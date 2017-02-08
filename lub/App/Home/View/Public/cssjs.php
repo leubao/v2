@@ -1,0 +1,16 @@
+<meta name="renderer" content="webkit">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="//cdn.bootcss.com/jquery/1.11.3/jquery.min.js"></script>
+
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+<link href="{$config_siteurl}static/home/css/bootstrap-datetimepicker.min.css" rel="stylesheet" media="screen">
+<script type="text/javascript" src="{$config_siteurl}static/home/js/bootstrap-datetimepicker.min.js" charset="UTF-8"></script>
+<script type="text/javascript" src="{$config_siteurl}static/home/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+<!--左侧折叠菜单-->
+<script src="{$config_siteurl}static/home/js/tendina.min.js"></script>
+<!-- 引入自定义样式文件-->
+<link rel="stylesheet" href="{$config_siteurl}static/home/css/core.css">
+<title>{$proconf.iname}  云鹿票务 渠道版  - by LubTMP v1.0</title>

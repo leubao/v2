@@ -1,0 +1,30 @@
+<form class="form-horizontal" action="{:U('Manage/Place/seatadd',array('areaid'=>$areaid,'tempid'=>$template_id,'placeid'=>$placeid));}" method="post" data-toggle="validate">
+<div class="bjui-pageContent">
+  <volist name="data" id="le" key="k">
+  <div class="form-group">
+  <volist name="le" id="ri">
+  <label class="checkbox-inline">
+  <input type="checkbox" id="c{$ri.a}" name="ids[{$row[$k-1]}][]" value="{$ri.a}" onClick="chkOper('<?php echo $ri['a'];?>',this);" <?php if($ri['s'] == 'v'){?>checked<?php }?>> 
+  <input type="text" name='seat[{$row[$k-1]}][]' class="form-control" size="5" value='{$ri.a}' id="{$ri.a}" <?php if($ri['s'] == 'h'){?>disabled<?php }?>>
+  </label>
+  </volist>
+  </div>
+  </volist>
+</div>
+<script type="text/javascript">
+function chkOper($id,chk){
+  var status = chk.checked;                                        //判断复选框是否选中的变量
+  if(status != false){
+    document.getElementById($id).disabled=false;  
+  }else{
+    document.getElementById($id).disabled=true;
+  }
+}
+</script>
+<div class="bjui-pageFooter">
+    <ul>
+      <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
+      <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
+    </ul>
+</div>
+</form>

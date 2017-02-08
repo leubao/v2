@@ -1,0 +1,511 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>印象大红袍春节活动"买一赠二"亲情套票</title>
+    <meta name="viewport" content="initial-scale=1, maximum-scale=1">
+    <link rel="shortcut icon" href="/favicon.ico">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.5.2/css/sm.min.css">
+    <link rel="stylesheet" href="//g.alicdn.com/msui/sm/0.5.2/css/sm-extend.min.css">
+
+    <link rel="stylesheet" href="static/css/wap.css">
+    <style type="text/css">
+      
+
+    </style>
+    <script type="text/javascript">
+    var global = {$goods_info};
+    </script>
+  </head>
+  <body>
+    <!-- 你的html代码 -->
+
+
+<div class="page">
+
+  <header class="bar bar-nav">
+    <h1 class="title">印象大红袍春节活动“买一送二”</h1>
+  </header>
+  <nav class="bar bar-tab bar-height">
+      <div class="btn"><a href="#" class="button button-big button-fill button-warning open-goods-cart">立即预定</a></div>
+  </nav>
+  <div class="content">
+  {$goods_info}
+  <div class="swiper-container">
+    <div class="swiper-wrapper">
+      <div class="swiper-slide"><img src="./d/wap/1.jpg" alt=""></div>
+    </div>
+    <div class="swiper-pagination"></div>
+  </div>
+  <!--内容-->
+  <!-- 这里是页面内容区 -->
+<p style="text-align: center;">
+    <span style="color: rgb(255, 0, 0); font-size: 18px;"><strong>买一送二“亲情套票”</strong></span>
+</p>
+<p>
+    活动购票说明
+</p>
+<p>
+    回馈活动对象：
+</p>
+<p>
+    南平地区有效身份证件的本地居民
+</p>
+<p>
+    活动时间：
+</p>
+<p>
+    <strong>2月14日（正月初七）——2月22日（正月十五）</strong>
+</p>
+<p>
+    三、活动票数量：
+</p>
+<p>
+    &nbsp;每场普通+贵宾共846张（282组）
+</p>
+<p>
+    四、购票途径及限购数量：
+</p>
+<p>
+    “印象大红袍”公众号共99张（33组）普通席。通过关注“印象大红袍”官方微信购票。
+</p>
+<p>
+    “印象大红袍团队服务号”平台普通席150张（50组）、贵宾席30张（10组）。通过关注“印象大红袍团队服务号”购票（每张身份证件限购一组（3张））。
+</p>
+<p>
+    现场凭有效证件排队购买，共567张。每一张有效证件限购两组（6张）。
+</p>
+<p>
+    购票时间：
+</p>
+<p>
+    每日早上9：30——开演。
+</p>
+<p>
+    取票方式：
+</p>
+<p>
+    通过“印象大红袍”公众号下单成功的，可到茶博园集散中心印象大红袍现金窗口，持下订单人的身份证件或准确报出下单人信息，核对无误后方可取票。
+</p>
+<p>
+    通过“印象大红袍团队服务号”平台下单成功的，可到茶博园集散中心印象大红袍现金窗口或自助取票机凭身份证或订单号+手机号取票。
+</p>
+<p>
+    现场购票的支付完成即可出票。
+</p>
+<p>
+    特别说明：
+</p>
+<p>
+    1、本活动无法接受电话预定。
+</p>
+<p>
+    2、每场活动票数；售完为止。
+</p>
+<p>
+    3、活动票型包含普通席和贵宾席位，尊宾席不参于本次活动。
+</p>
+<p>
+    4、门票一经售出，不得退票。
+</p>
+<p>
+    5、儿童1.2米以下免票，1.2米以上须购票（含1.2米）
+</p>
+<p>
+    <span style="color: rgb(255, 255, 255);"><strong><span style="background-color: rgb(255, 0, 0);">注意：订单取票只能当天换取，过期不逾。</span></strong></span>
+</p>
+<p>
+    <br/>
+</p>
+  </div>
+</div>
+
+<!-- About Popup -->
+<div class="popup goods-cart">
+  <header class="bar bar-nav">
+    <a href="#" class="icon icon-refresh pull-right close-popup"></a>
+  </header>
+  <div class="sku-layout">
+    <div class="adv-opts layout-content">
+    <div class="goods-models js-sku-views block block-list block-border-top-none">
+      <dl class="clearfix block-item">
+        <dt class="model-title sku-sel-title">
+          <label>演出时间：</label>
+        </dt>
+        <dd>
+          <ul class="model-list sku-sel-list" id="plan">
+          </ul>
+        </dd>
+      </dl>
+      <dl class="clearfix block-item">
+        <dt class="model-title sku-sel-title">
+          <label>演出票价：</label>
+        </dt>
+        <dd>
+          <ul class="model-list sku-sel-list" id="price">
+            <li class="tag sku-tag pull-left ellipsis unavailable">请选择售票日期</li>
+          </ul>
+        </dd>
+      </dl>
+      <dl class="clearfix block-item">
+        <dt class="model-title sku-num pull-left">
+          <label>数量</label>
+        </dt>
+        <dd>
+          <dl class="clearfix">
+            <div class="quantity">
+              <button class="minus disabled" type="button" disabled="true"></button>
+              <input type="text" class="txt" value="1" id="num">
+              <button class="plus" type="button"></button>
+              <div class="response-area response-area-minus"></div>
+              <div class="response-area response-area-plus"></div>
+              <div class="txtCover"></div>
+            </div>
+            <div class="stock pull-right font-size-12">
+              <dt class="model-title stock-label pull-left">
+                <label>剩余: </label>
+              </dt>
+              <dd class="stock-num"> 0 </dd>
+            </div>
+          </dl>
+        </dd>
+      </dl>
+      <div class="block-item block-item-messages">
+        <div class="sku-message">
+          <dl class="clearfix">
+            <dt class="pull-left">
+              <label for="ipt-0"><sup class="required">*</sup>姓名</label>
+            </dt>
+            <dd class="comment-wrapper clearfix">
+              <input data-valid-type="text" required="" tabindex="1" id="name" name="name" type="text" class="txt js-message font-size-14">
+             
+            </dd>
+          </dl>
+          <dl class="clearfix">
+            <dt class="pull-left">
+              <label for="ipt-1"><sup class="required">*</sup>电话</label>
+            </dt>
+            <dd class="comment-wrapper clearfix">
+              <input data-valid-type="text" required="" tabindex="2" id="phone" name="phone" type="text" class="txt js-message font-size-14">
+              
+            </dd>
+          </dl>
+          <dl class="clearfix">
+            <dt class="pull-left">
+              <label for="ipt-2">身份证</label>
+            </dt>
+            <dd class="comment-wrapper clearfix">
+              <input data-valid-type="text" required="" tabindex="3" id="card" name="card" type="text" class="txt js-message font-size-14">
+            </dd>
+          </dl>
+          <dl class="clearfix">
+            <dt class="pull-left">
+              <label for="ipt-2">留言</label>
+            </dt>
+            <dd class="comment-wrapper clearfix item-input">
+             <input data-valid-type="text" tabindex="4" id="remark" name="remark" type="text" class="txt js-message font-size-14">
+            </dd>
+          </dl>
+     
+        </div>
+      </div>
+    </div>
+    
+    <div class="btn">
+      <a href="#" class="button button-fill button-warning button-big buy">下一步</a>
+    </div>
+  </div>
+  </div>
+</div>
+<!--产品信息区域-->
+
+<script type='text/javascript' src='//g.alicdn.com/sj/lib/zepto/zepto.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.5.2/js/sm.min.js' charset='utf-8'></script>
+<script type='text/javascript' src='//g.alicdn.com/msui/sm/0.5.2/js/sm-extend.min.js' charset='utf-8'></script>
+
+
+<script type="text/javascript" src="/static/js/wap/laytpl.js" charset="utf-8"></script>
+<script type="text/javascript" src="/static/js/wap/wap.js" charset="utf-8"></script>
+<script type="text/javascript">
+  $(function() {
+    $(".swiper-container").swiper({
+      speed: 400,
+      spaceBetween: 100,
+      autoplay: 2300,
+    });
+    var getPlantpl = document.getElementById('plantpl').innerHTML;
+    var getPricetpl = document.getElementById('pricetpl').innerHTML;
+    laytpl(getPlantpl).render(global, function(html){
+        document.getElementById('plan').innerHTML = html;
+    });
+    
+    var plan = '0',
+        area = '0',
+        ticket = '0',
+        price = '0',
+        discount = '0',
+        num = '0',
+        name = '',
+        phone = '',
+        card = '',
+        msg = '',
+        pay = '',
+        crm = '',
+        param = '',
+        toJSONString = '',
+        postData = '',
+        subtotal = '0',
+        remark = '';
+    $("#plan li").click(function(){
+      //检查当前被选择的元素是否已经有已选中的
+      $(".goods-models li").each(function(){
+        if($(this).hasClass("tag-orangef60 active")){ toggle($(this))};
+      });
+      //为当前选择加上
+      active($(this));
+      refreshNum();
+      plan = $(this).data('plan');
+      area = 0; 
+      ticket = 0;
+      price = 0;
+      $(".stock-num").html($(this).data('num'));
+      laytpl.fn = plan;
+      laytpl(getPricetpl).render(global, function(html){
+        document.getElementById('price').innerHTML = html;
+      });
+      
+      //this.hasClass("tag-orangef60");
+      //移除所有包含的元素
+      //$(this).toggleClass("tag-orangef60");
+    });
+    
+    $(document).on("click","#price li",function(){
+       //判断是否已经选择计划
+      if(!$(this).hasClass("unavailable")){
+        if(plan != 0){
+          $("#price li").each(function(){
+            if($(this).hasClass("tag-orangef60 active")){ toggle($(this))};
+          });
+          area = $(this).data('area');
+          ticket = $(this).data('priceid');
+          price = $(this).data('price');
+          discount = $(this).data('discount');
+          num = $(this).data('num');
+          //更新可售数量  当为0时 禁用
+          $(".stock-num").html(num);
+          active($(this));
+          refreshNum();
+        }else{
+          $.toast("请选择演出日期!");
+        }
+      } 
+    });
+
+    //删除选中状态
+    function toggle(t){
+      t.toggleClass("tag-orangef60");
+      t.toggleClass("active");
+      
+    }
+    //选中
+    function active(t){
+      t.addClass("tag-orangef60");
+      t.addClass("active");
+    }
+    //删除选中
+    function deActive(t){
+      t.removeClass("tag-orangef60");
+      t.removeClass("active");
+    }
+    //数量增加减少
+    $(".response-area-minus").click(function(){
+      if(num > 1){
+        num = getNum() - 1;
+        updateNum();
+      }else{
+        updateBtnStatus();
+      }
+    });
+    $(".response-area-plus").click(function(){
+      //判断是否选择日期和价格
+      if(plan != 0 && area != 0 && price != 0){
+        if(num < global['user']['maxnum']){
+          //限制单笔订单最大数量
+          num = getNum() + 1;
+          updateNum();
+        }else{
+          $.toast("亲，您一次只能买这么多了!");
+        }
+      }else if(plan == 0 && area == 0){
+        $.toast("请选择演出日期和演出票价!");
+      }else if(area == 0){
+        $.toast("请选择演出票价!");
+      }else{
+        $.toast("请选择演出日期和演出票价!");
+      }
+    });
+    function changeNum(t){
+      $("#num").val();
+    }
+    //更换场次时重置页面
+    function refreshNum(){
+      $("#num").val('1');
+      getNum();
+      updateBtnStatus();
+    }
+    //更新数量
+    function updateNum(){
+        $("#num").val(num);
+        updateBtnStatus();
+    }
+    //更新数量增减状态
+    function updateBtnStatus(){
+      if(num > 1){
+        $('.minus').removeClass("disabled");
+        $('.minus').removeAttr("disabled");
+      }else{
+        $('.minus').addClass("disabled"),
+        $('.minus').attr("disabled", "true")
+      }
+    }
+    //获取数量
+    function getNum(){
+      num = parseInt($("#num").val());
+      return num;
+    }
+    
+    $(".buy").click(function(){
+      //验证输入
+      name = $("#name").val(),
+      phone = $("#phone").val(),
+      card = $("#card").val(),
+      msg = '';//alert(name);
+      if(plan.length == 0){
+        msg = "请选择销售日期!";
+      }
+      if(price.length == 0 || num == 0){
+        msg = "请选择票型并选择要购买的数量!";
+      }
+      if(name.length == 0){
+        msg = "姓名不能为空";
+      }
+      if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(phone)){
+        msg = "手机号码格式不正确!";
+      }
+   
+    
+      if(msg != ''){$.toast(msg);return false;}else{
+          post_server(2,card);
+        }
+    });
+    
+    /*验证身份证取票 type  1验证 2 不验证 */
+    function post_server(type,card){
+      //计算金额
+      if(global['user']['epay'] == '1'){
+        subtotal = parseFloat(price * parseInt(num));
+      }else{
+        subtotal = parseFloat(discount * parseInt(num));
+      }
+      remark = $('#remark').val();
+      $.ajax({
+        type:'GET',
+        url:'<?php echo U('Wechat/Index/quota');?>'+'&plan='+plan+'&cid='+global['user']['qditem']+'&num='+num+'&type=2&card='+card+'&area='+area,
+        dataType:'json',
+        timeout: 1500,
+        error: function(){
+          $.toast('服务器请求超时，请检查网络...');
+        },
+        success:function(data){
+            if(data.statusCode == "200"){
+
+              /*获取支付相关数据*/
+              pay = '{"cash":0,"card":0,"alipay":0}';
+              param = '{"remark":"'+remark+'","id_card":"'+card+'"}';
+              crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"'+phone+'","contact":"'+name+'","memmber":"'+global['user']['memmber']+'"}';
+              toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}';
+
+              postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+              /*提交到服务器**/
+              $.ajax({
+                  type:'POST',
+                  url:'<?php echo U('Wechat/Index/acty_order');?>',
+                  data:postData,
+                  dataType:'json',
+                  success:function(data){
+                      if(data.statusCode == "200"){
+                          location.href = data.url;
+                      }else{
+                          $.toast("下单失败!");
+                      }
+                  }
+              });
+            }else{
+              $.toast(data.msg);
+            }
+        }
+      });
+      
+    }
+  });
+  $(document).on('click','.open-goods-cart', function () {
+    $.popup('.goods-cart');
+  });
+  // 身份证号验证 
+ function isIdCard(cardid) {
+     //身份证正则表达式(18位) 
+     var isIdCard2 = /^[1-9]\d{5}(19\d{2}|[2-9]\d{3})((0\d)|(1[0-2]))(([0|1|2]\d)|3[0-1])(\d{4}|\d{3}X)$/i;
+     var stard = "10X98765432"; //最后一位身份证的号码
+     var first = [7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2]; //1-17系数
+     var sum = 0;
+     if (!isIdCard2.test(cardid)) {
+         return false;
+     }
+     var year = cardid.substr(6, 4);
+     var month = cardid.substr(10, 2);
+     var day = cardid.substr(12, 2);
+     var birthday = cardid.substr(6, 8);
+     if (birthday != dateToString(new Date(year + '/' + month + '/' + day))) { //校验日期是否合法
+         return false;
+     }
+     for (var i = 0; i < cardid.length - 1; i++) {
+         sum += cardid[i] * first[i];
+     }
+     var result = sum % 11;
+     var last = stard[result]; //计算出来的最后一位身份证号码
+     if (cardid[cardid.length - 1].toUpperCase() == last) {
+         return true;
+     } else {
+         return false;
+     }
+ }
+ //日期转字符串 返回日期格式20080808
+ function dateToString(date) {
+     if (date instanceof Date) {
+         var year = date.getFullYear();
+         var month = date.getMonth() + 1;
+         month = month < 10 ? '0' + month: month;
+         var day = date.getDate();
+         day = day < 10 ? '0' + day: day;
+         return year + month + day;
+     }
+     return '';
+ }
+</script>
+<script id="plantpl" type="text/html">
+{{# for(var i = 0, len = d.plan.length; i < len; i++){ }}
+    <li class="tag sku-tag pull-left ellipsis" data-plan="{{ d.plan[i].id }}" data-num="{{d.plan[i].num}}">{{ d.plan[i].title }}</li>
+{{# $(".stock-num").html(d.plan[i].num); } }}
+</script>
+<script id="pricetpl" type="text/html">
+{{# $(d.area[laytpl.fn]).each(function(i){ }}
+  <li class="tag sku-tag pull-left ellipsis {{# if(this.num < '1'){ }}unavailable{{# } }}" data-price="{{ this.money }}" data-discount="{{ this.moneys }}" data-area="{{ this.area }}" data-priceid="{{ this.priceid }}" data-num="{{ this.num }}">{{this.money}}元 ({{this.name}})</li>
+{{#    });}}
+</script>
+
+  </body>
+</html>

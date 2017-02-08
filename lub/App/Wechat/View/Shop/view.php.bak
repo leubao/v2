@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <title>{$product.title}</title>
+    <meta charset="utf-8" />
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=0, minimum-scale=1.0, maximum-scale=1.0">
+    <meta name="keywords" />
+    <meta name="description" />
+    <link href="http://newstatic.31huiyi.com/app/event/favicon.ico" rel="shortcut icon" />
+    <link rel="stylesheet" type="text/css" href="http://newstatic.31huiyi.com/css/eventMobile/bootstrap.min.css?v=v2016_03_02_15">
+    <link rel="stylesheet" type="text/css" href="http://newstatic.31huiyi.com/css/eventMobile/core.css?v=v2016_03_02_15">
+    <link rel="stylesheet" type="text/css" href="http://newstatic.31huiyi.com/ExternalFiles/www/css/notyfy.css?v=v2016_03_02_15">
+    <script src="http://newstatic.31huiyi.com/app/public/InterviewStatistics.js?v=v2016_03_02_15"></script>
+    
+    <script src="http://newstatic.31huiyi.com/app/eventMobile/jquery-1.9.1.min.js?v=v2016_03_02_15" type="text/javascript"></script>
+    <style type="text/css">
+        .hm-t-container {
+            display: none !important;
+        }
+    </style>
+    <style type="text/css">
+        .form-control {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+    
+
+
+<!--自定义css样式 start-->
+
+
+<!--自定义css样式 end-->
+<!--自定义js start-->
+<!--自定义js end-->
+</head>
+<body>
+    
+    
+
+<!-- 滚动区 start -->
+<div id="wrapper" style="overflow:hidden">
+    <div class="scroll">
+        <div class="container to-container">
+            
+<style>
+    .btn-group-lang {
+        position: absolute;
+        right: 10%;
+        top: 10px;
+        z-index: 2;
+    }
+
+        .btn-group-lang .btn {
+            border-color: #fff;
+            background: rgba(0,0,0,0.2);
+            color: #fff;
+        }
+
+            .btn-group-lang .btn.active {
+                border-color: #fff;
+                color: #333;
+                background: #fff;
+                box-shadow: none;
+            }
+</style>
+
+
+
+            <div class="to-mhome to-mhome-standard">
+                <div class="to-mhome-banner">
+                    <img src="http://31img.ufile.ucloud.com.cn//Uploads/Files/2016/08/08/636062421995868691.jpg" />
+                </div>
+                <div class="to-mhome-bar to-font-sm">
+                    <!-- 优惠价 -->
+                    <span class="to-money ori"><em>¥&nbsp;</em><span>59</span></span>
+                    <!-- 原价 -->
+                    
+
+                                <a href="http://event.3188.la/447133267/SelectCate" class="to-btn to-btn-inline btn-register pull-right">立即预定</a>
+                            <span class="pull-right join_user_count join_user_count_h5">已有 289999 人购买 </span>
+                    
+
+                </div>
+                <!-- 滚动菜单 start -->
+                <!-- 滚动菜单 end -->
+                <!-- 会议类型 start -->
+                <div class="to-panel panel-meeting-detail">
+                    <div class="to-panel-header">
+郑卫明                        <span class="pull-right to-font-sm to-note">
+                            <i class="to-icon to-icon-time"></i>
+1天之前发布
+                        </span>
+                    </div>
+                    <div class="to-panel-body to-table">
+                        <table>
+                            <tr>
+                                <td colspan="2">
+                                    产品名称
+                                </td>
+                            </tr>
+                                <tr class="to-link" data-href="/map/BMap?eventId=447133267">
+                                    <td>
+                                        <i class="to-icon to-icon-location"></i>
+                                        <p>地址</p>
+                                    </td>
+                                    <td>
+                                        <i class="to-icon to-location-link"></i>
+                                    </td>
+                                </tr>
+                            <tr>
+                                <td colspan="2"><i class="to-icon to-icon-time"></i><p>旺季06:30-18:00；淡季07:00-17:00</p></td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <!-- 会议类型 end -->
+
+        <!--简介 s-->
+        <div class="to-panel panel-custom-module">
+            <header class="to-panel-header">
+                会议简介
+                <span class="expand pull-right to-font-sm to-note">
+                    <i class="to-icon to-icon-expand"></i>
+                    <span>点击收起 </span>
+                </span>
+            </header>
+            <div class="to-panel-body standard">
+
+            </div>
+        </div>
+        <!--简介 e-->
+        <div class="to-panel panel-organizers to-panel-table">
+            <header class="to-panel-header">
+                会议主办方
+            </header>
+            <div class="to-panel-body to-table">
+                <table>
+                    <tr>
+                        <td>
+                            <span>个人发布</span>
+                        </td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+
+
+
+<!-- 参会人列表 start -->
+
+<div class="to-panel to-table panel-custom-link">
+    <table>
+        <tr>
+            <td>
+                <a href="http://event.3188.la/447133267/Index/UserCenterIndex">
+                    个人中心<i class="to-icon to-icon-arrow pull-right"></i>
+                </a>
+            </td>
+        </tr>
+    </table>
+</div>            </div>
+        </div>
+    </div>
+</div>
+
+    
+    
+    
+
+
+
+    
+    <script src="http://newstatic.31huiyi.com/app/eventMobile/bootstrap.min.js?v=v2016_03_02_15"></script>
+    <script src="http://newstatic.31huiyi.com/assets/plugins/core_browser/json/json.js?v=v2016_03_02_15" type="text/javascript"></script>
+    <script src="http://newstatic.31huiyi.com/ExternalFiles/www/js/jquery.notyfy.js?v=v2016_03_02_15" type="text/javascript"></script>
+    <script src="http://newstatic.31huiyi.com/assets/plugins/forms_validator/jquery-validation/dist/jquery.validate.custom.js?v=v2016_03_02_15" type="text/javascript"></script>
+        <script src="http://newstatic.31huiyi.com/assets/plugins/forms_validator/jquery-validation/localization/messages_zh.min.js?v=v2016_03_02_15" type="text/javascript"></script>
+    <script src="http://newstatic.31huiyi.com/app/public/JqueryValidate_31huiyi.js?v=v2016_03_02_15" type="text/javascript"></script>
+    <script src="http://newstatic.31huiyi.com/app/eventMobile/validate_init_h5.js?v=v2016_03_02_15" type="text/javascript"></script>
+    <script src="http://newstatic.31huiyi.com/app/eventMobile/iscroll.min.js?v=v2016_03_02_15"></script>
+    <script src="http://newstatic.31huiyi.com/app/eventMobile/core.js?v=v2016_03_02_15"></script>
+    
+
+    
+    
+    <script type="text/javascript">
+        window.eventlanguage = 'Chinese';
+        window.eventId = parseInt('447133267');
+        window.shareRemark = '时间:2016-08-29 07:30:00\n地址:河北省承德市双桥区文冠饭店（承德市双桥区环城南路99号)';
+        window.shareLinkUrl = 'http://event.3188.la/447133267';
+        window.shareLogo = 'http://file.31huiyi.com/Uploads/Files/2016/08/08/636062421995868691.jpg';
+        window.shareTitle = '【如何裂变思维颠覆传统销售终极秘诀】8月29日相约承德！！！';
+
+        var ehomeBar = $('.to-mhome-bar'),
+            ehomeTab = $('.to-mhome-tab');
+
+        $(window).on('scroll', function () {
+            if (window.scrollY >= 200 && !ehomeBar.hasClass('fixed'))
+                ehomeBar.addClass('fixed');
+            else if (window.scrollY < 200 && ehomeBar.hasClass('fixed')) {
+                ehomeBar.removeClass('fixed');
+            }
+        });
+
+    </script>
+    <script type="text/javascript" src='http://newstatic.31huiyi.com/app/eventM/standardTemplate.js?v=v2016_03_02_15'></script>
+    <script type="text/javascript" src='http://newstatic.31huiyi.com/app/eventMobile/31comment.js?v=v2016_03_02_15'></script>
+    <script type="text/javascript" src='http://newstatic.31huiyi.com/app/eventM/standardTemplate1.js?v=v2016_03_02_15'></script>
+
+    
+</body>
+</html>

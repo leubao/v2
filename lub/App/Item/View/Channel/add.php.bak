@@ -1,0 +1,87 @@
+<?php if (!defined('LUB_VERSION')) exit(); ?>
+<form class="form-horizontal" action="{:U('Item/Channel/add',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
+<div class="bjui-pageContent">
+   <div class="form-group">
+    <label class="col-sm-2 control-label">标准名称:</label>
+    <input type="text" name="name" class="form-control required" data-rule="required;" size="40" placeholder="名称">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">任务量:</label>
+    <input type="text" name="task" class="form-control required" data-rule="required;" size="15" placeholder="任务量">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">单场配额:</label>
+    <input type="text" name="one_quota" class="form-control required" data-rule="required;" size="15" placeholder="单场配额">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">单次充值:</label>
+    <input type="text" name="one_toup" class="form-control required" data-rule="required;" size="15" placeholder="单次充值">
+    <input type="text" name="one_toup" class="form-control required" data-rule="required;" size="15" placeholder="扣分标准">
+
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">余额报警:</label>
+    <input type="text" name="police" class="form-control required" data-rule="required;" size="15" placeholder="余额报警">
+    <input type="text" name="one_toup" class="form-control required" data-rule="required;" size="15" placeholder="扣分标准">
+  </div>
+  <table id="table_kpi" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
+            <thead>
+                <tr data-idname="ckpi[#index#][id]">
+                    <th title="No."><input type="text" name="ckpi[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
+                    <th title="细则名称"><input type="text" name="ckpi[#index#][name]" data-rule="required" value="" size="20"></th>
+                    <th title="标准"><input type="text" name="ckpi[#index#][name]" data-rule="required" value="" size="20"></th>
+                    <th title="扣分规则"><input type="text" name="ckpi[#index#][name]" data-rule="required" value="" size="20"></th>
+                    <th title="销售配额"><input type="text" name="ckpi[#index#][quotas]" data-rule="required" value="{$proconf.quotas}" size="5"></th>
+                    <th title="渠道配额"><input type="text" name="ckpi[#index#][quota]" data-rule="required" value="{$proconf.quota}" size="5"></th>
+                    <th title="工具类型"><select name="ckpi[#index#][tooltype]" data-toggle="selectpicker">
+                      <option value="0">===请选择===</option>
+                      <volist name="tooltype" id="vo">
+                        <option value="{$vo.id}">{$vo.title}</option>
+                      </volist>
+                    </select>
+                    </th>
+                    
+                    
+                    
+                    <th title="" data-addtool="true" width="100">
+                        <a href="javascript:;" class="btn btn-red row-del" data-confirm-msg="确定要删除该行信息吗？">删</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+        </table>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">类型:</label>
+    <input type="radio" name="type" data-toggle="icheck" value="1" checked data-label="一般控座&nbsp;">
+    <input type="radio" name="type" data-toggle="icheck" value="2" data-label="特殊控座">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">状态码:</label>
+    <input type="text" name="state" class="form-control required" data-rule="required;" value="66" size="15" placeholder="状态码">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">排序:</label>
+    <input type="text" name="sort" class="form-control required" data-rule="required;" size="25" placeholder="排序">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">说明:</label>
+    <textarea name="remark" class="form-control" rows="3" size="40"></textarea>
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">状态:</label>
+    <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
+      <option value="1">启用</option>
+      <option value="0">禁用</option>
+  </select>
+  </div>
+</div>
+<input name="product_id" type="hidden" value="{$pid}">
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
+        <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
+    </ul>
+</div>
+</form>
