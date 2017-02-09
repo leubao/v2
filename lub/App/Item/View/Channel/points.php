@@ -1,36 +1,42 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<form class="form-horizontal" action="{:U('Item/Set/add_control',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
-<div class="bjui-pageContent">
-   <div class="form-group">
-    <label class="col-sm-2 control-label">处罚对象:</label>
-    
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">类型:</label>
-    <input type="radio" name="type" data-toggle="icheck" value="1" checked data-label="标准处罚&nbsp;">
-    <input type="radio" name="type" data-toggle="icheck" value="2" data-label="自定义处罚">
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">分值:</label>
-    <input type="text" name="one_quota" class="form-control required" data-rule="required;" size="15" placeholder="单场配额">
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">说明:</label>
-    <textarea name="remark" class="form-control" rows="3" size="40"></textarea>
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">状态:</label>
-    <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
-      <option value="1">启用</option>
-      <option value="0">禁用</option>
-  </select>
-  </div>
-</div>
-<input name="product_id" type="hidden" value="{$pid}">
-<div class="bjui-pageFooter">
-    <ul>
-        <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
-        <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
-    </ul>
-</div>
+<!--Page -->
+<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Channel/index',array('menuid'=>$menuid));}" method="post">
+  <input type="hidden" name="pageSize" value="{$numPerPage}">             
+  <input type="hidden" name="pageCurrent" value="{$currentPage}"> 
 </form>
+<!--Page end-->
+<div class="bjui-pageHeader">
+<Managetemplate file="Common/Nav"/>
+</div>
+<div class="bjui-pageContent tableContent">
+  <table class="" data-toggle="tablefixed" data-width="100%"  data-nowrap="true">
+    <thead>
+      <tr>
+        <th align="center" width="40">编号</th>
+        <th align="center">考核对象</th>
+        <th align="center">记录类型</th>
+        <th align="center">分值</th>
+        <th align="center">操作员</th>
+        <th align="center">状态</th>
+      </tr>
+    </thead>
+    <tbody>
+    <volist name="data" id="vo">
+      <tr data-id="{$vo.id}">
+        <td align="center">{$i}</td>
+        <td>{$vo.crm_id|crmName}</td>
+        <td align="center">{$vo.fill|kpi_fill}</td>
+        <td align="center">{$vo.score}</td>
+        <td align="center">{$vo.user_id|userName}</td>
+        <td align="center">{$vo.status|status}</td>
+       </tr>
+    </volist> 
+    </tbody>
+  </table>
+</div>
+<div class="bjui-pageFooter">
+  <div class="pages">
+    <span>共 {$totalCount} 条</span>
+  </div>
+  <div class="pagination-box" data-toggle="pagination" data-total="{$totalCount}" data-page-size="{$numPerPage}" data-page-current="{$currentPage}"> </div>
+</div>

@@ -12,6 +12,9 @@ use Common\Controller\ManageBase;
 use Libs\Service\Order;
 use Common\Model\Model;
 class OrderController extends ManageBase{	
+	function _initialize(){
+	 	parent::_initialize();
+	}
 /*=====================================================================华丽分割线  1 添加窗口订单================================================================*/
 	/*选座提交*/
 	function seatPost(){
@@ -420,14 +423,32 @@ class OrderController extends ManageBase{
 		$plan = I('get.plan',0,intval);
 		$type = I('get.type',1,intval);
 		$uInfo = \Manage\Service\User::getInstance()->getInfo();//读取当前登录用户信息
-		$type = '1'.$type;
-		$sn = Order::quick($pinfo,$type,$uInfo);
-		if($sn != false){
+		$type = '6'.$type;
+		$run = Order::quick($pinfo,$type,$uInfo);
+		if($run != false){
+			//支付方式影响返回结果
+			if(in_array($run['is_pay'],array('4','5'))){
+				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan_id'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money']));
+				$title = "网银支付";
+				$width = '600';
+				$height = '400';
+				$pageId = 'payment';
+			}else{
+				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan));
+				$title = "门票打印";
+				$width = '213';
+				$height = '208';
+				$pageId = 'print';
+			}
 			$return = array(
 				'statusCode' => '200',
-				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan)),
+				'title'		 =>	$title,
+				'width'		 =>	$width,
+				'height'	 =>	$height,
+				'pageid' 	 => $pageId,
+				'forwardUrl' => $forwardUrl,
 			);
-			$message = "下单成功!单号".$sn;
+			$message = "下单成功!单号".$run;
 			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 		}else{
 			$return = array(
@@ -439,6 +460,60 @@ class OrderController extends ManageBase{
 		}			
 		//记录订单信息
 		die(json_encode($return));
+	}
+	//处理刷卡支付
+	function public_payment(){
+		if(IS_POST){
+			$pinfo = $_POST['info'];
+			$info = json_decode($pinfo,true);
+			//pos 收费 现金支付
+			$oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn'],'status'=>array('in','6,11')))->relation(true)->find();
+            if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
+			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
+				$run = Order::sweep_pay_seat($info,$oinfo);
+
+			}
+			if($info['pay_type'] == '4'){
+				//支付宝支付
+			}
+			if($info['pay_type'] == '5'){
+				//微信支付
+				
+			}
+			if($run != false){
+				//支付方式影响返回结果
+				$return = array(
+					'statusCode' => '200',
+					'title'		 =>	"门票打印",
+					'width'		 =>	'213',
+					'height'	 =>	'208',
+					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
+				);
+				$message = "支付成功!单号".$run;
+				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
+			}else{
+				$return = array(
+					'statusCode' => '300',
+					'forwardUrl' => '',
+				);
+				$message = "支付失败!";
+				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
+			}
+			die(json_encode($return));
+		}else{
+			$ginfo = I('get.');
+			$this->assign('ginfo',$ginfo)->display('payment');
+		}
+	}
+	//支付宝扫码支付
+	function alipay_code()
+	{
+		# code...
+	}
+	//微信扫码支付
+	function weixin_code()
+	{
+		# code...
 	}
 /*======================================================================华丽分割线 团队售票订单====================================================*/
 /*	function teamPost(){
@@ -505,7 +580,7 @@ class OrderController extends ManageBase{
 				$status = Order::add_seat($oinfo);			
 			}else{
 				//不同意退款
-				$status = $this->arefund($ginfo,$oinfo);			
+				$status = \Libs\Service\Refund::arefund($oinfo);			
 			}
 		}
 		//返回结果
@@ -515,39 +590,7 @@ class OrderController extends ManageBase{
 			$this->erun("操作失败!");
 		}	
 	}
-	/**
-	 * 不同意退款
-	 */
-	function arefund($ginfo,$oinfo){
-		$model = new \Think\Model();
-		$model->startTrans();
-		$createtime = time();
-		$cid = money_map($oinfo['channel_id']);
-		//先消费后记录
-		$crmData = array('cash' => array('exp','cash+'.$oinfo['money']),'uptime' => $createtime);
-		$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
-		$data = array(
-			'cash'		=>	$oinfo['money'],
-			'user_id'	=>	get_user_id(),
-			'crm_id'	=>	$cid,
-			'createtime'=>	$createtime,
-			'type'		=>	'5',
-			'order_sn'	=>	$oinfo['order_sn'],
-			'balance'	=>  balance($cid),
-		);
-		$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
-		//修改订单状态
-		$up = $model->table(C('DB_PREFIX')."order")->where(array('order_sn'=>$oinfo['order_sn']))->setField('status','3');
-		$up2 = $model->table(C('DB_PREFIX')."pre_order")->where(array('order_sn'=>$oinfo['order_sn']))->setField('status','4');
-		if($c_pay && $c_pay2 && $up && $up2){
-			$model->commit();//成功则提交
-			return true;
-		}else{
-			$model->rollback();//不成功，则回滚
-			return false;
-		}
-		
-	}
+	
 	/**
 	 * 政企订单处理   排座但不付费
 	 */

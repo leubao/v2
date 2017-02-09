@@ -13,9 +13,10 @@
     <thead>
       <tr>
         <th align="center" width="40">编号</th>
-        <th align="center">绩效名称</th>
-        <th align="center">类型</th>
-        <th align="center">时间段</th>
+        <th align="center">考核对象</th>
+        <th align="center">考核分</th>
+        <th align="center">任务量</th>
+        <th align="center">单场配额</th>
         <th align="center">状态</th>
       </tr>
     </thead>
@@ -23,12 +24,11 @@
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
         <td align="center">{$i}</td>
-        <td><a href="{:U('Item/Activity/activity',array('id'=>$vo['id']));}" data-toggle="dialog" data-mask="true" data-max="true">{$vo.title}</a></td>
-        <td align="center">{$vo.type|activity_type}</td>
-        <td>{$vo.starttime|date="Y-m-d",###}至{$vo.endtime|date="Y-m-d",###}</td>
+        <td>{$vo.crm_id|crmName}</td>
+        <td align="center">{$vo.score}</td>
+        <td align="center">{$vo.task}</td>
+        <td align="center">{$vo.quota}</td>
         <td align="center">{$vo.status|status}</td>
-        <!--
-        <td align="center"><a type="button" class="btn btn-default" data-toggle="dialog" data-mask="true" data-max="true" data-id="activity" href="{:U('Item/Activity/add_activity',array('menuid'=>$menuid,'id'=>$vo['id']));}" data-title="{$vo.title}_详情"><i class="fa fa-puzzle-piece"></i>活动页面</a></td>-->
        </tr>
     </volist> 
     </tbody>

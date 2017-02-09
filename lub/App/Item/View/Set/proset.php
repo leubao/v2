@@ -70,6 +70,12 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">渠道账户最低余额:</td>
+                                <td>
+                               <input type="text" name="money_low" value="{$vo.money_low}" size="10"><span class="remark">渠道账户最低余额报警阀值,短信通知渠道商联系人</span>
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">窗口结算方式:</td>
                                 <td>
                                 <input type="radio" name="settlement" data-toggle="icheck" value="1" <eq name="vo['settlement']" value="1"> checked</eq> data-label="票面价计算&nbsp;">
@@ -287,7 +293,6 @@
       </div>
   </div>                   
 </div>
-<input name="type" value="1" type="hidden">
   <input name="product_id" value="{$pid}" type="hidden">
   <div class="bjui-pageFooter">
     <ul>

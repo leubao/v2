@@ -10,6 +10,9 @@ namespace Item\Controller;
 use Common\Controller\ManageBase;
 use Item\Service\Partner;
 class PublicController extends ManageBase{
+    function _initialize(){
+        parent::_initialize();
+    }
     // 左侧页面
     public function menu() {
         $parentid=I('get.tid', 0, intval);

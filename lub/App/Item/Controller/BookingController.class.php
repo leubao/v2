@@ -11,6 +11,9 @@ use Common\Controller\ManageBase;
 use Item\Service\Partner;
 use Libs\Service\Operate;
 class BookingController extends ManageBase{
+	function _initialize(){
+	 	parent::_initialize();
+	}
 	//预定单列表
 	function index(){
 		//检索可售场次

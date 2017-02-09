@@ -66,7 +66,6 @@
                 <option value="0">禁用</option>
             </select></td>
         </tr>
-       
         <tr>
           <td>备注:</td><td colspan="3"><input type="text" name="remark" placeholder="如：一大人|一儿童" value="" size="50"></td>
         </tr>

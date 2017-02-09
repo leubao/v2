@@ -1,5 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<form class="form-horizontal" action="{:U('Item/Product/edit_tooltype',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
+<form class="form-horizontal" action="{:U('Item/Product/add_tooltype',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
 <div class="bjui-pageContent">
 	<div class="form-group">
     <label class="col-sm-2 control-label">名称:</label>

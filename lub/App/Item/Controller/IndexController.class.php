@@ -11,7 +11,9 @@ use Common\Controller\ManageBase;
 use Item\Service\Partner;
 use Item\Service\Menu;
 class IndexController extends ManageBase{
-	
+	function _initialize(){
+	 	parent::_initialize();
+	}
 	/**
 	 * 操作首页
 	 * @author zhoujing
@@ -51,7 +53,6 @@ class IndexController extends ManageBase{
 	 */
 	function cache(){
 		$product_id = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
-		
 		$this->display();
 	}
 	function cacheall(){

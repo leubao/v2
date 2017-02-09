@@ -7,11 +7,7 @@
     </div>
 	 <div class="form-group">
     <label class="col-sm-2 control-label">配额:</label>
-    <if condition="$data.product_type eq '1'">
     <input type="text" name="quota" class="form-control required" data-rule="required;" size="40" value="{$data.quota}" placeholder="请输入正整数">
-    <else />
-    <input type="text" name="quotas" class="form-control required" data-rule="required;" size="40" value="{$data.quotas}" placeholder="请输入正整数">
-    </if>
   </div>
 </div>
 <input type="hidden" name="id" value="{$data.id}">

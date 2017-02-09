@@ -1,4 +1,4 @@
-<style type="text/css">.border{border: 1px solid #ddd;}</style>
+<?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageContent">
     <div class="panel panel-default">
       <div class="panel-body">

@@ -809,6 +809,12 @@
             case 5:
                 $return = "API";
                 break;
+            case 6:
+                $return = "窗口";
+                break;
+            case 7:
+                $return = "自助设备";
+                break;
             default:
                 $return = "未知场景";
                 break;

@@ -43,4 +43,18 @@ function exchange_focus($param = null,$type = null){
 		echo $count;
 	}
 }
+/**
+ * KPI 记录类型
+ */
+function kpi_fill($param = null){
+	switch ($param) {
+        case 1:
+            echo "<span class='label label-info'>系统创建</span>";
+            break;
+        case 2:
+            echo "<span class='label label-warning'>考核员创建</span>";
+            break;
+
+    }
+}
 ?>

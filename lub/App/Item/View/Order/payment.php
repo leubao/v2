@@ -22,7 +22,7 @@
 <div class="bjui-pageFooter">
     <ul>
         <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
-        <li><button type="submit" class="btn-default" data-icon="save">提交</button></li>
+        <li><a href="#" class="btn btn-default" data-icon="save" onclick="pay_post();">提交</a></li>
     </ul>
 </div>
 <script>
@@ -39,26 +39,45 @@
           sn = '{$ginfo.sn}',
           is_pay = '{$ginfo.is_pay}',
           payKey = $("#pay_card").val();
-      postData = 'info={"plan":'+plan+',"sn":'+sn+',"is_pay":'+is_pay+',"paykey":'+payKey+'}';
-      $.ajax({
-        type:'POST',
-        url:'<?php echo U('Item/Order/public_payment');?>',
-        data:postData,
-        dataType:'json',
-        timeout: 3500,
-        error: function(){
-          layer.msg('服务器请求超时，请检查网络...');
-        },
-        success:function(data){
-            if(data.statusCode == "200"){
-                //刷新
-                $(this).dialog('refresh', 'work_quick');
-                $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
-            }else{
-                $(this).alertmsg('error','出票失败!');
-            }
-        }
-      });
+      postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"paykey":'+payKey+'}';
+      post_server(postData,url);
     } 
   });
+  function pay_post() {
+    //判断是否是线下收款方式
+    var is_pay = $('input[name="is_pay"]:checked').val(),
+        postData = '',
+        plan = '{$ginfo.plan}',
+        sn = '{$ginfo.sn}',
+        url = '<?php echo U('Item/Order/public_payment');?>';
+    if(is_pay == '4' || is_pay == '5'){
+      layer.msg('当前选择支付方式不允许此项操作,请重新选择支付方式...');
+      return false;
+    }
+    postData = 'info={"pay_type":'+is_pay+',"seat_type":"1","sn":'+sn+'}';
+    post_server(postData,url);
+  }
+  //提交到服务器 TODO  通用提交到服务器
+  function post_server(postData,url){
+    $.ajax({
+      type:'POST',
+      url:url,
+      data:postData,
+      dataType:'json',
+      timeout: 3500,
+      error: function(){
+        layer.msg('服务器请求超时，请检查网络...');
+      },
+      success:function(data){
+          if(data.statusCode == "200"){
+              //刷新
+              $(this).dialog('refresh', 'work_quick');
+              $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+          }else{
+              $(this).alertmsg('error','出票失败!');
+          }
+          $(this).dialog('close','payment');
+      }
+    });
+  }
 </script>

@@ -112,11 +112,19 @@
                 </tr>
                 <tr>
                     <td align='right'><input type="radio" class="pay" name="pay" value="6"></td>
-                    <td>划卡</td>
+                    <td>POS机划卡</td>
                 </tr>
                 <tr>
                     <td align='right'><input type="radio" class="pay" name="pay" value="3"></td>
                     <td>签单</td>
+                </tr>
+                <tr>
+                    <td align='right'><input type="radio" id="alipay_sweep" class="pay" name="pay" value="4"></td>
+                    <td>支付宝支付</td>
+                </tr>
+                <tr>
+                    <td align='right'><input type="radio" id="wxpay_sweep" class="pay" name="pay" value="5"></td>
+                    <td>微信支付</td>
                 </tr>
             </tbody>
         </table>

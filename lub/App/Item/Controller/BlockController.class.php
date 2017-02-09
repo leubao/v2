@@ -24,21 +24,10 @@ class BlockController extends ManageBase{
 		$today = strtotime(date('Y-m-d'))."-1";
 		$todays = strtotime(date('Y-m-d'));
 		$plan = Operate::do_read('Plan',1,array('product_id'=>$this->pid,'status'=>array('in','2,3')));
-		switch ($this->product['product_type']) {
-			case '1':
-				$template = 'index';
-				break;
-			case '2':
-				$template = 'index_scenic';
-				break;
-			case '3':
-				$template = 'index_scenic';
-				break;
-		}
 		$this->assign('plan',$plan)
 		     ->assign('today',$today)
 			 ->assign('product',$this->product)
-		     ->display($template);
+		     ->display();
 	}
 	/*设置门票销售session*/
 	function set_session_plan(){

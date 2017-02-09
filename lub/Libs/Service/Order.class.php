@@ -130,7 +130,7 @@ class Order extends \Libs\System\Service {
 				);
 				$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
 				//窗口团队时判断是否是底价结算
-				if($proconf[$plan['product_id']]['settlement'] == '2'){
+				if($proconf[$plan['product_id']]['1']['settlement'] == '2'){
 					$in_team = true;
 				}else{
 					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
@@ -193,8 +193,25 @@ class Order extends \Libs\System\Service {
 		if(empty($info)){error_insert('400002');return false;}
 		//获取订单初始数据
 		$scena = Order::is_scena($scena,$info['param'][0]['is_pay']);
-		//dump($scena);
-		return Order::quick_order($info,$scena,$uinfo,1);
+		//判断是否选择的是微信或支付宝刷卡支付
+		//1现金2余额3签单4支付宝5微信支付6划卡
+		if(in_array($info['param'][0]['is_pay'],array('4','5'))){$is_seat = '2';}else{$is_seat = '1';}
+		$sn = Order::quick_order($info,$scena,$uinfo,$is_seat);
+		if($sn != false){
+			$sn = array('sn' => $sn,'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
+		}
+		return $sn;
+	}
+	/**
+	 * 窗口通过支付宝和微信扫码付款
+	 */
+	function sweep_pay_seat($info,$oinfo){
+		//获取座位区域信息
+		$param = unserialize($oinfo['info']);
+		$seat = $param['data'];
+		//判断支付提交场景，窗口自动排座，窗口选座
+		$status = Order::quickSeat($seat,$oinfo,'',1,$info['seat_type'],$info['pay_type']);
+		return $status;
 	}
 	/**************************************************微信、网站**************************************************/
 	/*
@@ -418,6 +435,8 @@ class Order extends \Libs\System\Service {
 					'order_sn'	=>	$info['order_sn'],
 					'balance'	=>  balance($cid),
 				);
+				//余额报警
+				
 				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
 				if($c_pay == false || $c_pay2 == false){
 					error_insert('400008');
@@ -485,7 +504,7 @@ class Order extends \Libs\System\Service {
 				'createtime' => $createtime,
 			);
 			$state = $model->table(C('DB_PREFIX').$table)->where($map)->limit($value['num'])->lock(true)->save($printList);
-			if($proconf[$plan['product_id']]['ticket_sms'] == '1'){
+			if($proconf[$plan['product_id']]['1']['ticket_sms'] == '1'){
 				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num']."张";
 			}else{
 				$msg = $info['number']."张";
@@ -508,7 +527,7 @@ class Order extends \Libs\System\Service {
 		//是否为团队订单 
 		if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8'){
 			/*查询是否开启配额 读取是否存在不消耗配额的票型*/
-			if($proconf[$plan['product_id']]['quota'] == '1'){
+			if($proconf[$plan['product_id']]['1']['quota'] == '1'){
 				if(in_array($info['type'],array('2','4'))){
 					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id']);
 				}else{
@@ -560,7 +579,7 @@ class Order extends \Libs\System\Service {
 				//error_insert('4000100');
 				
 				//窗口团队时判断是否是底价结算
-				if($info['type'] == '2' && $proconf[$plan['product_id']]['settlement'] == '2'){
+				if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
 					$in_team = true;
 				}else{
 					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
@@ -579,7 +598,7 @@ class Order extends \Libs\System\Service {
 			$model->commit();//提交事务
 			if($info['addsid'] <> '1' && $no_sms <> '1'){
 			    //发送成功短信
-				if($proconf[$plan['product_id']]['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
+				if($proconf[$plan['product_id']]['1']['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
 				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
@@ -684,7 +703,7 @@ class Order extends \Libs\System\Service {
 					$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
 					//计算订单返佣金额
 					//判断是否开启分销
-					if($proconf[$plan['product_id']]['wechant_full_level']){
+					if($proconf[$plan['product_id']]['3']['wechant_full_level']){
 						$ticketFull = $ticketType[$va['priceid']]['param']['full'];
 						$rebate1 = $rebate1+$ticketFull['1']*$va['num'];
 						$rebate2 = $rebate2+$ticketFull['2']*$va['num'];
@@ -704,10 +723,10 @@ class Order extends \Libs\System\Service {
 					}
 					//统计订单座椅个数
 					$number = (int)$number+$va['num'];
-					if($proconf[$plan['product_id']]['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
+					if($proconf[$plan['product_id']]['1']['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
 				}
 				//按区域发送短信
-				if($proconf[$plan['product_id']]['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
+				if($proconf[$plan['product_id']]['1']['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
 			}
 			/*座椅信息*/
 			$seatInfo = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(array('order_sn'=>$info['order_sn']))->field('order_sn,area,seat,sale')->select();
@@ -776,7 +795,7 @@ class Order extends \Libs\System\Service {
 			//是否为团队订单 
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8'){//error_insert('4000180');
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
-				if($proconf[$plan['product_id']]['quota'] == '1'){
+				if($proconf[$plan['product_id']]['1']['quota'] == '1'){
 					if(in_array($info['type'],array('2','4'))){
 						$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
 					}else{
@@ -806,7 +825,7 @@ class Order extends \Libs\System\Service {
 					}else{
 						$type = '2';
 					}
-					if($proconf[$plan['product_id']]['wechant_full_level'] == '1' && $type == '1'){
+					if($proconf[$plan['product_id']]['3']['wechant_full_level'] == '1' && $type == '1'){
 					//判断当前下单人级别
 						$mvip = D('WxMember');
 						//第一层分销
@@ -895,7 +914,7 @@ class Order extends \Libs\System\Service {
 
 					}
 										//窗口团队时判断是否是底价结算
-					if($info['type'] == '2' && $proconf[$plan['product_id']]['settlement'] == '2'){
+					if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
 						$in_team = true;
 					}else{
 						$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
@@ -921,7 +940,7 @@ class Order extends \Libs\System\Service {
 			$model->commit();//提交事务
 			//发送成功短信
 			if($info['addsid'] <> '1' && $no_sms <> '1'){
-			    if($proconf[$plan['product_id']]['crm_sms']){
+			    if($proconf[$plan['product_id']]['1']['crm_sms']){
 			    	$crminfo = Order::crminfo($plan['product_id'],$oInfo['crm'][0]['qditem']);
 			    }
 				$msgs = array('phone'=>$oInfo["crm"][0]['phone'],'title'=>planShows($plan['id']),'num'=>$counts,'remark'=>$msg,'sn'=>$info['order_sn'],'crminfo'=>$crminfo);
@@ -1074,10 +1093,10 @@ class Order extends \Libs\System\Service {
 				//统计订单座椅个数
 				$number = (int)$number+$va['num'];
 				//按票型发送短信
-				if($proconf[$plan['product_id']]['ticket_sms']){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
+				if($proconf[$plan['product_id']]['1']['ticket_sms']){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
 			}
 			//按区域发送短信
-			if($proconf[$plan['product_id']]['area_sms']){$msg = $msg.areaName($k,1).$v['num']."张";}
+			if($proconf[$plan['product_id']]['1']['area_sms']){$msg = $msg.areaName($k,1).$v['num']."张";}
 		}
 		/*金额校验
 		if($money == $info['subtotal']){
@@ -1186,9 +1205,9 @@ class Order extends \Libs\System\Service {
 		}	
 	}
 	/*订单场景初始值 
-	* 根据订单场景设置订单的初始值 场景+订单类型
+	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
 	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
-	* 创建场景1窗口2渠道版3网站4微信5api 
+	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
 	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售
 	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
@@ -1196,12 +1215,20 @@ class Order extends \Libs\System\Service {
 	function is_scena($param = null,$is_pay = null){//dump($is_pay);
 		switch ($param) {
 			case '11':
-				//窗口散客
+				//窗口选座散客
 				$return = array('type'=>1,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
 				break;
 			case '12':
-				//窗口团队
+				//窗口选座团队
 				$return = array('type'=>2,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '61':
+				//窗口快捷散客
+				$return = array('type'=>1,'addsid'=>6,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '62':
+				//窗口快捷团队
+				$return = array('type'=>2,'addsid'=>6,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
 				break;
 			case '22':
 				//渠道版普通团队
@@ -1265,7 +1292,7 @@ class Order extends \Libs\System\Service {
 		if($ticket_type == '1'){
 			//定义座位号方式
 			$proconf = cache('ProConfig');
-			switch ($proconf[$product_id]['print_seat']) {
+			switch ($proconf[$product_id]['1']['print_seat']) {
 				case '1':
 					$seat = $seats[0].'排'.$seats[1].'号';
 					break;
@@ -1282,7 +1309,7 @@ class Order extends \Libs\System\Service {
 		}else{
 			$seat = $seats[0].'排'.$seats[1].'号';
 		}
-		if($proconf[$product_id]['print_mouth'] == '1'){
+		if($proconf[$product_id]['1']['print_mouth'] == '1'){
 			return Order::print_mouth($seats[0]).$seat;
 		}else{
 			return $seat;
@@ -1563,7 +1590,7 @@ class Order extends \Libs\System\Service {
 		if($up_order && $states && $flag && $in_team){
 			$model->commit();//提交事务
 			//发送成功短信
-			if($proconf[$plan['product_id']]['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}
+			if($proconf[$plan['product_id']]['1']['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}
 			$msgs = array('phone'=>$hdata["crm"][0]['phone'],'title'=>planShows($plan['id']),'num'=>$count,'remark'=>$msg,'sn'=>$info['sn'],'crminfo'=>$crminfo);
 			//手动排座分为政府和渠道
 			if($oinfo['pay'] == '1' || $oinfo['pay'] == '3'){
@@ -1577,6 +1604,29 @@ class Order extends \Libs\System\Service {
 			$model->rollback();//事务回滚
 			return false;
 		}
+	}
+	/**
+	 * 判断是否处于最低额，发送短信通知
+	 * $money 当前余额
+	 */
+	function if_money_low($money = '',$product_id = '', $crm_id = ''){
+		$proconf = M('ProConfig')->where(array('product_id'=>$product_id,'type'=>5))->getField("varname");
+		if($money < $proconf['money_low']){
+			//查询待返利的金额
+			//提醒 但不作为扣分起点
+			$kpimoney = cache('kpimoney_'.$product_id.'_'.$crm_id);
+			if(empty($kpimoney)){
+				cache('kpimoney_'.$product_id.'_'.$crm_id,'1');
+			}
+			/*$sum_money = $money + $g_money;
+			if($money < $proconf['money_low']){
+
+			}*/
+			//每隔24小时提醒一次,读取短信发送记录，该类型短信
+			//判断缓存中是否存在了记录
+			
+		}
+		return true;
 	}
 	/**
 	 * 多级分销奖金计算

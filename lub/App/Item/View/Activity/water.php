@@ -1,6 +1,7 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageHeader">
 <Managetemplate file="Common/Nav"/>
+
 <!--Page -->
 <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Activity/water',array('menuid'=>$menuid));}" method="post">
   <input type="hidden" name="pageSize" value="{$numPerPage}">             

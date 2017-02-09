@@ -28,7 +28,6 @@ function getprice(event, treeId, treeNode){
     event.preventDefault();
 }
 </script>
-<style type="text/css">.border{border: 1px solid #ddd;}</style>
 <div class="bjui-pageContent">
     <div class="panel panel-default">
       <div class="panel-body">
@@ -132,7 +131,7 @@ function getprice(event, treeId, treeNode){
                 </tr>
                 <tr>
                     <td align='right'><input type="radio" class="pay" name="pay" value="6"></td>
-                    <td>划卡</td>
+                    <td>POS机划卡</td>
                 </tr>
                 <tr>
                     <td align='right'><input type="radio" class="pay" name="pay" value="3"></td>
@@ -140,11 +139,11 @@ function getprice(event, treeId, treeNode){
                 </tr>
                 <tr>
                     <td align='right'><input type="radio" id="alipay_sweep" class="pay" name="pay" value="4"></td>
-                    <td>支付宝扫码</td>
+                    <td>支付宝支付</td>
                 </tr>
                 <tr>
                     <td align='right'><input type="radio" id="wxpay_sweep" class="pay" name="pay" value="5"></td>
-                    <td>微信支付扫码</td>
+                    <td>微信支付</td>
                 </tr>
             </tbody>
         </table>
@@ -328,7 +327,7 @@ function post_server(){
             if(data.statusCode == "200"){
                 //刷新
                 $(this).dialog('refresh', 'work_quick');
-                $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+                $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
             }else{
                 $(this).alertmsg('error','出票失败!');
             }
