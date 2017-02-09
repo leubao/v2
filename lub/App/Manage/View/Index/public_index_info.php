@@ -65,93 +65,41 @@
         -->
 </div>
 <div class="bjui-pageContent">
-  <div class="col-md-8">
-    <iframe width="800" scrolling="no" height="120" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&color=%23&bgc=%23&icon=1&temp=1&num=5"></iframe>
+  <div class="col-md-8" style="padding:5px;">
+      <div class="alert" role="alert" style="margin:0 0 5px; padding:5px 15px;">
+          <iframe width="800" scrolling="no" height="120" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&color=%23&bgc=%23&icon=1&temp=1&num=5"></iframe>
+      </div> 
   </div>
   <div class="col-md-4">
     <div class="row" style="padding:5px;">
       <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
           <strong>常用软件下载</strong>
-          <h5>打印插件: <a href="http://new.leubao.com/d/print_32.exe" target="_blank">32位</a>　|
+          <h5>打印插件 : <a href="http://new.leubao.com/d/print_32.exe" target="_blank">32位</a>　|
           <a href="http://new.leubao.com/d/print_64.exe" target="_blank">64位</a></h5>
-          <h5>打印机驱动: <a href="http://new.leubao.com/d/TOSHIBA_TEC_7.3.exe" target="_blank">东芝（TOSHIBA)B-EX4T1-GS14驱动</a></h5>
-      </div>  
-                
+          <h5>打印机驱动 : <a href="http://new.leubao.com/d/TOSHIBA_TEC_7.3.exe" target="_blank">东芝（TOSHIBA)B-EX4T1-GS14驱动</a></h5>
+          <h5>浏览器 : <a href="http://chrome.360.cn/" target="_blank">推荐360急速浏览器</a></h5>  
+      </div>     
       <div class="alert alert-success" role="alert" style="margin:0 0 5px; padding:5px 15px;">
-          <h5>项目地址：<a href="http://new.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
-          <h5>ZUI手册：<a href="http://www.zui.sexy/" target="_blank">http://www.zui.sexy/</a></h5>
-          <h5>图标 : <a href="http://fontawesome.dashgame.com/" target="_blank">http://fontawesome.dashgame.com/</a></h5>
-          <h5>ThinkPHP手册：<a href="http://www.kancloud.cn/manual/thinkphp/1678" target="_blank">ThinkPHP3.2.3</a></h5>
-          <h5>B-JUI手册：<a href="http://b-jui.com/index_tree.html" target="_blank">B-JUI</a></h5>
-      </div> 
-        <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
-            <strong>B-JUI团队欢迎你!</strong>
+          <strong>手册及其它</strong>
+          <h5>渠道版手册 : <a href="http://new.leubao.com/help.pdf" target="_blank">渠道版V1.0手册</a></h5>
+          <h5>系统手册 : <a href="http://www.leubao.com/index.php?g=Manual" target="_blank">云鹿票务管理平台 V2.1.3 </a></h5>
+          <h5>新功能预览 : <a href="http://new.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
+          <h5>更新日志 : <a href="http://www.leubao.com/index.php?a=up_log" target="_blank">[更新日志]</a>　</h5>
+      </div>
+      <!--
+      <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
+            <strong>更新日志</strong>
+      </div>
+      <div class="alert alert-warning" role="alert" style="margin:0 0 5px; padding:5px 15px;">
+            <strong>通知公告</strong>
             <br><span class="label label-default">开发：</span>孤星</a>
             <br><span class="label label-default">测试 & 推广：</span> <a href="#">@Jack Yuan （成都锦杨）</a>
             <br><span class="label label-default">测试 & 试用：</span> <a href="#">@管书清 （小小正能量）</a>
-        </div>                                 
+      </div>  
+      -->
+                                       
     </div>
   </div>
-
-<a href="http://new.leubao.com/help.pdf">渠道版手册</a>
-<a href="http://new.leubao.com/soft.php">常用软件下载</a>
-<div style="margin-top:5px; margin-right:200px; overflow:hidden;">
-<strong>2016-5-11 系统更新</strong>
-<p>
-1、新增黑名单<a href="{:U('Manage/Index/public_temp')}" data-toggle="navtab">配置</a></br>
-说明:该功能需要在产品设置中开启，默认关闭</br>
-2、删除部分无用代码</br>
-</p>
-<strong>2016-4-28 系统更新</strong>
-<p>
-1、修复渠道商余额为负数情况</br>
-2、删除无用代码</br>
-3、更新多处菜单权限限制</br>
-4、修复打印日志按操作员查询，翻页条件丢失</br>
-5、新增官网售票方式</br>
-6、增强提示信息分类</br>
-7、常用取票人增加身份证识别</br>
-8、更新窗口订单详情中渠道商层级结构显示如:中信旅行社 -> 测试 -> 三级渠道商测试(18631451216)</br>
-   从左到右依次是一级代理商->二级代理商->三级代理商 括号中的是业务员名称</br>
-9、渠道版新增按时间段进行销售统计(明细)</br>
-10、渠道版销售统计新增 “报表打印”功能</br>
-11、产品设置中新增微信配置、和第三方支付配置
-12、更新系统版本号至v2.1.3
-</p>
-<strong>2016-4-14 系统更新</strong>
-<p>
-1、修复渠道取消订单(驳回或者不同意)不记录操作员的情况</br>
-2、修复退票日志不支持状态查询</br>
-3、新增去订单金额校验</br>
-4、新增渠道商配置检测</br>
-5、解除个人渠道不允许底价结算的限制</br>
-6、增加对门票座位号打印的配置，支持全座位号如x排y号，X排，自定义三种方式</br>
-7、修复窗口团队票选座，团队信息丢失</br>
-8、窗口支持结算方式的选择目前支持、划卡、现金、签单</br>
-9、新增报表execl导出功能</br>
-10、删除无效菜单</br>
-11、新增客源地统计</br>
-12、修正座位编辑中的一处错误</br>
-13、修复手动排座，座位号丢失</br>
-14、新增打印按钮禁用事件</br>
-15、增加过期退单的配置项</br>
-16、新增门票打印后置校验(主要解决两个用户同时打印一个订单时，不需要输入二次打印密码)</br>
-17、修复座椅分组一处漏洞(分组单个区域时会存在错误)）</br>
-18、修复打印窗口多开的情况下，二次打印跳开二次打印密码输入</br>
-19、新增单台设备同一时间单一账号登录</br>
-20、新增渠道版自行门票打印(设置方式-->产品->商户管理->产品设置->渠道版出票，客户-->客户管理->选择客户->编辑客户->勾选门票打印)</br>
-22、修复窗口版订单详情座位详情最后座位被遮罩</br>
-23、修复取消中的订单可打印。</br>
-24、修复特殊时刻已打印订单可执行取消操作</br>
-25、修复授信记录查询时，渠道商信息丢失</br>
-26、更新订单号算法</br>
-27、修复已过期场次(暂停中)的状态显示</br>
-28、渠道单笔订单最大限额支持自定义配置</br>
-29、取消座椅分组最多50分组的限制</br>
-30、新增模板控坐功能。</br>
-31、更新系统版本号至v2.1.2
-</p>
-</div>
     <!--未取票的订单
     <div class="col-md-4" id="index_order" data-toggle="autoajaxload" data-autorefresh="1660" data-url="{:U('Manage/index/index_order');}">
         

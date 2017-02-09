@@ -357,7 +357,7 @@ class SetController extends ManageBase{
 	}
 	// 密码管理
 	function pwd(){
-		$this->basePage('Pwd','',"status DESC");
+		$this->basePage('Pwd','',"status DESC,createtime DESC");
 		$this->display();
 	}
 	//添加密码
@@ -365,7 +365,8 @@ class SetController extends ManageBase{
 		if(IS_POST){
 			$data = array(
 				'createtime'	=>	time(),
-				'userid'		=>	\Libs\Util\Encrypt::authcode($_SESSION['lub_userid'], 'DECODE'),
+				'userid'		=>	get_user_id(),
+				'product_id'	=>	$this->pid,
 				'password'		=>	md5($_POST['password']),
 			);
 			if(Operate::do_add('Pwd',$data)){
@@ -374,8 +375,7 @@ class SetController extends ManageBase{
 				$this->erun('新增失败!');
 			}
 		}else{
-			$this->assign('pid',\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'))
-				->display();
+			$this->display();
 		}
 	}
 	//编辑密码

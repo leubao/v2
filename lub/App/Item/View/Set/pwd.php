@@ -13,7 +13,8 @@
     <thead>
       <tr>
         <th width="50">编号</th>
-        <th align="center">所有人名称</th>
+        <th align="center">所有人</th>
+        <th align="center">产品范围</th>
         <th align="center">用途</th>
         <th align="center">状态</th>
         <th align="center">添加时间</th>
@@ -24,6 +25,7 @@
       <tr data-id="{$vo.id}">
         <td>{$i}</td>
         <td align="center">{$vo.name}</td>
+        <td align="center">{$vo.product_id|productName}</td>
         <td align="center"><if condition="$vo['type'] eq '1'">二次打印</if></td>
         <td align="center">{$vo.status|status}</td>
         <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>
