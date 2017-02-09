@@ -15,8 +15,16 @@
     <label class="col-sm-2 control-label">金额:</label>
     <input type="text" name="money" class="form-control" size="20" value="{$ginfo['money']}" disabled>
   </div>
+  <div class="form-group" id="payMsg">
+    <p>扫码成功,等待客户确认....</p>
+    <p>客户确认成功,打印门票....</p>
+  </div>
   <div class="form-group">
     <input type="text" name="card" class="form-control" size="20" id="pay_card" value="">
+  </div>
+  <!--倒计时区域-->
+  <div id="countdown">
+  
   </div>
 </div>
 <div class="bjui-pageFooter">
@@ -26,10 +34,14 @@
     </ul>
 </div>
 <script>
+  $(document).ready(function(){
+    settime('countdown',90);
+  });
   $("#pay_card").focus();
   $('#pay_card').keydown(function(e){
     var pay_card = $("#pay_card").val(),
-        keycode = (e.keyCode ? e.keyCode : e.which);
+        keycode = (e.keyCode ? e.keyCode : e.which),
+        payMsg = '';
     if(keycode ==13){
       if(isNull(pay_card) == false){
         layer.msg('扫码失败...');
@@ -40,9 +52,48 @@
           is_pay = '{$ginfo.is_pay}',
           payKey = $("#pay_card").val();
       postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"paykey":'+payKey+'}';
+      //向第三方支付提交支付请求
+      $.ajax({
+        type:'POST',
+        url:url,
+        data:postData,
+        dataType:'json',
+        timeout: 3500,
+        error: function(){
+          layer.msg('服务器请求超时，请检查网络...');
+        },
+        success:function(data){
+            if(data.statusCode == "200"){
+              //刷新
+              payMsg.html();
+            }else{
+              payMsg.html('扫码失败...');
+            }
+        }
+      });
+      //等待第三方返回结果
+      //轮询结果
+      setInterval(function(){prompt();}, 60000);
       post_server(postData,url);
     } 
   });
+  /**
+   * 倒计时
+   * @param  {[type]} showmsg   显示区域
+   * @param  {int} countdown 总时长
+   */
+  function settime(showmsg,countdown) {
+    if (countdown == 0) { 
+      $('#'+showmsg).html(countdown);
+      $(this).dialog('refresh', 'work_quick');
+      //关闭当前窗口
+      $(this).dialog('close','payment');
+    } else {
+      $('#'+showmsg).html(countdown);
+      countdown--; 
+    } 
+    setTimeout(function() { settime(showmsg,countdown) },1000) 
+  } 
   function pay_post() {
     //判断是否是线下收款方式
     var is_pay = $('input[name="is_pay"]:checked').val(),

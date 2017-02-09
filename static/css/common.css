@@ -320,3 +320,15 @@ h5.block {
 /*景区门票*/
 .scenic_ticket span{margin: 5px;}
 .border{border: 1px solid #ddd;}
+/**
+ * 扫码支付
+ */
+#countdown{
+  float: right;
+  margin-top: 100px;
+  margin-right: 20px;
+  color: crimson;
+  font-size: 33px;
+  font-weight: normal;
+  font-family: 'Microsoft YaHei','SimSun','Arial';
+}
