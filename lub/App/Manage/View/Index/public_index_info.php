@@ -65,6 +65,34 @@
         -->
 </div>
 <div class="bjui-pageContent">
+  <div class="col-md-8">
+    <iframe width="800" scrolling="no" height="120" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&color=%23&bgc=%23&icon=1&temp=1&num=5"></iframe>
+  </div>
+  <div class="col-md-4">
+    <div class="row" style="padding:5px;">
+      <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
+          <strong>常用软件下载</strong>
+          <h5>打印插件: <a href="http://new.leubao.com/d/print_32.exe" target="_blank">32位</a>　|
+          <a href="http://new.leubao.com/d/print_64.exe" target="_blank">64位</a></h5>
+          <h5>打印机驱动: <a href="http://new.leubao.com/d/TOSHIBA_TEC_7.3.exe" target="_blank">东芝（TOSHIBA)B-EX4T1-GS14驱动</a></h5>
+      </div>  
+                
+      <div class="alert alert-success" role="alert" style="margin:0 0 5px; padding:5px 15px;">
+          <h5>项目地址：<a href="http://new.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
+          <h5>ZUI手册：<a href="http://www.zui.sexy/" target="_blank">http://www.zui.sexy/</a></h5>
+          <h5>图标 : <a href="http://fontawesome.dashgame.com/" target="_blank">http://fontawesome.dashgame.com/</a></h5>
+          <h5>ThinkPHP手册：<a href="http://www.kancloud.cn/manual/thinkphp/1678" target="_blank">ThinkPHP3.2.3</a></h5>
+          <h5>B-JUI手册：<a href="http://b-jui.com/index_tree.html" target="_blank">B-JUI</a></h5>
+      </div> 
+        <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
+            <strong>B-JUI团队欢迎你!</strong>
+            <br><span class="label label-default">开发：</span>孤星</a>
+            <br><span class="label label-default">测试 & 推广：</span> <a href="#">@Jack Yuan （成都锦杨）</a>
+            <br><span class="label label-default">测试 & 试用：</span> <a href="#">@管书清 （小小正能量）</a>
+        </div>                                 
+    </div>
+  </div>
+
 <a href="http://new.leubao.com/help.pdf">渠道版手册</a>
 <a href="http://new.leubao.com/soft.php">常用软件下载</a>
 <div style="margin-top:5px; margin-right:200px; overflow:hidden;">
@@ -131,47 +159,9 @@
     <!--待处理的订单
     <div class="col-md-4" id="index_pending_order" data-toggle="autoajaxload" data-autorefresh="12000" data-url="{:U('Manage/index/index_pending_order');}">
         
-    </div>--><!--
+    </div>-->
     <div style="margin-top:5px; margin-right:200px; overflow:hidden;">
-           <div style="padding: 0 15px;">
-        <div style="float:left; width:157px;">
-            <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:10px;">
-                <img src="" width="135">
-            </div>
-        </div>
-        
-        <div style="margin-left:170px; margin-top:22px; padding-left:6px;">
-            <a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=0047455f3845597286edd381d54076b1e10a45c0c735115f0ee74961f70880af"><img border="0" src="images/group.png" alt="B-JUI前端框架-群1" title="B-JUI前端框架-群1"></a>
-            <span class="label label-default">(1群已满)</span>　
-            <a target="_blank" href="http://shang.qq.com/wpa/qunwpa?idkey=96974f9b311cb8566e371703e2e4c2abb23c4835f4ec6c2893652f7a3b920c32"><img border="0" src="images/group.png" alt="B-JUI前端框架-群2" title="B-JUI前端框架-群2"></a>
-            <span style="padding-left:30px;">官方论坛：</span><a href="http://www.b-jui.com/" target="_blank">http://www.b-jui.com/</a>
-        </div>
-        
-        <div class="row" style="margin-left:170px; margin-top:10px;">
 
-            <div class="col-md-6" style="padding:5px;">
-                
-                <div class="alert alert-success" role="alert" style="margin:0 0 5px; padding:5px 15px;">
-                    <h5>项目地址：<a href="http://new.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
-                    <h5>ZUI手册：<a href="http://www.zui.sexy/" target="_blank">http://www.zui.sexy/</a></h5>
-                    <h5>图标 : <a href="http://fontawesome.dashgame.com/" target="_blank">http://fontawesome.dashgame.com/</a></h5>
-                    <h5>ThinkPHP手册：<a href="http://www.kancloud.cn/manual/thinkphp/1678" target="_blank">ThinkPHP3.2.3</a></h5>
-                    <h5>B-JUI手册：<a href="http://b-jui.com/index_tree.html" target="_blank">B-JUI</a></h5>
-                    <h5><a href="" class="btn btn-danger" data-url="{:U('Manage/Index/seat')}" data-toggle="dialog" data-max="true" data-width="800" data-height="400" data-id="dialog-mask" data-mask="true"><i class="fa fa-ban"> 驳回</i></a>
-</h5>
-                </div> 
-            </div>-->
-            <!--
-            <div class="col-md-6" style="padding:5px;">
-                <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
-                    <strong>B-JUI团队欢迎你!</strong>
-                    <br><span class="label label-default">开发：</span>孤星</a>
-                    <br><span class="label label-default">测试 & 推广：</span> <a href="#">@Jack Yuan （成都锦杨）</a>
-                    <br><span class="label label-default">测试 & 试用：</span> <a href="#">@管书清 （小小正能量）</a>
-                </div>                                 
-            </div>-->
-        </div>
-    </div>
     </div>
 
 </div>

@@ -11,7 +11,7 @@
     <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
       <option value="1">启用</option>
       <option value="0">禁用</option>
-  </select>
+    </select>
   </div>
 </div>
 <input name="product_id" type="hidden" value="{$pid}">

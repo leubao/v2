@@ -4,3 +4,4 @@ apiclient_key.pem
 apiclient_cert.pem
 cacert.pem
 rootca.pem
+up.log
