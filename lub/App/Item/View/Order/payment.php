@@ -55,7 +55,7 @@
       //向第三方支付提交支付请求
       $.ajax({
         type:'POST',
-        url:url,
+        url:'<?php echo U('Item/Order/public_payment');?>',
         data:postData,
         dataType:'json',
         timeout: 3500,
@@ -65,16 +65,22 @@
         success:function(data){
             if(data.statusCode == "200"){
               //刷新
-              payMsg.html();
+              payMsg.html("扫码成功,等待客户确认....");
+              //开始轮询支付结果
+              //等待第三方返回结果
+              //轮询结果
+              setInterval(function(){
+                alert('www');
+                //第三方返回成功
+                //调出打印窗口
+              }, 60000);
             }else{
               payMsg.html('扫码失败...');
             }
         }
       });
-      //等待第三方返回结果
-      //轮询结果
-      setInterval(function(){prompt();}, 60000);
-      post_server(postData,url);
+      
+      //(postData,url);
     } 
   });
   /**
