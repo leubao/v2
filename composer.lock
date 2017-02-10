@@ -4,28 +4,26 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "785a0b8dd333475536306679047280ff",
-    "content-hash": "add2c4b1864b71f65b75d3d227721fd4",
+    "content-hash": "cec1861e6b230e87cc55e4e06169bb78",
     "packages": [
         {
             "name": "riverslei/payment",
-            "version": "v2.6.1",
+            "version": "v2.7.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/helei112g/payment.git",
-                "reference": "d8633b193d3e21bc0628e8bbed6964c879754dc6"
+                "reference": "0833419ef88466b6861ac9efe8739d6494a5bcd6"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://packagist.phpcomposer.com/files/helei112g/payment/d8633b193d3e21bc0628e8bbed6964c879754dc6.zip",
-                "reference": "d8633b193d3e21bc0628e8bbed6964c879754dc6",
+                "url": "https://packagist.phpcomposer.com/files/helei112g/payment/0833419ef88466b6861ac9efe8739d6494a5bcd6.zip",
+                "reference": "0833419ef88466b6861ac9efe8739d6494a5bcd6",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.5"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "~4.0"
+                "ext-bcmath": "*",
+                "ext-mbstring": "*",
+                "php": ">=5.6"
             },
             "type": "library",
             "autoload": {
@@ -39,9 +37,9 @@
             ],
             "authors": [
                 {
-                    "name": "helei112g",
-                    "email": "helei5200@126.com",
-                    "homepage": "http://blog.csdn.net/hel12he/"
+                    "name": "helei",
+                    "email": "dayugog@gmail.com",
+                    "homepage": "https://helei112g.github.io/"
                 }
             ],
             "description": "集成支付宝、微信支付等流行的支付接口，后续会持续跟进中",
@@ -53,7 +51,7 @@
                 "支付宝支付",
                 "集成支付接口SDK"
             ],
-            "time": "2016-10-28 01:43:45"
+            "time": "2017-01-03T14:44:48+00:00"
         },
         {
             "name": "zoujingli/wechat-php-sdk",
@@ -87,7 +85,7 @@
             "keywords": [
                 "wechat-php-sdk"
             ],
-            "time": "2016-12-31 10:05:37"
+            "time": "2016-12-31T10:05:37+00:00"
         }
     ],
     "packages-dev": [],
