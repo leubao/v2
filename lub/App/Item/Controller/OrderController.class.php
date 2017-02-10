@@ -27,6 +27,7 @@ class OrderController extends ManageBase{
 			if($sn != false){
 				$return = array(
 					'statusCode' => '200',
+					'refresh'	 => 'work_seat',
 					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan)),
 				);
 				$message = "下单成功!单号".$sn;
@@ -40,8 +41,7 @@ class OrderController extends ManageBase{
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
 			}
 			//记录订单信息
-			echo json_encode($return);
-			return true;
+			die(json_encode($return));
 		}
 	}
 	
@@ -446,6 +446,7 @@ class OrderController extends ManageBase{
 				'width'		 =>	$width,
 				'height'	 =>	$height,
 				'pageid' 	 => $pageId,
+				'refresh'	 => 'work_quick',
 				'forwardUrl' => $forwardUrl,
 			);
 			$message = "下单成功!单号".$run;
@@ -478,7 +479,12 @@ class OrderController extends ManageBase{
 			}
 			if($info['pay_type'] == '5'){
 				//微信支付
-				
+				$data = array(
+					'money' => $oinfo[''],
+					'paykey'=>	$info['paykey'],
+					'plan' 	=>	$info['plan']
+				);
+				$this->weixin_code();
 			}
 			if($run != false){
 				//支付方式影响返回结果
