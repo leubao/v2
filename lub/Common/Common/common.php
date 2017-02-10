@@ -949,7 +949,6 @@ function xorcrypt($data, $key){
     }
     return $data;
 }
-
 /**
  * 获取微信操作对象
  * @staticvar array $wechat

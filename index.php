@@ -14,7 +14,7 @@ if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 //当前目录路径
 define('SITE_PATH', getcwd() . '/');
 //项目路径
-define('PROJECT_PATH', SITE_PATH . 'lub/');
+define('PROJECT_PATH', SITE_PATH . 'Lub/');
 // 开启调试模式 建议开发阶段开启 部署阶段注释或者设为false
 define('APP_DEBUG', true);
 // 应用公共目录
@@ -24,4 +24,4 @@ define('APP_PATH', PROJECT_PATH . 'App/');
 //应用运行缓存目录
 define("RUNTIME_PATH", SITE_PATH . "#runtime/");
 // 引入ThinkPHP入口文件
-require PROJECT_PATH . 'Cores/ThinkPHP.php';
+require './ThinkPHP/ThinkPHP.php';
