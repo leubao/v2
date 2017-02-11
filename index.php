@@ -23,5 +23,7 @@ define('COMMON_PATH', PROJECT_PATH . 'Common/');
 define('APP_PATH', PROJECT_PATH . 'App/');
 //应用运行缓存目录
 define("RUNTIME_PATH", SITE_PATH . "#runtime/");
+
+require './vendor/autoload.php';
 // 引入ThinkPHP入口文件
 require './ThinkPHP/ThinkPHP.php';

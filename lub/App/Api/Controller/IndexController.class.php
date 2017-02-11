@@ -11,7 +11,7 @@ use Common\Controller\ApiBase;
 use Libs\Service\Api;
 use Libs\Service\Order;
 use Common\Model\Model;
-use Libs\Service\Report;
+use Whoops\Run;
 class IndexController extends ApiBase {
     //获取场次信息
     function api_plan(){
@@ -588,9 +588,54 @@ class IndexController extends ApiBase {
       );
       return $info;
     }
-    
+    /**
+     * api 接口通知取票状态
+     * 通过订单号查询取票状态
+     * @return [type] [description]
+     */
+    function api_notice(){
+      
+    }
+    /**
+     * 查询订单状态 条件为订单号
+     * 1、查询订单状态
+     * 2、查询支付记录状态，若两者状态存在歧义，马上强制屏幕弹窗报警
+     */
+    function confirm_pay(){
+      $sn = I('get.sn');
+      if(empty($sn)){return false;}
+      $map = array(
+        'order_sn' => $sn,
+        'status'   => '1',
+        );
+      $o_status = D('Item/Order')->where($map)->find('id');
+      $p_status = D('Pay')->where($map)->find('id');
+      if(empty($o_status) || empty($p_status)){
+        return false;
+      }else{
+        return true;
+      }
+    }
+    /**
+     * 扫码支付通知接口
+     */
+    function paynotify(){
+      //判断通知来路微信还是支付宝
+    }
 
+    function c_temp(){
+        try {
+            $this->division(10, 0);
+        } catch(\Exception $e) {
+            echo $e->getMessage();
+        }
+    }
 
+    function division($dividend, $divisor) {
+        if($divisor == 0) {
+            throw new \Exception('Division by zero');
+        }
+    }
 
     function c_network(){
       $url = "http://new.leubao.com/api.php?a=api_check_network";
@@ -598,9 +643,17 @@ class IndexController extends ApiBase {
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
+      $whoops = new Run();
+      $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
+      $whoops->register();
+
+      // 测试未捕获的异常
+      $this->division(10, 0);
+  
+      echo "1";
       $post['data'] = json_encode($post);
       $aa = $this->curl_server($url,$post);
-      dump($aa);
+      //dump($aa);
     }
     //构造订单请求
     //$pinfo1 = '{"subtotal":288,"checkin":1,"data":[ {"areaId":21,"priceid":27,"price":288,"num":"1"} ],"param":[{"guide":"测试","qditem":"爱上大声地","phone":18631451216,"contact":"啊实打实"},{"cash":288,"card":0,"alipay":0}]}';

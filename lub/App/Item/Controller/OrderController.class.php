@@ -472,7 +472,6 @@ class OrderController extends ManageBase{
             if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
 				$run = Order::sweep_pay_seat($info,$oinfo);
-
 			}
 			if($info['pay_type'] == '4'){
 				//支付宝支付

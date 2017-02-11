@@ -9,6 +9,7 @@ class ComposerStaticInit0685fe7b3804375d34c97ddc081b15e6
     public static $prefixLengthsPsr4 = array (
         'W' => 
         array (
+            'Whoops\\' => 7,
             'Wechat\\' => 7,
         ),
         'P' => 
@@ -18,6 +19,10 @@ class ComposerStaticInit0685fe7b3804375d34c97ddc081b15e6
     );
 
     public static $prefixDirsPsr4 = array (
+        'Whoops\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/filp/whoops/src/Whoops',
+        ),
         'Wechat\\' => 
         array (
             0 => __DIR__ . '/..' . '/zoujingli/wechat-php-sdk/Wechat',

@@ -985,3 +985,12 @@ function & load_wechat($type = '',$scene = '',$product_id = '') {
     }
     return $wechat[$index];
 }
+/**
+ * 获取支付操作对象
+ * @param $pay string wxpay || alipay
+ * @param $type  string card //刷卡支付
+ */
+function & load_payment($pay = '',$type = '',$product_id = ''){
+    static $payment = array();
+
+}

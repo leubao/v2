@@ -103,6 +103,7 @@ class IndexController extends ManageBase {
         }
     }
     public function public_index_info(){
+       
     	$this->display();
     }
     //登录超时
