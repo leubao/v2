@@ -77,7 +77,7 @@ class Base extends LubTMP {
             'page_title'=>'',
         );
         $proconf = cache('ProConfig');
-        $return = array_diff_key($proconf[$product],$unset);
+        $return = array_diff_key($proconf[$product]['1'],$unset);
         return $return;
     }
     /*返回去除敏感信息的客户信息

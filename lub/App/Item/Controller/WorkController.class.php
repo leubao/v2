@@ -26,7 +26,8 @@ class WorkController extends ManageBase{
 			case '1':
 				//今天时间戳
 				$today = strtotime(date('Y-m-d'))."-1";
-				$plan = Operate::do_read('Plan',1,array('product_id'=>$this->pid,'status'=>2));	
+				$plan = Operate::do_read('Plan',1,array('product_id'=>get_product('id'),'status'=>2));	
+				dump($plan);
 				//剧场
 				$template = 'index';
 				break;

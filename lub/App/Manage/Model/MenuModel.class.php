@@ -130,6 +130,7 @@ class MenuModel extends Model {
     public function getTree($myid, $parent = "", $Level = 1) {
         $data = $this->adminMenu($myid);
         $Level++;
+        $ret = "";
         if (is_array($data)) {
             foreach ($data as $a) {
                 $id = $a['id'];

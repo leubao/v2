@@ -167,7 +167,7 @@
         </div>
   </if>
   </div>
-  <input name="product_id" value="{$pid}" type="hidden">
+  <input name="product_id" value="{$pinfo['id']}" type="hidden">
   <input name="product_type" value="{$pinfo['type']}" type="hidden">
   <div class="bjui-pageFooter">
     <ul>

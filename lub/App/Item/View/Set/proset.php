@@ -263,7 +263,7 @@
                                     <div class="caption">
                                       <div style="display: inline-block; vertical-align: middle;">
                                         <div style="display: inline-block; vertical-align: middle;">
-                                          <div data-toggle="upload" data-uploader="{:U('Manage/Config/up_img',array('menuid'=>$menuid,'name'=>'wechat'));}" 
+                                          <div data-toggle="uload" data-uploader="{:U('Manage/Config/up_img',array('menuid'=>$menuid,'name'=>'wechat'));}" 
                                                               data-file-size-limit="1024000000"
                                                               data-file-type-exts="*.jpg;"
                                                               data-multi="true"

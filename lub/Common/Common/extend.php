@@ -1556,7 +1556,23 @@
         }
         return $userid;
     }
-
+    /**
+     * 返回当前产品或根据产品ID 返回产品详情
+     * @param  string $type       id  或 info
+     * @param  int $product_id 产品id
+     * @return int || array 
+     */
+    function get_product($type = 'id',$product_id = ''){
+        if(empty($product_id)){
+            $product = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+            if($type == 'info'){
+                $product = M('Product')->where(array('id'=>$product))->find();
+            }
+        }else{
+            $product = M('Product')->where(array('id'=>$product_id))->find();
+        }
+        return $product;
+    }
     /*
     * @param $param int 根据管理员获取所管理的商户和导游
     */

@@ -109,25 +109,21 @@ class PayController extends Base{
             $pinfo = I('post.');
             $sn = get_order_sn();
             //构造数据
-            $data = array(
-               
-
-            );
-            require ('/alidata/www/new/lub/App/Home/Service/ABCpay/PaymentRequest.php');
+            require (SITE_PATH.'/lub/App/Home/Service/ABCpay/PaymentRequest.php');
             $tRequest = new \PaymentRequest();
-            $tRequest->order['PayTypeID']      =  'ImmediatePay';//直接支付
+            $tRequest->order['PayTypeID']      =  "ImmediatePay";//直接支付
             $tRequest->order['OrderNo']        =  $sn;
             $tRequest->order['OrderDate']      =  date('Y-m-d');//订单日期
             $tRequest->order['OrderTime']      =  date('H:i:s');//订单时间
             $tRequest->order['OrderAmount']    =  $pinfo['money'];
-            $tRequest->order['CurrencyCode']   =  '156';//设定交易币种
+            $tRequest->order['CurrencyCode']   =  "156";//设定交易币种
             $tRequest->order['BuyIP']          =  get_client_ip();
-            $tRequest->order['Fee']            =  '0';
+            $tRequest->order['Fee']            =  "0";
             $tRequest->order['OrderDesc']      =  $pinfo['remark'];
-            $tRequest->order['CommodityType']  =  '0101';//充值类
-            $tRequest->order['InstallmentMark']= '0';
-            $tRequest->order['PaymentLinkType']= '1';//1：internet网络接入 2：手机网络接入 3:数字电视网络接入
-            $tRequest->order['PaymentType']    = 'A';
+            $tRequest->order['CommodityType']  =  "0101";//充值类
+            $tRequest->order['InstallmentMark']= "0";
+            $tRequest->order['PaymentLinkType']= "1";//1：internet网络接入 2：手机网络接入 3:数字电视网络接入
+            $tRequest->order['PaymentType']    = "A";
             $tRequest->order['OrderURL']       = U('Home/pay/up_order',array('sn'=>$sn));
 
 
@@ -135,11 +131,11 @@ class PayController extends Base{
             //户名：印象大红袍股份有限公司
             //帐号：13-9701 0104 0011 738
             //开户行：中国农业银行武夷山支行
-            $tRequest->order['ReceiveAccount'] = '13970101040011738'; //设定收款方账号
-            $tRequest->order['ReceiveAccName'] = '印象大红袍股份有限公司'; //设定收款方户名
-            $tRequest->order['NotifyType']     = '0';//通知类型0：URL页面通知 1：服务器通知
-            $tRequest->order['ResultNotifyURL']= 'http://www.yx513.net/abcpay.php';//通知URL
-            $tRequest->order['IsBreakAccount'] = '0';//分账0否1是
+            $tRequest->order['ReceiveAccount'] = "13970101040011738"; //设定收款方账号
+            $tRequest->order['ReceiveAccName'] = "印象大红袍股份有限公司"; //设定收款方户名
+            $tRequest->order['NotifyType']     = "0";//通知类型0：URL页面通知 1：服务器通知
+            $tRequest->order['ResultNotifyURL']= "http://www.yx513.net/abcpay.php";//通知URL
+            $tRequest->order['IsBreakAccount'] = "0";//分账0否1是
             $tRequest->order['MerchantRemarks']= $pinfo['remark']; //设定附言
             $tResponse = $tRequest->postRequest();
             if($tResponse){
@@ -148,7 +144,6 @@ class PayController extends Base{
                $this->error("支付失败！"); 
             }
         }else{
-            print(dirname(__FILE__));
             $this->display();
         }
     }

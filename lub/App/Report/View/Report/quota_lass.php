@@ -41,6 +41,7 @@
       <tr>
         <th width="56px">编号</th>
         <th>渠道商</th>
+        <th>标准</th>
         <th>已使用</th>
       </tr>
     </thead>
@@ -49,6 +50,7 @@
             <tr>
               <td>{$i}</td>
               <td>{$vo.channel_id|crmName}</td>
+              <td>{$vo.channel_id|crmQuota}</td>
               <td>{$vo.number}</td>
             </tr>
           </volist>

@@ -139,7 +139,7 @@ class ProductController extends ManageBase{
 	 *  @param $pid int 所属产品ID
 	 */
 
-	function groupEdit(){
+	function groupedit(){
 		if(IS_POST){
 			$up = Operate::do_up('TicketGroup');
 			if($up){
@@ -164,7 +164,7 @@ class ProductController extends ManageBase{
 	 *  @param $pid int 所属产品ID
 	 */
 
-	function groupDel(){
+	function groupdel(){
 		$id = I('get.id',0,intval);
 		if(!empty($id)){
 			//判断是否存在成员
@@ -340,34 +340,29 @@ class ProductController extends ManageBase{
 				$this->erun('新增失败,在同一时间已存在销售计划!');
 			}
 		}else{
-			$product_id = (int)$this->pid;
-			if(!empty($product_id)){
-				//产品信息
-				$pinfo = M('Product')->where(array('id'=>$product_id))->find();
-				switch ($pinfo['type']) {
-					case '1':
-						//剧场座椅区域信息
-						$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->order('listorder ASC')->select();
-						$this->assign('seat',$seat);
-						break;
-					case '2':
-						//景区
-						break;
-					case '3':
-						$tooltype = D('ToolType')->where(array('product_id'=>$product_id,'status'=>1))->field('id,title')->select();
-						$this->assign('tooltype',$tooltype);
-						//漂流
-						break;
-				}
-				//票型价格信息
-				$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$product_id,'status'=>'1'))->select();
-				$this->assign('group',$ticket)
-					 ->assign('pid',$product_id)
-				     ->assign('pinfo',$pinfo)
-					 ->display();
-			}else{
-				$this->erun('参数错误!');
+			//产品信息
+			$pinfo = get_product('info');
+			if(empty($pinfo)){$this->erun('未捕获产品信息,请重新登录系统...');}
+			switch ($pinfo['type']) {
+				case '1':
+					//剧场座椅区域信息
+					$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->order('listorder ASC')->select();
+					$this->assign('seat',$seat);
+					break;
+				case '2':
+					//景区
+					break;
+				case '3':
+					//漂流
+					$tooltype = D('ToolType')->where(array('product_id'=>$pinfo['id'],'status'=>1))->field('id,title')->select();
+					$this->assign('tooltype',$tooltype);
+					break;
 			}
+			//票型价格信息
+			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
+			$this->assign('group',$ticket)
+			     ->assign('pinfo',$pinfo)
+				 ->display();
 		}
 	}
 	/**

@@ -33,7 +33,6 @@ class ProductModel extends Model{
         foreach ($data as $rs) {
         	$cache[$rs['id']] = $rs;
         }
-        //F('Product', $cache, DATA_PATH.'/Item/');
         cache('Product',$cache);
         return true;
 	 }

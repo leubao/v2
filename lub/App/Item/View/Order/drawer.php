@@ -16,8 +16,8 @@
 <div class="pageContent">
   <div class="pageFormContent">
   <div class="print_type">
-  <input type="radio" name="type" id="print_type" value="1" <if condition="$procof['print_type'] eq '1'">checked</if>> 一人一票  
-  <input type="radio" name="type" id="print_type" value="2" <if condition="$procof['print_type'] eq '2'">checked</if>> 一单一票
+  <input type="radio" name="type" id="print_type" value="1" <if condition="$proconf['print_type'] eq '1'">checked</if>> 一人一票  
+  <input type="radio" name="type" id="print_type" value="2" <if condition="$proconf['print_type'] eq '2'">checked</if>> 一单一票
   </div>
   <button type="button" style="width:200px; height:130px" onclick="printTicket({$data.sn},{$data.plan_id})">打印门票</button>
   </div>

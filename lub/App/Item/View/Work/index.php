@@ -19,7 +19,7 @@
       <div class="btn-group" role="group" aria-label="售票">
       <a type="submit" href="#" class="btn btn-success" id="quick"><i class="fa fa-deviantart"> 快捷售票</i></a>
       
-      <if condition="$procof['window_channel'] eq '1'">
+      <if condition="$proconf['window_channel'] eq '1'">
       <a type="submit" class="btn btn-info" href="#" id="teams"><i class="fa fa-flickr"></i> 团队售票</a> 
       </if>
       <!--

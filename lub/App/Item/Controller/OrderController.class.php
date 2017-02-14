@@ -473,8 +473,20 @@ class OrderController extends ManageBase{
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
 				$run = Order::sweep_pay_seat($info,$oinfo);
 			}
+			$product = product_name($oinfo['product_id'],1);
+			//构造支付订单数据
+			$payData = [
+			    "order_no"	=> $info['sn'],
+			    "amount"	=> $oinfo['money'],// 单位为元 ,最小为0.01
+			    "client_ip"	=> get_client_ip(),
+			    "subject"	=> $product."门票",
+			    "body"		=> planShow($oinfo['plan_id'],1).$product."门票",
+			    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
+			    "extra_param"	=> '',
+			];
 			if($info['pay_type'] == '4'){
 				//支付宝支付
+				$this->alipay_code($payData);
 			}
 			if($info['pay_type'] == '5'){
 				//微信支付
@@ -510,10 +522,10 @@ class OrderController extends ManageBase{
 			$this->assign('ginfo',$ginfo)->display('payment');
 		}
 	}
-	//支付宝扫码支付
-	function alipay_code()
+	//支付宝扫码支付 当面付
+	function alipay_code($odata)
 	{
-		# code...
+		
 	}
 	//微信扫码支付
 	function weixin_code()

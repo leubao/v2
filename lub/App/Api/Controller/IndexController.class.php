@@ -11,7 +11,10 @@ use Common\Controller\ApiBase;
 use Libs\Service\Api;
 use Libs\Service\Order;
 use Common\Model\Model;
-use Whoops\Run;
+
+use Payment\ChargeContext;
+use Payment\Config;
+use Payment\Common\PayException;
 class IndexController extends ApiBase {
     //获取场次信息
     function api_plan(){
@@ -630,29 +633,91 @@ class IndexController extends ApiBase {
             echo $e->getMessage();
         }
     }
-
+    /*
     function division($dividend, $divisor) {
         if($divisor == 0) {
             throw new \Exception('Division by zero');
         }
     }
-
+  */
     function c_network(){
       $url = "http://new.leubao.com/api.php?a=api_check_network";
       $post = array(
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
-      $whoops = new Run();
+      /*
+      $whoops = new \Whoops\Run();
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
       $whoops->register();
 
       // 测试未捕获的异常
       $this->division(10, 0);
-  
-      echo "1";
+      */
+     
       $post['data'] = json_encode($post);
       $aa = $this->curl_server($url,$post);
+
+      $payData = [
+          "order_no"  => '201612311430',
+          "amount"  => '10.00',// 单位为元 ,最小为0.01
+          "client_ip" => '127.0.0.1',
+          "subject" => 'test',
+          "body"  => 'test wap pay',
+          "show_url"  => 'https://helei112g.github.io/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
+          "extra_param" => '',
+      ];
+      dump($this->pid);
+      $config = load_payment('alipay',$this->pid);
+      //dump($config);
+      /*
+      $charge = new ChargeContext();
+      try {
+          // 支付宝即时到帐接口  新版本，不再支持该方式
+          //$type = Config::ALI_CHANNEL_WEB;
+
+          // 支付宝 手机网站支接口
+          $type = Config::ALI_CHANNEL_WAP;
+
+          // 支付宝 移动支付接口
+          //$type = Config::ALI_CHANNEL_APP;
+
+          // 支付宝  扫码支付
+          //$type = Config::ALI_CHANNEL_QR;
+
+          $charge->initCharge($type, $config);
+
+          // 微信 扫码支付
+          //$type = Config::WX_CHANNEL_QR;
+
+          // 微信 APP支付
+          //$type = Config::WX_CHANNEL_APP;
+
+          // 微信 公众号支付
+          //$type = Config::WX_CHANNEL_PUB;
+
+          //$charge->initCharge($type, $wxconfig);
+          $ret = $charge->charge($payData);
+      } catch (PayException $e) {
+          echo $e->errorMessage();exit;
+      }
+      if ($type === Config::ALI_CHANNEL_APP) {
+          echo $ret;exit;
+      } elseif ($type === Config::ALI_CHANNEL_QR) {
+          $url = \Payment\Utils\DataParser::toQRimg($ret);// 内部会用到google 生成二维码的api  可能有些同学反应很慢
+          echo "<img alt='支付宝扫码支付' src='{$url}' style='width:150px;height:150px;'/>";exit;
+      } elseif ($type === Config::WX_CHANNEL_QR) {
+          $url = \Payment\Utils\DataParser::toQRimg($ret);
+          echo "<img alt='微信扫码支付' src='{$url}' style='width:150px;height:150px;'/>";exit;
+      } elseif ($type === Config::WX_CHANNEL_PUB) {
+          $json = $ret;
+          var_dump($json);
+      } elseif (stripos($type, 'wx') !== false) {
+          var_dump($ret);exit;
+      } elseif (stripos($type, 'ali') !== false) {
+          // 跳转支付宝
+          header("Location:{$ret}");
+      }*/
       //dump($aa);
     }
     //构造订单请求
@@ -731,7 +796,13 @@ class IndexController extends ApiBase {
           return false;
         }
     }
-
+    /**
+     * 阿里支付网关
+     */
+    function alipay_gateway()
+    {
+      # code...
+    }
     //测试计划接入
     function c_plan(){
       $url = "http://new.leubao.com/api.php?a=api_plan";

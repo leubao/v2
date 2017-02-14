@@ -46,7 +46,7 @@ class ManageBase extends LubTMP {
         $this->itemid = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
         //设置产品配置信息
         $this->procofig = cache('ProConfig');
-        $this->procof = $this->procofig[$this->pid];
+        $this->procof = $this->procofig[$this->pid]['1'];
         //取得当前产品信息
         $this->product = $this->products[$this->pid];
         //绑定URl参数
@@ -54,7 +54,7 @@ class ManageBase extends LubTMP {
         $this->assign('menuid',$this->menuid);
         $this->assign('product',$this->product);
         $this->assign('USER_INFO', json_encode(senuInfo(User::getInstance()->getInfo())));
-        $this->assign('procof',$this->procof)->assign('PRODUCT_CONF',json_encode($this->procof));
+        $this->assign('proconf',$this->procof)->assign('PRODUCT_CONF',json_encode($this->procof));
 
     }
 

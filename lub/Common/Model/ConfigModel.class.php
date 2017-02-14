@@ -255,7 +255,13 @@ class ConfigModel extends Model {
         //拉取产品
         $list = M('Product')->field('id')->select();
         foreach ($list as $key => $value) {
-            $product_data[$value['id']] = M("ConfigProduct")->where(array('product_id'=>$value['id']))->getField("varname,value");
+            $procof = M("ConfigProduct")->where(array('product_id'=>$value['id']))->field("varname,type,value")->select();
+            if(!empty($procof)){
+                foreach ($procof as $k => $v) {
+                    $product_data[$value['id']][$v['type']][$v['varname']] = $v['value'];
+                }
+            }
+            //$product_data[$value['id']] = M("ConfigProduct")->where(array('product_id'=>$value['id']))->getField("varname,value");
         }
         cache("ProConfig",$product_data);
         return $data;

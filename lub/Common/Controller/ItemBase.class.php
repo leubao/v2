@@ -37,7 +37,7 @@ class ItemBase extends LubTMP{
         //取得所有产品信息
         $this->products = cache('Product');
         //取得当前产品信息
-        $this->product = $this->products[$this->pid];
+        $this->product = $this->products[$this->pid]['1'];
         //设置产品配置信息
         $this->procof = cache('ProConfig');
         //验证登录
