@@ -7,7 +7,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="apple-touch-icon" href="{$config_siteurl}static/images/favicon.ico">
 <link rel="icon" href="{$config_siteurl}static/images/favicon.ico">
-<title>{$proconf.iname}- 云鹿(剧院版)票务系统登录 v2.0.1</title>
+<title>云鹿(剧院版)票务系统登录 v2.0.1</title>
 <script src="{$config_siteurl}static/bjui/js/jquery-1.7.2.min.js"></script>
 <script src="{$config_siteurl}static/bjui/js/jquery.cookie.js"></script>
 <link href="{$config_siteurl}static/bjui/themes/css/bootstrap.min.css" rel="stylesheet">

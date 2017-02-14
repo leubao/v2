@@ -52,7 +52,7 @@ class PlanModel extends Model{
 				'template_id'=>$data['template_id'],
 				'quota'	=> $data['quota'],
 			);
-			$param = $this->plan_param($data['product_id'],$data['seat'],$data['ticket'],$data['product_type']);
+			$param = $this->plan_param($data['product_id'],$data['seat'],$data['ticket'],$data['goods'],$data['product_type']);
 			$infoAll = array(
 				'plantime' => $plantime,
 				'product_id' => $data['product_id'],
@@ -76,7 +76,7 @@ class PlanModel extends Model{
 				'quota' =>	$data['quota'],
 				'quotas' =>	$data['quotas'],
 			);
-			$param = $this->plan_param($data['product_id'],'',$data['ticket'],$data['product_type']);
+			$param = $this->plan_param($data['product_id'],'',$data['ticket'],$data['goods'],$data['product_type']);
 			$infoAll = array(
 				'plantime' => $plantime,
 				'product_id' => $data['product_id'],
@@ -105,7 +105,7 @@ class PlanModel extends Model{
 					'quotas' =>	$value['quotas'],
 					'product_type' => $data['product_type'],
 				);
-				$param = $this->plan_param($data['product_id'],$value['tooltype'],$data['ticket'],$data['product_type']);
+				$param = $this->plan_param($data['product_id'],$value['tooltype'],$data['ticket'],$data['goods'],$data['product_type']);
 				$infoAll = array(
 					'plantime' => $plantime,
 					'status'=>'1',
@@ -125,9 +125,10 @@ class PlanModel extends Model{
 	* @param $product int 产品id
 	* @param $seat 座椅区域|景区产品为空
 	* @param $ticket 票型集合
+	* @param $goods 收银台商品
 	* return $param array 返回参数
 	*/
-	function plan_param($product = null,$seat, $ticket, $type = '1'){
+	function plan_param($product = null,$seat, $ticket, $goods, $type = '1'){
 		if(empty($product)){return false;}
 		//获取分组排序规则
 		if($type == '1'){
@@ -139,16 +140,19 @@ class PlanModel extends Model{
 			$param = array(
 				'seat' => $seat,
 				'ticket' => $ticket,
+				'goods'	=>	$goods,
 				'auto_group' => $a_g,//自动排座分组排序
 			);
 		}elseif($type == '2'){
 			$param = array(
 				'seat' => $seat,
+				'goods'	=>	$goods,
 				'ticket' => $ticket,
 			);
 		}else{
 			$param = array(
 				'tooltype' => $seat,
+				'goods'	=>	$goods,
 				'ticket' => $ticket,
 			);
 		}

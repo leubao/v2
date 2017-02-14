@@ -109,7 +109,7 @@ class PayController extends Base{
             $pinfo = I('post.');
             $sn = get_order_sn();
             //构造数据
-            require (SITE_PATH.'/lub/App/Home/Service/ABCpay/PaymentRequest.php');
+            require SITE_PATH.'Lub/App/Home/Service/ABCpay/PaymentRequest.php';
             $tRequest = new \PaymentRequest();
             $tRequest->order['PayTypeID']      =  "ImmediatePay";//直接支付
             $tRequest->order['OrderNo']        =  $sn;
@@ -137,12 +137,13 @@ class PayController extends Base{
             $tRequest->order['ResultNotifyURL']= "http://www.yx513.net/abcpay.php";//通知URL
             $tRequest->order['IsBreakAccount'] = "0";//分账0否1是
             $tRequest->order['MerchantRemarks']= $pinfo['remark']; //设定附言
-            $tResponse = $tRequest->postRequest();
+            dump($tRequest);
+            /*$tResponse = $tRequest->postRequest();
             if($tResponse){
                 $this->error("充值成功！");
             }else{
                $this->error("支付失败！"); 
-            }
+            }*/
         }else{
             $this->display();
         }

@@ -6,7 +6,7 @@
  * @return [type]        [description]
  */
 function crmQuota($param = '', $type = null){
-	$quota = M('CrmQuota')->where(array('crm_id'=>$param,'product_id'=>(int)get_product())->getField('quota');
+	$quota = M('CrmQuota')->where(array('crm_id'=>$param,'product_id'=>(int)get_product()))->getField('quota');
 	if($type == '1'){
 		echo $quota;
 	}else{

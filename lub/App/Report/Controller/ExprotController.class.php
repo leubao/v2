@@ -10,6 +10,9 @@ namespace Report\Controller;
 use Common\Controller\ManageBase;
 use \Libs\Service\Exports; 
 class ExprotController extends ManageBase{
+	protected function _initialize() {
+		parent::_initialize();
+	}
 	/*
 	* 导出Execl
 	*/

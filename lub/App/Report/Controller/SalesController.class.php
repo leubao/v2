@@ -12,6 +12,9 @@ use Libs\Service\Operate;
 use Libs\Service\Report;
 use Item\Service\Partner;
 class SalesController extends ManageBase{
+	protected function _initialize() {
+		parent::_initialize();
+	}
 	/*
 	* 销售日历
 	*/

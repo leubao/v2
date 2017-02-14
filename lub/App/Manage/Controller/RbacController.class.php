@@ -179,7 +179,7 @@ class RbacController extends ManageBase {
                 );
                 $json[] = $data;
             }
-            dump($json);//->assign('json', json_encode($json))
+            //dump($json);//->assign('json', json_encode($json))
             $this->assign("roleid", $roleid)
                 ->assign('menu',$json)
                 ->assign("scene", $scene)

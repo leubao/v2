@@ -11,7 +11,9 @@ use Common\Controller\ManageBase;
 use Libs\Service\Operate;
 use Libs\Service\Report;
 class FinancialController extends ManageBase{
-
+	protected function _initialize() {
+		parent::_initialize();
+	}
 	//景区日报表 明细
 	function index(){
 		$starttime = I('starttime') ? I('starttime') : date('Y-m-d',time());

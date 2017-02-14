@@ -12,7 +12,9 @@ use Libs\Service\Operate;
 use Libs\Service\Report;
 use Item\Service\Partner;
 class ReportController extends ManageBase{
-	
+	protected function _initialize() {
+		parent::_initialize();
+	}
 	/*
 	*销售折线 人数 金额 散客
 	*/

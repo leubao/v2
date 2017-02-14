@@ -3,7 +3,6 @@
   <!--工具条 s-->
   <Managetemplate file="Common/Nav"/>
   <!--帮助 说明-->
-
 </div>
 <div class="bjui-pageContent tableContent">
   <div class="panel panel-default">
@@ -22,9 +21,6 @@
       <if condition="$proconf['window_channel'] eq '1'">
       <a type="submit" class="btn btn-info" href="#" id="teams"><i class="fa fa-flickr"></i> 团队售票</a> 
       </if>
-      <!--
-      <a type="submit" href="#" class="btn btn-warning" id="difference"><i class="fa fa-money"> 补差价</i></a>
-      -->
       </div>
     </div>
     <table class="table table-bordered">
@@ -42,6 +38,11 @@
       </tbody>
     </table>
   </div>
+</div>
+<div class="bjui-pageFooter">
+    <ul>
+        <li><button type="button" class="btn-close" data-icon="close">关闭</button></li>
+    </ul>
 </div>
 <script type="text/javascript">
 $(document).ready(function(){

@@ -360,8 +360,12 @@ class ProductController extends ManageBase{
 			}
 			//票型价格信息
 			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
+			//商品
+			$goods = D('Goods')->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->field('id,title')->select();
+			dump($goods);
 			$this->assign('group',$ticket)
 			     ->assign('pinfo',$pinfo)
+			     ->assign('goods',$goods)
 				 ->display();
 		}
 	}
@@ -490,6 +494,34 @@ class ProductController extends ManageBase{
 			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$info['product_id'],'status'=>'1'))->select();
 			$infos = unserialize($info['param']);
 			$this->assign('group',$ticket)
+				->assign('data',$infos)
+				->assign('pid',$id)
+				->display();
+		}	
+	}
+	/**
+	 * 更新可用小商品
+	 * @return [type] [description]
+	 */
+	function plan_goods(){
+		if(IS_POST){
+			$info = I('post.');
+			$infos = Operate::do_read("Plan",0,array('id'=>$info['plan_id']));
+			$param = unserialize($infos['param']);
+			$param['goods'] = $info['goods'];
+			if(Operate::do_up("Plan",array('id'=>$info['plan_id']),'',array('param'=>serialize($param)))){
+				$this->srun("更新成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun('更新失败!');
+			}
+		}else {
+			$id  = I("get.id");
+			$map = array("id"=>$id);
+			$info = Operate::do_read("Plan",0,$map);
+			//票型价格信息
+			$goods = D('Goods')->where(array('product_id'=>$info['product_id'],'status'=>'1'))->field('id,title')->select();
+			$infos = unserialize($info['param']);
+			$this->assign('goods',$goods)
 				->assign('data',$infos)
 				->assign('pid',$id)
 				->display();
