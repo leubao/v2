@@ -739,9 +739,21 @@
         }
     }
     /**
-     * 根据计划统计已售数
+     * 小商品名称
+     * @param  int $param 商品ID
+     * @param  int $type  返回类型
+     * @return [type]        [description]
      */
-    
+    function goodsName($product_id, $param, $type = NULL){
+        $goodsList = F('Goods_'.$product_id);
+        $goodsname = 
+        if($type){
+            return $msg;
+        }else{
+            $return = "<span class='label label-".$status."'>".$msg."</span>";
+            echo $return;
+        } 
+    }
     /**==========================================================用于系统内部回调==========================================================================****/
     /**
      * 得到新订单号

@@ -97,6 +97,7 @@ class WorkController extends ManageBase{
 	function set_session_plan(){
 		if(IS_POST){
 			$pinfo = json_decode($_POST['info'],true);
+			$ginfo = I('get.param',0,intval) ? I('get.param',0,intval) : '1';
 			$info = explode('-', $pinfo['plan']);
 			$map = array(
 				'product_id'=>$this->pid,
@@ -106,33 +107,53 @@ class WorkController extends ManageBase{
 			);
 			$plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,plantime,starttime,endtime,games')->find();
 			$param = unserialize($plan['param']);
-			foreach ($param['seat'] as $k => $v) {
-				$area[] = array(
-					'id'	=>	$v,
-					'name'	=>	areaName($v,1),
-					'number'=>  areaSeatCount($v,1),
-					'num'	=>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
-					'nums'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99'),'area'=>$v),1),//已售出
-					'numb'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','66'),'area'=>$v),1),//预定数
-					'cnum'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','99'),'area'=>$v),1),//已检票
-				); 
+			//拉取坐席
+			if($ginfo == '1'){
+				foreach ($param['seat'] as $k => $v) {
+					$area[] = array(
+						'id'	=>	$v,
+						'name'	=>	areaName($v,1),
+						'number'=>  areaSeatCount($v,1),
+						'num'	=>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
+						'nums'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99'),'area'=>$v),1),//已售出
+						'numb'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','66'),'area'=>$v),1),//预定数
+						'cnum'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','99'),'area'=>$v),1),//已检票
+					); 
+				}
+				$sale = array(
+					'nums'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99')),1),
+					'numb'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','66')),1),
+					'money' =>	format_money(M('Order')->where(array('status'=>array('in','1,7,9'),'plan_id'=>$plan['id']))->sum('money')),
+				);
+				$return = array(
+					'statusCode' => '200',
+					'info'	=>	'',
+					'plan'	=> $plan['id'],
+					'area'	=> $area,
+					'sale'	=> $sale,
+				);
 			}
-			$sale = array(
-				'nums'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99')),1),
-				'numb'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','66')),1),
-				'money' =>	format_money(M('Order')->where(array('status'=>array('in','1,7,9'),'plan_id'=>$plan['id']))->sum('money')),
-			);
-			$return = array(
-				'statusCode' => '200',
-				'info'	=>	'',
-				'plan'	=> $plan['id'],
-				'area'	=> $area,
-				'sale'	=> $sale,
-			);
+			//拉取小商品
+			if($ginfo == '2'){
+				foreach ($param['goods'] as $k => $v) {
+					$goods[] = array(
+						'id'	=>	$v,
+						'name'	=>	goodsName($v,1),
+						'number'=>  areaSeatCount($v,1),//已售出
+						'price'	=>  goodsprice($v,1)
+					); 
+				}
+				$return = array(
+					'statusCode' => '200',
+					'info'	=>	'',
+					'plan'	=> $plan['id'],
+					'goods'	=> $goods				
+				);
+			}
 			//设置session
 			session('plan',$plan);
-			echo json_encode($return);
-			return true;
+			die(json_encode($return));
+			
 		}
 	}
 	/**

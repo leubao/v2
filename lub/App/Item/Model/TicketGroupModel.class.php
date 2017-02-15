@@ -26,7 +26,7 @@ class TicketGroupModel extends RelationModel{
 	/**
 	 * 更新缓存
 	 */
-	 function group_cache($proid){
+	function group_cache($proid){
 	 	$productId = $proid ? $proid : \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');	 	
 	 	$data = $this->where(array('product_id'=>$productId,'status'=>1))->select();
         if (empty($data)) {
@@ -40,7 +40,7 @@ class TicketGroupModel extends RelationModel{
         //cache('TicketType'.$productId, $cache);
         F('TicketGroup'.$productId, $cache);
         return true;
-	 }
+	}
 	/**
      * 插入成功后的回调方法
      */
@@ -51,8 +51,8 @@ class TicketGroupModel extends RelationModel{
      *更新成功后的回调方法
      *
      */
-     protected function _after_update(){
+    protected function _after_update(){
      	$this->group_cache();
-     }
+    }
 	 
 }

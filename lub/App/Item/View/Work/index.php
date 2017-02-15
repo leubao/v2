@@ -54,7 +54,7 @@ $(document).ready(function(){
     var data = 'info={"plan":"'+plan+'"}',
         content = '';
         $.ajax({
-            url: '{:U('Item/Work/set_session_plan')}',
+            url: '{:U('Item/Work/set_session_plan',array('param'=>1))}',
             type: 'POST',
             dataType: 'JSON',
             timeout: 3500,
@@ -95,7 +95,7 @@ $(document).ready(function(){
         var data = 'info={"plan":"'+plan+'"}',
             content = '';
           $.ajax({
-            url: '{:U('Item/Work/set_session_plan')}',
+            url: '{:U('Item/Work/set_session_plan',array('param'=>1))}',
             type: 'POST',
             dataType: 'JSON',
             timeout: 1500,

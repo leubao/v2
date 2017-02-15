@@ -15,4 +15,35 @@ class GoodsModel extends Model{
         array('update_time', 'time', 3, 'function'),
         array('user_id', 'get_user_id', 1, 'function'), //新增时自动生成验证码
     );
+    /**
+	 * 更新缓存
+	 */
+	function goods_cache($proid){
+	 	$productId = $proid ? $proid : get_product('id');	 	
+	 	$data = $this->where(array('product_id'=>array('find_in_set',$productId),'status'=>1))->field('id,title,price,discount,rebate,scene')->select();
+        if (empty($data)) {
+            return false;
+        }
+        $cache = array();
+        foreach ($data as $rs) {
+        	//缓存当前产品的小商品
+        	$cache[$rs['id']] = $rs;
+        }
+        //cache('TicketType'.$productId, $cache);
+        F('Goods_'.$productId, $cache);
+        return true;
+	}
+    /**
+     * 插入成功后的回调方法
+     */
+    protected function _after_insert() {
+        $this->goods_cache();
+    }
+    /**
+     *更新成功后的回调方法
+     *
+     */
+    protected function _after_update(){
+     	$this->goods_cache();
+    }
 }

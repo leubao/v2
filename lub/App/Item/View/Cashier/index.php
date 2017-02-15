@@ -5,10 +5,10 @@
   <!--帮助 说明-->
 </div>
 <div class="bjui-pageContent tableContent">
-    <div class="col-md-4">
+    <div class="col-md-4 row">
       <div class="panel panel-default">
         <div class="panel-heading">
-          <select class="required" name="plan" id="work_plan" data-toggle="selectpicker">
+          <select class="required" name="plan" id="work_cashier_plan" data-toggle="selectpicker">
             <option value="">+=^^=售票日期=^^=+</option>
             <volist name="plan" id="vo">
               <?php $ptime =  $vo['plantime']."-".$vo['games'];?>
@@ -23,15 +23,13 @@
         <table class="table table-bordered">
           <thead>
                 <tr>
-                  <th align="center" width="120">座位区域</th>
-                  <th align="center" width="80">总数</th>
-                  <th align="center" width="80">空闲数</th>
+                  <th align="center" width="120">商品名称</th>
+                  <th align="center" width="80">价格</th>
                   <th align="center" width="80">已售数</th>
-                  <th align="center" width="80">预留数</th>
                   <th align="center" width="180">操作</th>
                 </tr>
           </thead>
-          <tbody id="work_area_seat">
+          <tbody id="work_cashier_goods">
           </tbody>
         </table>
       </div>
@@ -147,7 +145,7 @@ $(document).ready(function(){
     var data = 'info={"plan":"'+plan+'"}',
         content = '';
         $.ajax({
-            url: '{:U('Item/Work/set_session_plan')}',
+            url: '{:U('Item/Work/set_session_plan',array('param'=>2))}',
             type: 'POST',
             dataType: 'JSON',
             timeout: 3500,
@@ -159,27 +157,18 @@ $(document).ready(function(){
               if(rdata.statusCode == '200'){
                 planId = rdata.plan;
                  /*写入*/
-                $(rdata.area).each(function(idx,area){
-                  if(PRODUCT_CONF.window_channel == '1'){
-                    content += "<tr><td align='center'>"+area.name+"</td><td>"+area.number+"</td><td>"+area.num+"</td><td>"+area.nums+"</td><td>"+area.numb+"</td><td align='center'>"
-                    +"[<a href='#' onclick='seat_select("+planId+",1,"+area.id+");' title='门票销售-散客选座'>散客选座</a>]"
-                    +"[<a href='#' onclick='seat_select("+planId+",2,"+area.id+");' title='门票销售-团队选座'>团队选座</a>]"
-                    +"</td></tr>";
-                  }else{
-                    content += "<tr><td align='center'>"+area.name+"</td><td>"+area.number+"</td><td>"+area.num+"</td><td>"+area.nums+"</td><td>"+area.numb+"</td><td align='center'>"
-                    +"[<a href='#' onclick='seat_select("+planId+",1,"+area.id+");' title='门票销售-散客选座'>散客选座</a>]"
-                    +"</td></tr>";
-                  }
+                $(rdata.goods).each(function(idx,goods){
+                  content += "<tr><td align='center'>"+goods.name+"</td><td>"+goods.price+"</td><td>"+goods.number+"</td>"
+                    +"</tr>";
                 });
-                content += "<tr><td></td><td></td><td></td><td>已售数:"+rdata.sale.nums+"</td><td>预定数:"+rdata.sale.numb+"</td><td>订单金额:"+rdata.sale.money+"</td></tr>"; 
               }
               $(this).alertmsg('ok', '售票场次,切换成功!');
-              $("#work_area_seat").html(content); 
+              $("#work_cashier_goods").html(content); 
             }
         });
   }else{
     var error_msg = "<tr><td style='padding:15px;' colspan='6' align='center'><strong style='color:red;font-size:48px;'>请选择售票日期</strong></td></tr>";
-    $("#work_area_seat").html(error_msg);
+      $("#work_cashier_goods").html(error_msg);
   }
   //改变日期场次
   $('#work_cashier_plan').change(function(){
@@ -188,7 +177,7 @@ $(document).ready(function(){
         var data = 'info={"plan":"'+plan+'"}',
             content = '';
           $.ajax({
-            url: '{:U('Item/Work/set_session_plan')}',
+            url: '{:U('Item/Work/set_session_plan',array('param'=>2))}',
             type: 'POST',
             dataType: 'JSON',
             timeout: 1500,
@@ -200,27 +189,18 @@ $(document).ready(function(){
               if(rdata.statusCode == '200'){
                 planId = rdata.plan;
                  /*写入*/
-                $(rdata.area).each(function(idx,area){
-                  if(PRODUCT_CONF.window_channel == '1'){
-                    content += "<tr><td align='center'>"+area.name+"</td><td>"+area.number+"</td><td>"+area.num+"</td><td>"+area.nums+"</td><td>"+area.numb+"</td><td align='center'>"
-                    +"[<a href='#' onclick='seat_select("+planId+",1,"+area.id+");' title='门票销售-散客选座'>散客选座</a>]"
-                    +"[<a href='#' onclick='seat_select("+planId+",2,"+area.id+");' title='门票销售-团队选座'>团队选座</a>]"
-                    +"</td></tr>";
-                  }else{
-                    content += "<tr><td align='center'>"+area.name+"</td><td>"+area.number+"</td><td>"+area.num+"</td><td>"+area.nums+"</td><td>"+area.numb+"</td><td align='center'>"
-                    +"[<a href='#' onclick='seat_select("+planId+",1,"+area.id+");' title='门票销售-散客选座'>散客选座</a>]"
-                    +"</td></tr>";
-                  }
+                $(rdata.goods).each(function(idx,goods){
+                  content += "<tr><td align='center'>"+goods.name+"</td><td>"+goods.price+"</td><td>"+goods.number+"</td>"
+                    +"</tr>";
                 });
-                content += "<tr><td></td><td></td><td></td><td>已售数:"+rdata.sale.nums+"</td><td>预定数:"+rdata.sale.numb+"</td><td>订单金额:"+rdata.sale.money+"</td></tr>"; 
               }
               $(this).alertmsg('ok', '售票场次,切换成功!');
-              $("#work_area_seat").html(content); 
+              $("#work_cashier_goods").html(content); 
             }
         });
     }else{
         var error_msg = "<tr><td style='padding:15px;' colspan='6' align='center'><strong style='color:red;font-size:48px;'>请选择售票日期</strong></td></tr>";
-        $("#work_area_seat").html(error_msg);
+        $("#work_cashier_goods").html(error_msg);
     }
   });
   //auto 加载
