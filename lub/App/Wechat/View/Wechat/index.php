@@ -1,5 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<form class="form-horizontal" action="{:U('Item/Set/proset',array('menuid'=>$menuid))}" method="post" data-toggle="validate">
+<form class="form-horizontal" action="{:U('Wechat/Wechat/index',array('menuid'=>$menuid))}" method="post" data-toggle="validate">
 <div class="bjui-pageContent tableContent">
   <div class="tabs-container" style="padding: 15px">
       <div class="tabs-left">

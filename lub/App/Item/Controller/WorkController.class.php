@@ -99,8 +99,9 @@ class WorkController extends ManageBase{
 			$pinfo = json_decode($_POST['info'],true);
 			$ginfo = I('get.param',0,intval) ? I('get.param',0,intval) : '1';
 			$info = explode('-', $pinfo['plan']);
+			$product_id = get_product('id');
 			$map = array(
-				'product_id'=>$this->pid,
+				'product_id'=>$product_id,
 				'status'=>2,//状态必为售票中
 				'plantime' => (int)$info[0] ? (int)$info[0] : $today,
 				'games' => (int)$info[1] ? (int)$info[1] : 1 ,
@@ -136,12 +137,11 @@ class WorkController extends ManageBase{
 			//拉取小商品
 			if($ginfo == '2'){
 				foreach ($param['goods'] as $k => $v) {
-					$goods[] = array(
-						'id'	=>	$v,
-						'name'	=>	goodsName($v,1),
-						'number'=>  areaSeatCount($v,1),//已售出
-						'price'	=>  goodsprice($v,1)
+					$info = goodsInfo($product_id,'',$v,1);
+					$number = array(
+						'number'=>  '1',//已售出
 					); 
+					$goods[] = array_merge($info,$number);
 				}
 				$return = array(
 					'statusCode' => '200',

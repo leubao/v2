@@ -744,13 +744,16 @@
      * @param  int $type  返回类型
      * @return [type]        [description]
      */
-    function goodsName($product_id, $param, $type = NULL){
+    function goodsInfo($product_id, $field = '', $param, $type = NULL){
         $goodsList = F('Goods_'.$product_id);
-        $goodsname = 
-        if($type){
-            return $msg;
+        if(empty($field)){
+            $return = $goodsList[$param];
         }else{
-            $return = "<span class='label label-".$status."'>".$msg."</span>";
+            $return = $goodsList[$param][$field];
+        }
+        if($type){
+            return $return;
+        }else{
             echo $return;
         } 
     }

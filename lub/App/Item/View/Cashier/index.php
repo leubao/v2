@@ -25,8 +25,8 @@
                 <tr>
                   <th align="center" width="120">商品名称</th>
                   <th align="center" width="80">价格</th>
+                  <th align="center" width="80">结算价</th>
                   <th align="center" width="80">已售数</th>
-                  <th align="center" width="180">操作</th>
                 </tr>
           </thead>
           <tbody id="work_cashier_goods">
@@ -45,47 +45,17 @@
                 <th align="center" width="50">操作</th>
               </tr>
             </thead>
-            <tbody id="quick-price-select">
-            </tbody>
-        </table>
-        <table class="table table-bordered">
-            <thead>
-            <tr>
-                <th align="center" width="150">票型名称</th>
-                <th align="center" width="90">价格</th>
-              </tr>
-            </thead>
-            <tbody id="child_ticket">
-               
+            <tbody id="cashier-price-select">
             </tbody>
         </table>
         <table class="table table-bordered">
             <tr><td colspan="2" align='right'>合计:</td>
-                <td colspan='3'><strong style='color:red;font-size:18px;' id="quick-total">0.00</strong></td>
+                <td colspan='3'><strong style='color:red;font-size:18px;' id="cashier-total">0.00</strong></td>
             </tr>
         </table>
   
         <table class="table table-bordered mt20">
-            <tbody id='quick-crm'>
-            <if condition="$type eq '2'">
-            <tr>
-                <td align='right'>导游:</td>
-                <td><input type="hidden" name="user.id" value="">
-                    <input type="text" name="user.name" disabled value="" size="20" data-toggle="lookup" data-url="{:U('Manage/Index/public_user',array('type'=>5,'ifadd'=>2));}" data-group="user" data-width="600" data-height="445" data-title="导游" placeholder="导游">
-                </td>
-            </tr>
-            <tr>
-                <td align='right'>渠道商:</td>
-                <td><input type="hidden" name="channel.id" value="">
-                    <input type="text" name="channel.name" disabled value="" size="20" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel');}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
-                </td>
-            </tr>
-            <tr>
-                <td align='right'>补贴对象:</td>
-                <td><input type="radio" name="sub_type" data-toggle="icheck" value="1" data-rule="checked" checked data-label="渠道商&nbsp;&nbsp;">
-                    <input type="radio" name="sub_type" data-toggle="icheck" value="2" data-label="导游"></td>
-            </tr>
-            </if>
+            <tbody id='cashier-crm'>
             <tr>
                 <td align='right'>联系人:</td>
                 <td><input type="text" name="content" class="form-control required" size="20" placeholder="联系人"></td>
@@ -105,10 +75,10 @@
             <thead>
                 <tr>
                   <th align="center" width="80">操作</th>
-                  <th align="center">支付方式  <button type="button"  data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i class="fa fa-angle-double-down"></i></button></th>
+                  <th align="center">支付方式</th>
                 </tr>
             </thead>
-            <tbody class="collapse" id="collapseExample">
+            <tbody>
                 <tr>
                     <td align='right' width="80">
                     <input type="radio" name="pay" value="1" checked="">
@@ -158,7 +128,7 @@ $(document).ready(function(){
                 planId = rdata.plan;
                  /*写入*/
                 $(rdata.goods).each(function(idx,goods){
-                  content += "<tr><td align='center'>"+goods.name+"</td><td>"+goods.price+"</td><td>"+goods.number+"</td>"
+                  content += "<tr data-id='"+goods.id+"' data-name='"+goods.title+"' data-discount='"+goods.discount+"' data-price='"+goods.price+"'><td align='center'>"+goods.title+"</td><td>"+goods.price+"</td><td>"+goods.discount+"</td><td>"+goods.number+"</td>"
                     +"</tr>";
                 });
               }
@@ -190,7 +160,7 @@ $(document).ready(function(){
                 planId = rdata.plan;
                  /*写入*/
                 $(rdata.goods).each(function(idx,goods){
-                  content += "<tr><td align='center'>"+goods.name+"</td><td>"+goods.price+"</td><td>"+goods.number+"</td>"
+                  content += "<tr data-id='"+goods.id+"' data-name='"+goods.title+"' data-discount='"+goods.discount+"' data-price='"+goods.price+"'><td align='center'>"+goods.title+"</td><td>"+goods.price+"</td><td>"+goods.discount+"</td><td>"+goods.number+"</td>"
                     +"</tr>";
                 });
               }
@@ -208,79 +178,35 @@ $(document).ready(function(){
   $('#plantime').on('afterchange.bjui.datepicker', function(e, data) {
       scenic_drifting_plan(FormatDate(data.value),{$type});
       //刷新购物车
-      $(this).bjuiajax('refreshLayout','quick-price-select');
-      //console.log($(this).bjuiajax('refreshLayout','quick-price-select'));
-  });
-  /**联票选择器子票型**/
-  $('#child_ticket').on('click',' .child_ticket',function(){
-      var child_fid = $(this).data('fid'),
-          child_price = PRODUCT_CONF.settlement == 2 ? $(this).data('discount') : $(this).data('price'),
-          end_price = '';
-      if($(this).is(':checked')){
-          //x选中
-          //alert($(this).data('id'));
-          end_price = child_price;
-      }else{
-          //未选中
-          end_price = -child_price;
-      }
-      //读取当前主票型数量
-      $("#quick-price-select tr").each(function(i){
-          if($(this).data('id') == child_fid){
-              //改变主门票单价
-              var main_price = $(this).data('price'),
-                  price = main_price*1+end_price*1,
-                  num = $("#quick-num-"+child_fid).val();
-              
-              $(this).data('price',price);
-              $("#quick-subtotal-"+child_fid).html(amount(num,price));
-              //更新总金额
-              $("#quick-total").html(total());
-          }else{
-              $(this).alertmsg('error','亲,请选择主门票!');
-          }
-      });
+      $(this).bjuiajax('refreshLayout','cashier-price-select');
   });
   //根据配置选择窗口是结算价格结算还是结算价结算
-  $('#quick-price').on('click','tr',function(event){
+  $('#work_cashier_goods').on('click','tr',function(event){
       var trId = $(this).data('id'),
           number = '1',
           price = PRODUCT_CONF.settlement == 2 ? $(this).data('discount') : $(this).data('price'),
           falg = false,
           subtotal = parseFloat(price * parseInt(number)).toFixed(2);/*计算小计金额*/
       //判断是否当前选择之前是否已选择
-      $("#quick-price-select tr").each(function(i){
+      $("#cashier-price-select tr").each(function(i){
           if(trId == $(this).data("id")){
              falg = true;
              return false;
           }
       });
       if(falg){
-          $(this).alertmsg('error', '票型已选择!若要继续添加,请直接改变票型数量');
+          $(this).alertmsg('error', '商品已选择!若要继续添加,请直接改变商品数量');
       }else{
-         var spinner = "<span class='wrap_bjui_btn_box' style='position: relative;'><input type='text' data-toggle='spinner' value='1' size='8' id='quick-num-"+trId+"' class='form-control' style='padding-right: 13px; width: 80px;'><ul class='bjui-spinner' style='height: 22px;'><li class='up' data-input='quick-num-"+trId+"' onclick='addNum("+trId+","+price+");'>∧</li><li class='down' onclick='delNum("+trId+","+price+")'>∨</li></ul></span>";
-         var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td> <td>"+spinner+"</td><td>"+price+"</td> <td id='quick-subtotal-"+trId+"''>"+subtotal+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
+         var spinner = "<span class='wrap_bjui_btn_box' style='position: relative;'><input type='text' data-toggle='spinner' value='1' size='8' id='cashier-num-"+trId+"' class='form-control' style='padding-right: 13px; width: 80px;'><ul class='bjui-spinner' style='height: 22px;'><li class='up' data-input='cashier-num-"+trId+"' onclick='addNum("+trId+","+price+");'>∧</li><li class='down' onclick='delNum("+trId+","+price+")'>∨</li></ul></span>";
+         var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td> <td>"+spinner+"</td><td>"+price+"</td> <td id='cashier-subtotal-"+trId+"''>"+subtotal+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
           
-         $('#quick-price-select').append(row);
+         $('#cashier-price-select').append(row);
       }
-      /*加载可选择联票*/
-      var child_data = 'info={"area":'+trId+',"type":5,"plan":'+$("#planID").val()+'}',
-          child_content = '';
-      $.post('{:U('Item/Work/getprice');}', child_data, function(rdata) {
-          if(rdata.statusCode == '200'){
-             if(rdata.price != null){
-                  $(rdata.price).each(function(idx,ticket){
-                      child_content += "<tr><td align='left'><input type='checkbox' class='child_ticket' name='child_ticket' data-fid='"+trId+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"' data-id='"+ticket.id+"' data-area='"+trId+"' data-name='"+ticket.name+"'> "+ticket.name+"</td><td>"+ticket.discount+"</td></tr>";
-                      });
-                  $("#child_ticket").html(child_content); 
-             }
-          }
-      },"json");
       //计算合计金额
-      $("#quick-total").html(total());
+      $("#cashier-total").html(total());
   });
-  //快捷售票选择票型
-  $('#quick-price-selects tr').click(function(){
+  //快捷售票选择商品
+  $('#cashier-price-select tr').click(function(){
       var trId = $(this).attr('id');
       var ktName = $("#kqtName"+trId).html();
       var ktPrice = parseFloat($("#kqtPrice"+trId).html()).toFixed(2);
@@ -310,19 +236,18 @@ $(document).ready(function(){
         //var trnum = $('#kselect').find("tr").length;   
   });
   //快捷售票键盘直接输入数量
-  $('#quick-price-select').click(function(){
-      child_ticket();
-      $("#quick-price-select tr").each(function(i){
+  $('#cashier-price-select').click(function(){
+        $("#cashier-price-select tr").each(function(i){
           var trIds = $(this).data('id'),
               prices = $(this).data('price');
-          $("#quick-num-"+trIds).keyup(function(){
+          $("#cashier-num-"+trIds).keyup(function(){
               var val_num = parseInt(this.value);
               if (isNaN(val_num) || val_num < 1) {                                  
                   val_num = 1;
               }
               this.value = val_num;
-              $("#quick-subtotal-"+trIds).html(amount(val_num,prices));/*小计*/
-              $("#quick-total").html(total());/*合计*/
+              $("#cashier-subtotal-"+trIds).html(amount(val_num,prices));/*小计*/
+              $("#cashier-total").html(total());/*合计*/
           })         
       });  
   });
@@ -330,9 +255,8 @@ $(document).ready(function(){
 
 /*删除已选择*/
 function delRow(rows){
-    child_ticket();
     $(rows).parent("td").parent("tr").remove();
-    $("#quick-total").html(total());/*合计*/
+    $("#cashier-total").html(total());/*合计*/
     //$("#kcash_quick").val(total());/*更新收款方式*/
 }
 /*计算小计金额*/
@@ -342,8 +266,8 @@ function amount(num,price){
 }
 function total(){
     var sum = 0;
-    $("#quick-price-select tr").each(function(i){
-        var _val = parseFloat($("#quick-subtotal-"+$(this).data("id")).html());
+    $("#cashier-price-select tr").each(function(i){
+        var _val = parseFloat($("#cashier-subtotal-"+$(this).data("id")).html());
         sum += _val;
     });
 
@@ -351,37 +275,35 @@ function total(){
 }
 /*数量增加与减少*/
 function addNum(trId,price){
-    var cnum = $("#quick-num-"+trId).val();//当前数量
+    var cnum = $("#cashier-num-"+trId).val();//当前数量
     var num1 = parseInt(cnum)+1;
-    $("#quick-num-"+trId).val(num1);
-    child_ticket();
+    $("#cashier-num-"+trId).val(num1);
     //金额
-    $("#quick-subtotal-"+trId).html(amount(num1,price));
-    $("#quick-total").html(total());/*合计*/
+    $("#cashier-subtotal-"+trId).html(amount(num1,price));
+    $("#cashier-total").html(total());/*合计*/
     //$("#tcash").val(total());/*更新收款方式*/
 }
 
 function delNum(trId,price){
-    var cnum = $("#quick-num-"+trId).val();//当前数量
+    var cnum = $("#cashier-num-"+trId).val();//当前数量
     if(cnum == 1){
         $(this).alertmsg('error','亲，已经是最少了！');
         return false;
     }
-    child_ticket();
     var num1 = parseInt(cnum)-1;
-    $("#quick-num-"+trId).val(num1);
-    $("#quick-subtotal-"+trId).html(amount(num1,price));
-    $("#quick-total").html(total());/*合计*/
+    $("#cashier-num-"+trId).val(num1);
+    $("#cashier-subtotal-"+trId).html(amount(num1,price));
+    $("#cashier-total").html(total());/*合计*/
 }
 /*向服务器提交数据*/
 function post_server(){
     var postData = '',
         pay = '',
         crm = '',
-        contact = $("#quick-crm input[name='content']").val() ? $("#quick-crm input[name='content']").val() : '0',
-        phone = $("#quick-crm input[name='phone']").val() ? $("#quick-crm input[name='phone']").val() : '0',
-        remark = $("#quick-crm textarea[name='remark']").val() ? $("#quick-crm textarea[name='remark']").val() : "空...",
-        sub_type = $("#quick-crm input[type='radio']:checked").val() ? $("#quick-crm input[type='radio']:checked").val() : '1',
+        contact = $("#cashier-crm input[name='content']").val() ? $("#cashier-crm input[name='content']").val() : '0',
+        phone = $("#cashier-crm input[name='phone']").val() ? $("#cashier-crm input[name='phone']").val() : '0',
+        remark = $("#cashier-crm textarea[name='remark']").val() ? $("#cashier-crm textarea[name='remark']").val() : "空...",
+        sub_type = $("#cashier-crm input[type='radio']:checked").val() ? $("#cashier-crm input[type='radio']:checked").val() : '1',
         toJSONString = '',
         child_ticket = '',
         checkinT = '1',
@@ -391,20 +313,20 @@ function post_server(){
         settlement = PRODUCT_CONF.settlement,
         data = '',
         is_pay = $('input[name="pay"]:checked').val(),
-        length =  $("#quick-price-select tr").length;
+        length =  $("#cashier-price-select tr").length;
     if(length <= 0){
-        $(this).alertmsg('error','请选择要售出的票型!');
+        $(this).alertmsg('error','请选择要售出的商品!');
         return false;
     }
     <?php if($type == '2'){?>
-        guide = $("#quick-crm input[name='user.id']").val(),
-        qditem = $("#quick-crm input[name='channel.id']").val();
+        guide = $("#cashier-crm input[name='user.id']").val(),
+        qditem = $("#cashier-crm input[name='channel.id']").val();
         if(phone == '' || contact == '' || guide == '' || qditem == ''){
           $(this).alertmsg('error','请完善团队信息!');
           return false;
         }
     <?php } ?>
-    /*子票型*/
+    /*子商品*/
     var child_length = $("#child_ticket input[type=checkbox]:checked").length;
     $("#child_ticket input[type=checkbox]:checked").each(function(i){
         if($(this).is(':checked')){
@@ -414,16 +336,16 @@ function post_server(){
             child_ticket = child_ticket + '{"fid":'+$(this).data("fid")+',"priceid":' +$(this).data("id")+',"price":"'+parseFloat(end_price).toFixed(2)+'"}'+fg;
         }
     });
-    /*主票型*/
-    $("#quick-price-select tr").each(function(i){
+    /*主商品*/
+    $("#cashier-price-select tr").each(function(i){
         var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-        toJSONString = toJSONString + '{"areaId":'+$(this).data("area")+',"priceid":' +$(this).data("id")+',"price":'+parseFloat($(this).data('price')).toFixed(2)+',"num":"'+$("#quick-num-"+$(this).data("id")).val()+'"}'+fg;
+        toJSONString = toJSONString + '{"areaId":'+$(this).data("area")+',"priceid":' +$(this).data("id")+',"price":'+parseFloat($(this).data('price')).toFixed(2)+',"num":"'+$("#cashier-num-"+$(this).data("id")).val()+'"}'+fg;
     });
     /*获取支付相关数据*/
-    pay = '{"cash":'+parseFloat($('#quick-total').html())+',"card":0,"alipay":0}';
+    pay = '{"cash":'+parseFloat($('#cashier-total').html())+',"card":0,"alipay":0}';
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
-    postData = 'info={"subtotal":'+parseFloat($('#quick-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"child_ticket":['+child_ticket+'],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+    postData = 'info={"subtotal":'+parseFloat($('#cashier-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"child_ticket":['+child_ticket+'],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
     /*提交到服务器*/
     $.ajax({
         type:'POST',

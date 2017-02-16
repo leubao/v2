@@ -7,7 +7,7 @@
     <div class="card">
         <div class="card-header">{$data.plan_id|planShow}</div>
         <div class="card-content">
-        <?php dump($or);//dump($data); dump($jsapi); dump($wxpay);?>
+        <?php //dump($or);dump($user); //dump($jsapi); dump($wxpay);?>
           <div class="list-block">
             <ul>
             <volist name="data['info']['data']['area']" id="vo" key='k'>
@@ -68,7 +68,6 @@
 <Managetemplate file="Wechat/Public/footer"/>
 <script type="text/javascript">
   $(function() {
-    alert("asda");
     var seat_type = '1',
         money = {$data.money},
         sn = {$data.order_sn},

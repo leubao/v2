@@ -16,10 +16,12 @@ class WechatPay {
 
     /** 公众号appid */
     public $appid;
-
+    /** 子公众号appid */
+    public $sub_appid;
     /** 商户身份ID */
     public $mch_id;
-
+    /** 商户身份 ID */
+    public $sub_mch_id;
     /** 商户支付密钥Key */
     public $partnerKey;
 
@@ -38,7 +40,9 @@ class WechatPay {
     public function __construct($options = array()) {
         $config = Loader::config($options);
         $this->appid = isset($config['appid']) ? $config['appid'] : '';
+        $this->sub_appid = isset($config['sub_appid']) ? $config['sub_appid'] : '';
         $this->mch_id = isset($config['mch_id']) ? $config['mch_id'] : '';
+        $this->sub_mch_id = isset($config['sub_mch_id']) ? $config['sub_mch_id'] : '';
         $this->partnerKey = isset($config['partnerkey']) ? $config['partnerkey'] : '';
         $this->ssl_cer = isset($config['ssl_cer']) ? $config['ssl_cer'] : '';
         $this->ssl_key = isset($config['ssl_key']) ? $config['ssl_key'] : '';
@@ -238,7 +242,34 @@ class WechatPay {
         return "weixin://wxpay/bizpayurl?" . http_build_query($data);
     }
 
-
+    /**
+     *  Author: zhoujing 2017-02-16
+     *  创建刷卡支付参数包
+     *  @param string $prepay_id
+     *  @return array
+     */
+    public function createMicroPay($auth_code,$sn,$total,$goods_tag,$body){
+        $data = array();
+        $data["appId"] = $this->appid;
+        $data["sub_appid"] = $this->sub_appid;
+        $data["mch_id"] = $this->mch_id;
+        $data["sub_mch_id"] = $this->sub_mch_id;
+        $data["nonceStr"] = Tools::createNoncestr();
+        $data["signType"] = "MD5";
+        $data["paySign"] = Tools::getPaySign($option, $this->partnerKey);
+        $data["body"]   =   $body;
+        $data["out_trade_no"]   =   $sn;
+        $data["total_fee"]  =   $total;
+        $data["goods_tag"]  =   $goods_tag;
+        $data["auth_code"]  =   $auth_code;
+        $data['spbill_create_ip'] = Tools::getAddress(); //调用接口的机器Ip地址
+        $result = $this->postXmlSSL($data, self::MCH_BASE_URL . '/pay/micropay');
+        $json = Tools::xml2arr($result);
+        if (!empty($json) && false === $this->_parseResult($json)) {
+            return false;
+        }
+        return $json;
+    }
     /**
      * 创建JSAPI支付参数包
      * @param string $prepay_id

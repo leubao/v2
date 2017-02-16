@@ -13,57 +13,95 @@ use Wechat\Service\Api;
 class WechatController extends ManageBase{
 	protected function _initialize() {
         parent::_initialize();
-        /*
-        $proconf = cache('ProConfig');
-        // 开发者中心-配置项-AppID(应用ID)
-        $this->appId = $proconf[$this->pid]['appid'];
-        // 开发者中心-配置项-AppSecret(应用密钥)
-        $this->appSecret = $proconf[$this->pid]['appsecret'];
-        //受理商ID，身份标识
-        $this->mchid = $proconf[$this->pid]['mchid'];
-        //商户支付密钥Key。审核通过后，在微信发送的邮件中查看
-        $this->mchkey = $proconf[$this->pid]['mchkey'];
-        // 开发者中心-配置项-服务器配置-Token(令牌)
-        $this->token = $proconf[$this->pid]['token'];
-        // 开发者中心-配置项-服务器配置-EncodingAESKey(消息加解密密钥)
-        $this->encodingAESKey = $proconf[$this->pid]['encoding'];*/
     }
 	//微信账号设置
 	function index(){
-        $db = M("ConfigProduct");   //产品设置表
-        $list = $db->where(array('type'=>2,'product_id'=>$this->pid))->select();
+        $db = M("ConfigProduct");   //产品设置表 
+        $type = '2';
+        $list = $db->where(array('product_id'=>$this->pid,'type'=>$type))->select();
         foreach ($list as $k => $v) {
             $config[$v["varname"]] = $v["value"];
         }
-        $this->assign("vo",$config);
-        //获取价格分组
-        $price = M('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
-       // dump($config['appid']);
-        $this->api = new Api(
-            array(
-                'appId' => $config['appid'],
-                'appSecret' => $config['appsecret'],
-                'get_access_token' => function(){
-                    // 用户需要自己实现access_token的返回
-                    return S('wechat_token');
-                },
-                'save_access_token' => function($token) {
-                    // 用户需要自己实现access_token的保存
-                    S('wechat_token', $token);
+        if(IS_POST){
+            $product_id = $_POST["product_id"];
+            if($product_id <> $this->pid){
+                $this->erun('配置失败,请刷新页面重试...');
+                return false;
+            }
+            $data = $_POST;
+            if (empty($data) || !is_array($data)) {
+                $this->erun('配置数据不能为空！');
+                return false;
+            }
+            $diff_key = array_diff_key($config,$data);
+            foreach ($data as $key => $value) {
+                if (empty($key)) {
+                    continue;
                 }
-            )
-        );
+                $saveData = array($config,);
+                $saveData["value"] = trim($value);
+                $count = $db->where(array("varname"=>$key,'type'=>$type,'product_id'=>$product_id))->count();
+                $ginfo = array();   
+                if ($count == 0) {//此前无此配置项
+                    if($key!="__hash__"&&$key!="product_id"&&$key!='type'){
+                        $ginfo["varname"] = $key;
+                        $ginfo["value"]   = trim($value);
+                        $ginfo["product_id"] = $product_id;
+                        $ginfo["type"]  =   $type;
+                        $add = $db->add($ginfo);
+                    }
+                }else{
+                    if ($db->where(array("varname" => $key,'product_id'=>$product_id,'type'=>$type))->save($saveData) === false) {
+                        $this->erun("更新到{$key}项时，更新失败！");
+                        return false;
+                    }                   
+                }
+            }
+            //更新未选择的复选框
+            foreach ($diff_key as $key => $value) {
+                $saveData = array();
+                $saveData["value"] = '0';
+                $saveData["product_id"] = $product_id;
+                if ($db->where(array("varname" => $key,'type'=>$type))->save($saveData) === false) {
+                    $this->erun("更新到{$key}项时，更新失败！");
+                    return false;
+                }
+            }
+            D('Common/Config')->config_cache();
+            $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME));    
+        }else{
 
-        $reg = $this->api->get_authorize_url('snsapi_userinfo',U('Wechat/Index/reg',array('pid'=>$this->pid)));
-        $view = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/show',array('pid'=>$this->pid)));
-        $channel = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/auth_channel',array('pid'=>$this->pid)));
-        $active = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/acty',array('act'=>1,'pid'=>$this->pid)));
-        $this->assign('price',$price)
-            ->assign('view',$view)
-            ->assign('reg',$reg)
-            ->assign('acty',$active)
-            ->assign('channel',$channel)
-            ->display();
+            //获取价格分组
+            $price = M('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
+           //dump($config['appid']);
+            $this->api = new Api(
+                array(
+                    'appId' => $config['appid'],
+                    'appSecret' => $config['appsecret'],
+                    'get_access_token' => function(){
+                        // 用户需要自己实现access_token的返回
+                        return S('wechat_token');
+                    },
+                    'save_access_token' => function($token) {
+                        // 用户需要自己实现access_token的保存
+                        S('wechat_token', $token);
+                    }
+                )
+            );
+
+            $reg = $this->api->get_authorize_url('snsapi_userinfo',U('Wechat/Index/reg',array('pid'=>$this->pid)));
+            $view = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/show',array('pid'=>$this->pid)));
+            $channel = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/auth_channel',array('pid'=>$this->pid)));
+            $active = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/acty',array('act'=>1,'pid'=>$this->pid)));
+            $this->assign('price',$price)
+                ->assign('view',$view)
+                ->assign('reg',$reg)
+                ->assign('acty',$active)
+                ->assign('channel',$channel)
+                ->assign("vo",$config)
+                ->display(); 
+        }
+        
     }
     //新增账号
     function add(){

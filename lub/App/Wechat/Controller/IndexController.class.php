@@ -30,8 +30,8 @@ class IndexController extends LubTMP {
         parent::_initialize();
         $cache_conf = cache('ProConfig');
         $this->pid = I('get.pid') ? I('get.pid') : '41';
-        $this->proconf = !empty($cache_conf[$this->pid]) ? $cache_conf[$this->pid] : $cache_conf;
-        
+        $this->proconf = $cache_conf[$this->pid]['2'];
+       // dump($this->proconf);
         // 开发者中心-配置项-AppID(应用ID)
         $this->appId = $this->proconf['appid'];
         // 开发者中心-配置项-AppSecret(应用密钥)
@@ -416,6 +416,7 @@ class IndexController extends LubTMP {
                     if(empty($user)){
                        $user = $this->tologin($ginfo);
                     }
+                    
                     //获取公众号信息，jsApiPay初始化参数
                     $this->options['appid'] = $this->appId;
                     $this->options['mchid'] = $this->mchid;
@@ -789,7 +790,7 @@ class IndexController extends LubTMP {
                 'guide'  => '0',
                 'qditem' => '0',
                 'scene'  => '41',
-                'epay'   => '1',//结算方式1 票面价结算2 底价结算
+                'epay'   => '2',//结算方式1 票面价结算2 底价结算
                 'channel'=> '0',
                 'pricegroup'=>$this->prcie_group,
                 'wxid'   => $uinfo['wechat']['user_id'],
