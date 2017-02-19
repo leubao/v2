@@ -13,8 +13,9 @@ class Quota extends \Libs\System\Service {
 	//查询配额
 	function quota($plan_id,$product,$crm_id,$number){
 		$proconf = cache('ProConfig');
+		$proconf = $proconf[$product][1];
 		$config = cache("Config");
-		if($proconf[$product][1]['quota'] <> '1'){return true;}
+		if($proconf['quota'] <> '1'){return true;}
 		//根据产品ID获取该产品所有一级渠道商
 		$channel = D('Item/Crm')->where(array('status'=>1,'level'=>$config['level_1']))->field('id')->select();
 		$map =  array(

@@ -127,7 +127,7 @@ $(function() {
     /*提交到服务器**/
     $.ajax({
         type:'POST',
-        url:'<?php echo U('Wechat/Index/reg');?>',
+        url:"<?php echo U('Wechat/Index/reg',array('type'=>$type));?>",
         data:postData,
         dataType:'json',
         timeout: 1500,

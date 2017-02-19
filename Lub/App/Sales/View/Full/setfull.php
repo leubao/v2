@@ -32,6 +32,10 @@
                           </td>
                         </tr>
                         <tr>
+                          <td width="120px">注册地址:</td>
+                          <td><textarea cols="80" rows="3">{$reg}</textarea></td>
+                        </tr>
+                        <tr>
                           <td width="120px">提现限制:</td>
                           <td><input type="text" name="level_cash" class="form-control" size="40" value="{$vo.level_cash}" placeholder="200">
                           </td>

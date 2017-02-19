@@ -909,6 +909,11 @@ class Order extends \Libs\System\Service {
 						);
 
 					}
+					S('Rebate_pre_order',$info['order_sn']);
+					$redis = new \Redis();
+					$redis->connect('127.0.0.1',6379);
+					$redis->lPush('test',$info['order_sn']);
+					//echo $redis->get("test");
 					//窗口团队时判断是否是底价结算
 					if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
 						$in_team = true;

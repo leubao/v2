@@ -647,7 +647,23 @@ class IndexController extends ApiBase {
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
       $ticketType = F("TicketType41");
-      dump($ticketType);
+      //dump($ticketType);
+      $redis = new \Redis();
+      $redis->connect('127.0.0.1',6379);
+      //判断列表中元素个数
+      $len = $redis->lsize('test');
+      if($len > 0){
+        //获取队列中最后一个元素，且移除
+        $sn = $redis->rPop('test');
+      }
+      //写入带处理队列，若存在则不再写入
+      $redis->lPush('test','1212211212');
+      
+      
+      //判断队列的长度
+      
+      dump($len);
+      dump($sn);
       /*
       $whoops = new \Whoops\Run();
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);

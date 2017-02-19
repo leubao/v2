@@ -952,6 +952,7 @@ class IndexController extends LubTMP {
     function reg(){
         if(IS_POST){
             $info = json_decode($_POST['info'],true);
+            $ginfo = I('get.');
             $verify = genRandomString();
             $data = array(
                 'username' => $info['phone'],
@@ -962,7 +963,7 @@ class IndexController extends LubTMP {
                 "create_time" => time(),
                 "update_time" => time(),
                 "is_scene" => 4,  //应用场景为4，全员销售
-                "type"  =>  '1', //推广
+                "type"  =>  $ginfo['type'] ? $ginfo['type'] : '1', //推广
                 "cid"    => '0',
                 "verify" => $verify,
                 'phone' => $info['phone'],
@@ -994,11 +995,11 @@ class IndexController extends LubTMP {
             echo json_encode($return);
         }else{
             $ginfo = I('get.');
-            $user = $this->tologin($ginfo);
+            $user = $this->tologin($ginfo);dump($user);
             if($user['user']['openid']){
                 $this->wx_init();
-                $url = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/view',array('u'=>$user['user']['id'])));
-                $this->assign('data',$user)->assign('url',$url)->display();
+                $url = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/view',array('u'=>$user['user']['id'],'type'=>$ginfo['type'])));
+                $this->assign('data',$user)->assign('url',$url)->assign('type',$ginfo['type'])->display();
             }else{
                 $this->error("授权失败...");
             }
