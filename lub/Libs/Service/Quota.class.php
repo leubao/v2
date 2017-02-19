@@ -9,11 +9,12 @@
 namespace Libs\Service;
 use Common\Model\Model;
 class Quota extends \Libs\System\Service {
+
 	//查询配额
 	function quota($plan_id,$product,$crm_id,$number){
 		$proconf = cache('ProConfig');
 		$config = cache("Config");
-		if($proconf[$product]['quota'] <> '1'){return true;}
+		if($proconf[$product][1]['quota'] <> '1'){return true;}
 		//根据产品ID获取该产品所有一级渠道商
 		$channel = D('Item/Crm')->where(array('status'=>1,'level'=>$config['level_1']))->field('id')->select();
 		$map =  array(
@@ -222,7 +223,7 @@ class Quota extends \Libs\System\Service {
     	}
     	//查询是否开启全民分销
     	$proconf = cache('ProConfig');
-    	if($proconf[$product]['full_sales'] == '1'){
+    	if($proconf[$product][1]['full_sales'] == '1'){
     		//查询销售计划关于分销的配额设置
     		$data[] = array(
     			'plan_id'=> $planid,

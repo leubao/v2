@@ -36,7 +36,7 @@ class TicketTypeModel extends Model{
         	//缓存当前产品的票型缓存
         	$cache[$rs['id']] = $rs;
         }
-       // cache('TicketType'.$productId, $cache);
+       // cache('TicketType'.$productId, $cache); 
         F('TicketType'.$productId, $cache);
         return true;
 	 }

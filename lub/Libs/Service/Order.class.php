@@ -341,7 +341,6 @@ class Order extends \Libs\System\Service {
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
 		$sn = get_order_sn($plan['id'],$printtype);
 
-
 		$model = new Model();
 		$model->startTrans();
 		//写入订单 窗口订单直接写入并完成排座   微信等其它场景只写入订单  支付完成后排座
@@ -555,8 +554,6 @@ class Order extends \Libs\System\Service {
 				}else{
 					$type = '2';
 				}
-				
-				
 				$teamData = array(
 					'order_sn' 		=> $info['order_sn'],
 					'plan_id' 		=> $info['plan_id'],
@@ -707,9 +704,9 @@ class Order extends \Libs\System\Service {
 						$rebate1 = $rebate1+$ticketFull['1']*$va['num'];
 						$rebate2 = $rebate2+$ticketFull['2']*$va['num'];
 						$rebate3 = $rebate3+$ticketFull['3']*$va['num'];
-					}
+					}*/
 					$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
-					*/
+					
 					/*以下代码用于校验*/
 					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
 					if(empty($status[$ke])){
@@ -794,7 +791,6 @@ class Order extends \Libs\System\Service {
 			}*/
 			//是否为团队订单 
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
-				//error_insert('4000180');
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
 				if($proconf[$plan['product_id']]['1']['quota'] == '1'){
 					if(in_array($info['type'],array('2','4'))){
@@ -893,7 +889,6 @@ class Order extends \Libs\System\Service {
 							);
 			            }
 			            //多层分销
-			        
 					}else{
 						$teamData[] = array(
 							'order_sn' 		=> $info['order_sn'],
@@ -914,7 +909,7 @@ class Order extends \Libs\System\Service {
 						);
 
 					}
-										//窗口团队时判断是否是底价结算
+					//窗口团队时判断是否是底价结算
 					if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
 						$in_team = true;
 					}else{

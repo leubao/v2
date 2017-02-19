@@ -77,7 +77,6 @@ class Rebate extends \Libs\System\Service {
 	 */
 	function level3($product_id,$userid,$oinfo){
 		//判断下单用户级别，拉取订单关联用户
-		
 		//订单数据
 		$ticketType = F("TicketType".$product_id);
 		//计算返佣

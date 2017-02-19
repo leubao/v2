@@ -189,7 +189,7 @@ class ProductController extends Base{
 		if(empty($plan)){
 			$data["statusCode"] = "0";echo json_encode($data);return false;
 		}else{
-			$crm = Partner::getInstance()->crm;//dump($crm);
+			$crm = Partner::getInstance()->crm;
 			$status = \Libs\Service\Quota::quota($plan['id'],$plan['product_id'],$crm['id'],(int)$ginfo['num']);
 			if($status){
                 $data["statusCode"] = "200";echo json_encode($data);return true;

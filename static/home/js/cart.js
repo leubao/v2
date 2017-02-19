@@ -86,10 +86,11 @@ function delcart(id){
 /**zj**/
 /*立即出票*/
 $(function(){
-  $("#print").bind("click",function(){ 
+  $("#print").bind("click",function(){
   	var rstr = "",
 	    vmima = "",
 	    vMobile = "",
+	    plan = $('#planID').val(),
 	    id_card = $("#id_card").val(),
 	    remark = $("#remark").val();
     if($(".contact_input").css("display") == "block"){
@@ -117,7 +118,7 @@ $(function(){
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
-	    	if(black(guide_black) || black(vMobile)){
+	    	if(black(guide_black)){
 	    		layer.msg("抱歉,该导游已被系统列入黑名单，请联系管理员!");
 	      		return false;
 	    	}
@@ -157,9 +158,9 @@ $(function(){
         }
       });
       //检测总数
-      if(nums < PRO_CONF.channel_order){
+      if(nums <= PRO_CONF.channel_order){
        	  //判断配额
-      	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums, function(data){
+      	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums+"&plan="+plan, function(data){
       		if(data != 0){
       		  var result = $.parseJSON(data);
       		  if(result.statusCode == "0"){
@@ -205,6 +206,7 @@ $(function(){
   $("#pre").bind("click",function(){
 	var rstr = "",
 		id_card = $("#id_card").val(),
+		plan = $('#planID').val(),
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
@@ -230,7 +232,7 @@ $(function(){
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
-	    	if(black(guide_black) || black(vMobile)){
+	    	if(black(guide_black)){
 	    		layer.msg("抱歉,该导游已被系统列入黑名单，请联系管理员!");
 	      		return false;
 	    	}
@@ -271,7 +273,7 @@ $(function(){
 	          	toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
 	        }
         });
-        if(nums < PRO_CONF.channel_order){
+        if(nums <= PRO_CONF.channel_order){
 		  /*获取支付相关数据*/
 		  var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
       		  itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客导游的id*/
@@ -312,6 +314,7 @@ $(function(){
  //政企预定  不付款  窗口手动排座
  $("#gov").bind("click",function(){
 	var rstr = "",
+		plan = $('#planID').val(),
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
@@ -357,9 +360,9 @@ $(function(){
           toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
         }
       });
-      if(nums < PRO_CONF.channel_order){
+      if(nums <= PRO_CONF.channel_order){
       	  //判断配额
-      	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums, function(data){
+      	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums+"&plan="+plan, function(data){
       		if(data != 0){
       		  var result = $.parseJSON(data);
       		  if(result.statusCode == "0"){
@@ -373,7 +376,7 @@ $(function(){
 					gov	= 1,
 					param = "";/*付款但不排座*/
 					crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-					param = '{"pre":'+pre+',"gov":'+gov+',"tour":'+tour+',"remark":"'+remark+'","settlement":"'+USER_INFO.group.settlement+'"}';
+					param = '{"pre":'+pre+',"gov":'+gov+',"tour":'+tour+',"remark":"'+remark+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
 				var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
 				/*提交到服务器*/
 				$.ajax({

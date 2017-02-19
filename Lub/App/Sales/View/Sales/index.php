@@ -19,10 +19,10 @@
         <option value="3" <if condition="$map.status eq '3'">selected</if>>待审核</option>
         <option value="0" <if condition="$map.status eq '0'">selected</if>>已作废</option>
     </select>
-    <select name="fenix" data-toggle="selectpicker">
+    <select name="type" data-toggle="selectpicker">
         <option value="">分销类型</option>
-        <option value="8" <if condition="$map.fenix eq '1'">selected</if>>全员分销</option>
-        <option value="9" <if condition="$map.fenix eq '9'">selected</if>>三级分销</option>
+        <option value="8" <if condition="$map.type eq '8'">selected</if>>全员分销</option>
+        <option value="9" <if condition="$map.type eq '9'">selected</if>>三级分销</option>
     </select>
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
@@ -49,7 +49,7 @@
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
         <td>{$vo.nickname}</td>
-        <td>{$vo.phone}</td>
+        <td>{$vo.type|sales_type}</td>
         <td>{$vo.groupid|crmgroupName}</td>
         <td>{$vo.legally}</td>
         <td>{$vo.status|status}</td>

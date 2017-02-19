@@ -16,12 +16,12 @@ class SalesController extends ManageBase{
 		$phone = I('phone');
         $legally = I('legally');
         $user = I('user_id');
-        $fenix = I('fenix');
+        $type = I('type');
         $status = I('status');
         if(!empty($phone)){$map['phone'] = $phone;}
         if(!empty($legally)){$map['legally'] = $legally;}
         if(!empty($user)){$map['id'] = $user;}
-        if(!empty($fenix)){$map['fenix'] = $fenix;}
+        if(!empty($type)){$map['type'] = $type;}
         if(!empty($status)){$map['status'] = $status;}
         $map['is_scene'] = '4';
     	$this->basePage('User',$map,array('id'=>'DESC'));
