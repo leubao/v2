@@ -35,8 +35,7 @@ class Wap extends LubTMP {
         }
         parent::_initialize();
         //验证登录
-        $this->competence();//dump(Partner::getInstance()->getInfo());
-        //$this->assign("SUBMENU_CONFIG", json_encode(D("Home/Menu")->getMenuList()));
+        $this->competence();
         $this->assign('USER_INFO', json_encode(Partner::getInstance()->getInfo()));   
     }
     

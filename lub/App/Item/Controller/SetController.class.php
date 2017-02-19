@@ -107,7 +107,6 @@ class SetController extends ManageBase{
 	            }
 	            $saveData = array($config,);
 	            $saveData["value"] = trim($value);
-	            //$saveData["product_id"] = $product_id;
 	            $count = $db->where(array("varname"=>$key,'type'=>$type,'product_id'=>$product_id))->count();
 	            $ginfo = array();	
 	            if ($count == 0) {//此前无此配置项

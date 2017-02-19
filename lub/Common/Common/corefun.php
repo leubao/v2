@@ -903,6 +903,7 @@ function U($url = '', $vars = '', $suffix = true, $domain = true) {
                 $domain = strtolower($siteurl['host']);
             }
         }
+
         //端口号处理
         if ($domain) {
             if (isset($siteurl['port']) && $siteurl['port'] && (int) $siteurl['port'] != 80) {
@@ -921,7 +922,6 @@ function U($url = '', $vars = '', $suffix = true, $domain = true) {
         parse_str($info['query'], $params);
         $vars = array_merge($params, $vars);
     }
-
     // URL组装
     $depr = C('URL_PATHINFO_DEPR');
     $urlCase = C('URL_CASE_INSENSITIVE');
@@ -1012,6 +1012,7 @@ function U($url = '', $vars = '', $suffix = true, $domain = true) {
             $showModuleName = false;
         }
     }
+    //dump($appUrl);
     if (C('URL_MODEL') == 0) { // 普通模式URL转换
         //去除默认参数
         if ($var[C('VAR_MODULE')] == C('DEFAULT_MODULE')) {

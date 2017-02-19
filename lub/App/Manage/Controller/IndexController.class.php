@@ -207,7 +207,7 @@ class IndexController extends ManageBase {
         if(IS_POST){
             if($_POST["name"] != ""){
                 $map["name"] = array('like','%'.$_POST["name"].'%');
-                $map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+                $map['product_id'] = get_product('id');
                 $this->assign("name",$_POST["name"]);
             }
         }
@@ -229,7 +229,17 @@ class IndexController extends ManageBase {
             $map['scene'] = array('find_in_set',$scene);
         }
         $map = array('group_id'=>array('in',$group_id),'product_id'=>(int) $this->pid,'status'=>1);
-        $list = M('TicketType')->where($map)->field('id,name,price')->select();
+        $lists = M('TicketType')->where($map)->field('id,name,price,param')->select();
+        foreach ($lists as $k => $v) {
+            $param = unserialize($v['param']);
+            $list[] = array(
+                'id'    =>  $v['id'],
+                'name'  =>  $v['name'],
+                'price' =>  $v['price'],
+                'full'  =>  $param['full'],
+                'level3'=>  $param['level3']
+                );
+        }
         $return = array('statusCode'=>'200','data'=>$list);
         die(json_encode($return));
     }

@@ -105,6 +105,58 @@ function getprice(event, treeId, treeNode){
 function isNull(data){ 
     return (data == "" || data == undefined || data == null) ? false : data; 
 }
+/**
+* 分销模型
+* @param  {int} price_group_full 价格分组
+* @param  {int} status          分销开启
+* @param  {string} vmodel      加载区域
+* @param  {string} type        分销类型
+* @return {[type]}                  [description]
+*/
+function auto_fenix(price_group,status,vmodel,type){
+    console.log(type);
+    var l1 = '',l2 = '', l3 = '';
+    if(price_group != '' || null || undefined && status == '1'){
+      var content = '';
+        $.ajax({
+          url: "index.php?g=manage&m=index&a=public_get_group_ticket&group_id="+price_group+"&scene=4",
+          type: 'GET',
+          dataType: 'JSON',
+          timeout: 1500,
+          error: function(){
+              layer.msg('服务器请求超时，请检查网络...');
+          },
+          success: function(rdata){
+            if(rdata.statusCode == '200'){
+              if(type == 'full'){
+                  content = "<table class='table  table-bordered'><tr><td>票型名称</td><td>票面价</td><td>补贴</td></tr>";
+                  $(rdata.data).each(function(idx,vo){
+                    if(vo.full != null){
+                        l1 = vo.full;
+                    }
+                    content += "<tr><td align='center'>"+vo.name+"</td><td>"+vo.price+"</td>"+
+                    "<td><input type='text' name='tic["+vo.id+"]' class='form-control' size='8' value='"+l1+"'/></td></tr>";                
+                  });
+              }
+              if(type == 'level3'){
+                content = "<table class='table  table-bordered'><tr><td>票型名称</td><td>票面价</td><td>一级补贴</td><td>二级补贴</td><td>三级补贴</td></tr>";
+                $(rdata.data).each(function(idx,vo){
+                  if(vo.level3 != null){
+                    l1 = vo.level3.l1; l2 = vo.level3.l2; l3 = vo.level3.l3;
+                  }
+                  content += "<tr><td align='center'>"+vo.name+"</td><td>"+vo.price+"</td>"+
+                  "<td><input type='text' name='tic["+vo.id+"][]' class='form-control' size='8' value='"+l1+"'/></td>"+
+                  "<td><input type='text' name='tic["+vo.id+"][]' class='form-control' size='8' value='"+l2+"'/></td>"+
+                  "<td><input type='text' name='tic["+vo.id+"][]' class='form-control' size='8' value='"+l3+"'/></td></tr>";                
+                });
+              }
+              content += "</table>";
+            }
+            $("#"+vmodel).html(content); 
+          }
+      });
+    }
+}
 /*窗口打印*/
 (function($){
     $.printBox = function(rel){
@@ -118,6 +170,4 @@ function isNull(data){
         window.print();
         $printBox.empty();//加上这句来清空printBox。
     }
-    
-    
 })(jQuery);

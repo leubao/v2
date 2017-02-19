@@ -95,7 +95,7 @@ class PlaceController extends ManageBase{
 	/**
 	 * 添加模板
 	 */
-	function addTemplate(){
+	function addtemplate(){
 		C('TOKEN_ON',true);
 		if(IS_POST) {
 				//$status = Operate::do_add('TemplateList',array('createtime'=>time()));dump($status);
@@ -115,7 +115,7 @@ class PlaceController extends ManageBase{
 	/**
 	 * 编辑模板
 	 */
-	function editTemplate(){
+	function edittemplate(){
 		if(IS_POST) {
 			
 		} else {
@@ -143,7 +143,7 @@ class PlaceController extends ManageBase{
 	function tempnav($placeid){
 		//菜单导航
         $Custom['tool'] = array(
-           array('name' => '添加模板', 'app' => MODULE_NAME, 'controller' => CONTROLLER_NAME, 'action' => 'addTemplate', 'parameter' => "placeid={$placeid}",'icon'=>'plus','target'=>'dialog'),
+           array('name' => '添加模板', 'app' => MODULE_NAME, 'controller' => CONTROLLER_NAME, 'action' => 'addtemplate', 'parameter' => "placeid={$placeid}",'icon'=>'plus','target'=>'dialog'),
         );
         $menuReturn = array('name' => '返回场所列表', 'title'=>"场所列表",'tabid'=> $this->menuid.MODULE_NAME,'url' => U('place/index',array('menuid'=>$this->menuid)));
         $this->assign('Custom', $Custom)

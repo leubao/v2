@@ -2,7 +2,6 @@
 <link href="{$config_siteurl}static/bjui/themes/css/bootstrap.css" rel="stylesheet">
 <link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
 -->
-
 <link href="{$config_siteurl}static/bjui/themes/css/bootstrap.css" rel="stylesheet">
 <!-- core - css -->
 <link href="{$config_siteurl}static/bjui/themes/css/style.css" rel="stylesheet">
@@ -19,7 +18,6 @@
 <!--[if lte IE 7]>
 <link href="{$config_siteurl}static/bjui/themes/css/ie7.css" rel="stylesheet">
 <![endif]-->
-<!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
 <!--[if lte IE 9]>
     <script src="{$config_siteurl}static/bjui/other/html5shiv.min.js"></script>
     <script src="{$config_siteurl}static/bjui/other/respond.min.js"></script>

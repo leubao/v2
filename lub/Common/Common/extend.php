@@ -1270,7 +1270,7 @@
             $price = price($value,$price_group,$scene,$param['ticket']);
             if($price){
                 foreach ($price as $k => $v) {
-                    $remark = print_remark($v['remark']);
+                    $remark = print_remark($v['remark'],$v['product_id']);
                     $seat[] = array(
                         'area'=>$value,
                         'name'=>areaName($value,1),
@@ -1295,7 +1295,7 @@
     */
     function price($area,$price_group,$scene,$ticket){
         $map = array('status'=>'1','area'=>$area, 'group_id'=>$price_group,'scene'=>array('like','%'.$scene.'%'),'id'=>array('in',implode(',',$ticket)));
-        $list = M('TicketType')->where($map)->field(array('id'=>'priceid','price'=>'money','discount'=>'moneys','name','remark'))->select();
+        $list = M('TicketType')->where($map)->field(array('id'=>'priceid','price'=>'money','discount'=>'moneys','name','product_id','remark'))->select();
         return $list;
     }
     /*格式化备注 用于打印
@@ -1812,6 +1812,24 @@ function objectToArray($e){
     function get_product_table($param,$product_id){
 
     }
+/**
+ * 生成二维码后通过base64处理后返回
+ * @param  string $data 二维码数据
+ * @param  string $name 图片名称
+ * @return 返回图片base64 地址
+ */
+function qr_base64($data,$name){
+    $image_file = SITE_PATH."d/upload/".$name.'.png';
+    //二维码是否已经生成
+    if(!file_exists($image_file)){
+       
+        //生成二维码
+        \Libs\Service\Qrcode::createQrcode($data,$name);
+    }
+    $image_info = getimagesize($image_file);
+    $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
+    return $base64_image_content;
+}
 /**
  * 模拟请求
  * @param  string $url  访问地址

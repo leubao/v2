@@ -36,7 +36,7 @@ class Dir {//类定义开始
      * @param string $path  目录路径
       +----------------------------------------------------------
      */
-    function __construct($path, $pattern = '*') {
+    function __construct($path = '', $pattern = '*') {
         if (substr($path, -1) != "/")
             $path .= "/";
         $this->listFile($path, $pattern);

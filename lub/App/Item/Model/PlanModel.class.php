@@ -564,7 +564,7 @@ sql;
 		}
 	}
 	/*计划任务缓存*/
-	function plan_cache($proid){
+	function plan_cache($proid = null ){
 		S('plan',null);
 	 	$productId = $proid ? $proid : \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');	 	
 	 	$data = $this->where(array('status'=>'2'))->select();

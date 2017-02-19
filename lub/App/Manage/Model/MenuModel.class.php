@@ -32,8 +32,7 @@ class MenuModel extends Model {
      * 获取菜单
      * @return type
      */
-    public function getMenuList() {
-        
+    public function getMenuList() {    
         foreach (D('Manage/AdminPanel')->getAllPanel(\Manage\Service\User::getInstance()->id) as $r) {
             $item[$r['mid'] . '0changyong'] = array(
                 "icon" => $r['icon'],
@@ -130,7 +129,7 @@ class MenuModel extends Model {
     public function getTree($myid, $parent = "", $Level = 1) {
         $data = $this->adminMenu($myid);
         $Level++;
-        $ret = "";
+        $ret = array();
         if (is_array($data)) {
             foreach ($data as $a) {
                 $id = $a['id'];

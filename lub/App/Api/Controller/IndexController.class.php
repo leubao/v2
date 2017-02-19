@@ -646,6 +646,8 @@ class IndexController extends ApiBase {
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
+      $ticketType = F("TicketType41");
+      dump($ticketType);
       /*
       $whoops = new \Whoops\Run();
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
@@ -653,7 +655,7 @@ class IndexController extends ApiBase {
 
       // 测试未捕获的异常
       $this->division(10, 0);
-      */
+      
      
       $post['data'] = json_encode($post);
       $aa = $this->curl_server($url,$post);
@@ -668,7 +670,7 @@ class IndexController extends ApiBase {
           "extra_param" => '',
       ];
       dump($this->pid);
-      $config = load_payment('alipay',$this->pid);
+      $config = load_payment('alipay',$this->pid);*/
       //dump($config);
       /*
       $charge = new ChargeContext();

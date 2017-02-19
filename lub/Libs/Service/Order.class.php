@@ -45,7 +45,7 @@ class Order extends \Libs\System\Service {
 				'status' => array('in','0,66'),
 			);
 			//$seats = explode('-', $v['seatid']);
-			$remark = print_remark($ticketType[$v['priceid']]['remark']);
+			$remark = print_remark($ticketType[$v['priceid']]['remark'],$plan['product_id']);
 			$data = array(
 				'order_sn' => $sn,
 				'soldtime' => $createtime,
@@ -224,7 +224,6 @@ class Order extends \Libs\System\Service {
 		$info = json_decode($pinfo,true);
 		if(empty($info)){error_insert('400002');return false;}
 		/*$seat = Order::area_group($info['data']);//dump($seat);
-		
 		//TODO   临时写法
         $proconf = cache('ProConfig');
         $plan = F('Plan_'.$info['plan_id']);
@@ -476,7 +475,7 @@ class Order extends \Libs\System\Service {
 					'remark'	=>	$child_t,
 				);
 			}else{
-				$remark = print_remark($ticketType[$value['priceid']]['remark']);
+				$remark = print_remark($ticketType[$value['priceid']]['remark'],$plan['product_id']);
 			}
 			//获取票型数据
 			$param = array(
@@ -701,7 +700,7 @@ class Order extends \Libs\System\Service {
 						$quota_num += $va['num'];
 					}
 					$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
-					//计算订单返佣金额
+					/*计算订单返佣金额
 					//判断是否开启分销
 					if($proconf[$plan['product_id']]['3']['wechant_full_level']){
 						$ticketFull = $ticketType[$va['priceid']]['param']['full'];
@@ -710,6 +709,7 @@ class Order extends \Libs\System\Service {
 						$rebate3 = $rebate3+$ticketFull['3']*$va['num'];
 					}
 					$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
+					*/
 					/*以下代码用于校验*/
 					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
 					if(empty($status[$ke])){
@@ -743,7 +743,7 @@ class Order extends \Libs\System\Service {
 				$maps = array('area'=>$vs['area'],'seat'=>$vs['seat'],'status' => array('eq',2));
 				$sale[$ks]=unserialize($vs['sale']);
 				//$seats = explode('-', $vs['seat']);
-				$remark = print_remark($ticketType[$sale[$ks]['priceid']]['remark']);
+				$remark = print_remark($ticketType[$sale[$ks]['priceid']]['remark'],$plan['product_id']);
 				$datas = array(
 					'sale' => serialize(array(
 						'plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
@@ -793,7 +793,8 @@ class Order extends \Libs\System\Service {
 				}
 			}*/
 			//是否为团队订单 
-			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8'){//error_insert('4000180');
+			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
+				//error_insert('4000180');
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
 				if($proconf[$plan['product_id']]['1']['quota'] == '1'){
 					if(in_array($info['type'],array('2','4'))){
@@ -965,7 +966,7 @@ class Order extends \Libs\System\Service {
 		$ticketType = F('TicketType'.$plan['product_id']);
 		//构造门票打印数据
 		foreach ($data as $key => $value) {
-			$remark = print_remark($ticketType[$value['priceid']]['remark']);
+			$remark = print_remark($ticketType[$value['priceid']]['remark'],$plan['product_id']);
 			//获取票型数据
 			$param = array(
 				'plantime'	=>  date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
@@ -1119,7 +1120,7 @@ class Order extends \Libs\System\Service {
 			$maps = array('area'=>$vs['area'],'seat'=>$vs['seat'],'status' => array('eq',2));
 			$sale[$ks]=unserialize($vs['sale']);
 			//$seats = explode('-', $vs['seat']);
-			$remark = print_remark($ticketType[$sale[$ks]['priceid']]['remark']);
+			$remark = print_remark($ticketType[$sale[$ks]['priceid']]['remark'],$plan['product_id']);
 			$datas = array(
 				'sale' => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 										'area'=>areaName($vs['area'],1),
@@ -1208,7 +1209,7 @@ class Order extends \Libs\System\Service {
 	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
 	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
 	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
-	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售
+	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售9三级分销
 	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
 	*/
@@ -1257,6 +1258,10 @@ class Order extends \Libs\System\Service {
 			case '48':
 				//全员销售
 				$return = array('type'=>8,'addsid'=>4,'pay'=>5,'status'=>2,'createtime'=>time());
+				break;
+			case '49':
+				//三级分销
+				$return = array('type'=>9,'addsid'=>4,'pay'=>5,'status'=>2,'createtime'=>time());
 				break;
 			case '51':
 				//API散客

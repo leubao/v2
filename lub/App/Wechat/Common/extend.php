@@ -55,25 +55,4 @@ function is_weixin() {
         return true; 
     } return false; 
 }
-/**
- * 生成二维码后通过base64处理后返回
- * @param  string $data 二维码数据
- * @param  string $name 图片名称
- * @return 返回图片base64 地址
- */
-function qr_base64($data,$name){
-	$image_file = SITE_PATH."d/upload/".$name.'.png';
-	//二维码是否已经生成
-    if(!file_exists($image_file)){
-        //构造链接
-        $url = U('Wechat/Index/show',array('u'=>$ginfo['id']));
-        $api = new \Wechat\Service\Api();
-        $urls = $api->get_authorize_url('snsapi_base',$url);
-        //生成二维码
-    	\Libs\Service\Qrcode::createQrcode($data,$name);
-    }
-    $image_info = getimagesize($image_file);
-    $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
-    return $base64_image_content;
-}
 ?>

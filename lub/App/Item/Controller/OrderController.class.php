@@ -530,7 +530,7 @@ class OrderController extends ManageBase{
 	//微信扫码支付
 	function weixin_code()
 	{
-		# code...
+		$pay = & load_wechat();
 	}
 /*======================================================================华丽分割线 团队售票订单====================================================*/
 /*	function teamPost(){

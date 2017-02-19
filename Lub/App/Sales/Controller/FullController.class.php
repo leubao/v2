@@ -6,12 +6,31 @@
 // +----------------------------------------------------------------------
 // | Author: zhoujing <admin@leubao.com>2014-12-19 
 // +----------------------------------------------------------------------
-namespace Wechat\Controller;
+namespace Sales\Controller;
 use Common\Controller\ManageBase;
-use Wechat\Service\Api;
+use \Wechat\Service\Api;
 class FullController extends ManageBase{
 	protected function _initialize() {
         parent::_initialize();
+        $proconf = cache('ProConfig');
+        // 开发者中心-配置项-AppID(应用ID)
+        $this->appId = $proconf[$this->pid]['2']['appid'];
+        // 开发者中心-配置项-AppSecret(应用密钥)
+        $this->appSecret = $proconf[$this->pid]['2'];
+        $this->api = new Api(
+            array(
+                'appId' => $this->appId,
+                'appSecret' => $this->appSecret,
+                'get_access_token' => function(){
+                    // 用户需要自己实现access_token的返回
+                    return S('wechat_token');
+                },
+                'save_access_token' => function($token) {
+                    // 用户需要自己实现access_token的保存
+                    S('wechat_token', $token);
+                }
+            )
+        );
     }
     //销售人员列表 登录场景为4
     function index(){
@@ -27,41 +46,27 @@ class FullController extends ManageBase{
     }
     //全员销售设置
     function setfull(){
-        $db = M("ConfigProduct");   //产品设置表
-        $list = $db->where(array('product_id'=>$this->pid))->select();
+        $db = M("ConfigProduct");   //产品设置表 
+        $type = '8';
+        $product_id = (int)get_product('id');
+        $list = $db->where(array('product_id'=>$product_id,'type'=>$type))->select();
         foreach ($list as $k => $v) {
             $config[$v["varname"]] = $v["value"];
         }
         if(IS_POST){
             $pinfo = $_POST;
             //判断是否开启多级分销
-            if($pinfo['wechant_full_level'] == '1'){
+            if($pinfo['wechat_full'] == '1'){
                 //新建多级返利表  作为票型表的扩展 
                 $dbs = M('TicketType');
                 //根据提交过来的票型分组拉去所有票型
-                $ticket = $dbs->where(array('group_id'=>$pinfo['group']))->field('id,param')->select();
+                $ticket = $dbs->where(array('group_id'=>$pinfo['price_group_full']))->field('id,param')->select();
                 foreach ($ticket as $key => $value) {
                     $param = unserialize($value['param']);
-                    if($param){
-                        $full = array(
-                            '1' => $pinfo['tic'][$value['id']][0],
-                            '2' => $pinfo['tic'][$value['id']][1],
-                            '3' => $pinfo['tic'][$value['id']][2],
-                            );
-                    }else{
-                        $full = array(
-                            '1' => $pinfo['tic'][$value['id']][0],
-                            '2' => $pinfo['tic'][$value['id']][1],
-                            '3' => $pinfo['tic'][$value['id']][2],
-                        );
-                    }
-                    $param['full'] = $full;
+                    $param['full'] = $pinfo['tic'][$value['id']];
                     $sataus = $dbs->where(array('id'=>$value['id']))->setField('param',serialize($param));
-                    //组合新的门票详情
-                    //$new_param = $param['full']
                 }
             }
-            $type = $pinfo['type'];
             if (empty($pinfo) || !is_array($pinfo)) {
                 $this->erun('配置数据不能为空！');
                 return false;
@@ -73,7 +78,6 @@ class FullController extends ManageBase{
                 }
                 $saveData = array($config,);
                 $saveData["value"] = trim($value);
-                //$saveData["product_id"] = $product_id;
                 $count = $db->where(array("varname"=>$key,'type'=>$type,'product_id'=>$product_id))->count();
                 $ginfo = array();   
                 if ($count == 0) {//此前无此配置项
@@ -85,7 +89,7 @@ class FullController extends ManageBase{
                         $add = $db->add($ginfo);
                     }
                 }else{
-                    if ($db->where(array("varname" => $key,'product_id'=>$this->pid,'type'=>$type))->save($saveData) === false) {
+                    if ($db->where(array("varname" => $key,'product_id'=>$product_id,'type'=>$type))->save($saveData) === false) {
                         $this->erun("更新到{$key}项时，更新失败！");
                         return false;
                     }                   

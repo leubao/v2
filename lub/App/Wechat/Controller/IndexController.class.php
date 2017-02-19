@@ -420,6 +420,7 @@ class IndexController extends LubTMP {
                     //获取公众号信息，jsApiPay初始化参数
                     $this->options['appid'] = $this->appId;
                     $this->options['mchid'] = $this->mchid;
+                    $this->options['sub_mchid'] = '1390172002';//子商户模式
                     $this->options['mchkey'] = $this->mchkey;
                     $this->options['secret'] = $this->appSecret;
                     $this->options['notify_url'] = $this->notify_url;//dump($this->options);
@@ -641,15 +642,15 @@ class IndexController extends LubTMP {
         $rsv_data = $GLOBALS ['HTTP_RAW_POST_DATA'];
         $result = xmlToArray($rsv_data);
        //获取公众号信息，jsApiPay初始化参数
-        $proconf = cache('ProConfig');
+        //$proconf = cache('ProConfig');
         $attach = unserialize($result["attach"]);
         $this->options['appid'] = $result["appid"];
         $this->options['mchid'] = $result["mch_id"];
-        $this->options['mchkey'] = $proconf[$attach['pid']]['mchkey'];
-        $this->options['secret'] = $proconf[$attach['pid']]['appSecret'];
-        $this->options['notify_url'] = $proconf[$attach['pid']]['notify_url'];
+        $this->options['mchkey'] = $this->mchkey;
+        $this->options['secret'] = $this->appSecret;
+        $this->options['notify_url'] = $this->notify_url;
         $this->wxpaycfg = new WxPayConfig($this->options);
-        $this->to_tplmsg($result);error_insert("4001");
+        $this->to_tplmsg($result);//error_insert("4001");
         //回复公众平台支付结果
         $notify = new PayNotifyCallBackController($this->wxpaycfg);
         $notify->Handle(false);

@@ -305,7 +305,6 @@ function post_server(){
         remark = $("#cashier-crm textarea[name='remark']").val() ? $("#cashier-crm textarea[name='remark']").val() : "空...",
         sub_type = $("#cashier-crm input[type='radio']:checked").val() ? $("#cashier-crm input[type='radio']:checked").val() : '1',
         toJSONString = '',
-        child_ticket = '',
         checkinT = '1',
         plan = $("#planID").val(),
         guide = '0',

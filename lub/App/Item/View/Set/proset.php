@@ -7,7 +7,6 @@
               <li class="active"><a data-toggle="tab" href="#tab-1" aria-expanded="true"><i class="fa fa-codepen"></i> 运营设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-2" aria-expanded="false"><i class="fa fa-print"></i> 打印设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-6" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  官网设置</a></li>
-              <li class=""><a data-toggle="tab" href="#tab-5" aria-expanded="false"><i class="fa fa-cc-visa"></i>  第三方支付</a></li>
           </ul>
           <div class="tabs-content">
               <div id="tab-1" class="tab-pane active">
@@ -35,6 +34,21 @@
                                 <td>
                                 <input type="radio" name="quota" data-toggle="icheck" value="1" <eq name="vo['quota']" value="1"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="quota" data-toggle="icheck" value="0" <eq name="vo['quota']" value="0"> checked</eq> data-label="关闭">
+                                </td>
+                              </tr>
+
+                              <tr>
+                                <td width="120px">全员销售:</td>
+                                <td>
+                                <input type="radio" name="wechat_full" data-toggle="icheck" value="1" <eq name="vo['wechat_full']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="wechat_full" data-toggle="icheck" value="0" <eq name="vo['wechat_full']" value="0"> checked</eq> data-label="关闭">
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="120px">三级分销:</td>
+                                <td>
+                                <input type="radio" name="wechat_level" data-toggle="icheck" value="1" <eq name="vo['wechat_level']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="wechat_level" data-toggle="icheck" value="0" <eq name="vo['wechat_level']" value="0"> checked</eq> data-label="关闭">
                                 </td>
                               </tr>
                               <tr>
@@ -195,28 +209,6 @@
                               </tr>
                           </table>
                       
-                        </div>
-                      </fieldset>
-                  </div>
-              </div>
-              
-              <div id="tab-5" class="tab-pane">
-                  <div class="panel-body">
-                      <fieldset style="height:100%;">
-                        <legend>支付宝</legend>
-                        <div style="height:94%; overflow:hidden;">
-                          <div class="form-group">
-                              <label class="col-sm-2 control-label">账号:</label>
-                              <input type="text" name="alipay" value="{$vo.alipay}" class="form-control" size="30">
-                            </div>
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label">appid:</label>
-                              <input type="text" name="aliid" value="{$vo.aliid}" class="form-control" size="30" />
-                            </div>
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label">appkey:</label>
-                              <input type="text" name="alikey" value="{$vo.alikey}" class="form-control" size="40">
-                            </div>
                         </div>
                       </fieldset>
                   </div>

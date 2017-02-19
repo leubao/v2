@@ -49,6 +49,14 @@ class LubTMP extends \Think\Controller {
      * @return Arry 配置数组
      */
     protected function initSite() {
+        /**
+         * 判断缓存是否支持
+         * @var [type]
+         */
+        if (class_exists('Redis') == false) {
+            $this->error('您的环境不支持Redis,系统无法正常运行！');
+            return false;
+        }
         $Config = cache("Config");
         self::$Cache['Config'] = $Config;
         $config_siteurl = $Config['siteurl'];
@@ -59,7 +67,6 @@ class LubTMP extends \Think\Controller {
         defined('CONFIG_SITEURL_MODEL') or define('CONFIG_SITEURL_MODEL', $config_siteurl);
         /*
          * 判断必须缓存是否存在
-         
         if(empty(cache('Item')) || empty(cache('Product'))){
         	
         }*/
