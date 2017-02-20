@@ -1,0 +1,13 @@
+##########################################################################
+# 
+# thank you for using aliyun virtual machine
+# 
+##########################################################################
+
+FTP:
+account:www
+password:cb7058fa2
+
+MySQL:
+account:root
+password:3df5e44669
