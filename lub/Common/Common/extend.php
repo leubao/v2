@@ -421,7 +421,6 @@
                     $name = date('m月d日',$info['plantime']);
                     break;
             }
-            
             return $name;
         }else{
             return "场次未知";
@@ -1829,6 +1828,22 @@ function qr_base64($data,$name){
     $image_info = getimagesize($image_file);
     $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
     return $base64_image_content;
+}
+/**
+ * 支付日志
+ */
+function payLog($money,$sn,$scene){
+    //记录微信支付
+    $pay_log = array(
+        'out_trade_no' =>   $data['transaction_id'], //微信支付单号
+        'money'        =>   $oinfo['money'],
+        'order_sn'     =>   $data["out_trade_no"],
+        'param'        =>   serialize($data),
+        'status'       =>   '1',
+        'type'         =>   '2',
+        'pattern'      =>   '1',
+    );
+    return D('Pay')->add($pay_log);
 }
 /**
  * 模拟请求

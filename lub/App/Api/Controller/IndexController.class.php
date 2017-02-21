@@ -647,21 +647,26 @@ class IndexController extends ApiBase {
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
       $ticketType = F("TicketType41");
-      //dump($ticketType);
+      /*dump($ticketType);
       $redis = new \Redis();
-      $redis->connect('127.0.0.1',6379);
+      $redis->connect('127.0.0.1',6379);*/
       //判断列表中元素个数
-      $len = $redis->lsize('test');
+      /*
+      $len = load_redis()->lsize('test');
       if($len > 0){
         //获取队列中最后一个元素，且移除
-        $sn = $redis->rPop('test');
+        $sn = load_redis()->rPop('test');
       }
       //写入带处理队列，若存在则不再写入
-      $redis->lPush('test','1212211212');
-      
-      
+      load_redis()->lPush('test','1212211212');*/
+
+      $len = load_redis('lsize','test','1212211212');
+      load_redis('set','work','qqqqq');
+      $sn = load_redis('get','work');
+      $sn = load_redis('rPop','test');
+      load_redis('setex','t2i','1221',60);
       //判断队列的长度
-      
+      load_redis('delete','work');
       dump($len);
       dump($sn);
       /*

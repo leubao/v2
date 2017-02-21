@@ -47,8 +47,16 @@
                                   </select>
                                 </td>
                               </tr>
-                           
-
+                              <tr>
+                                <td width="120px">微信APPID:</td>
+                                <td><input type="text" name="wx_appid" value="{$Site.wx_appid}" size="40" disabled="">
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="120px">微信商户号:</td>
+                                <td><input type="text" name="wx_mchid" value="{$Site.wx_mchid}" size="40" disabled="">
+                                </td>
+                              </tr>
                             </tbody>
                           </table>   
                         </div>

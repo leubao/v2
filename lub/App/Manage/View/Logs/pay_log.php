@@ -5,9 +5,7 @@
 <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Manage/Logs/pay_log',array('menuid'=>$menuid));}" method="post">
  <!--Page --> 
   <input type="hidden" name="pageSize" value="{$numPerPage}">             
-  <input type="hidden" name="pageCurrent" value="{$currentPage}">       
-  <input type="hidden" name="orderField" value="${param.orderField}">         
-  <input type="hidden" name="orderDirection" value="${param.orderDirection}">
+  <input type="hidden" name="pageCurrent" value="{$currentPage}">
 
 <!--Page end-->
 <!--条件检索 s-->
@@ -45,6 +43,7 @@
         <th>支付方式</th>
         <th>订单号</th>
         <th align="center">网银单号</th>
+        <th align="center">创建场景</th>
         <th align="center">金额</th>
         <th align="center">类型</th>
         <th align="center">创建时间</th>
@@ -60,6 +59,7 @@
         <td><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">
         {$vo.order_sn}</a></td>
         <td>{$vo['out_trade_no']}</td>
+        <td></td>
         <td>{$vo.money}</td>
         <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
         <td>{$vo.update_time|date="Y-m-d H:i:s",###}</td>

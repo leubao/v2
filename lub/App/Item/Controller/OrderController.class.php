@@ -490,12 +490,7 @@ class OrderController extends ManageBase{
 			}
 			if($info['pay_type'] == '5'){
 				//微信支付
-				$data = array(
-					'money' => $oinfo[''],
-					'paykey'=>	$info['paykey'],
-					'plan' 	=>	$info['plan']
-				);
-				$this->weixin_code();
+				$this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
 			}
 			if($run != false){
 				//支付方式影响返回结果
@@ -528,11 +523,17 @@ class OrderController extends ManageBase{
 		
 	}
 	//微信扫码支付
-	function weixin_code()
+	function weixin_code($product_id,$paykey,$payData)
 	{
-		$pay = & load_wechat();
+		$pay = & load_wechat('Pay',$product_id);
+		$money = $payData['amount']*100;
+		// 创建JSAPI签名参数包，这里返回的是数组
+		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
+
 	}
-/*======================================================================华丽分割线 团队售票订单====================================================*/
+	//记录支付日志
+	
+	/*======================================================================华丽分割线 团队售票订单====================================================*/
 /*	function teamPost(){
 		$info = $_POST['info'];
 		//$sn = Order::team($info,1);

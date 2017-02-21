@@ -962,28 +962,33 @@ function & load_wechat($type = '',$scene = '',$product_id = '') {
     static $wechat = array();
     $index = md5(strtolower($type));
     if (!isset($wechat[$index])) {
-        // 从数据库查询配置参数
-        //$config = M('WechatConfig')->field('token,appid,appsecret,encodingaeskey,mch_id,partnerkey,ssl_cer,ssl_key,qrc_img')->find();
-        //获取config 配置 TODO  暂时以收银台为主
-        if(empty($product_id)){return false;}
-        $proconf = cache('ProConfig_'.$plan['product_id']);
-        $proconf = $proconf[6];
-        //定义微信公众号配置参数（这里是可以从数据库读取的哦）
-        $options = array(
-            'token'           => $proconf['token'], // 填写你设定的key
-            'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
-            'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
-            'appsecret'       => $proconf['appsecret'], // 填写高级调用功能的密钥
-            'encodingaeskey'  => $proconf['encodingaeskey'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
-            'mch_id'          => $proconf['wx_mch_id'], // 微信支付，商户ID（可选）
-            'partnerkey'      => $proconf['wx_partnerkey'], // 微信支付，密钥（可选）
-            'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
-            'ssl_cer'         => $proconf['ssl_cer'], // 微信支付，双向证书（可选，操作退款或打款时必需）
-            'ssl_key'         => $proconf['ssl_key'], // 微信支付，双向证书（可选，操作退款或打款时必需）
-            //'cachepath'       => '', // 设置SDK缓存目录（可选，默认位置在Wechat/Cache下，请保证写权限）
-        );
-        // 设置SDK的缓存路径
-        $config['cachepath'] = CACHE_PATH . 'Data/';
+        if(empty($product_id)){
+            $proconf = cache('ProConfig_'.$plan['product_id']);
+            $proconf = $proconf[6];
+            //定义微信公众号配置参数（这里是可以从数据库读取的哦）
+            $options = array(
+                'token'           => $proconf['token'], // 填写你设定的key
+                'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
+                'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
+                'appsecret'       => $proconf['appsecret'], // 填写高级调用功能的密钥
+                'encodingaeskey'  => $proconf['encodingaeskey'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
+                'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
+                'partnerkey'      => $proconf['wx_partnerkey'], // 微信支付，密钥（可选）
+                'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
+                'ssl_cer'         => $proconf['ssl_cer'], // 微信支付，双向证书（可选，操作退款或打款时必需）
+                'ssl_key'         => $proconf['ssl_key'], // 微信支付，双向证书（可选，操作退款或打款时必需）
+                //'cachepath'       => '', // 设置SDK缓存目录（可选，默认位置在Wechat/Cache下，请保证写权限）
+            );
+            // 设置SDK的缓存路径
+            $config['cachepath'] = CACHE_PATH . 'Data/';
+        }else{
+            $proconf = cache('Config');
+            $options = array(
+                'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
+                'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
+            );
+        }
+        
         $wechat[$index] = & \Wechat\Loader::get_instance($type, $config);
     }
     return $wechat[$index];
