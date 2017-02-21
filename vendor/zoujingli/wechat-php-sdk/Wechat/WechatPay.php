@@ -195,7 +195,8 @@ class WechatPay {
             return false;
         }
         //记录支付日志 zj
-        payLog($total,$sn,2,2,1,array('appid'=>$this->appid,'mch_id'=>$this->mch_id));
+        $param = array('appid'=>$this->appid,'mch_id'=>$this->mch_id,'sub_appid'=>$this->sub_appid,'sub_mch_id'=>$this->sub_mch_id,'openid'=>$openid);
+        payLog($total,$out_trade_no,2,2,1,$param);
         return ($trade_type === 'JSAPI') ? $result['prepay_id'] : $result['code_url'];
     }
 
@@ -225,7 +226,8 @@ class WechatPay {
             return false;
         }
         //记录支付日志 zj
-        payLog($total,$sn,2,2,1,array('appid'=>$this->appid,'mch_id'=>$this->mch_id));
+        $param = array('appid'=>$this->appid,'mch_id'=>$this->mch_id,'sub_appid'=>$this->sub_appid,'sub_mch_id'=>$this->sub_mch_id,'openid'=>$openid);
+        payLog($total,$out_trade_no,2,2,1,$param);
         return $result['prepay_id'];
     }
 
@@ -252,7 +254,7 @@ class WechatPay {
      *  @param string $prepay_id
      *  @return array
      */
-    public function createMicroPay($auth_code,$sn,$total,$goods_tag,$body){
+    public function createMicroPay($auth_code,$out_trade_no,$total,$goods_tag,$body){
         $data = array();
         $data["appId"] = $this->appid;
         $data["sub_appid"] = $this->sub_appid;
@@ -262,7 +264,7 @@ class WechatPay {
         $data["signType"] = "MD5";
         $data["paySign"] = Tools::getPaySign($option, $this->partnerKey);
         $data["body"]   =   $body;
-        $data["out_trade_no"]   =   $sn;
+        $data["out_trade_no"]   =   $out_trade_no;
         $data["total_fee"]  =   $total;
         $data["goods_tag"]  =   $goods_tag;
         $data["auth_code"]  =   $auth_code;
@@ -273,7 +275,8 @@ class WechatPay {
             return false;
         }
         //记录支付日志 zj
-        payLog($total,$sn,1,2,1,array('appid'=>$this->appid,'mch_id'=>$this->mch_id));
+        $param = array('appid'=>$this->appid,'mch_id'=>$this->mch_id,'sub_appid'=>$this->sub_appid,'sub_mch_id'=>$this->sub_mch_id,'openid'=>$openid);
+        payLog($total,$out_trade_no,1,2,1,$param);
         return $json;
     }
     /**
@@ -349,6 +352,8 @@ class WechatPay {
         if (false === $this->_parseResult($result)) {
             return false;
         }
+        $param = array('appid'=>$this->appid,'mch_id'=>$this->mch_id,'sub_appid'=>$this->sub_appid,'sub_mch_id'=>$this->sub_mch_id,'openid'=>$openid,'sn'=>$out_trade_no);
+        payLog($total,$out_refund_no,1,2,3,$param);
         return ($result['return_code'] === 'SUCCESS');
     }
 

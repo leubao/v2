@@ -1835,7 +1835,7 @@ function qr_base64($data,$name){
  * @param  string $sn    系统单号
  * @param  int    $scene 创建场景 1、窗口当面付2在线支付
  * @param  int    $type  1支付宝2微信
- * @param  int    $pattern 支付类型1收款2付款
+ * @param  int    $pattern 支付类型1收款2付款3退款
  * @param  array  $data  提交数据包
  */
 function payLog($money,$sn,$scene,$type,$pattern,$data){
@@ -1854,6 +1854,8 @@ function payLog($money,$sn,$scene,$type,$pattern,$data){
         'pattern'      =>   $pattern,
         'scene'        =>   $scene,
     );
+    //快速缓存 缓存有效期300秒
+    S('pay'.$sn,'400',300);
     return D('Manage/Pay')->add($pay_log);
 }
 /**

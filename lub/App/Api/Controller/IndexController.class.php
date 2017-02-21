@@ -636,8 +636,11 @@ class IndexController extends ApiBase {
           //支付通知数据获取成功
            if ($notifyInfo['result_code'] == 'SUCCESS' && $notifyInfo['return_code'] == 'SUCCESS') {
               // 支付状态完全成功，可以更新订单的支付状态了
-              // 1、更新订单状态，查看是否需要后续操作，如排座
-              $sn = \Libs\Service\Order::mobile_seat();
+              // 1、更新订单状态，查看是否需要后续操作，如排座  
+              // 此处有两种情况
+              //更新缓存存储状态
+              S('pay'.$notifyInfo['out_trade_no'],'200',300);
+              // $sn = \Libs\Service\Order::sweep_pay_seat();
               // 2、更新网银支付日志
               $uppaylog = array('status'=>1,'out_trade_no'=>$notifyInfo['transaction_id']);
               $paylog = D('Manage/Pay')->where(array('order_sn'=>$notifyInfo['out_trade_no'],'type'=>2))->save($uppaylog);

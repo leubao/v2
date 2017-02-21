@@ -487,10 +487,16 @@ class OrderController extends ManageBase{
 			if($info['pay_type'] == '4'){
 				//支付宝支付
 				$this->alipay_code($payData);
+				$return = array(
+					'statusCode' => '200'
+				);
 			}
 			if($info['pay_type'] == '5'){
 				//微信支付
 				$this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
+				$return = array(
+					'statusCode' => '200'
+				);
 			}
 			if($run != false){
 				//支付方式影响返回结果
@@ -505,8 +511,7 @@ class OrderController extends ManageBase{
 				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 			}else{
 				$return = array(
-					'statusCode' => '300',
-					'forwardUrl' => '',
+					'statusCode' => '300'
 				);
 				$message = "支付失败!";
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
@@ -531,8 +536,49 @@ class OrderController extends ManageBase{
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
 
 	}
-	//记录支付日志
-	
+	/*轮询支付日志查询支付结果*/
+	function public_payment_results(){
+		$ginfo = I('get.');
+		$status = S('pay'.$ginfo['sn']);
+		if($status == '200'){
+			$oinfo = D('Item/Order')->where(array('order_sn'=>$ginfo['sn'],'status'=>array('in','6,11')))->relation(true)->find();
+            if(empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
+            $info = array(
+            	'seat_type' => $ginfo['seat'],
+            	'pay_type'  => $ginfo['pay'],
+            );
+			$run = Order::sweep_pay_seat($info,$oinfo);
+			if($run !== false){
+				$return = array(
+					'statusCode' => '200',
+					'title'		 =>	"门票打印",
+					'width'		 =>	'213',
+					'height'	 =>	'208',
+					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
+				);
+			}else{
+				//抛出售票失败，同时执行退款程序
+				if($ginfo['pay'] == '4'){
+					//支付宝
+				}
+				if($ginfo['pay'] == '5'){
+					//微信
+					\Libs\Service\Refund::weixin_refund($ginfo['sn'],$oinfo['product_id']);
+					$return = array(
+						'statusCode' => '400',
+						'message' => '订单创建遇到严重错误,无法继续执行,已经执行退款程序,请提醒客户查收',
+					);
+				}
+			}
+			S('pay'.$ginfo['sn'],null);
+		}else{
+			$return = array(
+				'statusCode' => '300'
+			);
+		}
+		die(json_encode($return));
+	}
+		
 	/*======================================================================华丽分割线 团队售票订单====================================================*/
 /*	function teamPost(){
 		$info = $_POST['info'];

@@ -66,14 +66,29 @@
             if(data.statusCode == "200"){
               //刷新
               payMsg.html("扫码成功,等待客户确认....");
+              //倒计时支付结果，等待支付结果
+              settime('countdown',90);
               //开始轮询支付结果
               //等待第三方返回结果
               //轮询结果
               setInterval(function(){
+                $.get("{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay']));}", function(result){
+                  if(result.statusCode == "200"){
+                      //刷新
+                      $(this).dialog('refresh', result.refresh);
+                      $(this).dialog({id:'print', url:''+result.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+                  }
+                  if(result.statusCode == "400"){
+                    layer.msg(result.message);
+                    $(this).dialog('refresh', 'work_quick');
+                    //关闭当前窗口
+                    $(this).dialog('close','payment');
+                  }
+                });
                 alert('www');
                 //第三方返回成功
                 //调出打印窗口
-              }, 60000);
+              }, 1000);
             }else{
               payMsg.html('扫码失败...');
             }
