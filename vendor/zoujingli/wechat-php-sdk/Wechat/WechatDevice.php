@@ -1,18 +1,15 @@
 <?php
-
 namespace Wechat;
-
 use Wechat\Lib\Common;
 use Wechat\Lib\Tools;
-
 /**
  * 微信设备相关SDK
  * @author Anyon <zoujingli@qq.com>
  * @date 2016-08-22 10:35
  */
 class WechatDevice extends Common {
-
     const SHAKEAROUND_DEVICE_APPLYID = '/shakearound/device/applyid?'; //申请设备ID
+    const SHAKEAROUND_DEVICE_APPLYSTATUS = '/shakearound/device/applystatus?'; //查询设备ID申请审核状态
     const SHAKEAROUND_DEVICE_UPDATE = '/shakearound/device/update?'; //编辑设备信息
     const SHAKEAROUND_DEVICE_SEARCH = '/shakearound/device/search?'; //查询设备列表
     const SHAKEAROUND_DEVICE_BINDLOCATION = '/shakearound/device/bindlocation?'; //配置设备与门店ID的关系
@@ -25,8 +22,6 @@ class WechatDevice extends Common {
     const SHAKEAROUND_USER_GETSHAKEINFO = '/shakearound/user/getshakeinfo?'; //获取摇周边的设备及用户信息
     const SHAKEAROUND_STATISTICS_DEVICE = '/shakearound/statistics/device?'; //以设备为维度的数据统计接口
     const SHAKEAROUND_STATISTICS_PAGE = '/shakearound/statistics/page?'; //以页面为维度的数据统计接口
-
-
     /**
      * 申请设备ID
      * @param array $data
@@ -48,7 +43,29 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
+    
+    /**
+     * 查询设备ID申请审核状态
+     * @param int $apply_id
+     * @return bool|array
+     */
+    public function applyStatusShakeAroundDevice($apply_id) {
+        if (!$this->access_token && !$this->getAccessToken()) {
+            return false;
+        }
+        $data = array("apply_id" => $apply_id);
+        $result = Tools::httpPost(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_APPLYSTATUS . "access_token={$this->access_token}", Tools::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return $this->checkRetry(__FUNCTION__, func_get_args());
+            }
+            return $json;
+        }
+        return false;
+    }
     /**
      * 编辑设备信息
      * @param array $data
@@ -70,8 +87,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 查询设备列表
      * @param $data
@@ -93,7 +108,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
     /**
      * 配置设备与门店的关联关系
      * @param string $device_id 设备编号，若填了UUID、major、minor，则可不填设备编号，若二者都填，则以设备编号为优先
@@ -130,7 +144,31 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
+    
+    /**
+     * 配置设备与其他公众账号门店的关联关系
+     * @param type $device_identifier 设备信息
+     * @param type $poi_id 待关联的门店ID
+     * @param type $poi_appid 目标微信appid
+     * @return boolean
+     */
+    public function bindLocationOtherShakeAroundDevice($device_identifier,$poi_id,$poi_appid) {
+        if (!$this->access_token && !$this->getAccessToken()) {
+            return false;
+        }
+        $data = array('device_identifier' => $device_identifier, 'poi_id' => $poi_id,"type"=>2,"poi_appid"=>$poi_appid);
+        $result = Tools::httpPost(self::API_BASE_URL_PREFIX . self::SHAKEAROUND_DEVICE_BINDLOCATION . "access_token={$this->access_token}", Tools::json_encode($data));
+        if ($result) {
+            $json = json_decode($result, true);
+            if (!$json || !empty($json['errcode'])) {
+                $this->errCode = $json['errcode'];
+                $this->errMsg = $json['errmsg'];
+                return $this->checkRetry(__FUNCTION__, func_get_args());
+            }
+            return $json; //这个可以更改为返回true
+        }
+        return false;
+    }
     /**
      * 配置设备与页面的关联关系
      * @param string $device_id 设备编号，若填了UUID、major、minor，则可不填设备编号，若二者都填，则以设备编号为优先
@@ -167,8 +205,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 上传在摇一摇页面展示的图片素材
      * @param array $data {"media":'@Path\filename.jpg'}
@@ -190,8 +226,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 增加摇一摇出来的页面信息
      * @param string $title 在摇一摇页面展示的主标题，不超过6 个字
@@ -218,8 +252,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 编辑摇一摇出来的页面信息
      * @param int $page_id
@@ -247,8 +279,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 查询已有的页面
      * @param array $page_ids
@@ -277,8 +307,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 删除已有的页面
      * @param array $page_ids
@@ -301,8 +329,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 获取设备信息
      * @param string $ticket 摇周边业务的ticket(可在摇到的URL中得到，ticket生效时间为30 分钟)
@@ -325,8 +351,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 以设备为维度的数据统计接口
      * @param int $device_id 设备编号，若填了UUID、major、minor，即可不填设备编号，二者选其一
@@ -362,8 +386,6 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
-
     /**
      * 以页面为维度的数据统计接口
      * @param int $page_id 指定页面的ID
@@ -388,5 +410,4 @@ class WechatDevice extends Common {
         }
         return false;
     }
-
 }

@@ -624,6 +624,33 @@ class IndexController extends ApiBase {
      */
     function paynotify(){
       //判断通知来路微信还是支付宝
+      $pay = & load_wechat('Pay');
+      // 获取支付通知
+      $notifyInfo = $pay->getNotify();
+
+      // 支付通知数据获取失败
+      if($notifyInfo===FALSE){
+          // 接口失败的处理
+          echo $pay->errMsg;
+      }else{
+          //支付通知数据获取成功
+           if ($notifyInfo['result_code'] == 'SUCCESS' && $notifyInfo['return_code'] == 'SUCCESS') {
+              // 支付状态完全成功，可以更新订单的支付状态了
+              // 1、更新订单状态，查看是否需要后续操作，如排座
+              $sn = \Libs\Service\Order::mobile_seat();
+              // 2、更新网银支付日志
+              $uppaylog = array('status'=>1,'out_trade_no'=>$notifyInfo['transaction_id']);
+              $paylog = D('Manage/Pay')->where(array('order_sn'=>$notifyInfo['out_trade_no'],'type'=>2))->save($uppaylog);
+              // 3、返回信息
+              // @todo 
+              // 返回XML状态，至于XML数据可以自己生成，成功状态是必需要返回的。
+              // <xml>
+              //    return_code><![CDATA[SUCCESS]]></return_code>
+              //    return_msg><![CDATA[OK]]></return_msg>
+              // </xml>
+              return xml(['return_code' => 'SUCCESS', 'return_msg' => 'DEAL WITH SUCCESS'])
+           }
+      }
     }
 
     function c_temp(){

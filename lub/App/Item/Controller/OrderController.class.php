@@ -527,7 +527,7 @@ class OrderController extends ManageBase{
 	{
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $payData['amount']*100;
-		// 创建JSAPI签名参数包，这里返回的是数组
+		//创建JSAPI签名参数包，这里返回的是数组
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
 
 	}

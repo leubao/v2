@@ -1830,20 +1830,31 @@ function qr_base64($data,$name){
     return $base64_image_content;
 }
 /**
- * 支付日志
+ * 记录网银支付日志
+ * @param  string $money 金额
+ * @param  string $sn    系统单号
+ * @param  int    $scene 创建场景 1、窗口当面付2在线支付
+ * @param  int    $type  1支付宝2微信
+ * @param  int    $pattern 支付类型1收款2付款
+ * @param  array  $data  提交数据包
  */
-function payLog($money,$sn,$scene){
+function payLog($money,$sn,$scene,$type,$pattern,$data){
+    if($type == '2'){
+       //处理微信支付的金额对100取余 ,原因你懂得
+       $money = $money/100;
+    }
     //记录微信支付
     $pay_log = array(
-        'out_trade_no' =>   $data['transaction_id'], //微信支付单号
-        'money'        =>   $oinfo['money'],
-        'order_sn'     =>   $data["out_trade_no"],
+        'out_trade_no' =>   '0', 
+        'money'        =>   $money,
+        'order_sn'     =>   $sn,
         'param'        =>   serialize($data),
-        'status'       =>   '1',
-        'type'         =>   '2',
-        'pattern'      =>   '1',
+        'status'       =>   2,
+        'type'         =>   $type,
+        'pattern'      =>   $pattern,
+        'scene'        =>   $scene,
     );
-    return D('Pay')->add($pay_log);
+    return D('Manage/Pay')->add($pay_log);
 }
 /**
  * 模拟请求

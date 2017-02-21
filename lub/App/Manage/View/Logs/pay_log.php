@@ -59,7 +59,7 @@
         <td><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">
         {$vo.order_sn}</a></td>
         <td>{$vo['out_trade_no']}</td>
-        <td></td>
+        <td><if condition="$vo['scene'] eq '1'">当面付<else />在线支付</if></td>
         <td>{$vo.money}</td>
         <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
         <td>{$vo.update_time|date="Y-m-d H:i:s",###}</td>
@@ -67,7 +67,6 @@
         <td><if condition="$vo['status'] eq '1'">支付完成<else />待支付</if></td>
        </tr>
     </volist>
-     
     </tbody>
   </table>
 </div>

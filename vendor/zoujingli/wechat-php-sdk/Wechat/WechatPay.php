@@ -194,6 +194,8 @@ class WechatPay {
         if (false === $this->_parseResult($result)) {
             return false;
         }
+        //记录支付日志 zj
+        payLog($total,$sn,2,2,1,array('appid'=>$this->appid,'mch_id'=>$this->mch_id));
         return ($trade_type === 'JSAPI') ? $result['prepay_id'] : $result['code_url'];
     }
 
@@ -222,6 +224,8 @@ class WechatPay {
         if (false === $this->_parseResult($result) || empty($result['prepay_id'])) {
             return false;
         }
+        //记录支付日志 zj
+        payLog($total,$sn,2,2,1,array('appid'=>$this->appid,'mch_id'=>$this->mch_id));
         return $result['prepay_id'];
     }
 
@@ -268,6 +272,8 @@ class WechatPay {
         if (!empty($json) && false === $this->_parseResult($json)) {
             return false;
         }
+        //记录支付日志 zj
+        payLog($total,$sn,1,2,1,array('appid'=>$this->appid,'mch_id'=>$this->mch_id));
         return $json;
     }
     /**
@@ -316,6 +322,7 @@ class WechatPay {
     }
 
     /**
+    /**
      * 订单退款接口
      * @param string $out_trade_no 商户订单号
      * @param string $transaction_id 微信订单号
@@ -323,9 +330,13 @@ class WechatPay {
      * @param int $total_fee 商户订单总金额
      * @param int $refund_fee 退款金额
      * @param int|null $op_user_id 操作员ID，默认商户ID
+     * @param string $refund_account 退款资金来源
+     *      仅针对老资金流商户使用
+     *          REFUND_SOURCE_UNSETTLED_FUNDS --- 未结算资金退款（默认使用未结算资金退款）
+     *          REFUND_SOURCE_RECHARGE_FUNDS --- 可用余额退款
      * @return bool
      */
-    public function refund($out_trade_no, $transaction_id, $out_refund_no, $total_fee, $refund_fee, $op_user_id = null) {
+    public function refund($out_trade_no, $transaction_id, $out_refund_no, $total_fee, $refund_fee, $op_user_id = null, $refund_account = '') {
         $data = array();
         $data['out_trade_no'] = $out_trade_no;
         $data['transaction_id'] = $transaction_id;
@@ -333,6 +344,7 @@ class WechatPay {
         $data['total_fee'] = $total_fee;
         $data['refund_fee'] = $refund_fee;
         $data['op_user_id'] = empty($op_user_id) ? $this->mch_id : $op_user_id;
+        !empty($refund_account) && $data['refund_account'] = $refund_account;
         $result = $this->getArrayResult($data, self::MCH_BASE_URL . '/secapi/pay/refund', 'postXmlSSL');
         if (false === $this->_parseResult($result)) {
             return false;
