@@ -18,47 +18,47 @@
                       <tbody>
                         <tr>
                           <td width="120px">APPID:</td>
-                          <td><input type="text" name="appid" class="form-control" size="30" value="{$vo.appid}" placeholder="appID">
+                          <td><input type="text" name="wx_sub_appid" class="form-control" size="30" value="{$vo.wx_sub_appid}" placeholder="appID">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">appSecret:</td>
-                          <td><input type="text" name="appsecret" class="form-control" size="40" value="{$vo.appsecret}" placeholder="appsecret">
+                          <td><input type="text" name="wx_appsecret" class="form-control" size="40" value="{$vo.wx_appsecret}" placeholder="appsecret">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">Token:</td>
-                          <td><input type="text" name="token" class="form-control" size="40" value="{$vo.token}" placeholder="Token">
+                          <td><input type="text" name="wx_token" class="form-control" size="40" value="{$vo.wx_token}" placeholder="Token">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">encodingASEKey:</td>
-                          <td><input type="text" name="encoding" class="form-control" value="{$vo.encoding}" size="40" placeholder="encodingASEKey">
+                          <td><input type="text" name="wx_encoding" class="form-control" value="{$vo.wx_encoding}" size="40" placeholder="encodingASEKey">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">URL:</td>
-                          <td><input type="text" name="wxurl" class="form-control" value="{$vo.wxurl}" size="40" placeholder="url">
+                          <td><input type="text" name="wx_url" class="form-control" value="{$vo.wx_url}" size="40" placeholder="url">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">商户id:</td>
-                          <td><input type="text" name="mchid" class="form-control" value="{$vo.mchid}" size="20" placeholder="商户id">
+                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mchid}" size="20" placeholder="商户id">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">商户支付密钥Key:</td>
-                          <td><input type="text" name="mchkey" class="form-control" value="{$vo.mchkey}" size="40" placeholder="商户支付密钥Key">
+                          <td><input type="text" name="wx_mchkey" class="form-control" value="{$vo.wx_mchkey}" size="40" placeholder="商户支付密钥Key">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">订单模板消息:</td>
-                          <td><input type="text" name="tplmsg_order_id" class="form-control" value="{$vo.tplmsg_order_id}" size="60" placeholder="订单模板消息id">
+                          <td><input type="text" name="wx_tplmsg_order_id" class="form-control" value="{$vo.wx_tplmsg_order_id}" size="60" placeholder="订单模板消息id">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">模板消息备注:</td>
-                          <td><textarea name="tplmsg_order_remark" cols="30" rows="3">{$vo.tplmsg_order_remark}</textarea></td>
+                          <td><textarea name="wx_tplmsg_order_remark" cols="30" rows="3">{$vo.wx_tplmsg_order_remark}</textarea></td>
                         </tr>
                         <tr>
                           <td width="120px">默认价格组:</td>
@@ -91,6 +91,10 @@
                       </table>
                       </div>
                     </fieldset>
+                    <!--主商户-->
+                    <input type="hidden" name="wx_mchid" value="{$vo.wx_mchid}">
+                    <input type="hidden" name="wx_appid" value="{$vo.wx_appid}">
+
                 </div>
               </div>
               <div id="wtab-5" class="tab-pane">
@@ -102,13 +106,13 @@
                           <tbody>
                             <tr>
                               <td width="100px">分享标题:</td>
-                              <td><input type="text" name="share_title" value="{$vo.share_title}" class="form-control required" data-rule="required;" size="40" placeholder="分享标题">
+                              <td><input type="text" name="wx_share_title" value="{$vo.wx_share_title}" class="form-control required" data-rule="required;" size="40" placeholder="分享标题">
                               <span class="remark">出现在朋友圈中的标题</span>
                               </td>
                             </tr>
                             <tr>
                               <td width="100px">分享描述:</td>
-                              <td><textarea name="share_desc" cols="30" rows="3">{$vo.share_desc}</textarea>
+                              <td><textarea name="wx_share_desc" cols="30" rows="3">{$vo.share_desc}</textarea>
                               </td>
                             </tr>
                             <tr>
@@ -145,7 +149,7 @@
                           <tbody>
                             <tr>
                               <td width="100px">页面标题:</td>
-                              <td><input type="text" name="page_title" value="{$vo.page_title}" class="form-control required" data-rule="required;" size="40" placeholder="页面标题">
+                              <td><input type="text" name="wx_page_title" value="{$vo.wx_page_title}" class="form-control required" data-rule="required;" size="40" placeholder="页面标题">
                               <span class="remark">出现在页面中的标题</span>
                               </td>
                             </tr>
@@ -227,7 +231,6 @@
   </div>                   
 </div>
 <input name="type" value="2" type="hidden">
-  <input name="product_id" value="{$pid}" type="hidden">
   <div class="bjui-pageFooter">
     <ul>
       <li>

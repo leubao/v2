@@ -76,7 +76,7 @@ class SalesController extends ManageBase{
                     if($key!="__hash__"&&$key!="product_id"&&$key!='type'){
                         $ginfo["varname"] = $key;
                         $ginfo["value"]   = trim($value);
-                        $ginfo["product_id"] = $this->pid;
+                        $ginfo["product_id"] = $product_id;
                         $ginfo["type"]  =   $type;
                         $add = $db->add($ginfo);
                     }
@@ -103,24 +103,9 @@ class SalesController extends ManageBase{
 			$this->assign("vo",$config);
             //获取价格分组
             $group = M('CrmGroup')->where(array('status'=>1,'type'=>4,'product_id'=>$product_id))->field('id,name,price_group')->select();
-            /*TODO 需要优化*/
-            $proconf = cache('ProConfig');
-            $proconf = $proconf[$product_id][2];
-            $api = new \Wechat\Service\Api(
-                array(
-                    'appId' => $proconf['appid'],
-                    'appSecret' => $proconf['appsecret'],
-                    'get_access_token' => function(){
-                        // 用户需要自己实现access_token的返回
-                        return S('wechat_token');
-                    },
-                    'save_access_token' => function($token) {
-                        // 用户需要自己实现access_token的保存
-                        S('wechat_token', $token);
-                    }
-                )
-            );
-            $reg = $api->get_authorize_url('snsapi_userinfo',U('Wechat/Index/reg',array('pid'=>$this->pid,'type'=>9)));
+            $oauth = & load_wechat('Oauth',$product_id,1);
+            // 执行接口操作
+            $reg = $oauth->getOauthRedirect(U('Wechat/Index/reg',array('pid'=>$product_id,'type'=>9)), $state, 'snsapi_userinfo');
             $this->assign('group',$group)->assign('reg',$reg)->display();
 		}
 	}

@@ -957,14 +957,14 @@ function xorcrypt($data, $key){
  * @param  string $product_id 产品id
  * @return WechatReceive
  */
-function & load_wechat($type = '',$scene = '',$product_id = '') {
+function & load_wechat($type = '',$product_id = '',$submch = '') {
     !class_exists('Wechat\Loader', FALSE) && Vendor('Wechat.Loader'); 
     static $wechat = array();
     $index = md5(strtolower($type));
     if (!isset($wechat[$index])) {
-        if(empty($product_id)){
-            $proconf = cache('ProConfig_'.$plan['product_id']);
-            $proconf = $proconf[6];
+        if(!empty($product_id)){
+            $proconf = cache('ProConfig');
+            $proconf = $proconf[$product_id][2];
             //定义微信公众号配置参数（这里是可以从数据库读取的哦）
             $options = array(
                 'token'           => $proconf['token'], // 填写你设定的key
@@ -979,8 +979,14 @@ function & load_wechat($type = '',$scene = '',$product_id = '') {
                 'ssl_key'         => $proconf['ssl_key'], // 微信支付，双向证书（可选，操作退款或打款时必需）
                 //'cachepath'       => '', // 设置SDK缓存目录（可选，默认位置在Wechat/Cache下，请保证写权限）
             );
+            if($submch == '1'){
+                //页面注册等使用子商户id  作为主要ID
+                $options = array(
+                    'appid'           => $proconf['wx_sub_appid']
+                );
+            }
             // 设置SDK的缓存路径
-            $config['cachepath'] = CACHE_PATH . 'Data/';
+            $options['cachepath'] = CACHE_PATH . 'Data/';
         }else{
             $proconf = cache('Config');
             $options = array(
@@ -989,7 +995,7 @@ function & load_wechat($type = '',$scene = '',$product_id = '') {
             );
         }
         
-        $wechat[$index] = & \Wechat\Loader::get_instance($type, $config);
+        $wechat[$index] = & \Wechat\Loader::get_instance($type, $options);
     }
     return $wechat[$index];
 }

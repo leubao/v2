@@ -55,11 +55,11 @@
         <td>{$vo.status|status}</td>
         <td>{$vo.cash}</td>
         <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
-
         <td>
           <a href="{:U('Sales/Full/qrcode',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="fullqr">二维码</a>
           
           <a href="{:U('Sales/Full/edit',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="full_edit">编辑</a>
+          <a href="{:U('Sales/Sales/unbundling',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="full_edit">解绑</a>
           <!--|
           <a href="{:U('Sales/Full/order',array('id'=>$vo.id));}">订单</a>|
           <a href="{:U('Sales/Full/income',array('id'=>$vo.id));}">收入</a>-->

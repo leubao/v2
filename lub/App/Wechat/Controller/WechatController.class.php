@@ -18,16 +18,12 @@ class WechatController extends ManageBase{
 	function index(){
         $db = M("ConfigProduct");   //产品设置表 
         $type = '2';
-        $list = $db->where(array('product_id'=>$this->pid,'type'=>$type))->select();
+        $product_id = (int)get_product('id');
+        $list = $db->where(array('product_id'=>$product_id,'type'=>$type))->select();
         foreach ($list as $k => $v) {
             $config[$v["varname"]] = $v["value"];
         }
         if(IS_POST){
-            $product_id = $_POST["product_id"];
-            if($product_id <> $this->pid){
-                $this->erun('配置失败,请刷新页面重试...');
-                return false;
-            }
             $data = $_POST;
             if (empty($data) || !is_array($data)) {
                 $this->erun('配置数据不能为空！');
@@ -70,29 +66,15 @@ class WechatController extends ManageBase{
             D('Common/Config')->config_cache();
             $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME));    
         }else{
-
             //获取价格分组
             $price = M('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
-           //dump($config['appid']);
-            $this->api = new Api(
-                array(
-                    'appId' => $config['appid'],
-                    'appSecret' => $config['appsecret'],
-                    'get_access_token' => function(){
-                        // 用户需要自己实现access_token的返回
-                        return S('wechat_token');
-                    },
-                    'save_access_token' => function($token) {
-                        // 用户需要自己实现access_token的保存
-                        S('wechat_token', $token);
-                    }
-                )
-            );
-
-            $reg = $this->api->get_authorize_url('snsapi_userinfo',U('Wechat/Index/reg',array('pid'=>$this->pid)));
-            $view = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/show',array('pid'=>$this->pid)));
-            $channel = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/auth_channel',array('pid'=>$this->pid)));
-            $active = $this->api->get_authorize_url('snsapi_base',U('Wechat/Index/acty',array('act'=>1,'pid'=>$this->pid)));
+            // SDK实例对象
+            $oauth = & load_wechat('Oauth',$product_id,1);
+            // 执行接口操作
+            $reg = $oauth->getOauthRedirect(U('Wechat/Index/reg',array('pid'=>$product_id)), $state, 'snsapi_userinfo');
+            $view = $oauth->getOauthRedirect(U('Wechat/Index/show',array('pid'=>$product_id)), $state, 'snsapi_base');
+            $channel = $oauth->getOauthRedirect(U('Wechat/Index/auth_channel',array('pid'=>$product_id)), $state, 'snsapi_base');
+            $active = $oauth->getOauthRedirect(U('Wechat/Index/acty',array('pid'=>$product_id,'act'=>1)), $state, 'snsapi_base');
             $this->assign('price',$price)
                 ->assign('view',$view)
                 ->assign('reg',$reg)
