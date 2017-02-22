@@ -1073,3 +1073,51 @@ function load_payment($pay = '',$product_id = ''){
     //根据支付类型选择驱动
     return $options;
 }
+/**
+ * lubTicket redis 操作API
+ * @param  string $apiport 要操作的接口
+ * @param  string $key     键名
+ * @param  string $value   键值
+ * @param  string $time    有效时间
+ * @return true|false  
+ */
+function load_redis($apiport,$key,$value = '',$time = ''){
+    $redis = new \Redis();
+    $redis->connect(C('REDIS_HOST'),C('REDIS_PORT'));
+    $redis->auth(C('REDIS_AUTH'));
+    switch ($apiport) {
+        case 'lsize':
+            //判断列表中元素个数
+            $return = $redis->lsize($key);
+            break;
+        case 'rPop':
+            //获取队列中最后一个元素，且移除
+            if((int)$redis->lsize($key) > 0){
+                $return = $redis->rPop($key);
+            }else{
+                $return = false;
+            }
+            break;
+        case 'lpush':
+            //写入带处理队列，若存在则不再写入
+            $return = $redis->lPush($key,$value);
+            break;
+        case 'set':
+            $return = $redis->set($key,$value);
+            break;
+        case 'setex':
+            /**
+             * 设置有效期
+             */
+            $return = $redis->setex($key, $time, $value);
+            break;
+        case 'get':
+            $return = $redis->get($key);
+            break;
+        case 'delete':
+            //删除指定key
+            $return = $redis->delete($key);
+            break;
+    }
+    return $return;
+}

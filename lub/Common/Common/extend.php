@@ -1802,15 +1802,6 @@ function objectToArray($e){
         $phone = M('User')->where(array('id'=>$param))->getField('phone');
         return $phone;
     }
-    /**
-     * 根据产品类型和产品id获取产品表
-     * @param  int $param 产品类型
-     * @param  int $param 产品id
-     * @return string  返回表名称
-     */
-    function get_product_table($param,$product_id){
-
-    }
 /**
  * 生成二维码后通过base64处理后返回
  * @param  string $data 二维码数据
