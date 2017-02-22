@@ -17,11 +17,11 @@ function sales_type($param = ''){
 			$return = "推广";
 			$label = "info";
 			break;
-		case '2':
+		case '8':
 			$return = "全员销售";
 			$label = "default";
 			break;
-		case '3':
+		case '9':
 			$return = "三级分销";
 			$label = "success";
 			break;

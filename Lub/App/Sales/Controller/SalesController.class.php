@@ -109,5 +109,18 @@ class SalesController extends ManageBase{
             $this->assign('group',$group)->assign('reg',$reg)->display();
 		}
 	}
-	
+	/**
+     *  解除绑定
+     */
+    function unbundling(){
+        $ginfo = I('get.');
+        if($ginfo['id']){
+            $this->erun("参数错误");
+        }
+        $user = D('User')->where(array('user_id'=>$ginfo['id']))->find();
+        if($user['type'] == '9'){
+
+        }
+        $status = D('WxMember')->where(array('user_id'=>$ginfo['id']))->getField('');
+    }
 }
