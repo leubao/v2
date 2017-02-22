@@ -101,7 +101,6 @@ class Order extends \Libs\System\Service {
 			return false;
 		}
 		if($info['type'] == '2'){
-			//团队ALTER TABLE `lub_team_order` ADD `number` INT(3) NOT NULL COMMENT '数量' AFTER `order_sn`;
 			//个人不允许底价结算
 			$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem']);
 			//严格验证渠道订单写入返利状态
@@ -112,6 +111,7 @@ class Order extends \Libs\System\Service {
 			}
 			//判断是否是底价结算['group']['settlement']
 			if($crmInfo['group']['settlement'] == '1'){
+				/*
 				$teamData = array(
 					'order_sn' 		=> $sn,
 					'plan_id' 		=> $plan['id'],
@@ -135,13 +135,9 @@ class Order extends \Libs\System\Service {
 				}else{
 					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
 					if(!$in_team){error_insert('400017');$model->rollback();return false;}
-				}
-			}else{
-				$in_team = true;
+				}*/
+				load_redis('lpush','PreOrder',$info['order_sn']);
 			}
-
-		}else{
-			$in_team = true;
 		}
 		/*写入订单信息*/
 		$orderData = array(
@@ -160,18 +156,13 @@ class Order extends \Libs\System\Service {
 			'status' => '1',
 			'number' =>$count,
 		);
-		
-		//$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
-		//$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($info)));
-		
-
 		$newInfo = array('subtotal'	=> $info['subtotal'],'type'=>$info['type'],'checkin'=> $info['checkin'],'sub_type'=>$info['sub_type'],'num'=>$info['num'],'data' => $seatData,'crm' => $info['crm'],'pay' => $info['param'][0]['is_pay'] ? $info['param'][0]['is_pay'] : '1','param'=> $info['param']);
 
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($newInfo)));
 		//dump($flag);dump($state);dump($oinfo);dump($in_team);
 		/*记录售票员操作日志*/
-		if($flag && $state && $oinfo && $in_team){
+		if($flag && $state && $oinfo){
 			$model->commit();//提交事务
 			return $sn;
 		}else{
@@ -624,6 +615,7 @@ class Order extends \Libs\System\Service {
 		$createtime = time();
 		$ticketType = F("TicketType".$plan['product_id']);
 		$proconf = cache('ProConfig');
+		$proconf = $proconf[$plan['product_id']]['1'];
 		if(empty($ticketType) || empty($seat)){error_insert('4000076');return false;}
 		/*多表事务*/
 		$model = new Model();
@@ -635,9 +627,7 @@ class Order extends \Libs\System\Service {
 		if($channel == '1' && $info['pay'] == '2'){
 			//获取扣费条件
 			$cid = money_map($info['channel_id']);
-			//先消费后记录
-			//$c_pay = $model->table(C('DB_PREFIX').'crm')->where(array('id'=>$cid))->setDec('cash',$info['money']);
-			//验证客户余额是否够用
+			//先消费后记录验证客户余额是否够用
 			$balance = M('Crm')->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
 			if($balance){
 				$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
@@ -705,7 +695,7 @@ class Order extends \Libs\System\Service {
 						$rebate2 = $rebate2+$ticketFull['2']*$va['num'];
 						$rebate3 = $rebate3+$ticketFull['3']*$va['num'];
 					}*/
-					$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
+					//$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
 					
 					/*以下代码用于校验*/
 					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
@@ -720,10 +710,10 @@ class Order extends \Libs\System\Service {
 					}
 					//统计订单座椅个数
 					$number = (int)$number+$va['num'];
-					if($proconf[$plan['product_id']]['1']['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
+					if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
 				}
 				//按区域发送短信
-				if($proconf[$plan['product_id']]['1']['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
+				if($proconf['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
 			}
 			/*座椅信息*/
 			$seatInfo = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(array('order_sn'=>$info['order_sn']))->field('order_sn,area,seat,sale')->select();
@@ -792,7 +782,7 @@ class Order extends \Libs\System\Service {
 			//是否为团队订单 
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
-				if($proconf[$plan['product_id']]['1']['quota'] == '1'){
+				if($proconf['quota'] == '1'){
 					if(in_array($info['type'],array('2','4'))){
 						$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
 					}else{
@@ -805,6 +795,21 @@ class Order extends \Libs\System\Service {
 						return false;
 					}
 				}
+				//个人允许底价结算,且有返佣
+				$crmInfo = google_crm($plan['product_id'],$oInfo['crm'][0]['qditem'],$oInfo['crm'][0]['guide']);
+				//严格验证渠道订单写入返利状态
+				if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
+					error_insert('400018');
+					$model->rollback();
+					return false;
+				}
+				//判断是否是底价结算
+				if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
+					//存储待处理数据
+					load_redis('lpush','PreOrder',$info['order_sn']);
+				}
+				
+				/*
 				//个人允许底价结算,且有返佣
 				$crmInfo = google_crm($plan['product_id'],$oInfo['crm'][0]['qditem'],$oInfo['crm'][0]['guide']);
 				//严格验证渠道订单写入返利状态
@@ -915,13 +920,13 @@ class Order extends \Libs\System\Service {
 					$redis->lPush('test',$info['order_sn']);
 					//echo $redis->get("test");
 					//窗口团队时判断是否是底价结算
-					if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
+					if($info['type'] == '2' && $proconf['settlement'] == '2'){
 						$in_team = true;
 					}else{
 						$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
 						if(!$in_team){error_insert('400017');$model->rollback();return false;}
 					}
-				}
+				}*/
 			}
 			$pre = true;$no_sms = '2';
 		}else{
@@ -941,7 +946,7 @@ class Order extends \Libs\System\Service {
 			$model->commit();//提交事务
 			//发送成功短信
 			if($info['addsid'] <> '1' && $no_sms <> '1'){
-			    if($proconf[$plan['product_id']]['1']['crm_sms']){
+			    if($proconf['crm_sms']){
 			    	$crminfo = Order::crminfo($plan['product_id'],$oInfo['crm'][0]['qditem']);
 			    }
 				$msgs = array('phone'=>$oInfo["crm"][0]['phone'],'title'=>planShows($plan['id']),'num'=>$counts,'remark'=>$msg,'sn'=>$info['order_sn'],'crminfo'=>$crminfo);
@@ -1053,6 +1058,7 @@ class Order extends \Libs\System\Service {
 		//读取订单对应计划
 		$plan = F('Plan_'.$oinfo['plan_id']);
 		$proconf = cache('ProConfig');
+		$proconf = $proconf[$plan['product_id']]['1'];
 		$plan_param = unserialize($plan['param']);
 		$ticketType = F("TicketType".$plan['product_id']);
 		foreach ($seat['area'] as $k=>$v){
@@ -1168,6 +1174,8 @@ class Order extends \Libs\System\Service {
 		}
 		//判断是否是底价结算['group']['settlement']
 		if($crmInfo['group']['settlement'] == '1'){
+			load_redis('lpush','PreOrder',$info['order_sn']);
+			/*
 			$teamData = array(
 				'order_sn' 		=> $oinfo['order_sn'],
 				'plan_id' 		=> $oinfo['plan_id'],
@@ -1187,12 +1195,13 @@ class Order extends \Libs\System\Service {
 			);
 			$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
 			if(!$in_team){error_insert('400017');$model->rollback();return false;}
+			*/
 		}
 		//dump($flag);dump($flags);dump($state);dump($in_team);dump($oinfo);
 		if($state && $flag && $flags && $ostate){
 			$model->commit();//提交事务
 			//发送成功短信
-			if($proconf[$plan['product_id']]['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
+			if($proconf['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
 			$msgs = array('phone'=>$param["crm"][0]['phone'],'title'=>planShows($plan['id']),'remark'=>$msg,'num'=>$counts,'sn'=>$oinfo['order_sn'],'crminfo'=>$crminfo);
 			if($oinfo['pay'] == '1' || $oinfo['pay'] == '3'){
 				Sms::order_msg($msgs,6);
@@ -1297,6 +1306,7 @@ class Order extends \Libs\System\Service {
 		if($ticket_type == '1'){
 			//定义座位号方式
 			$proconf = cache('ProConfig');
+			$proconf = $proconf[$product_id]['1'];
 			switch ($proconf[$product_id]['1']['print_seat']) {
 				case '1':
 					$seat = $seats[0].'排'.$seats[1].'号';
@@ -1314,7 +1324,7 @@ class Order extends \Libs\System\Service {
 		}else{
 			$seat = $seats[0].'排'.$seats[1].'号';
 		}
-		if($proconf[$product_id]['1']['print_mouth'] == '1'){
+		if($proconf['print_mouth'] == '1'){
 			return Order::print_mouth($seats[0]).$seat;
 		}else{
 			return $seat;
@@ -1478,8 +1488,6 @@ class Order extends \Libs\System\Service {
 		$money = 0;
 		$rebate	= 0;
 		$createtime = time();
-		//$uInfo = \Item\Service\Partner::getInstance()->getInfo();//读取当前登录用户信息
-		
 		//读取订单
 		$oinfo = D('Order')->where(array('order_sn'=>$info['sn']))->relation(true)->find();
 		if($oinfo['status'] == '9' || $oinfo['status'] == '1'){
@@ -1489,6 +1497,8 @@ class Order extends \Libs\System\Service {
 		}
 		//读取订单对应计划
 		$plan = F('Plan_'.$oinfo['plan_id']);
+		$proconf = cache('ProConfig');
+		$proconf = $proconf[$plan['product_id']]['1'];
 		if(empty($plan)){error_insert('400005');$model->rollback();return false;}
 		$ticketType = F("TicketType".$plan['product_id']);
 		$count = count($info['data']);//统计座椅个数
@@ -1498,7 +1508,6 @@ class Order extends \Libs\System\Service {
 				'seat' => $v['seatid'],
 				'status' => array('not in','2,99'), //政企订单可排预留座位,
 			);
-			//$seats = explode('-', $v['seatid']);
 			$data = array(
 				'order_sn' => $oinfo['order_sn'],
 				'soldtime' => $createtime,
@@ -1553,8 +1562,6 @@ class Order extends \Libs\System\Service {
 		}
 		//检测该订单是否有补贴
 		if($oinfo['type'] == '4'){
-			//团队ALTER TABLE `lub_team_order` ADD `number` INT(3) NOT NULL COMMENT '数量' AFTER `order_sn`;
-			//个人不允许底价结算
 			$crmInfo = google_crm($plan['product_id'],$hdata['crm'][0]['qditem']);
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
@@ -1564,6 +1571,7 @@ class Order extends \Libs\System\Service {
 			}
 			//判断是否是底价结算['group']['settlement']
 			if($crmInfo['group']['settlement'] == '1'){
+				/*
 				$teamData = array(
 					'order_sn' 		=> $oinfo['order_sn'],
 					'plan_id' 		=> $plan['id'],
@@ -1581,21 +1589,18 @@ class Order extends \Libs\System\Service {
 					'uptime'		=> $createtime,
 				);
 				$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
-			}else{
-				$in_team = true;
+				*/
 			}
-		}else{
-			$in_team = true;
 		}
 		//得到新数组
 		$hdata['data'] = $seatData;
 		//$newData = array_merge($hdata['data'],$seatData);
 		$up_order = $model->table(C('DB_PREFIX').'order')->where(array('order_sn' =>$info['sn']))->setField('status','1');
 		$states = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn' =>$info['sn']))->setField('info',serialize($hdata));
-		if($up_order && $states && $flag && $in_team){
+		if($up_order && $states && $flag){
 			$model->commit();//提交事务
 			//发送成功短信
-			if($proconf[$plan['product_id']]['1']['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}
+			if($proconf['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}
 			$msgs = array('phone'=>$hdata["crm"][0]['phone'],'title'=>planShows($plan['id']),'num'=>$count,'remark'=>$msg,'sn'=>$info['sn'],'crminfo'=>$crminfo);
 			//手动排座分为政府和渠道
 			if($oinfo['pay'] == '1' || $oinfo['pay'] == '3'){
@@ -1633,12 +1638,4 @@ class Order extends \Libs\System\Service {
 		}
 		return true;
 	}
-	/**
-	 * 多级分销奖金计算
-	 */
-	function full($value='')
-	{
-		# code...
-	}
-	
 }

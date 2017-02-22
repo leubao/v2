@@ -16,7 +16,16 @@ class Rebate extends \Libs\System\Service {
 	 */
 	function ajax_rebate_order(){
 		//读取队列中未处理订单
-		
+		$redis = new \Redis();
+	    $redis->connect('127.0.0.1',6379);
+	    //判断列表中元素个数
+	    $len = $redis->lsize('test');
+		if($len > 0){
+			//获取队列中最后一个元素，且移除
+			$sn = $redis->rPop('test');
+		}
+		//写入带处理队列，若存在则不再写入
+		$redis->lPush('test','1212211212');
 		//读取当前在五分钟内所有团队订单   团队订单分为渠道订单和分销订单
 		$map = array(
 			'order_sn' => $order_sn,
@@ -112,7 +121,6 @@ class Rebate extends \Libs\System\Service {
 		}else{
 			return $userid;
 		}
-
 	}
 	//计算补贴金额
     function rebate($seat,$product_id){

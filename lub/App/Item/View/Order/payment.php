@@ -16,8 +16,6 @@
     <input type="text" name="money" class="form-control" size="20" value="{$ginfo['money']}" disabled>
   </div>
   <div class="form-group" id="payMsg">
-    <p>扫码成功,等待客户确认....</p>
-    <p>客户确认成功,打印门票....</p>
   </div>
   <div class="form-group">
     <input type="text" name="card" class="form-control" size="20" id="pay_card" value="">
@@ -34,15 +32,18 @@
     </ul>
 </div>
 <script>
+/*
   $(document).ready(function(){
     settime('countdown',90);
-  });
+  });*/
+
   $("#pay_card").focus();
   $('#pay_card').keydown(function(e){
     var pay_card = $("#pay_card").val(),
         keycode = (e.keyCode ? e.keyCode : e.which),
-        payMsg = '';
-    if(keycode ==13){
+        payMsg = $('#payMsg');
+        console.log(keycode);
+    if(keycode == 13){
       if(isNull(pay_card) == false){
         layer.msg('扫码失败...');
         return false;
@@ -64,13 +65,11 @@
         },
         success:function(data){
             if(data.statusCode == "200"){
-              //刷新
               payMsg.html("扫码成功,等待客户确认....");
               //倒计时支付结果，等待支付结果
-              settime('countdown',90);
+              //settime('countdown',90);
               //开始轮询支付结果
-              //等待第三方返回结果
-              //轮询结果
+              //等待第三方返回结果,轮询结果
               setInterval(function(){
                 $.get("{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay']));}", function(result){
                   if(result.statusCode == "200"){
@@ -85,17 +84,14 @@
                     $(this).dialog('close','payment');
                   }
                 });
-                alert('www');
                 //第三方返回成功
                 //调出打印窗口
-              }, 1000);
+              }, 60000);
             }else{
               payMsg.html('扫码失败...');
             }
         }
       });
-      
-      //(postData,url);
     } 
   });
   /**

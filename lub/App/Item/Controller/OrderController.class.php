@@ -428,7 +428,7 @@ class OrderController extends ManageBase{
 		if($run != false){
 			//支付方式影响返回结果
 			if(in_array($run['is_pay'],array('4','5'))){
-				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan_id'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money']));
+				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money']));
 				$title = "网银支付";
 				$width = '600';
 				$height = '400';
@@ -472,6 +472,24 @@ class OrderController extends ManageBase{
             if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
 				$run = Order::sweep_pay_seat($info,$oinfo);
+				if($run != false){
+					//支付方式影响返回结果
+					$return = array(
+						'statusCode' => '200',
+						'title'		 =>	"门票打印",
+						'width'		 =>	'213',
+						'height'	 =>	'208',
+						'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
+					);
+					$message = "支付成功!单号".$run;
+					D('Item/Operationlog')->record($message, 200);//记录售票员日报表
+				}else{
+					$return = array(
+						'statusCode' => '300'
+					);
+					$message = "支付失败!";
+					D('Item/Operationlog')->record($message, 300);//记录售票员日报表
+				}
 			}
 			$product = product_name($oinfo['product_id'],1);
 			//构造支付订单数据
@@ -480,7 +498,7 @@ class OrderController extends ManageBase{
 			    "amount"	=> $oinfo['money'],// 单位为元 ,最小为0.01
 			    "client_ip"	=> get_client_ip(),
 			    "subject"	=> $product."门票",
-			    "body"		=> planShow($oinfo['plan_id'],1).$product."门票",
+			    "body"		=> planShow($oinfo['plan_id'],1,1).$product."门票",
 			    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
 			    "extra_param"	=> '',
 			];
@@ -497,24 +515,6 @@ class OrderController extends ManageBase{
 				$return = array(
 					'statusCode' => '200'
 				);
-			}
-			if($run != false){
-				//支付方式影响返回结果
-				$return = array(
-					'statusCode' => '200',
-					'title'		 =>	"门票打印",
-					'width'		 =>	'213',
-					'height'	 =>	'208',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
-				);
-				$message = "支付成功!单号".$run;
-				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
-			}else{
-				$return = array(
-					'statusCode' => '300'
-				);
-				$message = "支付失败!";
-				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
 			}
 			die(json_encode($return));
 		}else{
