@@ -790,9 +790,7 @@ class Report{
     	foreach ($data as $key => $value) {
     		//$channel[$value['crm_id']][] = $value;
     		if($value['type'] == '1'){
-    			if(){
-    				
-    			}
+    			
     			$list[$value['crm_id']]['topup'] += $value['cash'];
     		}
     		/*

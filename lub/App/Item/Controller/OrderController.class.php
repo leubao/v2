@@ -512,10 +512,10 @@ class OrderController extends ManageBase{
 			if($info['pay_type'] == '5'){
 				//微信支付
 				$result = $this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
-				if(!empty($result['err_code'])){
+				if(!empty($result['errCode'])){
 					$return = array(
 						'statusCode' => '400',
-						'message'=>'['.$result['err_code'].']'.$result['err_code_des']
+						'message'=>'['.$result['errCode'].']'.$result['errMsg']
 					);
 				}else{
 					$return = array(
@@ -542,7 +542,9 @@ class OrderController extends ManageBase{
 		$money = $payData['amount']*100;
 		//创建JSAPI签名参数包，这里返回的是数组
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
-		dump($result);
+		if($result === FALSE){
+			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
+		}
 		return $result;
 
 	}

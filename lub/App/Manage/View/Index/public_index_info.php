@@ -74,14 +74,14 @@
     <div class="row" style="padding:5px;">
       <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
           <strong>常用软件下载</strong>
-          <h5>打印插件 : <a href="http://new.leubao.com/d/print_32.exe" target="_blank">32位</a>　|
-          <a href="http://new.leubao.com/d/print_64.exe" target="_blank">64位</a></h5>
-          <h5>打印机驱动 : <a href="http://new.leubao.com/d/TOSHIBA_TEC_7.3.exe" target="_blank">东芝（TOSHIBA)B-EX4T1-GS14驱动</a></h5>
+          <h5>打印插件 : <a href="http://ticket.leubao.com/d/print_32.exe" target="_blank">32位</a>　|
+          <a href="http://ticket.leubao.com/d/print_64.exe" target="_blank">64位</a></h5>
+          <h5>打印机驱动 : <a href="http://ticket.leubao.com/d/TOSHIBA_TEC_7.3.exe" target="_blank">东芝（TOSHIBA)B-EX4T1-GS14驱动</a></h5>
           <h5>浏览器 : <a href="http://chrome.360.cn/" target="_blank">推荐360急速浏览器</a></h5>  
       </div>     
       <div class="alert alert-success" role="alert" style="margin:0 0 5px; padding:5px 15px;">
           <strong>手册及其它</strong>
-          <h5>渠道版手册 : <a href="http://new.leubao.com/help.pdf" target="_blank">渠道版V1.0手册</a></h5>
+          <h5>渠道版手册 : <a href="http://ticket.leubao.com/help.pdf" target="_blank">渠道版V1.0手册</a></h5>
           <h5>系统手册 : <a href="http://www.leubao.com/index.php?g=Manual" target="_blank">云鹿票务管理平台 V2.1.3 </a></h5>
           <h5>新功能预览 : <a href="http://new.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
           <h5>更新日志 : <a href="http://www.leubao.com/index.php?a=up_log" target="_blank">[更新日志]</a>　</h5>

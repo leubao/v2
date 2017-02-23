@@ -89,7 +89,7 @@
               }, 60000);
             }
             if(data.statusCode == "400"){
-              layer.msg(result.message);
+              layer.msg(data.message);
               $(this).dialog('refresh', 'work_quick');
               //关闭当前窗口
               $(this).dialog('close','payment');
