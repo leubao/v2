@@ -256,119 +256,6 @@ function str_cut($sourcestr, $length, $dot = '...') {
     }
     return $returnstr;
 }
-/**
- * flash上传初始化
- * 初始化swfupload上传中需要的参数
- * @param $module 模块名称
- * @param $catid 栏目id
- * @param $args 传递参数
- * @param $userid 用户id
- * @param $groupid 用户组id 默认游客
- * @param $isadmin 是否为管理员模式
- */
-function initupload($module, $catid, $args, $userid, $groupid = 8, $isadmin = false) {
-    if (empty($module)) {
-        return false;
-    }
-    //网站配置
-    $config = cache('Config');
-    //检查用户是否有上传权限
-    if ($isadmin) {
-        //后台用户
-        //上传大小
-        $file_size_limit = intval($config['uploadmaxsize']);
-        //上传处理地址
-        $upload_url = U('Attachment/Manage/swfupload');
-    } else {
-        //前台用户
-        $Member_group = cache("Member_group");
-        if ((int) $Member_group[$groupid]['allowattachment'] < 1 || empty($Member_group)) {
-            return false;
-        }
-        //上传大小
-        $file_size_limit = intval($config['qtuploadmaxsize']);
-        //上传处理地址
-        $upload_url = U('Attachment/Upload/swfupload');
-    }
-    //当前时间戳
-    $sess_id = time();
-    //生成验证md5
-    $swf_auth_key = md5(C("AUTHCODE") . $sess_id . ($isadmin ? 1 : 0));
-    //同时允许的上传个数, 允许上传的文件类型, 是否允许从已上传中选择, 图片高度, 图片宽度,是否添加水印1是
-    if (!is_array($args)) {
-        //如果不是数组传递，进行分割
-        $args = explode(',', $args);
-    }
-    //参数补充完整
-    if (empty($args[1])) {
-        //如果允许上传的文件类型为空，启用网站配置的 uploadallowext
-        if ($isadmin) {
-            $args[1] = $config['uploadallowext'];
-        } else {
-            $args[1] = $config['qtuploadallowext'];
-        }
-    }
-    //允许上传后缀处理
-    $arr_allowext = explode('|', $args[1]);
-    foreach ($arr_allowext as $k => $v) {
-        $v = '*.' . $v;
-        $array[$k] = $v;
-    }
-    $upload_allowext = implode(';', $array);
-
-    //上传个数
-    $file_upload_limit = (int) $args[0] ? (int) $args[0] : 8;
-    //swfupload flash 地址
-    $flash_url = CONFIG_SITEURL_MODEL . 'statics/js/swfupload/swfupload.swf';
-
-    $init = 'var swfu_' . $module . ' = \'\';
-    $(document).ready(function(){
-        Wind.use("swfupload",GV.DIMAUB+"statics/js/swfupload/handlers.js",function(){
-            swfu_' . $module . ' = new SWFUpload({
-                flash_url:"' . $flash_url . '?"+Math.random(),
-                upload_url:"' . $upload_url . '",
-                file_post_name : "Filedata",
-                post_params:{
-                    "sessid":"' . $sess_id . '",
-                    "module":"' . $module . '",
-                    "catid":"' . $catid . '",
-                    "uid":"' . $userid . '",
-                    "isadmin":"' . $isadmin . '",
-                    "groupid":"' . $groupid . '",
-                    "watermark_enable":"' . intval($args[5]) . '",
-                    "thumb_width":"' . intval($args[3]) . '",
-                    "thumb_height":"' . intval($args[4]) . '",
-                    "filetype_post":"' . $args[1] . '",
-                    "swf_auth_key":"' . $swf_auth_key . '"
-                  },
-               file_size_limit:"' . $file_size_limit . 'KB",
-               file_types:"' . $upload_allowext . '",
-               file_types_description:"All Files",
-               file_upload_limit:"' . $file_upload_limit . '",
-               custom_settings : {progressTarget : "fsUploadProgress",cancelButtonId : "btnCancel"},
-               button_image_url: "",
-               button_width: 75,
-               button_height: 28,
-               button_placeholder_id: "buttonPlaceHolder",
-               button_text_style: "",
-               button_text_top_padding: 3,
-               button_text_left_padding: 12,
-               button_window_mode: SWFUpload.WINDOW_MODE.TRANSPARENT,
-               button_cursor: SWFUpload.CURSOR.HAND,
-               file_dialog_start_handler : fileDialogStart,
-               file_queued_handler : fileQueued,
-               file_queue_error_handler:fileQueueError,
-               file_dialog_complete_handler:fileDialogComplete,
-               upload_progress_handler:uploadProgress,
-               upload_error_handler:uploadError,
-               upload_success_handler:uploadSuccess,
-               upload_complete_handler:uploadComplete
-        });
-    });
-})
-';
-    return $init;
-}
 
 /**
  * 取得URL地址中域名部分
@@ -523,70 +410,6 @@ function parseTemplateFile($templateFile = '') {
     $TemplateFileCache[$key] = $templateFile;
     return $TemplateFileCache[$key];
 }
-
-/**
- * 生成缩略图
- * @param type $imgurl 图片地址
- * @param type $width 缩略图宽度
- * @param type $height 缩略图高度
- * @param type $thumbType 缩略图生成方式 1 按设置大小截取 0 按原图等比例缩略
- * @param type $smallpic 图片不存在时显示默认图片
- * @return type
- */
-function thumb($imgurl, $width = 100, $height = 100, $thumbType = 0, $smallpic = 'nopic.gif') {
-    static $_thumb_cache = array();
-    if (empty($imgurl)) {
-        return $smallpic;
-    }
-    //区分
-    $key = md5($imgurl . $width . $height . $thumbType . $smallpic);
-    if (isset($_thumb_cache[$key])) {
-        return $_thumb_cache[$key];
-    }
-    if (!$width || !$height) {
-        return $smallpic;
-    }
-    //当获取不到DOCUMENT_ROOT值时的操作！
-    if (empty($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['SCRIPT_FILENAME'])) {
-        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', substr($_SERVER['SCRIPT_FILENAME'], 0, 0 - strlen($_SERVER['PHP_SELF'])));
-    }
-    if (empty($_SERVER['DOCUMENT_ROOT']) && !empty($_SERVER['PATH_TRANSLATED'])) {
-        $_SERVER['DOCUMENT_ROOT'] = str_replace('\\', '/', substr(str_replace('\\\\', '\\', $_SERVER['PATH_TRANSLATED']), 0, 0 - strlen($_SERVER['PHP_SELF'])));
-    }
-    // 解析URLsitefileurl
-    $imgParse = parse_url($imgurl);
-    //图片路径
-    $imgPath = $_SERVER['DOCUMENT_ROOT'] . $imgParse['path'];
-    //取得文件名
-    $basename = basename($imgurl);
-    //取得文件存放目录
-    $imgPathDir = str_replace($basename, '', $imgPath);
-    //生成的缩略图文件名
-    $newFileName = "thumb_{$width}_{$height}_" . $basename;
-    //检查生成的缩略图是否已经生成过
-    if (file_exists($imgPathDir . $newFileName)) {
-        return str_replace($basename, $newFileName, $imgurl);
-    }
-    //检查文件是否存在，如果是开启远程附件的，估计就通过不了，以后在考虑完善！
-    if (!file_exists($imgPath)) {
-        return $imgurl;
-    }
-    //取得图片相关信息
-    list($width_t, $height_t, $type, $attr) = getimagesize($imgPath);
-    //判断生成的缩略图大小是否正常
-    if ($width >= $width_t || $height >= $height_t) {
-        return $imgurl;
-    }
-    //生成缩略图
-    if (1 == $thumbType) {
-        \Image::thumb2($imgPath, $imgPathDir . $newFileName, '', $width, $height, true);
-    } else {
-        \Image::thumb($imgPath, $imgPathDir . $newFileName, '', $width, $height, true);
-    }
-    $_thumb_cache[$key] = str_replace($basename, $newFileName, $imgurl);
-    return $_thumb_cache[$key];
-}
-
 /**
  * 邮件发送
  * @param type $address 接收人 单个直接邮箱地址，多个可以使用数组
@@ -973,10 +796,10 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
                 'appsecret'       => $proconf['appsecret'], // 填写高级调用功能的密钥
                 'encodingaeskey'  => $proconf['encodingaeskey'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
                 'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
-                'partnerkey'      => $proconf['wx_partnerkey'], // 微信支付，密钥（可选）
+                'partnerkey'      => $proconf['wx_mchkey'], // 微信支付，密钥（可选）
                 'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
-                'ssl_cer'         => $proconf['ssl_cer'], // 微信支付，双向证书（可选，操作退款或打款时必需）
-                'ssl_key'         => $proconf['ssl_key'], // 微信支付，双向证书（可选，操作退款或打款时必需）
+                'ssl_cer'         => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem', // 微信支付，双向证书（可选，操作退款或打款时必需）
+                'ssl_key'         => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem', // 微信支付，双向证书（可选，操作退款或打款时必需）
                 //'cachepath'       => '', // 设置SDK缓存目录（可选，默认位置在Wechat/Cache下，请保证写权限）
             );
             if($submch == '1'){
@@ -1084,7 +907,7 @@ function load_payment($pay = '',$product_id = ''){
 function load_redis($apiport,$key,$value = '',$time = ''){
     $redis = new \Redis();
     $redis->connect(C('REDIS_HOST'),C('REDIS_PORT'));
-    $redis->auth(C('REDIS_AUTH'));
+    //$redis->auth(C('REDIS_AUTH'));
     switch ($apiport) {
         case 'lsize':
             //判断列表中元素个数

@@ -124,19 +124,30 @@ class Upload {
             $this->error = '没有上传的文件！';
             return false;
         }
-
-        /* 检测上传根目录 */
+        /* 检查上传目录
+        if (!is_dir($this->rootPath)) {
+            // 尝试创建目录
+            if (!mkdir($this->rootPath, 0777, true)) {
+                $this->error = $this->uploader->getError();
+                return false;
+            }
+        } else {
+            if (!is_writeable($this->rootPath)) {
+                $this->error = '上传目录' . $savePath . '不可写';
+                return false;
+            }
+        }*/
+         //检测上传根目录 
         if(!$this->uploader->checkRootPath($this->rootPath)){
             $this->error = $this->uploader->getError();
             return false;
-        }
-
-        /* 检查上传目录 */
+        } 
+        // 检查上传目录 
         if(!$this->uploader->checkSavePath($this->savePath)){
             $this->error = $this->uploader->getError();
             return false;
         }
-
+       
         /* 逐个检测并上传文件 */
         $info    =  array();
         if(function_exists('finfo_open')){
@@ -193,7 +204,7 @@ class Upload {
                 $file['savepath'] = $this->savePath . $subpath;
             }
 
-            /* 对图像文件进行严格检测 */
+            /* 对图像文件进行严格检测
             $ext = strtolower($file['ext']);
             if(in_array($ext, array('gif','jpg','jpeg','bmp','png','swf'))) {
                 $imginfo = getimagesize($file['tmp_name']);
@@ -201,7 +212,7 @@ class Upload {
                     $this->error = '非法图像文件！';
                     continue;
                 }
-            }
+            } */
 
             /* 保存文件 并记录保存成功的文件 */
             if ($this->uploader->save($file,$this->replace)) {

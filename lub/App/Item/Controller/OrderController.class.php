@@ -498,7 +498,7 @@ class OrderController extends ManageBase{
 			    "amount"	=> $oinfo['money'],// 单位为元 ,最小为0.01
 			    "client_ip"	=> get_client_ip(),
 			    "subject"	=> $product."门票",
-			    "body"		=> planShow($oinfo['plan_id'],1,1).$product."门票",
+			    "body"		=> $product."门票",//planShow($oinfo['plan_id'],1,1).$product."门票",
 			    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
 			    "extra_param"	=> '',
 			];
@@ -511,10 +511,18 @@ class OrderController extends ManageBase{
 			}
 			if($info['pay_type'] == '5'){
 				//微信支付
-				$this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
-				$return = array(
-					'statusCode' => '200'
-				);
+				$result = $this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
+				if(!empty($result['err_code'])){
+					$return = array(
+						'statusCode' => '400',
+						'message'=>'['.$result['err_code'].']'.$result['err_code_des']
+					);
+				}else{
+					$return = array(
+						'statusCode' => '200'
+					);
+				}
+				
 			}
 			die(json_encode($return));
 		}else{
@@ -534,6 +542,8 @@ class OrderController extends ManageBase{
 		$money = $payData['amount']*100;
 		//创建JSAPI签名参数包，这里返回的是数组
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
+		dump($result);
+		return $result;
 
 	}
 	/*轮询支付日志查询支付结果*/

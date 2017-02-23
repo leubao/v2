@@ -43,14 +43,52 @@
                         </tr>
                         <tr>
                           <td width="120px">商户id:</td>
-                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mchid}" size="20" placeholder="商户id">
+                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">商户支付密钥Key:</td>
-                          <td><input type="text" name="wx_mchkey" class="form-control" value="{$vo.wx_mchkey}" size="40" placeholder="商户支付密钥Key">
+                          <td><input type="text" name="wx_sub_mchkey" class="form-control" value="{$vo.wx_sub_mchkey}" size="40" placeholder="商户支付密钥Key">
                           </td>
                         </tr>
+                        <tr>
+                          <td width="120px">apiclient_cert.pem:</td>
+                          <td>
+                              <div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                        data-file-size-limit="1024000000"
+                                        data-file-type-exts="*.pem"
+                                        data-multi="true"
+                                        data-auto="true"
+                                        data-on-upload-success="doc_upload_success"
+                                        data-icon="cloud-upload"></div>
+
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">apiclient_key.pem:</td>
+                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                        data-file-size-limit="1024000000"
+                                        data-file-type-exts="*.pem"
+                                        data-multi="true"
+                                        data-auto="true"
+                                        data-on-upload-success="doc_upload_success"
+                                        data-icon="cloud-upload"></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">rootca.pem:</td>
+                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                        data-file-size-limit="1024000000"
+                                        data-file-type-exts="rootca.pem"
+                                        data-multi="true"
+                                        data-auto="true"
+                                        data-on-upload-success="doc_upload_success"
+                                        data-icon="cloud-upload"></div>
+                          </td>
+                        </tr>
+                        rootca.pem
+                        ssl_cer
+
                         <tr>
                           <td width="120px">订单模板消息:</td>
                           <td><input type="text" name="wx_tplmsg_order_id" class="form-control" value="{$vo.wx_tplmsg_order_id}" size="60" placeholder="订单模板消息id">
@@ -94,6 +132,7 @@
                     <!--主商户-->
                     <input type="hidden" name="wx_mchid" value="{$vo.wx_mchid}">
                     <input type="hidden" name="wx_appid" value="{$vo.wx_appid}">
+                    <input type="hidden" name="wx_mchkey" value="{$vo.wx_mchkey}">
 
                 </div>
               </div>
@@ -124,7 +163,7 @@
                                       <div style="display: inline-block; vertical-align: middle;">
                                         <div data-toggle="upload" data-uploader="{:U('Manage/Config/up_img',array('menuid'=>$menuid,'name'=>'wshare_'.$pid));}" 
                                                             data-file-size-limit="1024000000"
-                                                            data-file-type-exts="*.jpg;*.png;*.gif;"
+                                                            data-file-type-exts="*.jpg;*.png;*.gif;*.pem"
                                                             data-multi="true"
                                                             data-on-upload-success="pic_upload_success"
                                                             data-icon="cloud-upload">分享图标</div>

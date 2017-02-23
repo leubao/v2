@@ -254,23 +254,21 @@ class WechatPay {
      *  @param string $prepay_id
      *  @return array
      */
-    public function createMicroPay($auth_code,$out_trade_no,$total,$goods_tag,$body){
-        $data = array();
-        $data["appId"] = $this->appid;
-        $data["sub_appid"] = $this->sub_appid;
-        $data["mch_id"] = $this->mch_id;
-        $data["sub_mch_id"] = $this->sub_mch_id;
-        $data["nonceStr"] = Tools::createNoncestr();
-        $data["signType"] = "MD5";
-        $data["paySign"] = Tools::getPaySign($option, $this->partnerKey);
-        $data["body"]   =   $body;
-        $data["out_trade_no"]   =   $out_trade_no;
-        $data["total_fee"]  =   $total;
-        $data["goods_tag"]  =   $goods_tag;
-        $data["auth_code"]  =   $auth_code;
-        $data['spbill_create_ip'] = Tools::getAddress(); //调用接口的机器Ip地址
-        $result = $this->postXmlSSL($data, self::MCH_BASE_URL . '/pay/micropay');
-        $json = Tools::xml2arr($result);
+    public function createMicroPay($auth_code,$out_trade_no,$total_fee,$goods_tag,$body){
+        $postdata = array(
+            "appid"            => $this->appid,
+            "mch_id"           => $this->mch_id,
+            "sub_appid"        => $this->sub_appid,
+            "sub_mch_id"       => $this->sub_mch_id,
+            "body"             => $body,
+            "out_trade_no"     => $out_trade_no,
+            "total_fee"        => $total_fee,
+            "auth_code"        => $auth_code,
+            "spbill_create_ip" => Tools::getAddress()
+        );
+        empty($goods_tag) || $postdata['goods_tag'] = $goods_tag;
+        $result = $this->postXml($postdata, self::MCH_BASE_URL . '/pay/micropay');
+        $json = Tools::xml2arr($result);dump($this->_parseResult($json));
         if (!empty($json) && false === $this->_parseResult($json)) {
             return false;
         }

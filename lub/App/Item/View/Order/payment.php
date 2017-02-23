@@ -87,8 +87,12 @@
                 //第三方返回成功
                 //调出打印窗口
               }, 60000);
-            }else{
-              payMsg.html('扫码失败...');
+            }
+            if(data.statusCode == "400"){
+              layer.msg(result.message);
+              $(this).dialog('refresh', 'work_quick');
+              //关闭当前窗口
+              $(this).dialog('close','payment');
             }
         }
       });

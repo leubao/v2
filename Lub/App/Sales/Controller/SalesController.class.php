@@ -119,7 +119,7 @@ class SalesController extends ManageBase{
         }
         $user = D('User')->where(array('user_id'=>$ginfo['id']))->find();
         if($user['type'] == '9'){
-
+            
         }
         $status = D('WxMember')->where(array('user_id'=>$ginfo['id']))->getField('');
     }

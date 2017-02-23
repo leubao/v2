@@ -651,7 +651,7 @@ class IndexController extends ApiBase {
               //    return_code><![CDATA[SUCCESS]]></return_code>
               //    return_msg><![CDATA[OK]]></return_msg>
               // </xml>
-              return xml(['return_code' => 'SUCCESS', 'return_msg' => 'DEAL WITH SUCCESS'])
+              return xml(['return_code' => 'SUCCESS', 'return_msg' => 'DEAL WITH SUCCESS']);
            }
       }
     }
@@ -699,6 +699,9 @@ class IndexController extends ApiBase {
       load_redis('delete','work');
       dump($len);
       dump($sn);
+      $sn = "27177137717127";
+      //load_redis('setex','Pay'.$sn,'222',300);
+      S('Pay'.$sn,'23',400);
       /*
       $whoops = new \Whoops\Run();
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);

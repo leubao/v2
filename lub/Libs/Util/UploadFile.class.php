@@ -9,7 +9,7 @@
 // +----------------------------------------------------------------------
 // | Author: liu21st <liu21st@gmail.com>
 // +----------------------------------------------------------------------
-
+namespace Libs\Util;
 /**
  * 文件上传类
  * @category   ORG
@@ -172,7 +172,7 @@ class UploadFile {//类定义开始
                 $this->error = '上传目录' . $savePath . '不可写';
                 return false;
             }
-        }
+        } 
         $fileInfo = array();
         $isUpload = false;
 

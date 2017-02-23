@@ -382,4 +382,25 @@ class WechatController extends ManageBase{
             $this->assign('data',$info)->display();
         }
     }
+    function public_ca(){
+        $this->display();
+    }
+    function public_upload(){
+        $upload = new \Libs\Util\Upload();// 实例化上传类
+        $upload->maxSize   =  3145728 ;// 设置附件上传大小
+        $upload->exts      =  array('pem');// 设置附件上传类型
+        $upload->autoSub   =  false;
+        $upload->replace   =  true;//存在同名文件是否是覆盖，默认为false
+        $upload->rootPath  =  SITE_PATH.'pay/wxpay/'; // 设置附件上传根目录
+        $upload->savePath  =  get_product('id').'/';
+        $upload->saveName  = '';
+        //dump($_FILES['file']);
+        // 上传单个文件 
+        $info   =   $upload->uploadOne($_FILES['file']);
+        if(!$info) {// 上传错误提示错误信息
+            $this->erun($upload->getError());
+        }else{// 上传成功 获取上传文件信息
+             $this->srun("上传成功",array('tabid'=>$this->menuid.MODULE_NAME));
+        }
+    }
 }

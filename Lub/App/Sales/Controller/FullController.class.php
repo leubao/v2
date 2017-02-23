@@ -161,6 +161,11 @@ class FullController extends ManageBase{
         if(!file_exists($image_file)){
             //构造链接
             $url = U('Wechat/Index/show',array('u'=>$ginfo['id']));
+            // SDK实例对象
+            $oauth = & load_wechat('Oauth',$product_id,1);
+            // 执行接口操作
+            $urls = $oauth->getOauthRedirect($callback, $state, $scope);
+            return $urls;
             $urls = $this->api->get_authorize_url('snsapi_base',$url);
         }
         $base64_image_content = qr_base64($urls,'u-'.$ginfo['id']);

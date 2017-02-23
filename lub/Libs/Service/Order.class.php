@@ -44,7 +44,6 @@ class Order extends \Libs\System\Service {
 				'seat' => $v['seatid'],
 				'status' => array('in','0,66'),
 			);
-			//$seats = explode('-', $v['seatid']);
 			$remark = print_remark($ticketType[$v['priceid']]['remark'],$plan['product_id']);
 			$data = array(
 				'order_sn' => $sn,
@@ -1594,7 +1593,6 @@ class Order extends \Libs\System\Service {
 		}
 		//得到新数组
 		$hdata['data'] = $seatData;
-		//$newData = array_merge($hdata['data'],$seatData);
 		$up_order = $model->table(C('DB_PREFIX').'order')->where(array('order_sn' =>$info['sn']))->setField('status','1');
 		$states = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn' =>$info['sn']))->setField('info',serialize($hdata));
 		if($up_order && $states && $flag){
