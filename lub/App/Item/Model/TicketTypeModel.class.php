@@ -24,7 +24,7 @@ class TicketTypeModel extends Model{
 	/**
 	 * 更新缓存
 	 */
-	 function type_cache($proid){
+	 function type_cache($proid = ''){
 	 	$productId = $proid ? $proid : \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');	 	
 	 	$data = $this->where(array('product_id'=>$productId))->select();
         if (empty($data)) {

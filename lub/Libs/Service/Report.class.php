@@ -72,7 +72,8 @@ class Report{
         //报表生成条件 1 按日期 且包含预定成功 拉取产品列表
         $product = M('Product')->field('id')->select();
         foreach ($product as $key => $value) {
-        	if($proconf[$value['id']]['report'] == '1'){
+        	$tproconf = $proconf[$value['id']][1];
+        	if($tproconf['report'] == '1'){
 	        	//按照日期
 				$map = array(
 	    			'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
@@ -193,12 +194,12 @@ class Report{
  	function ticket_type($general, $seat, $param, $datetime, $type, $product_type, $child = null, $number = null){//dump($seat);
  		//根据票型归类
  		foreach($seat as $k=>$v){
- 			$datalist[$v['priceid']][] = $v;
+ 			$datalist[$v['price_id']][] = $v;
  		}
  		//计算票型内门票数量 以及重组要写入数组
  		$t_type = array_keys($datalist);//获取当前订单的票型
  		for ($i=0; $i < count($datalist); $i++) {
- 			if(!empty($datalist[$t_type[$i]][0]['priceid'])){
+ 			if(!empty($datalist[$t_type[$i]][0]['price_id'])){
  				if($child){
  					$nums[$i] = $number;
  				}else{
@@ -212,7 +213,7 @@ class Report{
 	 			}
 	  			$data[$i] = array(
 	 				'area'		=>	$area,	//区域ID
-					'priceid'	=>	$t_type[$i],//票型ID
+					'price_id'	=>	$t_type[$i],//票型ID
 					'number'	=>	$nums[$i],//数量 	
 					'price'		=>  $datalist[$t_type[$i]][0]['price'],	//单价
 					'discount'	=>  $datalist[$t_type[$i]][0]['discount'],	//结算价
@@ -267,7 +268,7 @@ class Report{
 					'pay'		=>	$value['pay'],//支付方式1现金2余额
 					'addsid' 	=>	$value['addsid'],
 					'area'		=>	$value['area'],	//区域ID
-					'priceid'	=>	$value['priceid'],//票型ID
+					'price_id'	=>	$value['price_id'],//票型ID
 					'number'	=>	$value['number'],//数量 	
 					'price'		=>  $value['price'],	//单价
 					'discount'	=>  $value['discount'],	//结算价
@@ -323,11 +324,11 @@ class Report{
 	*/
 	function plan_ticket_fold($data,$key){
 		foreach ($data as $ke => $value) {
-			$datas[$value['priceid']]['plan_id'] = $key;
-			$datas[$value['priceid']]['priceid'] = $value['priceid'];
-			$datas[$value['priceid']]["price"] 	 = $value["price"];
-        	$datas[$value['priceid']]["discount"] = $value["discount"];
-			$datas[$value['priceid']]['number'] += $value['number'];
+			$datas[$value['price_id']]['plan_id'] = $key;
+			$datas[$value['price_id']]['price_id'] = $value['price_id'];
+			$datas[$value['price_id']]["price"] 	 = $value["price"];
+        	$datas[$value['price_id']]["discount"] = $value["discount"];
+			$datas[$value['price_id']]['number'] += $value['number'];
 		}
 
 		foreach ($datas as $ky => $value) {
@@ -362,24 +363,24 @@ class Report{
 	@param $type int 合并类型  1 计划任务合并 从reprotdata 取数据 2 非计划任务从order 取数据
 	return array 返回数据
 	*/
-	function ticket_fold($data, $datetime, $user_id = null, $channel_id = null, $type = '1'){
+	function ticket_fold($data, $datetime = '', $user_id = null, $channel_id = null, $type = '1'){
 		foreach ($data as $key => $value) {
 			foreach ($value as $ke => $valu) {
-				$num[$key][$valu['priceid']]['num'] += $valu['number'];
-				$num[$key][$valu['priceid']]['rebate'] += $valu['subsidy'];
+				$num[$key][$valu['price_id']]['num'] += $valu['number'];
+				$num[$key][$valu['price_id']]['rebate'] += $valu['subsidy'];
 				//获取票型金额
-				$money = Report::settlement($num[$key][$valu['priceid']]['num'],$valu['price'],$valu['discount']);
-				$datas[$key]['price'][$valu['priceid']] = array( 
+				$money = Report::settlement($num[$key][$valu['price_id']]['num'],$valu['price'],$valu['discount']);
+				$datas[$key]['price'][$valu['price_id']] = array( 
 						'product_id'=> $valu['product_id'],
 						'channel_id'=> $valu['channel_id'],
 						'plan_id' 	=> $valu['plan_id'], 
-					 	'priceid'	=> $valu['priceid'],
+					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
       					'discount' 	=> $valu['discount'],
-      					'number'	=> $num[$key][$valu['priceid']]['num'],
+      					'number'	=> $num[$key][$valu['price_id']]['num'],
       					'money'		=> $money['money'],
       					'moneys'	=> $money['moneys'],
-      					'rebate'	=> $num[$key][$valu['priceid']]['rebate'],
+      					'rebate'	=> $num[$key][$valu['price_id']]['rebate'],
       			);
 			}
 			sort($datas[$key]['price']);
@@ -485,21 +486,21 @@ class Report{
 		foreach ($data as $key => $value) {
 			foreach ($value as $ke => $valu) {
 				$channel_id = $channel ? $channel : $valu['channel_id'];
-				$num[$key][$valu['priceid']][$channel_id]['num'] += $valu['number'];
-				$num[$key][$valu['priceid']][$channel_id]['rebate'] += $valu['subsidy'];
+				$num[$key][$valu['price_id']][$channel_id]['num'] += $valu['number'];
+				$num[$key][$valu['price_id']][$channel_id]['rebate'] += $valu['subsidy'];
 				//获取票型金额
-				$money = Report::settlement($num[$key][$valu['priceid']][$channel_id]['num'],$valu['priceid'],$valu['product_id']);
-				$datas[$key][$channel_id]['price'][$valu['priceid']] = array( 
+				$money = Report::settlement($num[$key][$valu['price_id']][$channel_id]['num'],$valu['price_id'],$valu['product_id']);
+				$datas[$key][$channel_id]['price'][$valu['price_id']] = array( 
 						'product_id'=> $valu['product_id'],
 						'channel_id'=>	$valu['channel_id'],
 						'plan_id' 	=> $valu['plan_id'], 
-					 	'priceid'	=> $valu['priceid'],
+					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
       					'discount' 	=> $valu['discount'],
-      					'number'	=> $num[$key][$valu['priceid']][$channel_id]['num'],
+      					'number'	=> $num[$key][$valu['price_id']][$channel_id]['num'],
       					'money'		=> $money['money'],
       					'moneys'	=> $money['moneys'],
-      					'rebate'	=> $num[$key][$valu['priceid']][$channel_id]['rebate'],
+      					'rebate'	=> $num[$key][$valu['price_id']][$channel_id]['rebate'],
       			);
       			$map = array(
 					'plan_id'=>$key,
@@ -563,57 +564,57 @@ class Report{
 		foreach ($data as $k => $valu) {
 			if($work == '1'){
 				//含工作票统计
-				$num[$valu['priceid']]['num'] += $valu['number'];
-				$num[$valu['priceid']]['rebate'] += $valu['subsidy'];//dump($num[$valu['priceid']]['rebate']);
-				$money = Report::settlement($num[$valu['priceid']]['num'],$valu['priceid'],$valu['product_id']);
-				$datas['price'][$valu['priceid']] = array( 
+				$num[$valu['price_id']]['num'] += $valu['number'];
+				$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
+				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$valu['product_id']);
+				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 						'product_id'=> $valu['product_id'],
 						'plan_id' 	=> $valu['plan_id'], 
-					 	'priceid'	=> $valu['priceid'],
+					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
 	  					'discount' 	=> $valu['discount'],
-	  					'number'	=> $num[$valu['priceid']]['num'],
+	  					'number'	=> $num[$valu['price_id']]['num'],
 	  					'money'		=> $money['money'],
 	  					'moneys'	=> $money['moneys'],
-	  					'rebate'	=> $num[$valu['priceid']]['rebate'],
+	  					'rebate'	=> $num[$valu['price_id']]['rebate'],
 	      		);
 			}elseif($work == '2'){
-				if(!in_array($valu['priceid'],explode(',',zero_ticket()))){
+				if(!in_array($valu['price_id'],explode(',',zero_ticket()))){
 					//不含工作票统计
-					$num[$valu['priceid']]['num'] += $valu['number'];
-					$num[$valu['priceid']]['rebate'] += $valu['subsidy'];//dump($num[$valu['priceid']]['rebate']);
-					$money = Report::settlement($num[$valu['priceid']]['num'],$valu['priceid'],$valu['product_id']);
-					$datas['price'][$valu['priceid']] = array( 
+					$num[$valu['price_id']]['num'] += $valu['number'];
+					$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
+					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$valu['product_id']);
+					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $valu['product_id'],
 							'plan_id' 	=> $valu['plan_id'], 
-						 	'priceid'	=> $valu['priceid'],
+						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
 		  					'discount' 	=> $valu['discount'],
-		  					'number'	=> $num[$valu['priceid']]['num'],
+		  					'number'	=> $num[$valu['price_id']]['num'],
 		  					'money'		=> $money['money'],
 		  					'moneys'	=> $money['moneys'],
-		  					'rebate'	=> $num[$valu['priceid']]['rebate'],
+		  					'rebate'	=> $num[$valu['price_id']]['rebate'],
 		      		);
 				}
 			}else{
-				if(in_array($valu['priceid'],explode(',',zero_ticket()))){
+				if(in_array($valu['price_id'],explode(',',zero_ticket()))){
 					//不含工作票统计
-					$num[$valu['priceid']]['num'] += $valu['number'];
-					$num[$valu['priceid']]['rebate'] += $valu['subsidy'];//dump($num[$valu['priceid']]['rebate']);
-					$money = Report::settlement($num[$valu['priceid']]['num'],$valu['priceid'],$valu['product_id']);
-					$datas['price'][$valu['priceid']] = array( 
+					$num[$valu['price_id']]['num'] += $valu['number'];
+					$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
+					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$valu['product_id']);
+					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $valu['product_id'],
 							'plan_id' 	=> $valu['plan_id'], 
-						 	'priceid'	=> $valu['priceid'],
+						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
 		  					'discount' 	=> $valu['discount'],
-		  					'number'	=> $num[$valu['priceid']]['num'],
+		  					'number'	=> $num[$valu['price_id']]['num'],
 		  					'money'		=> $money['money'],
 		  					'moneys'	=> $money['moneys'],
-		  					'rebate'	=> $num[$valu['priceid']]['rebate'],
+		  					'rebate'	=> $num[$valu['price_id']]['rebate'],
 		      		);
 				}
 			}
@@ -638,21 +639,21 @@ class Report{
 		foreach ($data as $key => $value) {
 			foreach ($value as $ke => $valu) {
 				$channel_id = $channel ? $channel : $valu['channel_id'];
-				$num[$key][$valu['priceid']][$channel_id]['num'] += $valu['number'];
-				$num[$key][$valu['priceid']][$channel_id]['rebate'] += $valu['subsidy'];
+				$num[$key][$valu['price_id']][$channel_id]['num'] += $valu['number'];
+				$num[$key][$valu['price_id']][$channel_id]['rebate'] += $valu['subsidy'];
 				//获取票型金额
-				$money = Report::settlement($num[$key][$valu['priceid']][$channel_id]['num'],$valu['priceid'],$valu['product_id']);
-				$datas[$key][$channel_id]['price'][$valu['priceid']] = array( 
+				$money = Report::settlement($num[$key][$valu['price_id']][$channel_id]['num'],$valu['price_id'],$valu['product_id']);
+				$datas[$key][$channel_id]['price'][$valu['price_id']] = array( 
 						'product_id'=> $valu['product_id'],
 						'channel_id'=>	$valu['channel_id'],
 						'plan_id' 	=> $valu['plan_id'], 
-					 	'priceid'	=> $valu['priceid'],
+					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
       					'discount' 	=> $valu['discount'],
-      					'number'	=> $num[$key][$valu['priceid']][$channel_id]['num'],
+      					'number'	=> $num[$key][$valu['price_id']][$channel_id]['num'],
       					'money'		=> $money['money'],
       					'moneys'	=> $money['moneys'],
-      					'rebate'	=> $num[$key][$valu['priceid']][$channel_id]['rebate'],
+      					'rebate'	=> $num[$key][$valu['price_id']][$channel_id]['rebate'],
       			);
       			$map = array(
 					'plan_id'=>$key,

@@ -267,7 +267,7 @@ class Refund extends \Libs\System\Service {
 	* @param $user_id int 操作员   在系统执行退票时  为系统管理员
 	* @param $tract int 1 核减订单  2 整场退票
 	*/
-	function single_back($type,$info,$plan,$poundage,$area_id = null, $seat_id = null, $user_id = null,$tract){
+	function single_back($type,$info,$plan,$poundage = '',$area_id = null, $seat_id = null, $user_id = null,$tract = ''){
 		$model = new Model();
 		$model->startTrans();
 		$createtime = time();

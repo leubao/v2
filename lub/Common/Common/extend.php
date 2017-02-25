@@ -400,25 +400,24 @@
     function planShows($param){
         if(!empty($param)){
             $plan = F('Plan_'.$param);
-            if(!empty($plan)){
-                $info = $plan;
-            }else{
-               $info = M('Plan')->where(array('id'=>$param))->field('plantime,starttime,games,product_type')->find();
+            if(empty($plan)){
+                $plan = M('Plan')->where(array('id'=>$param))->field('product_id,plantime,starttime,games,product_type')->find();
             }
-            $Proconf = cache('ProConfig');
-            switch ($info['product_type']) {
+            $proconf = cache('ProConfig');
+            $proconf = $proconf[$plan['product_id']][1];
+            switch ($plan['product_type']) {
                 case '1':
-                    if($Proconf[$plan['product_id']]['plan_start_time'] == '1'){
-                        $name = date('m月d日',$info['plantime'])."第".$info['games']."场,开演时间".date('H:i',$info['starttime']);
+                    if($proconf['plan_start_time'] == '1'){
+                        $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场,开演时间".date('H:i',$plan['starttime']);
                     }else{
-                        $name = date('m月d日',$info['plantime'])."第".$info['games']."场";
+                        $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场";
                     }
                     break;
                 case '2':
-                    $name = date('m月d日',$info['plantime']);
+                    $name = date('m月d日',$plan['plantime']);
                     break;
                 case '3':
-                    $name = date('m月d日',$info['plantime']);
+                    $name = date('m月d日',$plan['plantime']);
                     break;
             }
             return $name;
@@ -1304,7 +1303,8 @@
     function print_remark($remark,$product_id){
         if(empty($remark)){$return = 0;}
         $proconf = cache('ProConfig');
-        if($proconf[$product_id]['print_remark'] == '1'){
+        $proconf = $proconf[$product_id][1];
+        if($proconf['print_remark'] == '1'){
             $data = explode('|',$remark);
             foreach ($data as $k => $v) {
                 if($k == 0){
@@ -1362,7 +1362,8 @@
         if(empty($plan_id) || empty($plan)){return false;}
         $datetime = date('Ymd');
         $proconf = cache('ProConfig');
-        if(!empty($proconf[$plan['product_id']]['channel_time'])){
+        $proconf = $proconf[$plan['product_id']][1];
+        if(!empty($proconf['channel_time'])){
             $time = date('Hi',strtotime($proconf['channel_time']." minute"));
         }else{
             $time = date('Hi');  
@@ -1465,7 +1466,7 @@
     * $crm_id 渠道商id
     * $gudie 导游id  全民销售
     */
-    function google_crm($product_id,$crm_id,$gudie){
+    function google_crm($product_id,$crm_id = '',$gudie = ''){
         if(!empty($crm_id)){
             $crm = F('Crm');
             $return = $crm[$crm_id];
@@ -1492,7 +1493,8 @@
     */
     function re_print($plan_id,$encry,$data){
         $plan = F('Plan_'.$plan_id);
-        $proconf = cache('ProConfig_'.$plan['product_id']);
+        $proconf = cache('ProConfig');
+        $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;
         $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
         $sn = $code."^#";

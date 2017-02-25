@@ -790,11 +790,11 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
             $proconf = $proconf[$product_id][2];
             //定义微信公众号配置参数（这里是可以从数据库读取的哦）
             $options = array(
-                'token'           => $proconf['token'], // 填写你设定的key
+                'token'           => $proconf['wx_token'], // 填写你设定的key
                 'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
                 'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
-                'appsecret'       => $proconf['appsecret'], // 填写高级调用功能的密钥
-                'encodingaeskey'  => $proconf['encodingaeskey'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
+                'appsecret'       => $proconf['wx_appsecret'], // 填写高级调用功能的密钥
+                'encodingaeskey'  => $proconf['wx_encoding'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
                 'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
                 'partnerkey'      => $proconf['wx_mchkey'], // 微信支付，密钥（可选）
                 'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
@@ -805,11 +805,14 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
             if($submch == '1'){
                 //页面注册等使用子商户id  作为主要ID
                 $options = array(
-                    'appid'           => $proconf['wx_sub_appid']
+                    'appid'           => $proconf['wx_sub_appid'],
+                    'token'           => $proconf['wx_token'], // 填写你设定的key
+                    'appsecret'       => $proconf['wx_appsecret'], // 填写高级调用功能的密钥
+                    'encodingaeskey'  => $proconf['wx_encoding'], // 
                 );
             }
             // 设置SDK的缓存路径
-            $options['cachepath'] = CACHE_PATH . 'Data/';
+            $options['cachepath'] = CACHE_PATH . 'Wechat/';
         }else{
             $proconf = cache('Config');
             $options = array(
@@ -908,6 +911,7 @@ function load_redis($apiport,$key,$value = '',$time = ''){
     $redis = new \Redis();
     $redis->connect(C('REDIS_HOST'),C('REDIS_PORT'));
     //$redis->auth(C('REDIS_AUTH'));
+    $redis->select(C('REDIS_DATABASE'));
     switch ($apiport) {
         case 'lsize':
             //判断列表中元素个数

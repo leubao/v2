@@ -39,7 +39,7 @@ class IndexController extends ManageBase {
                                 foreach ($subdir as $path) {
                                     $dirName = str_replace(RUNTIME_PATH, '', $path);
                                     //忽略目录
-                                    if (in_array($dirName, array('Cache', 'Logs'))) {
+                                    if (in_array($dirName, array('Cache', 'Logs','Wechat'))) {
                                         continue;
                                     }
                                     if (in_array($dirName, $dirList)) {

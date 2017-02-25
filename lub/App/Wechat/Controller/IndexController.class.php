@@ -9,6 +9,7 @@
 namespace Wechat\Controller;
 use Common\Controller\LubTMP;
 use Wechat\Service\Wticket;
+use \Wechat\WechatReceive;
 class IndexController extends LubTMP {
 	/**
      * 微信消息对象
@@ -42,41 +43,134 @@ class IndexController extends LubTMP {
     	$wechat = & load_wechat('Receive',$this->ginfo['pid'],1);
     	//dump($wechat);
     	/* 验证接口 */
-
 		if ($wechat->valid() === FALSE) {
 		    // 接口验证错误，记录错误日志
 		     // log_message('ERROR', "微信被动接口验证失败，{$wechat->errMsg}[{$wechat->errCode}]"); 
-		     error_insert("微信被动接口验证失败");
+		    // error_insert($wechat->errMsg.$wechat->errCode);
 		     // 退出程序
 		     exit($wechat->errMsg);
 		}
 		/* 获取粉丝的openid */
 		$openid = $wechat->getRev()->getRevFrom();
-
 		/* 记录接口日志，具体方法根据实际需要去完善 */
 		// _logs();
-
-		/* 分别执行对应类型的操作 */
+        $url = U('Wechat/Index/ticket',array('openid'=>$openid,'pid'=>$this->ginfo['pid']));
+        $user = & load_wechat('User',$this->ginfo['pid'],1);
+        // 读取微信粉丝列表
+        $result = $user->getUserInfo($openid);
+		/* 分别执行对应类型的操作*/
 		switch ($wechat->getRev()->getRevType()) {
 		    // 文本类型处理
-		     case WechatReceive::MSGTYPE_TEXT: 
+		     case WechatReceive::MSGTYPE_TEXT:
 		          $keys = $wechat->getRevContent();
-		          $wechat->text($keys)->reply();
+                  $wechat->text($tomsg)->reply();
 		          //return _keys($keys);
 		     // 事件类型处理
 		     case WechatReceive::MSGTYPE_EVENT:
-		           $event = $wechat->getRevEvent();
-		          return _event(strtolower($event['event']));
-		     // 图片类型处理
-		     case WechatReceive::MSGTYPE_IMAGE:
-		          return _image();
-		     // 发送位置类的处理
-		     case WechatReceive::MSGTYPE_LOCATION:
-		          return _location();
-		     // 其它类型的处理，比如卡卷领取、卡卷转赠
-		     default:
-		          return _default();
-		 }
+                    $event = $wechat->getRevEvent();
+                    switch (strtolower($event['event'])) {
+                        // 粉丝关注事件
+                        case 'subscribe':
+                            $uinfo = $this->stikcet($result);
+                            if($uinfo != false){
+                                $tomsg = $result['nickname']."很高兴在茫茫人海中与你相遇!\n我送你一张海潮游乐城<a href='".$url."'>".$uinfo['ticket']."体验劵，点击立即领取吧!</a>";
+                            }else{
+                                $tomsg = $result['nickname']."欢迎你再次回来.";
+                            }
+                           //发送购票链接
+                           return $wechat->text($tomsg)->reply();
+                        // 粉丝取消关注
+                        case 'unsubscribe':
+                            exit("success");
+                    }
+                break;
+		 } 
+    }
+    function stikcet($result = '')
+    {
+         //查询是否已经写入
+        $db = D('HcWx');
+        $uinfo = $db->where(array('openid'=>$result['openid']))->find();
+        if($uinfo){
+            return false;
+        }else{
+            $datas = array(
+                'openid'    =>  $result['openid'],
+                'nickname'  =>  $result['nickname'],
+                'ticket'    =>  $this->get_ticket(),
+                'createtime'=>  time(),
+                'uptime'    =>  time(),
+                'status'    =>  '1',
+            );
+            $db->add($datas);
+            return $datas;
+        }
+        
+         //构造链接门票
+    }
+    function ticket()
+    {
+        $ginfo = I('get.');
+        $db = D('HcWx');
+        $uinfo = $db->where(array('openid'=>$ginfo['openid']))->find();
+        $user = & load_wechat('User',$this->ginfo['pid'],1);
+        // 读取微信粉丝列表
+        $result = $user->getUserInfo($ginfo['openid']);
+        $this->assign('uinfo',$uinfo)->assign('result',$result)->display();
+    }
+    //核销
+    function check()
+    {
+        $ginfo = I('get.');
+        $db = D('HcWx');
+        $updata = array('status'=>4,'uptime'=>time());
+        $uinfo = $db->where(array('openid'=>$ginfo['openid'],'status'=>1))->save($updata);
+        if($uinfo){
+            $return = array('statusCode'=>200);
+        }else{
+            $return = array('statusCode'=>300);
+        }
+        die(json_encode($return));
+    }
+    function get_ticket()
+    {
+        $product = array(
+            '1'     =>      '过山车',
+            '2'     =>      '摩天环车',
+            '3'     =>      '冲浪旋艇',
+            '4'     =>      '摩天轮',
+            '5'     =>      '水陆大战',
+            '6'     =>      '欢乐旅行',
+            '7'     =>      '疯狂老鼠',
+            '8'     =>      '飞椅',
+            '9'     =>      '迷你穿梭',
+            '10'    =>      '碰碰船',
+            '11'    =>      '挖掘机',
+            '12'    =>      '逍遥水母',
+            '13'    =>      '升降飞机',
+            '14'    =>      '体能乐园',
+            '15'    =>      '海盗船',
+            '16'    =>      '鬼城',
+            '17'    =>      '旋风骑士',
+            '18'    =>      '弹跳机',
+            '19'    =>      '碰碰车',
+            '20'    =>      '高空飞翔',
+            '21'    =>      '双人飞天',
+            '22'    =>      '嘉年华',
+            '23'    =>      '超级飞碟',
+            '24'    =>      '太空漫步',
+            '25'    =>      '激流勇进',
+            '26'    =>      '转马',
+            '27'    =>      '狂呼',
+            '28'    =>      '迪斯科转盘',
+            '29'    =>      '大摆锤',
+            '30'    =>      '喷球车',
+            '31'    =>      '袋鼠跳',
+            '32'    =>      '手摇船',
+            '33'    =>      '五D影院'
+        );
+        $bh = rand(1,33);
+        return $product[$bh];
     }
     //页面初始化
     function wx_init($product_id){
@@ -589,6 +683,7 @@ class IndexController extends LubTMP {
     */
     function _keys($keys){
 	    global $wechat;
+        error_insert("111微信被动接口验证失败");
 	    // 这里直接原样回复给微信(当然你需要根据业务需求来定制的)
 	    return $wechat->text($keys)->reply();
 	}
@@ -602,7 +697,7 @@ class IndexController extends LubTMP {
 	    switch ($event) {
 	        // 粉丝关注事件
 	        case 'subscribe':
-	                return $wechat->text('欢迎关注公众号！')->reply();
+	           return $wechat->text('欢迎关注公众号dd！')->reply();
 	        // 粉丝取消关注
 	        case 'unsubscribe':
 	            exit("success");

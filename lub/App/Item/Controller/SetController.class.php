@@ -649,7 +649,7 @@ class SetController extends ManageBase{
 				$datetime = date('Ymd',strtotime($datetime));
 				if($datetime == date('Ymd')){
 					$this->erun('亲，你太热爱工作，还未到报表生成时间！', array('tabid'=>$this->menuid.MODULE_NAME));
-				}else{
+				}else{ 
 					if($this->proconf['report'] == '1'){
 						//按日期
 						$map['datetime'] = $datetime;

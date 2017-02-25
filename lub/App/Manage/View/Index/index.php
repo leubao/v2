@@ -205,6 +205,7 @@ function prompt(){
             }
     },
   });
+  
 }
 /*长时间未操作系统自动退出
 $(window).keyup( function(event){

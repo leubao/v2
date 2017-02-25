@@ -539,7 +539,7 @@ class OrderController extends Base{
 			foreach ($list as $k=>$v){
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);//dump($sale);
-				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$v['encry'],$v['area'],$v['seat'],'1',$v['id'])."^2016^#";
+				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."^2017^#";
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,

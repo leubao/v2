@@ -793,6 +793,8 @@ class Order extends \Libs\System\Service {
 						$model->rollback();
 						return false;
 					}
+				}else{
+					$up_quota = true;
 				}
 				//个人允许底价结算,且有返佣
 				$crmInfo = google_crm($plan['product_id'],$oInfo['crm'][0]['qditem'],$oInfo['crm'][0]['guide']);
@@ -928,6 +930,7 @@ class Order extends \Libs\System\Service {
 				}*/
 			}
 			$pre = true;$no_sms = '2';
+			
 		}else{
 			//支付但不排座
 			//更新订单 status=5支付但未排座 TODO  政企订单 TDOD
@@ -941,6 +944,7 @@ class Order extends \Libs\System\Service {
 			$pre = $model->table(C('DB_PREFIX').'pre_order')->add(array('order_sn'=>$info['order_sn'],'user_id'=>get_user_id(),'status'=>'1','createtime'=>$createtime));
 			$flag=true;$flags = true;$o_status = true;$no_sms = 1;
 		}
+		//dump($flag);dump($flags);dump($state);dump($in_team);dump($up_quota);dump($pre);
 		if($flag && $flags && $state && $o_status && $pre){
 			$model->commit();//提交事务
 			//发送成功短信
@@ -959,7 +963,7 @@ class Order extends \Libs\System\Service {
 			}
 			return $info['order_sn'];
 		}else{
-			//dump($flag);dump($flags);dump($state);dump($in_team);dump($up_quota);dump($pre);
+			
 			error_insert('400013');
 			$model->rollback();//事务回滚
 			return false;

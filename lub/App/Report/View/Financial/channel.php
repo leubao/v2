@@ -72,7 +72,7 @@
             <if condition="$k eq '1'">
               <tr>
                 <td rowspan="{$price['tic_num']}" align="center">{$price['plan']|planShow}</td>
-                <td align="center">{$item.priceid|ticketName}</td>
+                <td align="center">{$item.price_id|ticketName}</td>
                 <td align="right">{$item.price}</td>
                 <td align="right">{$item.discount}</td>
                 <td align="center">{$item.number}</td>
@@ -87,7 +87,7 @@
               </tr>
               <else />
                 <tr>
-                  <td align="center">{$item.priceid|ticketName}</td>
+                  <td align="center">{$item.price_id|ticketName}</td>
                   <td align="right">{$item.price}</td>
                   <td align="right">{$item.discount}</td>
                   <td align="center">{$item.number}</td>
@@ -99,7 +99,7 @@
           <else />
             <tr>
               <td align="center">{$price['plan']|planShow}</td>
-              <td align="center">{$item.priceid|ticketName}</td>
+              <td align="center">{$item.price_id|ticketName}</td>
               <td align="right">{$item.price}</td>
               <td align="right">{$item.discount}</td>
               <td align="center">{$item.number}</td>
@@ -183,7 +183,7 @@
           <if condition="$k eq '1'">
             <tr class="subtotal" data-num="{$channel.number}" data-money="{$channel.money}" data-moneys="{$channel.moneys}" data-subsidy="{$channel.rebate}">
               <td rowspan="{$price_count}" align="center">{$item.channel_id|crmName}</td>
-              <td align="center">{$item.priceid|ticketName}</td>
+              <td align="center">{$item.price_id|ticketName}</td>
               <td align="right">{$item.price}</td>
               <td align="right">{$item.discount}</td>
               <td align="center">{$item.number}</td>
@@ -198,7 +198,7 @@
             </tr>
             <else />
               <tr>
-                <td align="center">{$item.priceid|ticketName}</td>
+                <td align="center">{$item.price_id|ticketName}</td>
                 <td align="right">{$item.price}</td>
                 <td align="right">{$item.discount}</td>
                 <td align="center">{$item.number}</td>
@@ -210,7 +210,7 @@
         <else />
           <tr  class="subtotal" data-num="{$channel.number}" data-money="{$channel.money}" data-moneys="{$channel.moneys}" data-subsidy="{$channel.rebate}">
             <td align="center">{$item.channel_id|crmName}</td>
-            <td align="center">{$item.priceid|ticketName}</td>
+            <td align="center">{$item.price_id|ticketName}</td>
             <td align="right">{$item.price}</td>
             <td align="right">{$item.discount}</td>
             <td align="center">{$item.number}</td>

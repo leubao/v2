@@ -96,7 +96,7 @@
 	  </tr>
 	  <volist name="vo['price']" id="item">
 	  <tr>
-	    <td align="center">{$item.priceid|ticketName}</td>
+	    <td align="center">{$item.price_id|ticketName}</td>
 	    <td align="right">{$item.price}</td>
 	    <td align="right">{$item.discount}</td>
 	    <td align="center">{$item.number}</td>

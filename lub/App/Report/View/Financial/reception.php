@@ -52,7 +52,7 @@
     <tr class="subtotal" data-num="{$price['number']}" data-money="{$vo.money}" data-moneys="{$vo.moneys}" data-subsidy="{$vo.rebate}">
       <td rowspan="{$vo['tic_num']}">{$k}</td>
       <td rowspan="{$vo['tic_num']}">{$vo.plan|planShow}</td>
-      <td>{$price['priceid']|ticketName}</td>
+      <td>{$price['price_id']|ticketName}</td>
       <td align="right">{$price['price']}</td>
       <td align="center">{$price['number']}</td>
       <td align="center" rowspan="{$vo['tic_num']}">{$vo['number']}</td>
@@ -60,7 +60,7 @@
     </tr>
     <else />
     <tr class="subtotal" data-num="{$price['number']}" data-money="{$vo.money}" data-moneys="{$vo.moneys}" data-subsidy="{$vo.rebate}">
-      <td>{$price['priceid']|ticketName}</td>
+      <td>{$price['price_id']|ticketName}</td>
       <td align="right">{$price['price']}</td>
       <td align="center">{$price['number']}</td>
     </tr>
@@ -69,7 +69,7 @@
     <tr class="subtotal" data-num="{$vo.number}" data-money="{$vo.money}" data-moneys="{$vo.moneys}" data-subsidy="{$vo.rebate}">
       <td>{$k}</td>
       <td>{$vo.plan|planShow}</td>
-      <td>{$price['priceid']|ticketName}</td>
+      <td>{$price['price_id']|ticketName}</td>
       <td align="right">{$price['price']}</td>
       <td align="center">{$price['number']}</td>
       <td align="center">{$vo['number']}</td>

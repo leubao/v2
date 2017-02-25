@@ -31,6 +31,7 @@ class Redis extends Cache
         $options = array_merge(array(
             'host'       => C('REDIS_HOST') ?: '127.0.0.1',
             'port'       => C('REDIS_PORT') ?: 6379,
+            'database'   => C('REDIS_DATABASE') ?: 0,
             'timeout'    => C('DATA_CACHE_TIMEOUT') ?: false,
             'persistent' => false,
         ), $options);
@@ -76,6 +77,7 @@ class Redis extends Cache
         $name = $this->options['prefix'] . $name;
         //对数组/对象数据进行缓存处理，保证数据完整性
         $value = (is_object($value) || is_array($value)) ? json_encode($value) : $value;
+        $this->handler->select($this->options['database']);
         if (is_int($expire) && $expire) {
             $result = $this->handler->setex($name, $expire, $value);
         } else {

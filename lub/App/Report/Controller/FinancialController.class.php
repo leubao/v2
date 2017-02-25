@@ -43,7 +43,7 @@ class FinancialController extends ManageBase{
 			//根据计划汇总
 			//$plan_fold = Report::plan_fold($list);
 			//根据票型汇总
-			$ticket_fold = Report::day_fold($list);
+			$ticket_fold = Report::day_fold($list);//dump($ticket_fold);
 			//用于报表模板导出
 			S('Today'.get_user_id(),$ticket_fold);
 			//退票记录 TODO

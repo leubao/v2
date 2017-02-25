@@ -964,7 +964,9 @@ class WechatReceive extends Common {
             }
             $msg = $this->_msg;
         }
+        dump($msg);
         $xmldata = Tools::arr2xml($msg);
+        F('1212',$xmldata);
         if ($this->encrypt_type == 'aes') { //如果来源消息为加密方式
             !class_exists('Prpcrypt', FALSE) && require __DIR__ . '/Lib/Prpcrypt.php';
             $pc = new Prpcrypt($this->encodingAesKey);
@@ -987,6 +989,7 @@ class WechatReceive extends Common {
         if ($return) {
             return $xmldata;
         }
+        error_insert('1221');
         echo $xmldata;
     }
 

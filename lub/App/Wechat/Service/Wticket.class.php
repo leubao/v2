@@ -170,7 +170,7 @@ class Wticket {
                 if($uinfo['user_id']){
                     return '2';
                 }else{
-                    return '1';
+                    return '3';
                 }
             }else{
                 $datas = array(

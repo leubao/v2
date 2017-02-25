@@ -58,7 +58,7 @@
         <td>{$vo.addsid|addsid}({$vo.type|channel_type})</td>
         <td><if condition="$vo['type'] eq 1">散客<else />{$vo.channel_id|crmName}</if></td>
         <td>{$vo.area|areaName}</td>
-        <td>{$vo.priceid|ticketName}</td>
+        <td>{$vo.price_id|ticketName}</td>
         <td align="right">{$vo.price}</td>
         <td align="right">{$vo.discount}</td>
         <td align="center">{$vo.number}</td>
@@ -114,7 +114,7 @@
 	  </tr>
 	  <volist name="vo['price']" id="item">
 	  <tr>
-	    <td align="center">{$item.priceid|ticketName}</td>
+	    <td align="center">{$item.price_id|ticketName}</td>
 	    <td align="right">{$item.price}</td>
 	    <td align="right">{$item.discount}</td>
 	    <td align="center">{$item.number}</td>

@@ -38,7 +38,7 @@
       <tbody id="business-list">
       <volist name="data['price']" id="vo">
         <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" data-money="{$vo.money}" data-moneys="{$vo.moneys}" data-subsidy="{$vo.subsidy}">
-          <td>{$vo.priceid|ticketName}</td>
+          <td>{$vo.price_id|ticketName}</td>
           <td align="right">{$vo.price}</td>
           <td align="right">{$vo.discount}</td>
           <td align="center">{$vo.number}</td>

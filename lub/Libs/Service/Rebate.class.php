@@ -16,67 +16,79 @@ class Rebate extends \Libs\System\Service {
 	 */
 	function ajax_rebate_order(){
 		//读取队列中未处理订单
-		$redis = new \Redis();
-	    $redis->connect('127.0.0.1',6379);
-	    //判断列表中元素个数
-	    $len = $redis->lsize('test');
-		if($len > 0){
+		//判断队列是否存在数据
+		$ln = load_redis('lsize','PreOrder');
+		if($ln > 0){
 			//获取队列中最后一个元素，且移除
-			$sn = $redis->rPop('test');
-		}
-		//写入带处理队列，若存在则不再写入
-		$redis->lPush('test','1212211212');
-		//读取当前在五分钟内所有团队订单   团队订单分为渠道订单和分销订单
-		$map = array(
-			'order_sn' => $order_sn,
-        	'status' => array('in','1,6,7,9'),
-        	'type'  => array('in','2,4,8,9'),
-      	);
-      	$list = D('Item/Order')->where($map)->relation(true)->find();
-		//判断系统设置是否有存在返利
-		$proconf = cache('ProductConfig'.);
-		//是否开启分销
-		//拆解订单
-		//构造返利数据
-		$rebate += $ticketType[$v['priceid']]['rebate'];
-		//团队ALTER TABLE `lub_team_order` ADD `number` INT(3) NOT NULL COMMENT '数量' AFTER `order_sn`;
-		//个人不允许底价结算
-		$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem']);
-		//严格验证渠道订单写入返利状态
-		if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-			error_insert('400018');
-			$model->rollback();
-			return false;
-		}
-		//判断是否是底价结算
-		if($crmInfo['group']['settlement'] == '1'){
-			$teamData = array(
-				'order_sn' 		=> $sn,
-				'plan_id' 		=> $plan['id'],
-				'product_type'	=> $info['product_type'],//产品类型
-				'product_type'	=> $plan['product_type'],//产品类型
-				'product_id' 	=> $plan['product_id'],
-				'user_id' 		=> \Libs\Util\Encrypt::authcode($_SESSION['lub_userid'], 'DECODE'),
-				'money'			=> $rebate,
-				'guide_id'		=> $info['crm'][0]['guide'],
-				'qd_id'			=> $info['crm'][0]['qditem'],
-				'status'		=> '1',
-				'number' 		=> $count,
-				'type'			=> $info['type'] == '2' ? $info['sub_type'] : '2',//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-				'createtime'	=> $createtime,
-				'uptime'		=> $createtime,
-			);
-			$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
-			//窗口团队时判断是否是底价结算
-			if($proconf[$plan['product_id']]['1']['settlement'] == '2'){
-				$in_team = true;
-			}else{
-				$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
-				if(!$in_team){error_insert('400017');$model->rollback();return false;}
+			$sn = load_redis('rPop','PreOrder');
+			$map = array(
+				'order_sn' => $sn,
+	        	'status' => array('in','1,6,7,9'),
+	        	'type'  => array('in','2,4,8,9'),
+	      	);
+	      	$info = D('Item/Order')->where($map)->relation(true)->find();
+	      	//判断系统设置是否有存在返利
+			$proconf = cache('ProConfig');
+			$proconf = $proconf[$info['product_id']][1];
+			$model = D('Item/TeamOrder');
+			//判断返利是否存在
+			if($model->where(array('order_sn'=>$sn))->getField('id')){
+				return false;
 			}
-		}else{
-			$in_team = true;
+			$map = array(
+				'order_sn' => $sn,
+				'status' => array('in','1,6,7,9'),
+				'type'  => array('in','2,4,8,9'),
+			);
+			$info = D('Item/Order')->where($map)->relation(true)->find();
+			 //判断系统设置是否有存在返利
+			$info['info'] = unserialize($info['info']);
+			//个人允许底价结算,且有返佣
+			$crmInfo = google_crm($info['product_id'],$info['info']['crm'][0]['qditem'],$info['info']['crm'][0]['guide']);
+			//严格验证渠道订单写入返利状态
+			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
+				error_insert('400018');
+				$model->rollback();
+				return false;
+			}
+			//判断是否是底价结算
+			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
+				if($crmInfo['group']['type'] == '4'){
+				  //当所属分组为个人时，补贴到个人
+				  $type = '1';
+				}else{
+				  $type = '2';
+				}
+				$ticketType = F('TicketType'.$info['product_id']);
+				//计算返利金额
+				foreach ($info['info']['data'] as $k => $v) {
+				  $rebate += $ticketType[$v['priceid']]['rebate'];
+				}
+				//组装写入数据
+				$teamData = array(
+				  'order_sn'    => $info['order_sn'],
+				  'plan_id'     => $info['plan_id'],
+				  'subtype'   => '0',
+				  'product_type'  => $info['product_type'],//产品类型
+				  'product_id'  => $info['product_id'],
+				  'user_id'     => $info['user_id'],
+				  'money'     => $rebate,
+				  'number'    => $info['number'],
+				  'guide_id'    => $info['info']['crm'][0]['guide'],
+				  'qd_id'     => $info['info']['crm'][0]['qditem'],
+				  'status'    => '1',
+				  'type'      => $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
+				  'userid'    => '0',
+				  'uptime'    =>  time(),
+				  'createtime'=> time()
+				);
+				$status = $model->add($teamData);
+				return $status;
+			}
+			//读取当前在五分钟内所有团队订单   团队订单分为渠道订单和分销订单
+		
 		}
+		//是否开启分销
 	}
 	function full(){
 
@@ -122,15 +134,7 @@ class Rebate extends \Libs\System\Service {
 			return $userid;
 		}
 	}
-	//计算补贴金额
-    function rebate($seat,$product_id){
-      $ticketType = F("TicketType".$product_id);
-      foreach ($seat as $k=>$v){
-        //计算订单返佣金额
-        $rebate += $ticketType[$v['priceid']]['rebate'];
-      }
-      return $rebate;
-    }
+
 	/*渠道返利
 	@param $info array 团队订单信息
 	@param $user_id int 操作员id 计划任务执行 时是 1 admin
