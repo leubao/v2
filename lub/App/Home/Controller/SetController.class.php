@@ -94,6 +94,8 @@ class SetController extends Base{
 					);
 				}
 				D('QuotaUse')->addAll($dataList);
+				//更新
+				D('Crm/Crm')->crm_cache();
 				$this->success("新增成功!",U('Home/Set/channel'));
 			}else{
 				$this->error("新增失败!");

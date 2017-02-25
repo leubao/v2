@@ -72,6 +72,7 @@ class IndexController extends ManageBase{
 				));
 			$add = Operate::do_add("Crm",$data);
 			if($add){
+				D('Crm/Crm')->crm_cache();
 				$this->srun('新增成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
 			}else{
 				$this->erun('新增失败!');
