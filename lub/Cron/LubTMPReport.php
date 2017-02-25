@@ -18,8 +18,8 @@ class LubTMPReport {
     //任务主体
     public function run($cronId) {
     	//默认计算当天的订单
-        //$datetime= date('Ymd',strtotime("-1 day"));
-        $datetime= date('Ymd');
+        $datetime= date('Ymd',strtotime("-1 day"));
+        //$datetime= date('Ymd');
         Report::report($datetime);  
     }
 

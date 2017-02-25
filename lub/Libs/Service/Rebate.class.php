@@ -33,6 +33,7 @@ class Rebate extends \Libs\System\Service {
 			$model = D('Item/TeamOrder');
 			//判断返利是否存在
 			if($model->where(array('order_sn'=>$sn))->getField('id')){
+				load_redis('lpush','Error_PreOrder',$info['order_sn'].'E2');
 				return false;
 			}
 			$map = array(
@@ -48,7 +49,6 @@ class Rebate extends \Libs\System\Service {
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
 				error_insert('400018');
-				$model->rollback();
 				return false;
 			}
 			//判断是否是底价结算
@@ -83,10 +83,15 @@ class Rebate extends \Libs\System\Service {
 				  'createtime'=> time()
 				);
 				$status = $model->add($teamData);
-				return $status;
+				if($status){
+					return $status;
+				}else{
+					load_redis('lpush','Error_PreOrder',$info['order_sn'].'E1');
+					return false;
+				}
+				
 			}
 			//读取当前在五分钟内所有团队订单   团队订单分为渠道订单和分销订单
-		
 		}
 		//是否开启分销
 	}

@@ -69,13 +69,19 @@ class Report{
 		$start_time = strtotime($datetime);
         $end_time = $start_time  + 86399;
         $proconf = cache('ProConfig');
+        if(empty($product_id)){
+        	$product = M('Product')->field('id')->select();
+        }else{
+			$product = array('id'=>$product_id);
+        }
+        
         //报表生成条件 1 按日期 且包含预定成功 拉取产品列表
-        $product = M('Product')->field('id')->select();
         foreach ($product as $key => $value) {
         	$tproconf = $proconf[$value['id']][1];
         	if($tproconf['report'] == '1'){
 	        	//按照日期
 				$map = array(
+					'product_id' => $value['id'],
 	    			'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 	    			'createtime' => array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),
 	    		);
@@ -97,14 +103,14 @@ class Report{
 				}
 	        }else{
 	        	//按场次 查询场次id
-	        	$plan_id = M('Plan')->where(array('plantime'=>$start_time))->field('id')->select();
+	        	$plan = M('Plan')->where(array('plantime'=>$start_time))->field('id')->select();
 	        	$where = array('plantime'=>$start_time,'status'=>'1');
 	        	$count = M('ReportData')->where($where)->count();
 				//当前日期是否已生成
 				if($count != 0){
 					if(M('ReportData')->where($where)->setField('status',0)){
 						//当前日期是否已生成
-						foreach ($plan_id as $k => $v) {
+						foreach ($plan as $k => $v) {
 				    		$map = array(
 								'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 								'product_id' => $value['id'],
@@ -112,7 +118,7 @@ class Report{
 							);
 							$status = Report::strip_order($map,$datetime,1);
 				    	}
-					}else{error_insert('122111');
+					}else{
 						//失败记录日志，并发送错误短信
 						$msg = array('phone'=>'18631451216','title'=>"",'rema'=>"订单拆解",'code'=>'120001');
 						Sms::err_msg($msg);
@@ -120,7 +126,7 @@ class Report{
 					}
 				}else{
 					//当前日期是否已生成
-					foreach ($plan_id as $k => $v) {
+					foreach ($plan as $k => $v) {
 			    		$map = array(
 							'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 							'product_id' => $value['id'],
@@ -142,9 +148,8 @@ class Report{
 	* @param 
 	* return true|false
 	*/
-	function strip_order($map, $datetime, $type = '1'){
+	function strip_order($map, $datetime, $type = '1'){//dump($map);
 		$list = D('Item/Order')->where($map)->relation(true)->select();
-		//dump($list);
 		if(!empty($list)){
 			foreach ($list as $key => $value) {
 				// TODO 缺少写入成功性验证
@@ -166,7 +171,7 @@ class Report{
 				);
 				$data = unserialize($value['info']);
 				$main[] = Report::ticket_type($general,$data['data'],$data['param'],$datetime,$type,$value['product_type']);
-				if(!empty($data['child_ticket'])){//dump($data);
+				if(!empty($data['child_ticket'])){
 					$child[] = Report::ticket_type($general,$data['child_ticket'],$data['param'],$datetime,$type,$value['product_type'],'1',$value['number']);
 				}
 			}
@@ -175,11 +180,9 @@ class Report{
 			}else{
 				$status = array_merge($main,$child);
 			}
-			
 		}else{
 			$status = '200';
-		}//dump($status);
-		//计划任务拆解
+		}//计划任务拆解
  		return 	$status;
 	}
  	/*按票型统计
@@ -191,15 +194,16 @@ class Report{
  	@param $product_type 产品类型
  	@param $number int 数量
  	return $data*/
- 	function ticket_type($general, $seat, $param, $datetime, $type, $product_type, $child = null, $number = null){//dump($seat);
+ 	function ticket_type($general, $seat, $param, $datetime, $type, $product_type, $child = null, $number = null){
+ 	//dump($seat);
  		//根据票型归类
  		foreach($seat as $k=>$v){
- 			$datalist[$v['price_id']][] = $v;
+ 			$datalist[$v['priceid']][] = $v;
  		}
  		//计算票型内门票数量 以及重组要写入数组
  		$t_type = array_keys($datalist);//获取当前订单的票型
  		for ($i=0; $i < count($datalist); $i++) {
- 			if(!empty($datalist[$t_type[$i]][0]['price_id'])){
+ 			if(!empty($datalist[$t_type[$i]][0]['priceid'])){
  				if($child){
  					$nums[$i] = $number;
  				}else{
@@ -221,7 +225,7 @@ class Report{
 					'moneys'	=>	$money[$i]['moneys'],//结算金额
 					'subsidy'   =>  $money[$i]['rebate'],  //补贴金额  
 					'region'	=>	$param[0]['tour'] ? $param[0]['tour'] : '0',
-	 			);
+	 			);//dump($data[$i]);
 	 			$datas[$i] = array_merge($data[$i],$general);
  			}else{
  				//记录异常日志
@@ -229,6 +233,7 @@ class Report{
  				error_insert('400012');
  			}
  		}
+ 		//dump($datas);
  		if($type == '1'){
  			//计划任务拆解
  			return Report::insert_report($datas);

@@ -657,6 +657,7 @@ class SetController extends ManageBase{
 						//按场次
 						$map['plantime'] = $datetime;
 					}
+					$map['product_id'] = get_product('id');
 					//$map['product_id'] = $this->pid;
 					if($type == '1'){
 					  //删除已生成的数据
@@ -672,7 +673,7 @@ class SetController extends ManageBase{
 					  if($count <> '0'){
 						$this->erun('请先删除作废数据，再执行此项操作', array('tabid'=>$this->menuid.MODULE_NAME));
 					  }else{
-					  	$stat = \Libs\Service\Report::report($datetime);
+					  	$stat = \Libs\Service\Report::report($datetime,$product_id);
 					  	//dump($stat);
 					  	if($stat == '200'){
 							$this->srun('生成成功', array('tabid'=>$this->menuid.MODULE_NAME));

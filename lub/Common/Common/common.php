@@ -941,6 +941,10 @@ function load_redis($apiport,$key,$value = '',$time = ''){
         case 'get':
             $return = $redis->get($key);
             break;
+        case 'lrange':
+            //返回list 中的元素 返回名称为key的list中start至end之间的元素（end为 -1 ，返回所有） value 为开始位置 $time 为结束位置
+            $return = $redis->lrange($key,$value,$time);
+            break;
         case 'delete':
             //删除指定key
             $return = $redis->delete($key);

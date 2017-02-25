@@ -159,5 +159,13 @@ class TrustController extends LubTMP {
         }
     }
 	/*自助机*/
-	
+	/*处理对接数据*/
+	function dealpre(){
+		\Libs\Service\Rebate::ajax_rebate_order();
+	}
+	/*校验程序*/
+	function check()
+	{
+		\Libs\Service\Check::check_rebate();
+	}
 }

@@ -20,13 +20,9 @@ class LubTMPRebate {
         //查询当天的计划
         $plan = M('Plan')->where(array('plantime'=>$plantime))->field('id')->select();
         $plan_id = array('in',implode(',',array_column($plan,'id')));
-        $map = array(
-            //'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
-            'plan_id' => $plan_id,
-            //'type'  => array('in','2,4,6'),
+        $map = array('plan_id' => $plan_id,
             'status'=>array('neq','4'),
         );
-        //$list = M('Order')->where($map)->field('order_sn')->select();//dump($list);
         $list = M('TeamOrder')->where($map)->select();
         //按订单返佣
         foreach ($list as $key => $value) {
