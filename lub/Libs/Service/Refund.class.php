@@ -7,7 +7,6 @@
 // | Author: zhoujing <admin@leubao.com>2014-12-19 
 // +----------------------------------------------------------------------
 namespace Libs\Service;
-
 use Libs\Service\Operate;
 use Common\Model\Model;
 class Refund extends \Libs\System\Service {
@@ -24,14 +23,14 @@ class Refund extends \Libs\System\Service {
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
 		$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
-		//dump($info);
 		if(empty($sn) || empty($info)){error_insert('400410');return false;}
 		//获取所属计划
 		//$plan = F('Plan_'.$info['plan_id']);
 		$plan = M('Plan')->where(array('id'=>$info['plan_id']))->find();
 		$proconf = cache('ProConfig');
+		$proconf = $proconf[$plan['product_id']][1];
 		//判断演出是否已过期 TODO 场次结束时间不允许退票  动态配置
-		if($proconf[$plan['product_id']]['plan_refund'] == '1'){
+		if($proconf['plan_refund'] == '1'){
 			$datetime = date('Ymd',time());
 			$plantime = date('Ymd',$plan['plantime']);
 			$starttime = date('H:i',$plan['starttime']);
@@ -41,8 +40,8 @@ class Refund extends \Libs\System\Service {
 				if($createtime >= $endtime){error_insert('400411');return false;}
 			}
 		}
-		//判断订单所属渠道商是个人还是商户
-		if($info['type'] == '8'){
+		//判断订单所属渠道商是个人还是商户 三级分销
+		if(in_array($info['type'],array('8','9'))){
 			//微信全员销售
 			$channel_id = $info['guide_id'];
 			$sub_type = '1';
@@ -734,5 +733,38 @@ class Refund extends \Libs\System\Service {
             return true;
 		}
 
+	}
+	/**
+	 * 不同意退款
+	 */
+	function arefund($oinfo){
+		$model = new \Think\Model();
+		$model->startTrans();
+		$createtime = time();
+		$cid = money_map($oinfo['channel_id']);
+		//先消费后记录
+		$crmData = array('cash' => array('exp','cash+'.$oinfo['money']),'uptime' => $createtime);
+		$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+		$data = array(
+			'cash'		=>	$oinfo['money'],
+			'user_id'	=>	get_user_id(),
+			'crm_id'	=>	$cid,
+			'createtime'=>	$createtime,
+			'type'		=>	'5',
+			'order_sn'	=>	$oinfo['order_sn'],
+			'balance'	=>  balance($cid),
+		);
+		$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+		//修改订单状态
+		$up = $model->table(C('DB_PREFIX')."order")->where(array('order_sn'=>$oinfo['order_sn']))->setField('status','3');
+		$up2 = $model->table(C('DB_PREFIX')."pre_order")->where(array('order_sn'=>$oinfo['order_sn']))->setField('status','4');
+		if($c_pay && $c_pay2 && $up && $up2){
+			$model->commit();//成功则提交
+			return true;
+		}else{
+			$model->rollback();//不成功，则回滚
+			return false;
+		}
+		
 	}
 }

@@ -227,7 +227,7 @@ $(function(){
 		}
 	}
 	if(PRO_CONF.black == '1'){
-		guide_black = $("#guide_black").val();
+		var guide_black = $("#guide_black").val();
 	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
@@ -333,6 +333,18 @@ $(function(){
 		if(contact == ''){
 			rstr += "取票人不能为空!";
 		}
+	}
+	if(PRO_CONF.black == '1'){
+		var guide_black = $("#guide_black").val();
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	      layer.msg("导游手机号码不正确!");
+	      return false;
+	    }else{
+	    	if(black(guide_black)){
+	    		layer.msg("抱歉,该导游已被系统列入黑名单，请联系管理员!");
+	      		return false;
+	    	}
+	    }
 	}
 	/*客源地判断*/
 	var tour = $("#tourists").val();
