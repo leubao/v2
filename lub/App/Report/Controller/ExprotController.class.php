@@ -51,7 +51,7 @@ class ExprotController extends ManageBase{
 		//构造查询条件
 		$map['datetime'] = $info['datetime'];
 		if(!empty($info['priceid'])){
-			$map['priceid'] = $info['priceid'];
+			$map['price_id'] = $info['priceid'];
 		}
 		$map['status'] = '1';
 		//查询数据
@@ -64,14 +64,14 @@ class ExprotController extends ManageBase{
    				'scena'		=>	addsid($v['addsid'],1).'('.channel_type($v['type'],1).')',
    				'channel'	=>	$v['type'] == '1' ? "散客" : crmName($v['channel_id'],1),
    				'area'		=>	areaName($v['area'],1),
-   				'ticket'	=>	ticketName($v['priceid'],1), 
+   				'ticket'	=>	ticketName($v['price_id'],1), 
    				'price'		=>	$v['price'], 
    				'discount'  =>	$v['discount'], 
 	   			'number'	=>	$v['number'],
 	   			'money'		=>	$v['money'],
 	   			'moneys'	=>	$v['moneys'],
 	   			'subsidy'	=>	$v['subsidy'],
-	   			'user'		=>	userName($v['user_id'],1),
+	   			'user'		=>	userName($v['user_id'],1,1),
 	   			);
    		}
    		//景区日报表明细 表头

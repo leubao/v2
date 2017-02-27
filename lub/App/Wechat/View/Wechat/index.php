@@ -86,8 +86,6 @@
                                         data-icon="cloud-upload"></div>
                           </td>
                         </tr>
-                        rootca.pem
-                        ssl_cer
 
                         <tr>
                           <td width="120px">订单模板消息:</td>

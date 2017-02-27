@@ -26,9 +26,9 @@ class FinancialController extends ManageBase{
 	    $export_map = array();
 		$where['datetime'] = date('Ymd',strtotime($starttime));
 		if($work == '2'){
-			$where['priceid'] = array('not in',zero_ticket());
+			$where['price_id'] = array('not in',zero_ticket());
 		}elseif($work == '3'){
-			$where['priceid'] = array('in',zero_ticket());
+			$where['price_id'] = array('in',zero_ticket());
 		}
 		$where['product_id'] = $this->pid;
 		$where['status'] = '1';
@@ -188,7 +188,7 @@ class FinancialController extends ManageBase{
 		if(IS_POST){
 			//获取系统中所有0元票票型  已结算金额为0  计算
 			$db = D('ReportData');
-			$map = array('status'=>'1','priceid'=>array('in',zero_ticket()));
+			$map = array('status'=>'1','price_id'=>array('in',zero_ticket()));
 			$start_time = I('starttime');
 		    $end_time = I('endtime') ? I('endtime') : date('Y-m-d',time());
 		    $plan_id = I('plan_id');
@@ -322,24 +322,24 @@ class FinancialController extends ManageBase{
         	$map['datetime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
         }
         if(!empty($ticket_id)){
-        	$map['priceid'] = array('in', explode(',',$ticket_id));
+        	$map['price_id'] = array('in', explode(',',$ticket_id));
         }
         if(!empty($channel)){
         	$map['channel_id'] = array('in',agent_channel($channel,2));
         }
         $db = M('ReportData');
-		$map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+		$map['product_id'] = get_product('id');
 		$map['status'] = '1';
    		$price = F('TicketType'.$map['product_id']);
         $list = $db->where($map)->select();
         foreach ($list as $k => $v) {
-            $data['price'][$v['priceid']]['name'] = $price[$v['priceid']]['name'];
-            $data['price'][$v['priceid']]['price'] = $price[$v['priceid']]['price'];
-            $data['price'][$v['priceid']]['discount'] = $price[$v['priceid']]['discount'];
-        	$data['price'][$v['priceid']]['number'] += $v['number'];
-        	$data['price'][$v['priceid']]['money'] += $v['price']*$v['number'];
-        	$data['price'][$v['priceid']]['moneys'] += $v['discount']*$v['number'];
-        	$data['price'][$v['priceid']]['rebate'] += $v['subsidy'];
+            $data['price'][$v['price_id']]['name'] = $price[$v['price_id']]['name'];
+            $data['price'][$v['price_id']]['price'] = $price[$v['price_id']]['price'];
+            $data['price'][$v['price_id']]['discount'] = $price[$v['price_id']]['discount'];
+        	$data['price'][$v['price_id']]['number'] += $v['number'];
+        	$data['price'][$v['price_id']]['money'] += $v['price']*$v['number'];
+        	$data['price'][$v['price_id']]['moneys'] += $v['discount']*$v['number'];
+        	$data['price'][$v['price_id']]['rebate'] += $v['subsidy'];
         	$data['info']['number'] += $v['number'];
 		    $data['info']['money']  += $v['price']*$v['number'];
 		    $data['info']['moneys']	+= $v['discount']*$v['number'];
@@ -478,9 +478,9 @@ class FinancialController extends ManageBase{
 	    $export_map = array();
 		$where['datetime'] = date('Ymd',strtotime($starttime));
 		if($work == '2'){
-			$where['priceid'] = array('not in',zero_ticket());
+			$where['price_id'] = array('not in',zero_ticket());
 		}elseif($work == '3'){
-			$where['priceid'] = array('in',zero_ticket());
+			$where['price_id'] = array('in',zero_ticket());
 		}
 		$where['status'] = '1';
 		$export_map = $where;

@@ -80,6 +80,7 @@ class UserController extends Base{
 		if(IS_POST){
 			$info=array(
 				'is_scene'	=> '3',
+				'role_id'	=>	'9'
 			);
 			$user_id = Operate::do_add('User',$info);
 			if($user_id){

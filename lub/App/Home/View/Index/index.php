@@ -11,7 +11,7 @@
   <div class="main row">
     <div class="panel panel-default">
       <div class="panel-body">
-       当前用户：{$uinfo['cid']|itemnav} > {$uinfo['nickname']}<span style="float:right;">可用授信额: ￥<span id="cash"></span> </span> 
+       当前用户：{$uinfo['cid']|itemnav} > {$uinfo['nickname']}<span style="float:right;">可用授信额: ￥<span id="cash"></span> 当前考核分: {$score} </span> 
       </div>
     </div>
     <if condition="$notice neq '1'">
@@ -34,20 +34,16 @@
           <volist name="vo['area']" id="area">
           <col width="120px">
           </volist>
-          <if condition="$proconf['quota'] eq '1'">
           <col>
           <col>
-          </if>
           <col width="150px">
           </colgroup>
           <thead>
             <tr valign="middle">
               <td rowspan="2" align="center">场次</td>
               <td colspan="{$arae_num}" align="center">剩余座椅</td>
-              <if condition="$proconf['quota'] eq '1'">
               <td rowspan="2" align="center">销售配额</td>
               <td rowspan="2" align="center">已用配额</td>
-              </if>
               <td rowspan="2" align="center">操作</td>
             </tr>
             <tr>
@@ -63,10 +59,8 @@
                 <volist name="vo['area']" id="area">
                 <td align="center"><?php echo M($plan['seat_table'])->where(array('status'=>0,'area'=>$area['id']))->count();?></td>
                 </volist>
-                <if condition="$proconf['quota'] eq '1'">
-                <td align="center">{$uinfo['crm']['quota']}</td>
-                <td align="center"><a href="{:U('Home/Index/seale',array('plan'=>$plan['id']));}" data-toggle="modal" data-target="#myModal"><?php echo M('QuotaUse')->where(array('plan_id'=>$plan['id'],'channel_id'=>$uinfo['crm']['id']))->getField('number')?></a></td>
-                </if>
+                <td align="center">{$vo['quota']}</td>
+                <td align="center"><a href="{:U('Home/Index/seale',array('plan'=>$plan['id']));}" data-toggle="modal" data-target="#myModal"><?php echo M('QuotaUse')->where(array('plan_id'=>$plan['id'],'channel_id'=>$uinfo['cid']))->getField('number')?></a></td>
                 <td align="center"><a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即出票</a></td>          
               </tr>
               </volist>   
@@ -74,7 +68,6 @@
       </table>
       </div>
       <else />
-
       <div class="col-sm-4 col-md-4">
           <div class="thumbnail">
               <img src="{$vo.img}" class="img-responsive img-rounded">

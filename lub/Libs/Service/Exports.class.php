@@ -8,68 +8,6 @@
 // +----------------------------------------------------------------------
 namespace Libs\Service;
 class Exports{
-	//导出数据方法
-    protected function goods_export($goods_list=array())
-    {
-        //print_r($goods_list);exit;
-        $goods_list = $goods_list;
-        $data = array();
-        foreach ($goods_list as $k=>$goods_info){
-            $data[$k][id] = $goods_info['id'];
-            $data[$k][title] = $goods_info['title'];
-            $data[$k][PNO] = $goods_info['PNO'];
-            $data[$k][old_PNO] = $goods_info['old_PNO'];
-            $data[$k][price]  = $goods_info['price'];
-            $data[$k][brand_id]  = get_title('brand',$goods_info['brand_id']);
-            $data[$k][category_id]  = get_title('category',$goods_info['category_id']);
-            $data[$k][type_ids] = get_type_title($goods_info['id']);
-            $data[$k][add_time] = $goods_info['add_time'];
-        }
-
-        //print_r($goods_list);
-        //print_r($data);exit;
-
-        foreach ($data as $field=>$v){
-            if($field == 'id'){
-                $headArr[]='产品ID';
-            }
-
-            if($field == 'title'){
-                $headArr[]='产品名称';
-            }
-
-            if($field == 'PNO'){
-                $headArr[]='零件号';
-            }
-
-            if($field == 'old_PNO'){
-                $headArr[]='原厂参考零件号';
-            }
-
-            if($field == 'price'){
-                $headArr[]='原厂参考面价';
-            }
-
-            if($field == 'type_ids'){
-                $headArr[]='品牌';
-            }
-
-            if($field == 'brand_id'){
-                $headArr[]='类别';
-            }
-            if($field == 'category_id'){
-                $headArr[]='适用机型';
-            }
-
-            if($field == 'add_time'){
-                $headArr[]='添加时间';
-            }
-        }
-
-        $filename="goods_list";
-
-        $this->getExcel($filename,$headArr,$data);
-    }
 	/**
 	 * 一般导出导出方法
 	 * Enter description here ...
@@ -174,7 +112,7 @@ class Exports{
     *@param $type int 报表类型
     */
     function templateExecl($data,$templateName,$header,$type = null){
-        
+
         Vendor('PHPExcel.PHPExcel');
         $objReader = \PHPExcel_IOFactory::createReader('Excel5');
         $temExcel= $objReader->load(SITE_PATH.'d/execl/'.$templateName.".xls");
@@ -225,7 +163,7 @@ class Exports{
                     $rebate += $va['rebate'];
                     foreach ($va['price'] as $ke => $da) {
                         /*详细 s*/
-                        $ticketname = ticketName($da['priceid'],1);
+                        $ticketname = ticketName($da['price_id'],1);
                         $objActSheet->setCellValue ($b.$zz, $ticketname);
                         $objActSheet->setCellValue ($c.$zz, $da['price']);
                         $objActSheet->setCellValue ($d.$zz, $da['discount'] );
@@ -246,7 +184,6 @@ class Exports{
                 $filename = "Lub_channel_sum_".time();
                 break;
             case '2':
-                
                 $objActSheet->setTitle ("景区日报表");
                 $objActSheet->setCellValue ('A1',"景区日报表");
                 $objActSheet->setCellValue ('B2',$header['starttime']);
@@ -273,10 +210,9 @@ class Exports{
                     //设置边框线
                     $objActSheet->getStyle($a.$zz.':'.$h.$zz)->applyFromArray($styleArray);
                     $zz = $zz+1;
-                    
                     foreach ($ve['price'] as $k=>$da){
-                        if(!empty($da['priceid'])){
-                            $ticketname = ticketName($da['priceid'],1);
+                        if(!empty($da['price_id'])){
+                            $ticketname = ticketName($da['price_id'],1);
                             $objActSheet->setCellValue ($a.$zz, $ticketname);
                             $objActSheet->setCellValue ($b.$zz, $da['price']);
                             $objActSheet->setCellValue ($c.$zz, $da['discount'] );
@@ -327,12 +263,9 @@ class Exports{
                             $objActSheet->setCellValue($b.$zz, crmName($va['channel_id'],1));
                             $objActSheet->mergeCells($b.$zz.':'.$m.$zz); 
                         }
-                            
-                        
                         $zz += 1;
                         $iii = '0';
                         foreach ($va['price'] as $key => $da) {
-
                             //设置合并的行数
                             $ss = $va['tic_num'] == '1' ? $zz : $zz+$va['tic_num']-1;
                             if($iii == '0'){
@@ -342,7 +275,6 @@ class Exports{
                                 $objActSheet->mergeCells($a.$zz.':'.$a.$ss);
                                 }
                             }
-                           
                             $objActSheet->setCellValue ($i.$zz, $va['number']);
                             $objActSheet->setCellValue ($j.$zz, $va['money']);
                             $objActSheet->setCellValue ($k.$zz, $va['moneys']);
@@ -355,10 +287,8 @@ class Exports{
                                 $objActSheet->mergeCells($l.$zz.':'.$l.$ss);
                                 $objActSheet->mergeCells($m.$zz.':'.$m.$ss);
                             }
-                            
-
                             /*详细 s*/
-                            $ticketname = ticketName($da['priceid'],1);
+                            $ticketname = ticketName($da['price_id'],1);
                             $objActSheet->setCellValue ($b.$zz, $ticketname);
                             $objActSheet->setCellValue ($c.$zz, $da['price']);
                             $objActSheet->setCellValue ($d.$zz, $da['discount'] );
@@ -424,7 +354,7 @@ class Exports{
                     $rebate += $va['rebate'];
                     foreach ($va['price'] as $ke => $da) {
                         /*详细 s*/
-                        $ticketname = ticketName($da['priceid'],1);
+                        $ticketname = ticketName($da['price_id'],1);
                         $objActSheet->setCellValue ($b.$zz, $ticketname);
                         $objActSheet->setCellValue ($c.$zz, $da['price']);
                         $objActSheet->setCellValue ($d.$zz, $da['discount'] );

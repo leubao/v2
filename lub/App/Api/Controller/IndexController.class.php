@@ -680,7 +680,7 @@ class IndexController extends ApiBase {
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
-      dump(F('1212'));
+
       /*
       $len = load_redis('lsize','test','1212211212');
       load_redis('set','work','qqqqq');
@@ -983,16 +983,12 @@ class IndexController extends ApiBase {
     //查询花费和返佣不匹配的订单
     function with_fill(){
       //查询所有渠道订单
-      //$list = M('Order')->where(array('addsid'=>array('in','2,4'),'type'=>array('in','2,4'),'status'=>array('in','1,9,7,8')))->limit('1,1500')->field('order_sn')->order('id DESC')->select();
+      $list = M('Order')->where(array('type'=>array('in','2,4,8,9'),'status'=>array('in','1,9,7,8')))->limit('1,500')->field('order_sn')->order('id DESC')->select();
       //匹配返佣订单
-     // dump($list);
-      //dump(count($list));
-      /*
       foreach ($list as $k => $v) {
         $status = M('TeamOrder')->where(array('order_sn' => $v['order_sn']))->find();
         if(!$status){
-          $data[] = $v['order_sn'];
-          //$this->sqlshow($v['order_sn']);
+          load_redis('lpush','PreOrder',$v['order_sn']);
         }
       }
       //echo "string";*/

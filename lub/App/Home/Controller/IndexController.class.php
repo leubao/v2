@@ -35,6 +35,7 @@ class IndexController extends Base{
 		$this->notice();
 		$this->assign('data',$list)
 			->assign('moneys',$money)
+			->assign('score',D('KpiChannel')->where(array('crm_id'=>$uinfo['cid'],'status'=>'1'))->getField('score'))
 			->display();           
 	}
 	/*通知公告*/
@@ -103,6 +104,7 @@ class IndexController extends Base{
 		$proArr = explode(',', $pro['product']);
 		foreach ($proArr as $k=>$v){
 			$list[$k] = Operate::do_read('Product',0,array('id'=>$v,'status'=>1));
+			$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'prodct_id'=>$v))->getField('quota');
 			if($list[$k] != false){
 				$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
 				$list[$k]['plan'] = Operate::do_read('Plan',1,array('product_id'=>$v,'status'=>2),"plantime ASC",array('id,product_id,plantime,games,seat_table'));
