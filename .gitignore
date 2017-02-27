@@ -5,3 +5,4 @@ apiclient_cert.pem
 cacert.pem
 rootca.pem
 up.log
+auto.php
