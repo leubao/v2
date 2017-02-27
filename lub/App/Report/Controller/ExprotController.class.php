@@ -72,7 +72,7 @@ class ExprotController extends ManageBase{
 	   			'moneys'	=>	$v['moneys'],
 	   			'subsidy'	=>	$v['subsidy'],
 	   			'user'		=>	userName($v['user_id'],1,1),
-	   			);
+	   		);
    		}
    		//景区日报表明细 表头
 		$headArr = array(

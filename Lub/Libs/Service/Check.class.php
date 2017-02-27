@@ -11,7 +11,7 @@ use Common\Model\Model;
 class Check{
 	//补贴报表
 	function check_rebate(){
-		$list = M('Order')->where(array('type'=>array('in','2,4,8,9'),'status'=>array('in','1,9,7,8')))->limit('1,100')->field('order_sn')->order('id DESC')->select();
+		$list = M('Order')->where(array('type'=>array('in','2,4,8,9'),'status'=>array('in','1,9,7,8')))->limit('1,200')->field('order_sn')->order('id DESC')->select();
 		if(!empty($list)){
 			$count = 0;
 			//判断是否在队列中

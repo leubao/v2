@@ -26,8 +26,8 @@ class TicketGroupModel extends RelationModel{
 	/**
 	 * 更新缓存
 	 */
-	function group_cache($proid){
-	 	$productId = $proid ? $proid : \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');	 	
+	function group_cache($proid = ''){
+	 	$productId = $proid ? $proid : get_product('id');	 	
 	 	$data = $this->where(array('product_id'=>$productId,'status'=>1))->select();
         if (empty($data)) {
             return false;

@@ -112,7 +112,6 @@ class Exports{
     *@param $type int 报表类型
     */
     function templateExecl($data,$templateName,$header,$type = null){
-
         Vendor('PHPExcel.PHPExcel');
         $objReader = \PHPExcel_IOFactory::createReader('Excel5');
         $temExcel= $objReader->load(SITE_PATH.'d/execl/'.$templateName.".xls");
@@ -122,10 +121,9 @@ class Exports{
         //***********************画出单元格边框*****************************  
         $styleArray = array(  
             'borders' => array(  
-                'allborders' => array(  
-                    //'style' => PHPExcel_Style_Border::BORDER_THICK,//边框是粗的  
+                'allborders' => array(   
                     'style' => \PHPExcel_Style_Border::BORDER_THIN,//细边框  
-                    //'color' => array('argb' => 'FFFF0000'),  
+                    'color' => array('argb' => '657180'),  
                 ),  
             ),  
         );
@@ -324,13 +322,13 @@ class Exports{
                 $objActSheet->setTitle ("售票员日报表");
                 $objActSheet->setCellValue ('A1',"售票员日报表");
                 $objActSheet->setCellValue ('B2',$header['datetime']);
-                $objActSheet->setCellValue ('F2',userName($header['user'],1));
+                $objActSheet->setCellValue ('F2',userName($header['user'],1,1));
                 $objActSheet->setCellValue ('I2',date('Y-m-d H:i:s'));
                 /* excel文件内容 */
                 $zz = 5;
                 //循环数据
                 foreach ($data as $ks=>$va){
-                    $objActSheet->setCellValue ($a.$zz, planShows($va['plan'],1));
+                    $objActSheet->setCellValue ($a.$zz, planShows($va['plan']));
                     $objActSheet->setCellValue ($i.$zz, $va['number']);
                     $objActSheet->setCellValue ($j.$zz, $va['money']);
                     $objActSheet->setCellValue ($k.$zz, $va['moneys']);
@@ -423,9 +421,7 @@ class Exports{
             default:
                 # code...
                 break;
-        }
-        
-            
+        }  
         header('Content-Type: application/vnd.ms-excel' );
         header('Content-Disposition: attachment;filename="' . $filename . '.xls"' );
         header('Cache-Control: max-age=0' );

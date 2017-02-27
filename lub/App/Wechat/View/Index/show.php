@@ -4,7 +4,7 @@
 </script>
 <div class="page">
   <header class="bar bar-nav">
-    <h1 class="title"><i class="iconfont">&#xe603</i>{$wechat.page_title}</h1>
+    <h1 class="title"><i class="iconfont">&#xe603</i>{$proconf.wx_page_title}</h1>
     <if condition="empty($uinfo['promote'])">
     <button class="button button-link button-nav pull-right"  ontouchend="window.location.href='{:U('Wechat/Index/uinfo');}'">
     </if>
@@ -137,8 +137,8 @@
             menuList: ['menuItem:share:appMessage','menuItem:share:timeline']
         });
         wx.onMenuShareAppMessage({
-            title: '{$wechat.share_title}',
-            desc: '{$wechat.share_desc}',
+            title: '{$proconf.wx_share_title}',
+            desc: '{$proconf.wx_share_desc}',
             link: '{$urls}',
             imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
             trigger: function (res) {
@@ -153,8 +153,8 @@
             }
         });
         wx.onMenuShareTimeline({
-            title: '{$wechat.share_title}',
-            desc: '{$wechat.share_desc}',
+            title: '{$proconf.share_title}',
+            desc: '{$proconf.share_desc}',
             link: '{$urls}',
             imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
             trigger: function (res) {

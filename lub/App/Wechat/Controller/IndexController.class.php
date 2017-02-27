@@ -30,7 +30,8 @@ class IndexController extends LubTMP {
     	}
         //加载产品配置信息
         $proconf = Cache('ProConfig');
-        $proconf = $proconf[$ginfo['id']][2]''
+        $proconf = $proconf[$this->ginfo['pid']][2];
+        dump($proconf);
         $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf);
     }
     /**

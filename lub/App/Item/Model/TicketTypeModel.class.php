@@ -13,7 +13,6 @@ class TicketTypeModel extends Model{
 	
 	//数据验证
 	 protected $_validate = array(
-	 	//array('name','','帐号名称已经存在！',0,'unique',1), // 在新增的时候验证name字段是否唯一
 	 );
 	 //自动完成字段
 	 protected $_auto = array(
@@ -25,7 +24,7 @@ class TicketTypeModel extends Model{
 	 * 更新缓存
 	 */
 	 function type_cache($proid = ''){
-	 	$productId = $proid ? $proid : \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');	 	
+	 	$productId = $proid ? $proid : get_product('id');	 	
 	 	$data = $this->where(array('product_id'=>$productId))->select();
         if (empty($data)) {
             return false;
@@ -36,7 +35,6 @@ class TicketTypeModel extends Model{
         	//缓存当前产品的票型缓存
         	$cache[$rs['id']] = $rs;
         }
-       // cache('TicketType'.$productId, $cache); 
         F('TicketType'.$productId, $cache);
         return true;
 	 }

@@ -565,7 +565,7 @@ class IndexController extends ApiBase {
     /**
      * 根据日期获取场次  TODO是否指定座位
      * 组合订单数据 多票型情况 ->根据票型获取区域ID
-     * 
+     *  
      */
     function booking_order($pinfo,$appInfo){
       $proList = cache('Product');

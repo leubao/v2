@@ -1425,7 +1425,7 @@
      * @param  int $product 产品id
      * @return int         
      */
-    function get_ticket_area($ticket, $product, $type){
+    function get_ticket_area($ticket, $product, $type = ''){
         $ticket_type = F("TicketType".$product);
         $tType = $ticket_type[$ticket];
         return $tType['area'];
