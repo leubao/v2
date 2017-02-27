@@ -28,7 +28,10 @@ class IndexController extends LubTMP {
         if(empty($this->ginfo)){
     		$this->error("参数错误");
     	}
-        $this->assign('ginfo',$this->ginfo);
+        //加载产品配置信息
+        $proconf = Cache('ProConfig');
+        $proconf = $proconf[$ginfo['id']][2]''
+        $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf);
     }
     /**
      * 微信开发几步走

@@ -19,7 +19,6 @@ class ProductController extends ManageBase{
 
 	/**
 	 * 单票设置
-	 * @param I('get.param',0,intval) int 判断是否是调用
 	 */
 	function single(){
 		$product_id = (int) $this->pid;

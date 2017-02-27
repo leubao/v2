@@ -67,7 +67,7 @@ class WechatController extends ManageBase{
             $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME));    
         }else{
             //获取价格分组
-            $price = M('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
+            $price = M('TicketGroup')->where(array('status'=>1,'product_id'=>get_product('id')))->field('id,name')->select();
             // SDK实例对象
             $oauth = & load_wechat('Oauth',$product_id,1);
             // 执行接口操作
