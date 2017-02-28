@@ -793,7 +793,7 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
                 'token'           => $proconf['wx_token'], // 填写你设定的key
                 'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
                 'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
-                'appsecret'       => $proconf['wx_appsecret'], // 填写高级调用功能的密钥
+                'appsecret'       => $proconf['appsecret'], // 填写高级调用功能的密钥
                 'encodingaeskey'  => $proconf['wx_encoding'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
                 'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
                 'partnerkey'      => $proconf['wx_mchkey'], // 微信支付，密钥（可选）
@@ -809,6 +809,7 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
                     'token'           => $proconf['wx_token'], // 填写你设定的key
                     'appsecret'       => $proconf['wx_appsecret'], // 填写高级调用功能的密钥
                     'encodingaeskey'  => $proconf['wx_encoding'], // 
+                    'partnerkey'      => $proconf['wx_mchkey'], // 微信支付，密钥（可选）
                 );
             }
             // 设置SDK的缓存路径

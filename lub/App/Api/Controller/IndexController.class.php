@@ -509,51 +509,50 @@ class IndexController extends ApiBase {
      */
     function api_booking_order(){
       if(IS_POST){
-         $pinfo = $_POST['data'];
-            $pinfo = json_decode($pinfo,true);
-            $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']); 
-            //dump($appInfo);
-            if($appInfo != false){
-              if(!empty($pinfo['sn'])){
-                //判断是否已下单
-                $sn = $this->query_order(array('sn'=>$pinfo['sn'],'type'=>1));//dump($sn);
-                if($sn != false){
-                    //已经下单直接返回
-                    $return = array(
-                      'code'  => 201,
-                      'info'  => $sn,
-                      'seat'  => sn_seat($sn),
-                      'msg'   => 'OK',
-                    );
-                }else{
-                  //组合订单数据
-                  //$info = $this->order_info($pinfo,$appInfo);
-                  $info = $this->booking_order($pinfo,$appInfo);
-                  //TODO API团队和API散客暂时按照支付方式来分  只记录不付费的51 API散客 52 API团队
-                  if($appInfo['is_pay'] == '1'){
-                    $scena = '51';
-                  }else{
-                    $scena = '52';
-                  }
-                  $sn = Order::orderApi($info,$scena,$appInfo); 
-                  if($sn){
-                    $return = array(
-                      'code'  => 200,
-                      'info'  => array('plan'=>planShow($info['plan_id'],1,1)),
-                      'sn'    => $sn,
-                      'seat'  => sn_seat($sn),
-                      'msg'   => 'OK',
-                    );
-                  }else{
-                    $return = array('code' => 403,'info' => '','msg' => '订单提交失败');
-                  }
-                }
-              }else{
-                $return = array('code' => 409,'info' => '','msg' => '终端标识不存在');
-              }
+        $pinfo = $_POST['data'];
+        $pinfo = json_decode($pinfo,true);
+        $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']); 
+        if($appInfo != false){
+          if(!empty($pinfo['sn'])){
+            //判断是否已下单
+            $sn = $this->query_order(array('sn'=>$pinfo['sn'],'type'=>1));//dump($sn);
+            if($sn != false){
+                //已经下单直接返回
+                $return = array(
+                  'code'  => 201,
+                  'info'  => $sn,
+                  'seat'  => sn_seat($sn),
+                  'msg'   => 'OK',
+                );
             }else{
-              $return = array('code' => 401,'info' => '','msg' => '认证失败');
+              //组合订单数据
+              //$info = $this->order_info($pinfo,$appInfo);
+              $info = $this->booking_order($pinfo,$appInfo);
+              //TODO API团队和API散客暂时按照支付方式来分  只记录不付费的51 API散客 52 API团队
+              if($appInfo['is_pay'] == '1'){
+                $scena = '51';
+              }else{
+                $scena = '52';
+              }
+              $sn = Order::orderApi($info,$scena,$appInfo); 
+              if($sn){
+                $return = array(
+                  'code'  => 200,
+                  'info'  => array('plan'=>planShow($info['plan_id'],1,1)),
+                  'sn'    => $sn,
+                  'seat'  => sn_seat($sn),
+                  'msg'   => 'OK',
+                );
+              }else{
+                $return = array('code' => 403,'info' => '','msg' => '订单提交失败');
+              }
             }
+          }else{
+            $return = array('code' => 409,'info' => '','msg' => '终端标识不存在');
+          }
+        }else{
+          $return = array('code' => 401,'info' => '','msg' => '认证失败');
+        }
 
       }else{
         $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
@@ -834,8 +833,6 @@ class IndexController extends ApiBase {
             $moneys += $va['num']*$price['discount'];
           }
         }
-        //dump($pinfo['money']);
-       // dump($moneys);
         if(bccomp((float)$pinfo['money'],(float)$moneys,2) == 0){
           return $seat;
         }else{
@@ -868,7 +865,7 @@ class IndexController extends ApiBase {
         'appkey'=> 'c922b084221663d43ef62e54142923a7',
         'money' =>  '0.1',
         'plan'  =>  '2960',
-        'sn'    =>  get_order_sn(),
+        'sn'    =>  get_order_sn('9999'),
         'oinfo' =>  array('0'=>array('areaId'=>'151','priceid'=>'34','price'=>'0.1','num'=>'1')),
         'crm'   =>  array('contact'=>'联系人','phone'=>'18631451216'),
         'param' =>  array('remark'=>'备注..')
@@ -878,15 +875,15 @@ class IndexController extends ApiBase {
     }
     //测试通用order
     function c_booking_order(){
-      $url = "http://new.leubao.com/api.php?a=api_booking_order";
+      $url = "http://ticket.leubao.com/api.php?a=api_booking_order";
       $post = array(
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
         'money' =>  '0.1',
         'product_id' => '41',
-        'datetime'  =>  '2016-08-31',
-        'sn'    =>  get_order_sn(),
-        'oinfo' =>  array('0'=>array('priceid'=>'34','price'=>'0.1','num'=>'1')),
+        'datetime'  =>  '2017-02-28',
+        'sn'    =>  get_order_sn('9999'),
+        'oinfo' =>  array(array('priceid'=>'34','price'=>'0.1','num'=>'1')),
         'crm'   =>  array('contact'=>'联系人','phone'=>'18631451216','id_card'=>'1304231988909171234'),
         'param' =>  array('remark'=>'备注..')
       );

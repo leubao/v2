@@ -26,6 +26,7 @@ class TrustController extends LubTMP {
 			);
 			$this->ajaxReturn($return);
 		}*/
+
 	}
 	//信任计划获取
 	function get_plan(){
@@ -162,10 +163,12 @@ class TrustController extends LubTMP {
 	/*处理对接数据*/
 	function dealpre(){
 		\Libs\Service\Rebate::ajax_rebate_order();
+		return true;
 	}
 	/*校验程序*/
 	function check()
 	{
 		\Libs\Service\Check::check_rebate();
+		return true;
 	}
 }

@@ -16,9 +16,12 @@ class LubTMPRebate {
     //任务主体
     public function run($cronId) {
     	//默认计算当天的订单
-        $plantime = strtotime(date('Ymd',strtotime("-1 day")));
+        $starttime = strtotime(date('Ymd',strtotime("-1 day")));
+        $endtime = strtotime(date('Ymd',strtotime("-5 day")));
+        $where['plantime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+        $where['status'] = 4;
         //查询当天的计划
-        $plan = M('Plan')->where(array('plantime'=>$plantime))->field('id')->select();
+        $plan = M('Plan')->where($where)->field('id')->select();
         $plan_id = array('in',implode(',',array_column($plan,'id')));
         $map = array('plan_id' => $plan_id,
             'status'=>array('neq','4'),
@@ -33,7 +36,7 @@ class LubTMPRebate {
                 'cron_id'=>0,
             );
         }
-        
+
         /*
         $log_1 = M('Cronlog')->addAll($info);
         //返佣结束后生成渠道商授信余额快报

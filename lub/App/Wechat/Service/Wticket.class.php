@@ -79,6 +79,11 @@ class Wticket {
                     $pay = '5';/*支持微信支付*/
                     $scene = '48';
                     break;
+                case '5':
+                    $type = 9;/*全员销售*/
+                    $pay = '5';/*支持微信支付*/
+                    $scene = '49';
+                    break;
             }
             $user['user'] = array(
                 'id'      => $uinfo['id'],
@@ -89,10 +94,8 @@ class Wticket {
                 'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
                 'scene'   => $scene,
                 'channel' => '1',
-
                 'epay'    => $uinfo['group']['settlement'],
                 'pricegroup'=> $uinfo['group']['price_group'],
-
                 'wxid'      => $uinfo['wechat']['user_id'],//微信id
                 'fx'        =>  $uinfo['type'],
                 'promote'   => $uinfo['promote'],
@@ -101,7 +104,7 @@ class Wticket {
             );
         }else{
             $proconf = cache('ProConfig');
-            $proconf = $proconf[$product_id][2];
+            $proconf = $proconf[$ginfo['pid']][2];
             //微信散客先写死 TODO
             $user['user'] = array(
                 'id' => 2,
@@ -112,7 +115,7 @@ class Wticket {
                 'scene'  => '41',
                 'epay'   => '2',//结算方式1 票面价结算2 底价结算
                 'channel'=> '0',
-                'pricegroup'=>$proconf['wx_prcie_group'],
+                'pricegroup'=>$proconf['wx_price_group'],
                 'wxid'   => $uinfo['wechat']['user_id'],
             );
         }
@@ -133,7 +136,6 @@ class Wticket {
         $winfo = M('WxMember')->where(array('openid'=>$open_id))->field('user_id,openid,unionid,channel')->find();
         if(!empty($winfo['user_id']) && $winfo['channel'] == '1'){
             $uInfo = M('User')->where(array('id'=>$winfo['user_id'],'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
-            //error_insert('109');
         }else{
             if(!empty($promote)){
                 $uInfo = M('User')->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid')->find();

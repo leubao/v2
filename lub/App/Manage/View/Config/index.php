@@ -49,20 +49,24 @@
                               </tr>
                               <tr>
                                 <td width="120px">微信APPID:</td>
-                                <td><input type="text" name="wx_appid" value="wx72bcf45e0f57a192" size="40" disabled="">
+                                <td><input type="text" name="wx_appid" value="wx72bcf45e0f57a192" size="40">
                                 </td>
                               </tr>
                               <tr>
                                 <td width="120px">微信商户号:</td>
-                                <td><input type="text" name="wx_mchid" value="1377282902" size="40" disabled="">
+                                <td><input type="text" name="wx_mchid" value="1377282902" size="40">
                                 </td>
                               </tr>
                               <tr>
                                 <td width="120px">商户key:</td>
-                                <td><input type="text" name="wx_mchkey" value="02c397be9ce49f9544bd768b6480330e" size="40" disabled="">
+                                <td><input type="text" name="wx_mchkey" value="02c397be9ce49f9544bd768b6480330e" size="40">
                                 </td>
                               </tr>
-                              
+                              <tr>
+                                <td width="120px">微信appsecret:</td>
+                                <td><input type="text" name="appsecret" value="66c9d92697c0496c1e72aa02f9ef2cf7" size="40">
+                                </td>
+                              </tr>
                             </tbody>
                           </table>   
                         </div>

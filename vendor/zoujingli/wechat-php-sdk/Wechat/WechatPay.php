@@ -60,6 +60,12 @@ class WechatPay {
         if (!isset($data['mchid']) && !isset($data['mch_id'])) {
             $data['mch_id'] = $this->mch_id;
         }
+        if(!isset($data['sub_appid'])){
+            $data['sub_appid'] = $this->sub_appid;
+        }
+        if(!isset($data['sub_mch_id'])){
+            $data['sub_mch_id'] = $this->sub_mch_id;
+        }
         isset($data['nonce_str']) || $data['nonce_str'] = Tools::createNoncestr();
         $data["sign"] = Tools::getPaySign($data, $this->partnerKey);
         return Tools::arr2xml($data);

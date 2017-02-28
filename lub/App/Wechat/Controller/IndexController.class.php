@@ -31,7 +31,6 @@ class IndexController extends LubTMP {
         //加载产品配置信息
         $proconf = Cache('ProConfig');
         $proconf = $proconf[$this->ginfo['pid']][2];
-        dump($proconf);
         $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf);
     }
     /**
@@ -550,16 +549,17 @@ class IndexController extends LubTMP {
                        $money = $info['money']*100; 
                     }
                     $proconf = cache('ProConfig');
-        			$proconf = $proconf[$product_id][2];
+        			$proconf = $proconf[$this->ginfo['pid']][2];
                     $notify_url = $proconf['wx_url'].'Wechat/Index/notify.html';
                     //产品名称
-                    $product_name = product_name($info['product_id'],1);
+                    $product_name = product_name($this->ginfo['pid'],1);
                     $pay = & load_wechat('Pay',$this->ginfo['pid']);
-                    //dump($pay);
+                   // dump($pay);
 					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI");
 					// 创建JSAPI签名参数包，这里返回的是数组
 					$options = $pay->createMchPay($prepayid);
-					$this->assign('wxpay',$options);
+                    //dump($options);
+					$this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                     
                 }
             }

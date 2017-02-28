@@ -7,7 +7,7 @@
     <div class="card">
         <div class="card-header">{$data.plan_id|planShow}</div>
         <div class="card-content">
-        <?php //dump($or);dump($user); //dump($jsapi); dump($wxpay);?>
+        <?php dump($user); dump($jsapi); dump($wxpay);?>
           <div class="list-block">
             <ul>
             <volist name="data['info']['data']['area']" id="vo" key='k'>
@@ -91,7 +91,7 @@
     function onBridgeReady(){
        WeixinJSBridge.invoke(
            'getBrandWCPayRequest', 
-           {$wxpay},
+           {$wxpay|json_encode},
            function(res){
           /*  alert(res.err_code+res.err_desc+res.err_msg);
               WeixinJSBridge.log(res.err_msg);
