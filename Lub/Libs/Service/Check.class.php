@@ -34,5 +34,38 @@ class Check{
 
 	}
 	//过期补贴未补的补贴报表
+	//网银支付  排座情况
+	function check_pay_order_seat(){
+		//读取订单列表，查询本地排座情况，若排座则不存入队列，若没有排座，查询微信支付支付情况，支付完成的调用排座程序
+		$order_list = load_redis('lrange','WechatPayOrder',0,-1);
+		$ln = load_redis('lsize','WechatPayOrder');
+		if($ln > 0){
+			$model = D('Item/Order');
+			for ($i=0; $i < $ln; $i++) { 
+				$sn = load_redis('rPop','WechatPayOrder');
+				$info = $model->where(array('order_sn'=>$sn))->relation(true)->find();
+				if(!in_array($info['status'],array('1,9'))){
+					//查询微信支付情况
+					$pay = & load_wechat('Pay',$info['product_id']);
+					$query = $pay->queryOrder($info['order_sn']);
+					if ($query['result_code'] == 'SUCCESS' && $query['return_code'] == 'SUCCESS' && $query['trade_state'] == 'SUCCESS') {
+		                $param = array(
+		                  'seat_type' => '1',
+		                  'pay_type' =>   '5'
+		                );
+		                $status = \Libs\Service\Order::mobile_seat($param,$info);
+		                if(!$status){
+		                	//排座失败
+		                	load_redis('lpush','WechatPayOrder',$sn);
+		                }else{
+		                	//排座成功
+		                }
+					}else{
+						error_insert($pay->errMsg.[$pay->errCode]);
+					}
+				}
+			}
+		}
+	}
 }
 	

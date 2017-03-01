@@ -16,8 +16,8 @@ class LubTMPRebate {
     //任务主体
     public function run($cronId) {
     	//默认计算当天的订单
-        $starttime = strtotime(date('Ymd',strtotime("-1 day")));
-        $endtime = strtotime(date('Ymd',strtotime("-5 day")));
+        $starttime = strtotime(date('Ymd',strtotime("-5 day")));
+        $endtime = strtotime(date('Ymd',strtotime("-1 day")));
         $where['plantime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
         $where['status'] = 4;
         //查询当天的计划

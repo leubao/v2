@@ -679,7 +679,7 @@ class IndexController extends ApiBase {
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
-
+load_redis('lpush','WechatPayOrder','70301190632334');
       /*
       $len = load_redis('lsize','test','1212211212');
       load_redis('set','work','qqqqq');
@@ -1019,7 +1019,13 @@ class IndexController extends ApiBase {
     
     //生成sql语句
     function sqlshow(){
-
+      $map = array('status'=>array('neq','4'));
+        //$list = M('TeamOrder')->where($map)->field('order_sn')->select();
+        //dump($list);
+        //按订单返佣
+        foreach ($list as $key => $value) {
+           //$info[$key] = \Libs\Service\Rebate::rebate($value,1);
+        }
       /*
       $map = array(
         'order_sn' => $sn,

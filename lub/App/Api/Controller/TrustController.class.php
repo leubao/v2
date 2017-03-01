@@ -151,8 +151,6 @@ class TrustController extends LubTMP {
             $moneys += $va['num']*$price['discount'];
           }
         }
-        //dump($pinfo['money']);
-       // dump($moneys);
         if(bccomp((float)$pinfo['money'],(float)$moneys,2) == 0){
           return $seat;
         }else{
@@ -168,7 +166,10 @@ class TrustController extends LubTMP {
 	/*校验程序*/
 	function check()
 	{
+		//校验返利
 		\Libs\Service\Check::check_rebate();
+		//校验微信支付排座情况
+		\Libs\Service\Check::check_pay_order_seat();
 		return true;
 	}
 }

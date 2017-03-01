@@ -67,6 +67,7 @@ class WechatPay {
             $data['sub_mch_id'] = $this->sub_mch_id;
         }
         isset($data['nonce_str']) || $data['nonce_str'] = Tools::createNoncestr();
+        //$data['nonce_str'] = 'f0o5dkko7zhce4s0u7l1nbcgrdunvlix';
         $data["sign"] = Tools::getPaySign($data, $this->partnerKey);
         return Tools::arr2xml($data);
     }
@@ -78,7 +79,9 @@ class WechatPay {
      * @return mixed
      */
     public function postXml($data, $url) {
-        return Tools::httpPost($url, $this->createXml($data));
+        $aa = $this->createXml($data);
+        load_redis('set','signs',$aa);
+        return Tools::httpPost($url, $aa);
     }
 
     /**
@@ -132,6 +135,7 @@ class WechatPay {
      */
     public function getNotify() {
         $notifyInfo = (array)simplexml_load_string(file_get_contents("php://input"), 'SimpleXMLElement', LIBXML_NOCDATA);
+        load_redis('set','1PayssOrder',serialize($notifyInfo));
         if (empty($notifyInfo)) {
             Tools::log('Payment notification forbidden access.', 'ERR');
             $this->errCode = '404';
@@ -144,14 +148,16 @@ class WechatPay {
             $this->errMsg = 'Payment notification signature is missing.';
             return false;
         }
+        /*获取配置信息  zj 取消签名验证
         $data = $notifyInfo;
+
         unset($data['sign']);
         if ($notifyInfo['sign'] !== Tools::getPaySign($data, $this->partnerKey)) {
             Tools::log('Payment notification signature verification failed.' . var_export($notifyInfo, true), 'ERR');
             $this->errCode = '403';
             $this->errMsg = 'Payment signature verification failed.';
             return false;
-        }
+        }*/
         Tools::log('Payment notification signature verification success.' . var_export($notifyInfo, true), 'MSG');
         $this->errCode = '0';
         $this->errMsg = '';
@@ -183,9 +189,10 @@ class WechatPay {
      * @param string $notify_url 支付成功回调地址
      * @param string $trade_type 支付类型JSAPI|NATIVE|APP
      * @param string $goods_tag 商品标记，代金券或立减优惠功能的参数
+     * @param string $sub  子商户模式
      * @return bool|string
      */
-    public function getPrepayId($openid, $body, $out_trade_no, $total_fee, $notify_url, $trade_type = "JSAPI", $goods_tag = null) {
+    public function getPrepayId($openid, $body, $out_trade_no, $total_fee, $notify_url, $trade_type = "JSAPI", $goods_tag = null,$sub = '') {
         $postdata = array(
             "body"             => $body,
             "out_trade_no"     => $out_trade_no,
@@ -195,8 +202,14 @@ class WechatPay {
             "spbill_create_ip" => Tools::getAddress()
         );
         empty($goods_tag) || $postdata['goods_tag'] = $goods_tag;
-        empty($openid) || $postdata['openid'] = $openid;
+        //TODO  子商户传递子openid
+        if($sub){
+            empty($openid) || $postdata['sub_openid'] = $openid;
+        }else{
+            empty($openid) || $postdata['openid'] = $openid;
+        }
         $result = $this->getArrayResult($postdata, self::MCH_BASE_URL . '/pay/unifiedorder');
+       // dump($result);
         if (false === $this->_parseResult($result)) {
             return false;
         }

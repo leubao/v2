@@ -128,9 +128,11 @@
                       </div>
                     </fieldset>
                     <!--主商户-->
-                    <input type="hidden" name="wx_mchid" value="{$vo.wx_mchid}">
-                    <input type="hidden" name="wx_appid" value="{$vo.wx_appid}">
-                    <input type="hidden" name="wx_mchkey" value="{$vo.wx_mchkey}">
+                    <input type="text" name="wx_appid" value="{$vo.wx_appid}">
+                    <input type="text" name="wx_mchid" value="{$vo.wx_mchid}">
+                    <input type="text" name="wx_mchkey" value="{$vo.wx_mchkey}">
+                    <input type="text" name="appsecret" value="{$vo.appsecret}">
+                    
 
                 </div>
               </div>

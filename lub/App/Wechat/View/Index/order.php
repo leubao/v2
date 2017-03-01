@@ -7,11 +7,11 @@
     <div class="card">
         <div class="card-header">{$data.plan_id|planShow}</div>
         <div class="card-content">
-        <?php dump($user); dump($jsapi); dump($wxpay);?>
           <div class="list-block">
             <ul>
             <volist name="data['info']['data']['area']" id="vo" key='k'>
               <li class="item-content">
+              <?php //dump($error);?>
                   <div class="item-inner">
                     <div class="item-title">{$vo.areaId|areaName}</div>
                     <div class="item-after">x {$vo.num}</div>
@@ -56,7 +56,7 @@
     </if>
     <if condition="$data.type eq '1' || $data.type eq '8' || $data.type eq '6'">
     <p><a href="#" class="button button-big button-fill button-success" id="wxpay">微信支付</a></p>
-    <p><a href="{:U('Wechat/Index/dfpay',array('sn'=>$data['order_sn'],'to'=>$wechat['id']));}" class="button button-big button-fill wxpay button-warning" id="dfpay">请人代付</a></p>
+    <p><a href="{:U('Wechat/Index/dfpay',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));}" class="button button-big button-fill wxpay button-warning" id="dfpay">请人代付</a></p>
     </if>
     <if condition="$data.type eq '6'">
     <p><a href="#" id="window_pay" class="button button-big button-fill">窗口现金支付 </a></p>
@@ -93,11 +93,9 @@
            'getBrandWCPayRequest', 
            {$wxpay|json_encode},
            function(res){
-          /*  alert(res.err_code+res.err_desc+res.err_msg);
-              WeixinJSBridge.log(res.err_msg);
              // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 */
              if(res.err_msg == "get_brand_wcpay_request:ok"){
-                var link = "{:U('Wechat/Index/pay_success',array('sn'=>$data['order_sn']));}";
+                var link = "{:U('Wechat/Index/pay_success',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));}";
                 window.location.href=link;
              }
            }
