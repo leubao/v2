@@ -471,37 +471,20 @@ class OrderController extends ManageBase{
 			$oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn'],'status'=>array('in','6,11')))->relation(true)->find();
             if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
-				$run = Order::sweep_pay_seat($info,$oinfo);
-				if($run != false){
-					//支付方式影响返回结果
-					$return = array(
-						'statusCode' => '200',
-						'title'		 =>	"门票打印",
-						'width'		 =>	'213',
-						'height'	 =>	'208',
-						'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
-					);
-					$message = "支付成功!单号".$run;
-					D('Item/Operationlog')->record($message, 200);//记录售票员日报表
-				}else{
-					$return = array(
-						'statusCode' => '300'
-					);
-					$message = "支付失败!";
-					D('Item/Operationlog')->record($message, 300);//记录售票员日报表
-				}
+				$return = $this->sweep_pay_seat($info,$oinfo);
+			}else{
+				$product = product_name($oinfo['product_id'],1);
+				//构造支付订单数据
+				$payData = [
+				    "order_no"	=> $info['sn'],
+				    "amount"	=> $oinfo['money'],// 单位为元 ,最小为0.01
+				    "client_ip"	=> get_client_ip(),
+				    "subject"	=> $product."门票",
+				    "body"		=> $product."门票",//planShow($oinfo['plan_id'],1,1).$product."门票",
+				    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
+				    "extra_param"	=> '',
+				];
 			}
-			$product = product_name($oinfo['product_id'],1);
-			//构造支付订单数据
-			$payData = [
-			    "order_no"	=> $info['sn'],
-			    "amount"	=> $oinfo['money'],// 单位为元 ,最小为0.01
-			    "client_ip"	=> get_client_ip(),
-			    "subject"	=> $product."门票",
-			    "body"		=> $product."门票",//planShow($oinfo['plan_id'],1,1).$product."门票",
-			    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
-			    "extra_param"	=> '',
-			];
 			if($info['pay_type'] == '4'){
 				//支付宝支付
 				$this->alipay_code($payData);
@@ -512,17 +495,18 @@ class OrderController extends ManageBase{
 			if($info['pay_type'] == '5'){
 				//微信支付
 				$result = $this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
-				if(!empty($result['errCode'])){
+				if($result['errCode'] == USERPAYING){
+					//用户支付中，需要输入密码
 					$return = array(
 						'statusCode' => '400',
 						'message'=>'['.$result['errCode'].']'.$result['errMsg']
 					);
-				}else{
-					$return = array(
-						'statusCode' => '200'
-					);
+				}elseif($result['result_code'] == 'SUCCESS' && $result['return_code'] == 'SUCCESS'){
+					//更新支付日志，写入待排座队列
+					$uppaylog = array('status'=>1,'out_trade_no'=>$result['transaction_id']);
+                	$paylog = D('Manage/Pay')->where(array('order_sn'=>$result['out_trade_no'],'type'=>2))->save($uppaylog);
+					$return = $this->sweep_pay_seat($info,$oinfo);
 				}
-				
 			}
 			die(json_encode($return));
 		}else{
@@ -540,7 +524,6 @@ class OrderController extends ManageBase{
 	{
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $payData['amount']*100;
-		//创建JSAPI签名参数包，这里返回的是数组
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
 		if($result === FALSE){
 			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
@@ -551,46 +534,63 @@ class OrderController extends ManageBase{
 	/*轮询支付日志查询支付结果*/
 	function public_payment_results(){
 		$ginfo = I('get.');
-		$status = S('pay'.$ginfo['sn']);
-		if($status == '200'){
-			$oinfo = D('Item/Order')->where(array('order_sn'=>$ginfo['sn'],'status'=>array('in','6,11')))->relation(true)->find();
-            if(empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
-            $info = array(
-            	'seat_type' => $ginfo['seat'],
-            	'pay_type'  => $ginfo['pay'],
-            );
-			$run = Order::sweep_pay_seat($info,$oinfo);
-			if($run !== false){
-				$return = array(
-					'statusCode' => '200',
-					'title'		 =>	"门票打印",
-					'width'		 =>	'213',
-					'height'	 =>	'208',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
-				);
+		$oinfo = D('Item/Order')->where(array('order_sn'=>$ginfo['sn'],'status'=>array('in','6,11')))->relation(true)->find();
+        if(empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
+		if($ginfo['pay'] == '5'){
+			$pay = & load_wechat('Pay',$oinfo['product_id']);
+			$query = $pay->queryOrder($ginfo['sn']);
+			if ($query['result_code'] == 'SUCCESS' && $query['return_code'] == 'SUCCESS' && $query['trade_state'] == 'SUCCESS') {
+	            $param = array(
+            		'seat_type' => $ginfo['seat'],
+            		'pay_type'  => $ginfo['pay'],
+            	);
+            	$return = $this->sweep_pay_seat($param,$oinfo);
 			}else{
-				//抛出售票失败，同时执行退款程序
-				if($ginfo['pay'] == '4'){
-					//支付宝
-				}
-				if($ginfo['pay'] == '5'){
-					//微信
-					\Libs\Service\Refund::weixin_refund($ginfo['sn'],$oinfo['product_id']);
+				$hit = (int)S('pay'.$ginfo['sn'])+1;
+				if((int)$hit >= 5){
 					$return = array(
 						'statusCode' => '400',
 						'message' => '订单创建遇到严重错误,无法继续执行,已经执行退款程序,请提醒客户查收',
 					);
+					//微信
+					\Libs\Service\Refund::weixin_refund($ginfo['sn'],$oinfo['product_id']);
+					S('pay'.$ginfo['sn'],null);
+				}else{
+					S('pay'.$ginfo['sn'],$hit);
+					$return = array(
+						'statusCode' => '300',
+						'msg'	=>	'等待客户付款...'
+					);
 				}
+				error_insert($pay->errMsg.[$pay->errCode]);
 			}
-			S('pay'.$ginfo['sn'],null);
+		}
+		die(json_encode($return));
+	}
+	//刷卡支付排座
+	function sweep_pay_seat($info,$oinfo)
+	{
+		$run = Order::sweep_pay_seat($info,$oinfo);
+		if($run != false){
+			//支付方式影响返回结果
+			$return = array(
+				'statusCode' => '200',
+				'title'		 =>	"门票打印",
+				'width'		 =>	'213',
+				'height'	 =>	'208',
+				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
+			);
+			$message = "支付成功!单号".$run;
+			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 		}else{
 			$return = array(
 				'statusCode' => '300'
 			);
+			$message = "支付失败!";
+			D('Item/Operationlog')->record($message, 300);//记录售票员日报表
 		}
-		die(json_encode($return));
+		return $return;
 	}
-		
 	/*======================================================================华丽分割线 团队售票订单====================================================*/
 /*	function teamPost(){
 		$info = $_POST['info'];
