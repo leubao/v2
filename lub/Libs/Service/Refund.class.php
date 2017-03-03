@@ -716,10 +716,10 @@ class Refund extends \Libs\System\Service {
 	//微信退款
 	function weixin_refund($sn,$product_id){
 		//读取支付日志
-		$info = D('Manage/Pay')->where(array('order_sn'=>$sn))->select();
+		$info = D('Manage/Pay')->where(array('order_sn'=>$sn))->find();
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $info['money']*100;
-		$rsn = get_order_sn();
+		$rsn = get_order_sn($product_id);
 		$result = $pay->refund($sn,$info['out_trade_no'],$rsn,$money,$money);
 		// 处理创建结果
 		if($result===FALSE){
@@ -732,7 +732,6 @@ class Refund extends \Libs\System\Service {
             $paylog = D('Manage/Pay')->where(array('order_sn'=>$result['out_refund_no'],'type'=>3))->save($uppaylog);
             return true;
 		}
-
 	}
 	/**
 	 * 不同意退款

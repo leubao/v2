@@ -110,4 +110,45 @@ class CashierController extends ManageBase{
 			$this->erun('参数错误!');
 		}
 	}
+	/**
+	 * 微信支付退款
+	 */
+	function weixin_refund_payment(){
+		$id = I('get.id',0,intval);
+		if(!empty($id)){
+			$map = array("id"=>$id);
+			$model = D('Item/Pay');
+			//读取状态
+			$map = array('status'=>1);
+			$pay = $model->where($map)->find();
+			if(!$pay){
+				$this->erun('订单状态不允许此项操作!');
+			}
+			//查看订单状态，已排座的不允许直接退款
+			$where= array('status'=>array('in','0,2,3,5,11'),'order_sn'=>$pay['order_sn']);
+			$db = D('Item/Order');
+			$oinfo = $db->where($where)->field('id,product_id')->find();
+			if($oinfo){
+				//发起退款
+				if(\Libs\Service\Refund::weixin_refund($pay['order_sn'],$oinfo['product_id'])){
+
+				}
+			}else{
+				$this->erun('订单状态不允许此项操作!');
+			}
+			//停用状态的数据，删除会直接删除
+			if($model->where($map)->getField('status') == '0'){
+				$del = $model->where($map)->delete();
+			}else{
+				$del = $model->where($map)->setField('status','0');
+			}
+			if($del){
+				$this->srun("删除成功!", array('tabid'=>$this->menuid.MODULE_NAME));
+			}else {
+				$this->erun('删除失败!');
+			}
+		}else{
+			$this->erun('参数错误!');
+		}
+	}
 }

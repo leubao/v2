@@ -36,13 +36,12 @@
   $(document).ready(function(){
     settime('countdown',90);
   });*/
-
+  var paymentT = '',
+      payMsg = $('#payMsg');
   $("#pay_card").focus();
   $('#pay_card').keydown(function(e){
     var pay_card = $("#pay_card").val(),
-        keycode = (e.keyCode ? e.keyCode : e.which),
-        payMsg = $('#payMsg');
-        console.log(keycode);
+        keycode = (e.keyCode ? e.keyCode : e.which);
     if(keycode == 13){
       if(isNull(pay_card) == false){
         layer.msg('扫码失败...');
@@ -52,7 +51,8 @@
           sn = '{$ginfo.sn}',
           is_pay = '{$ginfo.is_pay}',
           payKey = $("#pay_card").val();
-      postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"paykey":'+payKey+'}';
+      postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"seat_type":"1","paykey":'+payKey+'}';
+      paymentT = setTimeout("payment_polling()",5000);
       //向第三方支付提交支付请求
       $.ajax({
         type:'POST',
@@ -63,33 +63,21 @@
         error: function(){
           layer.msg('服务器请求超时，请检查网络...');
         },
-        success:function(data){
-            if(data.statusCode == "200"){
-              payMsg.html("扫码成功,等待客户确认....");
+        success:function(result){
+            payMsg.html("扫码成功,等待客户确认....");
+            if(result.statusCode == "200"){
               //倒计时支付结果，等待支付结果
               //settime('countdown',90);
-              //开始轮询支付结果
-              //等待第三方返回结果,轮询结果
-              setInterval(function(){
-                $.get("{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay']));}", function(result){
-                  if(result.statusCode == "200"){
-                      //刷新
-                      $(this).dialog('refresh', result.refresh);
-                      $(this).dialog({id:'print', url:''+result.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
-                  }
-                  if(result.statusCode == "400"){
-                    layer.msg(result.message);
-                    $(this).dialog('refresh', 'work_quick');
-                    //关闭当前窗口
-                    $(this).dialog('close','payment');
-                  }
-                });
-                //第三方返回成功
-                //调出打印窗口
-              }, 60000);
+              $(this).dialog('refresh', result.refresh);
+              $(this).dialog({id:'print', url:''+result.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+              //关闭当前窗口
+              $(this).dialog('close','payment');
             }
-            if(data.statusCode == "400"){
-              layer.msg(data.message);
+            if(result.statusCode == "300"){
+              payMsg.html(result.message);
+            }
+            if(result.statusCode == "400"){
+              layer.msg(result.message);
               $(this).dialog('refresh', 'work_quick');
               //关闭当前窗口
               $(this).dialog('close','payment');
@@ -98,6 +86,40 @@
       });
     } 
   });
+  function payment_polling(){
+    $.ajax({
+      type:'GET',
+      url:"{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay'],'seat_type'=>1));}",
+      dataType:'json',
+      timeout: 3500,
+      error: function(){
+        layer.msg('服务器请求超时，请检查网络...');
+      },
+      success:function(result){
+        if(result.statusCode == "200"){
+          clearTimeout(paymentT); 
+          //刷新
+          $(this).dialog('refresh', result.refresh);
+          $(this).dialog({id:'print', url:''+result.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+           //关闭当前窗口
+          $(this).dialog('close','payment');
+        }
+        if(result.statusCode == "300"){
+            //刷新
+            payMsg.html(result.message);
+            paymentT = setTimeout("payment_polling()",5000);
+        }
+        if(result.statusCode == "400"){
+          clearTimeout(paymentT); 
+          layer.msg(result.message);
+          $(this).dialog('refresh', 'work_quick');
+           //关闭当前窗口
+          $(this).dialog('close','payment');
+        }
+        console.log(result.statusCode);
+      }
+    });
+  }
   /**
    * 倒计时
    * @param  {[type]} showmsg   显示区域
@@ -145,6 +167,7 @@
               //刷新
               $(this).dialog('refresh', data.refresh);
               $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+
           }else{
               $(this).alertmsg('error','出票失败!');
           }

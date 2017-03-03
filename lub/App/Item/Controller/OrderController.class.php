@@ -469,7 +469,7 @@ class OrderController extends ManageBase{
 			$info = json_decode($pinfo,true);
 			//pos 收费 现金支付
 			$oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn'],'status'=>array('in','6,11')))->relation(true)->find();
-            if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
+            if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '400','msg' => $oinfo)));}
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
 				$return = $this->sweep_pay_seat($info,$oinfo);
 			}else{
@@ -498,7 +498,7 @@ class OrderController extends ManageBase{
 				if($result['errCode'] == USERPAYING){
 					//用户支付中，需要输入密码
 					$return = array(
-						'statusCode' => '400',
+						'statusCode' => '300',
 						'message'=>'['.$result['errCode'].']'.$result['errMsg']
 					);
 				}elseif($result['result_code'] == 'SUCCESS' && $result['return_code'] == 'SUCCESS'){
@@ -534,20 +534,19 @@ class OrderController extends ManageBase{
 	/*轮询支付日志查询支付结果*/
 	function public_payment_results(){
 		$ginfo = I('get.');
-		$oinfo = D('Item/Order')->where(array('order_sn'=>$ginfo['sn'],'status'=>array('in','6,11')))->relation(true)->find();
-        if(empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => $oinfo)));}
-		if($ginfo['pay'] == '5'){
+		$oinfo = D('Item/Order')->where(array('order_sn'=>$ginfo['sn'],'status'=>array('in','5,11')))->relation(true)->find();
+        if(empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => '订单获取失败')));}
+		if($ginfo['pay_type'] == '5'){
 			$pay = & load_wechat('Pay',$oinfo['product_id']);
 			$query = $pay->queryOrder($ginfo['sn']);
 			if ($query['result_code'] == 'SUCCESS' && $query['return_code'] == 'SUCCESS' && $query['trade_state'] == 'SUCCESS') {
 	            $param = array(
-            		'seat_type' => $ginfo['seat'],
-            		'pay_type'  => $ginfo['pay'],
+            		'seat_type' => $ginfo['seat_type'],
+            		'pay_type'  => $ginfo['pay_type'],
             	);
             	$return = $this->sweep_pay_seat($param,$oinfo);
-			}else{
-				$hit = (int)S('pay'.$ginfo['sn'])+1;
-				if((int)$hit >= 5){
+            	$hit = (int)S('pay'.$ginfo['sn'])+1;
+            	if((int)$hit >= 5){
 					$return = array(
 						'statusCode' => '400',
 						'message' => '订单创建遇到严重错误,无法继续执行,已经执行退款程序,请提醒客户查收',
@@ -555,13 +554,13 @@ class OrderController extends ManageBase{
 					//微信
 					\Libs\Service\Refund::weixin_refund($ginfo['sn'],$oinfo['product_id']);
 					S('pay'.$ginfo['sn'],null);
-				}else{
-					S('pay'.$ginfo['sn'],$hit);
-					$return = array(
-						'statusCode' => '300',
-						'msg'	=>	'等待客户付款...'
-					);
 				}
+				S('pay'.$ginfo['sn'],$hit);
+			}else{
+				$return = array(
+					'statusCode' => '300',
+					'message'	=>	'等待客户付款...'
+				);
 				error_insert($pay->errMsg.[$pay->errCode]);
 			}
 		}

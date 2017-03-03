@@ -109,6 +109,11 @@ class IndexController extends Controller
             $this->assign('data',session('info'))->display();
         }
     }
+    //微信扫码支付
+    function weixinpay(){
+        //获取订单号
+        //制作微信扫码付款链接并生成二维码
+    }
     //支付
     function pay(){
         if(IS_POST){

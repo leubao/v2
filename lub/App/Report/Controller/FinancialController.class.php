@@ -81,6 +81,7 @@ class FinancialController extends ManageBase{
         	$map['channel_id'] = array('in',agent_channel($channel,2));
         }
         //设置订单类型为团队或渠道
+        //按照客户分组来统计报表 TODO
         $map['type'] = array('in','2,4,6,7');
         $map['status'] = '1';
         $db = M('ReportData');
