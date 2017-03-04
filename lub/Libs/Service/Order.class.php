@@ -14,9 +14,9 @@ use Libs\Service\Autoseat;
 class Order extends \Libs\System\Service {
     //数据
     protected $data = array();
-    //错误信息
-    protected $error = NULL;
-
+    /** 执行错误消息及代码 */
+    public $errMsg;
+    public $errCode;
 	/**************************************************选座订单****************************************************/
 	function rowSeat($pinfo){
 		$info = json_decode($pinfo,true);
@@ -83,7 +83,9 @@ class Order extends \Libs\System\Service {
 			);
 			$num = $num++;
 			if($status[$k] == false){
-				error_insert('400009');
+				//$this->errCode = '400009';
+				//$this->errMsg = '座椅信息更新失败';
+				//error_insert('400009');
 				return false;
 				break;
 			}
@@ -95,8 +97,10 @@ class Order extends \Libs\System\Service {
 		if($money == $info['subtotal']){
 			$info['subtotal'] = $money;
 		}else{
-			error_insert('400018');
+			//error_insert('400018');
 			$model->rollback();//事务回滚
+			//$this->errCode = '400018';
+			//$this->errMsg = '金额校验失败';
 			return false;
 		}
 		if($info['type'] == '2'){
@@ -104,8 +108,10 @@ class Order extends \Libs\System\Service {
 			$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem']);
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-				error_insert('400018');
+				//error_insert('400018');
 				$model->rollback();
+				//$this->errCode = '400021';
+				//$this->errMsg = '渠道商信息获取失败';
 				return false;
 			}
 			//判断是否是底价结算['group']['settlement']
@@ -165,8 +171,10 @@ class Order extends \Libs\System\Service {
 			$model->commit();//提交事务
 			return $sn;
 		}else{
-			error_insert('400006');
+			//error_insert('400006');
 			$model->rollback();//事务回滚
+			//$this->errCode = '400006';
+			//$this->errMsg = '订单写入失败';
 			return false;
 		}	
 	}

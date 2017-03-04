@@ -11,7 +11,6 @@
             <ul>
             <volist name="data['info']['data']['area']" id="vo" key='k'>
               <li class="item-content">
-              <?php //dump($error);?>
                   <div class="item-inner">
                     <div class="item-title">{$vo.areaId|areaName}</div>
                     <div class="item-after">x {$vo.num}</div>
@@ -21,7 +20,8 @@
             </ul>
           </div>
         </div>
-        <div class="card-footer price"> <span>合计</span><span>￥ {$data['money']}</span></div>
+        <div class="card-footer price"> <span>优惠金额</span><span>{$data['info']['data']['poor']|format_money}</span></div>
+        <div class="card-footer price"> <span>实付金额</span><span> ￥ {$data['money']}</span></div>
     </div>
     
    <div class="list-block">

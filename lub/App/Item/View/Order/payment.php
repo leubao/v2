@@ -167,7 +167,6 @@
               //刷新
               $(this).dialog('refresh', data.refresh);
               $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
-
           }else{
               $(this).alertmsg('error','出票失败!');
           }

@@ -130,7 +130,10 @@ class CashierController extends ManageBase{
 			$oinfo = $db->where($where)->field('id,product_id')->find();
 			if($oinfo){
 				//发起退款
-				if(\Libs\Service\Refund::weixin_refund($pay['order_sn'],$oinfo['product_id'])){
+				$refund = \Libs\Service\Refund::weixin_refund($pay['order_sn'],$oinfo['product_id']);
+				if($refund !== FALSE){
+					$this->srun("退款成功!", array('tabid'=>$this->menuid.MODULE_NAME));
+				}else{
 
 				}
 			}else{

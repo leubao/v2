@@ -23,6 +23,7 @@ class OrderController extends ManageBase{
 			$plan = I('get.plan',0,intval);
 			$type = I('get.type',1,intval);
 			//更新座位状态信息
+			//$order = new Order;
 			$sn = Order::rowSeat($info);
 			if($sn != false){
 				$return = array(
@@ -36,6 +37,7 @@ class OrderController extends ManageBase{
 				$return = array(
 					'statusCode' => '300',
 					'forwardUrl' => '',
+					'message' => $sn->errMsg,
 				);
 				$message = "下单失败!";
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表

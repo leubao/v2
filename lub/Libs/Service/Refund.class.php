@@ -716,22 +716,32 @@ class Refund extends \Libs\System\Service {
 	//微信退款
 	function weixin_refund($sn,$product_id){
 		//读取支付日志
-		$info = D('Manage/Pay')->where(array('order_sn'=>$sn))->find();
+		$info = D('Item/Pay')->where(array('order_sn'=>$sn))->find();
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $info['money']*100;
 		$rsn = get_order_sn($product_id);
 		$result = $pay->refund($sn,$info['out_trade_no'],$rsn,$money,$money);
 		// 处理创建结果
 		if($result===FALSE){
-		    // 接口失败的处理
 		    //TODO  写入紧急处理错误
-		    return false;
+		    //写入待处理事件
+		    load_redis('lpush','WeixinPayRefund',$sn);
 		}else{
 		    // 接口成功的处理
-		    $uppaylog = array('status'=>1,'out_trade_no'=>$result['transaction_id']);
-            $paylog = D('Manage/Pay')->where(array('order_sn'=>$result['out_refund_no'],'type'=>3))->save($uppaylog);
-            return true;
+		    $param = unserialize($info['param']);
+		    $param['refund'] = $result;
+		    $uppaylog = array(
+		    	'status'		=>	4,
+		    	'out_refund_no'	=>	$result['refund_id'],
+		    	'refund_sn'		=>	$result['out_refund_no'],
+		    	'refund_moeny'	=>	$result['cash_refund_fee'],
+		    	'param'			=>  serialize($param),
+		    	'user_id'		=>	get_user_id(),
+		    	'update_time'	=>	time()
+		    );
+            $paylog = D('Item/Pay')->where(array('order_sn'=>$sn))->save($uppaylog);
 		}
+		return $result;
 	}
 	/**
 	 * 不同意退款

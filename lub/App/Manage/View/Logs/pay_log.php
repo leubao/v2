@@ -56,7 +56,7 @@
       <tr data-id="{$vo.id}">
         <td>{$vo.id}</td>
         <td><if condition="$vo['type'] eq '1'">支付宝<else />微信支付</if></td>
-        <td><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">
+        <td><a data-toggle="dialog" href="{:U('Manage/Logs/public_loginfo',array('id'=>$vo['id'],'type'=>pay))}"  data-id="loginfo" data-width="900" data-height="600" data-title="订单详情">
         {$vo.order_sn}</a></td>
         <td>{$vo['out_trade_no']}</td>
         <td><if condition="$vo['scene'] eq '1'">当面付<else />在线支付</if></td>
@@ -64,7 +64,7 @@
         <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
         <td>{$vo.update_time|date="Y-m-d H:i:s",###}</td>
         <td><if condition="$vo['pattern'] eq '1'">收款<else />付款</if></td>
-        <td><if condition="$vo['status'] eq '1'">支付完成<else />待支付</if></td>
+        <td>{$vo.status|pay_status}</td>
        </tr>
     </volist>
     </tbody>

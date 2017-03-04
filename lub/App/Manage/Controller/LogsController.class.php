@@ -241,7 +241,7 @@ class LogsController extends ManageBase {
         if ($type != '') {
             $where['type'] = array('eq', $type);
         }
-        $this->basePage('Checklog',$where,array("id" => "desc"));
+        $this->basePage('ApiLog',$where,array("id" => "desc"));
         $this->assign('type',$type)->assign('where', $where)->display();
     }
     /**
@@ -262,5 +262,25 @@ class LogsController extends ManageBase {
         }
         $this->basePage('Error',$where,array("id" => "desc"));
         $this->assign('where', $where)->display();
+    }
+    /**
+     * 日志详情
+     */
+    function public_loginfo(){
+        $ginfo = I('get.');
+        $map = array('id'=>$ginfo['id']);
+        switch ($ginfo['type']) {
+            case 'pay':
+                //支付日志
+                $info = M('Pay')->where($map)->find();
+                $info['param'] = unserialize($info['param']);
+                break;
+            
+            default:
+                # code...
+                break;
+        }
+        $this->assign('type',$ginfo['type'])->assign('data',$info)->display();
+
     }
 }
