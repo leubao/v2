@@ -12,7 +12,6 @@ class Sweeper{
 	//清理过期待支付订单
 	function pay_del(){
 		//设定日期，当前日期前一个月之前的所有订单
-		
 	}
 	//清理过期座位表
 	function table_del(){

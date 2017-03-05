@@ -116,31 +116,6 @@ class Order extends \Libs\System\Service {
 			}
 			//判断是否是底价结算['group']['settlement']
 			if($crmInfo['group']['settlement'] == '1'){
-				/*
-				$teamData = array(
-					'order_sn' 		=> $sn,
-					'plan_id' 		=> $plan['id'],
-					'product_type'	=> $info['product_type'],//产品类型
-					'product_type'	=> $plan['product_type'],//产品类型
-					'product_id' 	=> $plan['product_id'],
-					'user_id' 		=> \Libs\Util\Encrypt::authcode($_SESSION['lub_userid'], 'DECODE'),
-					'money'			=> $rebate,
-					'guide_id'		=> $info['crm'][0]['guide'],
-					'qd_id'			=> $info['crm'][0]['qditem'],
-					'status'		=> '1',
-					'number' 		=> $count,
-					'type'			=> $info['type'] == '2' ? $info['sub_type'] : '2',//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-					'createtime'	=> $createtime,
-					'uptime'		=> $createtime,
-				);
-				$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
-				//窗口团队时判断是否是底价结算
-				if($proconf[$plan['product_id']]['1']['settlement'] == '2'){
-					$in_team = true;
-				}else{
-					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
-					if(!$in_team){error_insert('400017');$model->rollback();return false;}
-				}*/
 				load_redis('lpush','PreOrder',$info['order_sn']);
 			}
 		}
@@ -694,16 +669,6 @@ class Order extends \Libs\System\Service {
 						$quota_num += $va['num'];
 					}
 					$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
-					/*计算订单返佣金额
-					//判断是否开启分销
-					if($proconf[$plan['product_id']]['3']['wechant_full_level']){
-						$ticketFull = $ticketType[$va['priceid']]['param']['full'];
-						$rebate1 = $rebate1+$ticketFull['1']*$va['num'];
-						$rebate2 = $rebate2+$ticketFull['2']*$va['num'];
-						$rebate3 = $rebate3+$ticketFull['3']*$va['num'];
-					}*/
-					//$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
-					
 					/*以下代码用于校验*/
 					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
 					if(empty($status[$ke])){
@@ -815,125 +780,6 @@ class Order extends \Libs\System\Service {
 					//存储待处理数据
 					load_redis('lpush','PreOrder',$info['order_sn']);
 				}
-				
-				/*
-				//个人允许底价结算,且有返佣
-				$crmInfo = google_crm($plan['product_id'],$oInfo['crm'][0]['qditem'],$oInfo['crm'][0]['guide']);
-				//严格验证渠道订单写入返利状态
-				if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-					error_insert('400018');
-					$model->rollback();
-					return false;
-				}
-				//error_insert($crmInfo['group']['settlement']);
-				//判断是否是底价结算['group']['settlement']
-				if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
-					if($crmInfo['group']['type'] == '4'){
-						//当所属分组为个人时，补贴到个人
-						$type = '1';
-					}else{
-						$type = '2';
-					}
-					if($proconf[$plan['product_id']]['3']['wechant_full_level'] == '1' && $type == '1'){
-					//判断当前下单人级别
-						$mvip = D('WxMember');
-						//第一层分销
-			            $fx1 = $mvip->where('user_id=' . $info['info']['crm'][0]['guide'])->field('user_id,fid,is_fx')->find();
-			            if ($fx1['isfx']) {
-			                $teamData[] = array(
-								'order_sn' 		=> $info['order_sn'],
-								'plan_id' 		=> $info['plan_id'],
-								'subtype'		=> '0',
-								'product_type'	=> $info['product_type'],//产品类型
-								'product_id' 	=> $info['product_id'],
-								'user_id' 		=> $info['user_id'],
-								'money'			=> $rebate1,
-								'number'		=> $info['number'],
-								'guide_id'		=> $fx1['user_id'],
-								'qd_id'			=> $info['info']['crm'][0]['qditem'],
-								'status'		=> '1',
-								'type'			=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-								'userid'		=> '0',
-								'createtime'	=> $createtime,
-								'uptime'		=> $createtime,
-							);
-			            }
-			            //第二层分销
-			            if ($fx1['fid']) {
-			                $fx2 = $mvip->where('id=' . $fx1['fid'])->field('user_id,fid,is_fx')->find();
-			                $teamData[] = array(
-								'order_sn' 		=> $info['order_sn'],
-								'plan_id' 		=> $info['plan_id'],
-								'subtype'		=> '0',
-								'product_type'	=> $info['product_type'],//产品类型
-								'product_id' 	=> $info['product_id'],
-								'user_id' 		=> $info['user_id'],
-								'money'			=> $rebate2,
-								'number'		=> $info['number'],
-								'guide_id'		=> $fx2['user_id'],
-								'qd_id'			=> $info['info']['crm'][0]['qditem'],
-								'status'		=> '1',
-								'type'			=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-								'userid'		=> '0',
-								'createtime'	=> $createtime,
-								'uptime'		=> $createtime,
-							);
-			            }
-			            //第三层分销
-			            if ($fx2['fid']) {
-			                $fx3 = $mvip->where('id=' . $fx2['fid'])->field('user_id,fid,is_fx')->find();
-			                $teamData[] = array(
-								'order_sn' 		=> $info['order_sn'],
-								'plan_id' 		=> $info['plan_id'],
-								'subtype'		=> '0',
-								'product_type'	=> $info['product_type'],//产品类型
-								'product_id' 	=> $info['product_id'],
-								'user_id' 		=> $info['user_id'],
-								'money'			=> $rebate3,
-								'number'		=> $info['number'],
-								'guide_id'		=> $fx3['user_id'],
-								'qd_id'			=> $info['info']['crm'][0]['qditem'],
-								'status'		=> '1',
-								'type'			=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-								'userid'		=> '0',
-								'createtime'	=> $createtime,
-								'uptime'		=> $createtime,
-							);
-			            }
-			            //多层分销
-					}else{
-						$teamData[] = array(
-							'order_sn' 		=> $info['order_sn'],
-							'plan_id' 		=> $info['plan_id'],
-							'subtype'		=> '0',
-							'product_type'	=> $info['product_type'],//产品类型
-							'product_id' 	=> $info['product_id'],
-							'user_id' 		=> $info['user_id'],
-							'money'			=> $rebate,
-							'number'		=> $info['number'],
-							'guide_id'		=> $oInfo['crm'][0]['guide'],
-							'qd_id'			=> $oInfo['crm'][0]['qditem'],
-							'status'		=> '1',
-							'type'			=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-							'userid'		=> '0',
-							'createtime'	=> $createtime,
-							'uptime'		=> $createtime,
-						);
-
-					}
-					S('Rebate_pre_order',$info['order_sn']);
-					$redis = new \Redis();
-					$redis->connect('127.0.0.1',6379);
-					$redis->lPush('test',$info['order_sn']);
-					//echo $redis->get("test");
-					//窗口团队时判断是否是底价结算
-					if($info['type'] == '2' && $proconf['settlement'] == '2'){
-						$in_team = true;
-					}else{
-						$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
-						if(!$in_team){error_insert('400017');$model->rollback();return false;}
-					}
-				}*/
 			}
 			$pre = true;$no_sms = '2';
 		}else{
@@ -1643,5 +1489,12 @@ class Order extends \Libs\System\Service {
 			
 		}
 		return true;
+	}
+	/**
+	 * 小商品订单
+	 */
+	function goods_order(){
+		//商品名称、价格、数量、总价、单号
+		//
 	}
 }

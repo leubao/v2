@@ -34,6 +34,7 @@ class Module {
     }
 
     /**
+     * 
      * 连接
      * @access public
      * @return void

@@ -9,9 +9,18 @@
 namespace Libs\Service;
 use Common\Model\Model;
 class Check{
-	//补贴报表
-	function check_rebate(){
-		$list = M('Order')->where(array('type'=>array('in','2,4,8,9'),'status'=>array('in','1,9,7,8')))->limit('1,50')->field('order_sn')->order('id DESC')->select();
+	/**
+	 * 补贴报表
+	 * @param  自定义条件 $map  array  日期范围必须
+	 * @param  访问类型 $type 1常规轮询2自定义轮询
+	 * @return [type]       [description]
+	 */
+	function check_rebate($map = '',$type = '1'){
+		if($type == '1'){
+			$list = M('Order')->where(array('type'=>array('in','2,4,8,9'),'status'=>array('in','1,9,7,8')))->limit('1,50')->field('order_sn')->order('id DESC')->select();
+		}else{
+			$list = M('Order')->where($map)->field('order_sn')->order('id DESC')->select();
+		}
 		if(!empty($list)){
 			$count = 0;
 			//判断是否在队列中

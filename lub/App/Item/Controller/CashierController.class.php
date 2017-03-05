@@ -134,7 +134,7 @@ class CashierController extends ManageBase{
 				if($refund !== FALSE){
 					$this->srun("退款成功!", array('tabid'=>$this->menuid.MODULE_NAME));
 				}else{
-
+					
 				}
 			}else{
 				$this->erun('订单状态不允许此项操作!');

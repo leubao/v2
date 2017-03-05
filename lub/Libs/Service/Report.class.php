@@ -58,12 +58,43 @@ class Report{
 			return false;
 		}
 	}*/
+	/**
+	 * 按计划读取订单数据 按渠道商分票型合并 针对旧数据
+	 * @param  [type] $datetime   [description]
+	 * @param  [type] $product_id [description]
+	 * @param  string $type       [description]
+	 * @return [type]             [description]
+	 */
 	function create_report($datetime,$product_id,$type = '1'){
 		if($type == '1'){
 			//报表生成
 		}else{
 
-		}	
+		}
+		foreach ($list as $k => $v) {
+			//渠道商订单 只针对渠道商合并
+			$ndata[$v['channel_id']][$v['price_id']] = array(
+
+			);
+			//散客订单 暂时不合并
+			//分销订单 暂时不合并
+		}
+	}
+	/**
+	 * 销售日历
+	 * @param   $datetime   [description]
+	 * @param  [type] $product_id [description]
+	 * @return [type]             [description]
+	 */
+	function seale_calendar(){
+		array(
+			'datetime' 	=>  '',
+			'number'	=>	'',
+			'price'		=>	'',
+			'discount'	=>	'',
+			'rebate'	=>	'',
+			'than'		=>	'',//团散比
+		);
 	}
 	function report($datetime,$product_id=null){
 		$start_time = strtotime($datetime);

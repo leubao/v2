@@ -625,7 +625,7 @@ class IndexController extends ApiBase {
       //判断通知来路微信还是支付宝
       $pay = & load_wechat('Pay');
       // 获取支付通知
-      $notifyInfo = $pay->getNotify();
+      $notifyInfo = $pay->getNotify(); 
 
       // 支付通知数据获取失败
       if($notifyInfo===FALSE){
