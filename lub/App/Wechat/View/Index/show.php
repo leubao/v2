@@ -3,7 +3,7 @@
     var global = {$goods_info};
 </script>
 <div class="page">
-  <!--
+
   <header class="bar bar-nav">
     <h1 class="title"><i class="iconfont">&#xe603</i>{$proconf.wx_page_title}</h1>
     <if condition="empty($uinfo['promote'])">
@@ -12,13 +12,13 @@
       <span class="icon icon-me"></span>
     </button>
   </header>
-  -->
+
   <nav class="bar bar-tab bar-height">
       <div class="btn"><a href="#" class="button button-big button-fill button-warning open-goods-cart">立即预定</a></div>
   </nav>
   <div class="swiper-container">
     <div class="swiper-wrapper">
-        <div class="swiper-slide"><img src="d/wap/w1.png"></div>
+        <div class="swiper-slide"><img src="d/wap/1.jpg"></div>
     </div>
     <!-- Add Pagination 
     <div class="swiper-pagination"></div>-->

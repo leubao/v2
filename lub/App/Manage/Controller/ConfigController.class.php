@@ -48,9 +48,12 @@ class ConfigController extends ManageBase {
                     $IndexURL[$v['ishtml']][$v['urlruleid']] = $v['example'];
                 }
             }
+            //读取角色
+            $role = M('Role')->field('id,name')->select();
             $this->assign('TagURL', $TagURL)
                     ->assign('IndexURL', $IndexURL)
                     ->assign('indextp', $indextp)
+                    ->assign('role',$role)
                     ->display();
         }
     }

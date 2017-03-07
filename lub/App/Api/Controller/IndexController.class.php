@@ -655,24 +655,6 @@ class IndexController extends ApiBase {
       }
     }
 
-    function c_temp(){
-        try {
-            $this->division(10, 0);
-        } catch(\Exception $e) {
-            echo $e->getMessage();
-        }
-    }
-    /*
-    function division($dividend, $divisor) {
-        if($divisor == 0) {
-            throw new \Exception('Division by zero');
-        }
-    }
-  */
-  function aa()
-  {
-    $this->display();
-  }
     function c_network(){
       $url = "http://new.leubao.com/api.php?a=api_check_network";
       $post = array(

@@ -63,7 +63,6 @@
             case 4 :
                 echo "政企渠道票";
                 break;
-                
         }
     }
     /**
@@ -1658,7 +1657,6 @@
         //可售区域 及授权票型
         //TODO  当销售场景超过9种时存在问题，更正模糊搜索
         $param = unserialize($plan['param']);
-        //$map = array();
         switch ($plan['product_type']) {
             case '1':
                 //获取当前可售数量
@@ -1687,7 +1685,6 @@
         if(!empty($area)){
             $map = array_merge($area,$map);
         }
-       // dump($map);
         //获取价格信息
         $tickets = M('TicketType')->where($map)->select();
         foreach ($param['ticket'] as $v){

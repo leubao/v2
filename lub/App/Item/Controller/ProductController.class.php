@@ -262,8 +262,10 @@ class ProductController extends ManageBase{
 			$pinfo['scene'] = implode(',', $pinfo['scene']);
 			$param = array('quota'=>$pinfo['param']['quota'],'ticket_print'=>$pinfo['param']['ticket_print'],'ticket_print_custom'=>$pinfo['param']['ticket_print_custom'],'present'=>$pinfo['param']['present']);
 			$pinfo['param'] = serialize($param);
-			$status = D('TicketType')->where(array('id'=>$pinfo['id']))->save($pinfo);
+			$model = D('Item/TicketType');
+			$status = $model->where(array('id'=>$pinfo['id']))->save($pinfo);
 			if($status){
+				$model->type_cache($product_id);
 				$this->srun("编辑成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('更新失败!');
@@ -681,7 +683,8 @@ class ProductController extends ManageBase{
 	function planinfo(){
 		$id = I('get.id',0,intval);
 		$info = M('Plan')->where(array('id'=>$id))->find();
-		$this->display();
+		$info['param'] = unserialize($info['param']);
+		$this->assign('data',$info)->display();
 	}
 	/***漂流***/
 	/**

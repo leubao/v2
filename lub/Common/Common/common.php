@@ -283,36 +283,6 @@ function get_url() {
 }
 
 /**
- * 返回附件类型图标
- * @param $file 附件名称
- * @param $type png为大图标，gif为小图标
- */
-function file_icon($file, $type = 'png') {
-    $ext_arr = array('doc', 'docx', 'ppt', 'xls', 'txt', 'pdf', 'mdb', 'jpg', 'gif', 'png', 'bmp', 'jpeg', 'rar', 'zip', 'swf', 'flv');
-    $ext = fileext($file);
-    if ($type == 'png') {
-        if ($ext == 'zip' || $ext == 'rar')
-            $ext = 'rar';
-        elseif ($ext == 'doc' || $ext == 'docx')
-            $ext = 'doc';
-        elseif ($ext == 'xls' || $ext == 'xlsx')
-            $ext = 'xls';
-        elseif ($ext == 'ppt' || $ext == 'pptx')
-            $ext = 'ppt';
-        elseif ($ext == 'flv' || $ext == 'swf' || $ext == 'rm' || $ext == 'rmvb')
-            $ext = 'flv';
-        else
-            $ext = 'do';
-    }
-    $config = cache('Config');
-    if (in_array($ext, $ext_arr)) {
-        return $config['siteurl'] . 'statics/images/ext/' . $ext . '.' . $type;
-    } else {
-        return $config['siteurl'] . 'statics/images/ext/blank.' . $type;
-    }
-}
-
-/**
  * 根据文件扩展名来判断是否为图片类型
  * @param type $file 文件名
  * @return type 是图片类型返回 true，否则返回 false
@@ -342,74 +312,6 @@ function cn_urlencode($url) {
     return $url;
 }
 
-/**
- * 获取模版文件 格式 主题://模块/控制器/方法
- * @param type $templateFile
- * @return boolean|string 
- */
-function parseTemplateFile($templateFile = '') {
-    static $TemplateFileCache = array();
-    //模板路径
-    $TemplatePath = TEMPLATE_PATH;
-    //模板主题
-    $Theme = empty(\Common\Controller\LubTMP::$Cache["Config"]['theme']) ? 'Default' : \Common\Controller\LubTMP::$Cache["Config"]['theme'];
-    //如果有指定 GROUP_MODULE 则模块名直接是GROUP_MODULE，否则使用 MODULE_NAME，这样做的目的是防止其他模块需要生成
-    $group = defined('GROUP_MODULE') ? GROUP_MODULE : MODULE_NAME;
-    //兼容 Add:ss 这种写法
-    if (!empty($templateFile) && strpos($templateFile, ':') && false === strpos($templateFile, C('TMPL_TEMPLATE_SUFFIX'))) {
-        if (strpos($templateFile, '://')) {
-            $temp = explode('://', $templateFile);
-            $fxg = str_replace(':', '/', $temp[1]);
-            $templateFile = $temp[0] . $fxg;
-        } else {
-            $templateFile = str_replace(':', '/', $templateFile);
-        }
-    }
-    if ($templateFile != '' && strpos($templateFile, '://')) {
-        $exp = explode('://', $templateFile);
-        $Theme = $exp[0];
-        $templateFile = $exp[1];
-    }
-    // 分析模板文件规则
-    $depr = C('TMPL_FILE_DEPR');
-    //模板标识
-    if ('' == $templateFile) {
-        $templateFile = $TemplatePath . $Theme . '/' . $group . '/' . CONTROLLER_NAME . '/' . ACTION_NAME . C('TMPL_TEMPLATE_SUFFIX');
-    }
-    $key = md5($templateFile);
-    if (isset($TemplateFileCache[$key])) {
-        return $TemplateFileCache[$key];
-    }
-    if (false === strpos($templateFile, '/') && false === strpos($templateFile, C('TMPL_TEMPLATE_SUFFIX'))) {
-        $templateFile = $TemplatePath . $Theme . '/' . $group . '/' . CONTROLLER_NAME . '/' . $templateFile . C('TMPL_TEMPLATE_SUFFIX');
-    } else if (false === strpos($templateFile, C('TMPL_TEMPLATE_SUFFIX'))) {
-        $path = explode('/', $templateFile);
-        $action = array_pop($path);
-        $controller = !empty($path) ? array_pop($path) : CONTROLLER_NAME;
-        if (!empty($path)) {
-            $group = array_pop($path)? : $group;
-        }
-        $depr = defined('MODULE_NAME') ? C('TMPL_FILE_DEPR') : '/';
-        $templateFile = $TemplatePath . $Theme . '/' . $group . '/' . $controller . $depr . $action . C('TMPL_TEMPLATE_SUFFIX');
-    }
-    //区分大小写的文件判断，如果不存在，尝试一次使用默认主题
-    if (!file_exists_case($templateFile)) {
-        $log = '模板:[' . $templateFile . '] 不存在！';
-        \Think\Log::record($log);
-        //启用默认主题模板
-        $templateFile = str_replace($TemplatePath . $Theme, $TemplatePath . 'Default', $templateFile);
-        //判断默认主题是否存在，不存在直接报错提示
-        if (!file_exists_case($templateFile)) {
-            if (defined('APP_DEBUG') && APP_DEBUG) {
-                E($log);
-            }
-            $TemplateFileCache[$key] = false;
-            return false;
-        }
-    }
-    $TemplateFileCache[$key] = $templateFile;
-    return $TemplateFileCache[$key];
-}
 /**
  * 邮件发送
  * @param type $address 接收人 单个直接邮箱地址，多个可以使用数组
@@ -759,20 +661,6 @@ function num_to_rmb($num){
     }
 }
 /**
- * 异或加密
- * @param  string $data 字符串
- * @param  string $key  加密key
- * @return string 
- */
-function xorcrypt($data, $key){
-    $key_len = strlen($key);
-    $data_len = strlen($data);
-    for($i=0;$i<$data_len;$i++){
-        $data[$i] = $data[$i]^$key[$i%$key_len];
-    }
-    return $data;
-}
-/**
  * 获取微信操作对象
  * @staticvar array $wechat
  * @param  type $type
@@ -823,7 +711,6 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
                 'partnerkey'      => $proconf['appsecret'], // 微信支付，密钥（可选）
             );
         }
-        
         $wechat[$index] = & \Wechat\Loader::get_instance($type, $options);
     }
     return $wechat[$index];
@@ -955,3 +842,14 @@ function load_redis($apiport,$key,$value = '',$time = ''){
     }
     return $return;
 }
+/**
+ * 判断是否可打印门票
+ * 计划ID必须
+ */
+function if_plan_print($plan_id){
+    $plan = F('Plan_'.$plan_id);
+    if(empty($plan)){
+        $plan = M('Plan')->where(array('id'=>$plan_id))->find();
+    }
+    return true;
+} 

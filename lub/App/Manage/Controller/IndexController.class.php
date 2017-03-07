@@ -8,8 +8,6 @@ class IndexController extends ManageBase {
         if (IS_AJAX) {
             return true;
         }
-        //dump($_SESSION);
-       // dump(D("Manage/Menu")->getMenuList());
         $pid = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
         $this->assign("SUBMENU_CONFIG", D("Manage/Menu")->getMenuList());
         $this->assign('userInfo', User::getInstance()->getInfo());

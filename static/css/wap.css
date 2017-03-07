@@ -17,7 +17,7 @@
 }
 .remark{text-align: center;color: darkgray;}                                  
 /*定义工具栏*/
-.bar-height{height:3.5rem;z-index: 1000;}
+.bar-height{height:2.9rem;z-index: 1000;}
 .row-block{overflow: inherit;}
 em.required,sup.required{color:#f00 !important}
 /*自定义幻灯片*/
@@ -99,7 +99,7 @@ em.required,sup.required{color:#f00 !important}
 .photo-input{position:absolute;opacity:0;height:60px;width:143px;right:0px;top:0px}
 
 /*页脚按钮*/
-.btn{padding: 10px;}
+.btn{padding:0em 10px 0em 10px;}
 @font-face {
   font-weight: normal;
   font-style: normal;

@@ -109,19 +109,19 @@
           var postData = 'info={"tomoney":"'+money+'","sn":"'+sn+'","pay_type":"1","seat_type":'+seat_type+'}';
           $.ajax({
             type:'POST',
-            url:'<?php echo U('Wechat/Index/window_pay',array('param'=>$param));?>',
+            url:'<?php echo U('Wechat/Index/window_pay',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));?>',
             data:postData,
             dataType:'json',
             timeout: 3500,
-            success:function(data){
-              if(data.statusCode == "200"){
-                location.href = data.url;
+            success:function(rdata){
+              if(rdata.statusCode == "200"){
+                location.href = rdata.url;
               }else{
-                $.alert("支付失败!"+data.msg);
+                $.alert("支付失败!"+rdata.msg+rdata.statusCode);
               }
             },
             error:function(data){
-              $.alert("支付失败!"+data.msg);
+              $.alert("支付失败!"+rdata.msg+rdata.statusCode);
             }
           });
         },
@@ -142,11 +142,11 @@
                   url:'<?php echo U('Wechat/Index/pay');?>',
                   data:postData,
                   dataType:'json',
-                  success:function(data){
-                      if(data.statusCode == "200"){
-                        location.href = data.url;
+                  success:function(rdata){
+                      if(rdata.statusCode == "200"){
+                        location.href = rdata.url;
                       }else{
-                        $.toast("支付失败!"+data.msg);
+                        $.toast("支付失败!"+rdata.msg);
                       }
                   }
               });

@@ -90,8 +90,10 @@ class UserController extends Base{
 				$this->erun('新增失败!');
 			}
 		}else{
-			$map['parentid'] = '42';
-			$map['is_scene'] =3;$map['status'] = 1;
+			$Config = cache("Config");
+			$map['parentid'] = $Config['channel_role_id'];
+			$map['is_scene'] = 3;
+			$map['status'] = 1;
 			$level = Operate::do_read('Role',1,$map,array('id'=>DESC));
 			$crm = Operate::do_read('Crm',0,array('id'=>I('get.cid',0,intval)));
  			$this->assign("level",$level)
@@ -124,8 +126,9 @@ class UserController extends Base{
 			if(empty($id)){
 				$this->error('参数错误');
 			}
+			$Config = cache("Config");
 			$info = M('User')->where(array('id'=>$id))->find();
-			$map['parentid'] = '42';
+			$map['parentid'] = $Config['channel_role_id'];
 			$map['is_scene'] =3;$map['status'] = 1;
 			$level = Operate::do_read('Role',1,$map,array('id'=>DESC));
 			$this->assign('data', $info)

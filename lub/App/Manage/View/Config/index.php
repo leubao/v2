@@ -48,6 +48,17 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">渠道版权限组:</td>
+                                <td>
+                                  <select name="channel_role_id">
+                                  <volist name="role" id="vo">
+                                    <option value="{$vo.id}" <if condition="$Site['channel_role_id'] eq $vo['id'] "> selected</if>>{$vo.name}</option>
+                                    </volist>
+                                  </select>
+
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">微信APPID:</td>
                                 <td><input type="text" name="wx_appid" value="wx72bcf45e0f57a192" size="40">
                                 </td>

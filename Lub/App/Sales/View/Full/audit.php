@@ -1,5 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<form class="form-horizontal" action="{:U('Wechat/Full/audit',array('menuid'=>$menuid))}" method="post" data-toggle="validate">
+<form class="form-horizontal" action="{:U('Sales/Full/audit',array('menuid'=>$menuid))}" method="post" data-toggle="validate">
 <div class="bjui-pageContent">
   <table class="table table-striped table-bordered table-hover">
   <tbody>

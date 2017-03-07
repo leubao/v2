@@ -31,6 +31,8 @@ class LubTMP extends \Think\Controller {
 
     //初始化
     protected function _initialize() {
+        $this->config = cache("Config");
+        $this->initSite($this->config);
         $this->initSite();
         //默认跳转时间
         $this->assign("waitSecond", 3);
@@ -48,7 +50,7 @@ class LubTMP extends \Think\Controller {
      * 初始化站点配置信息
      * @return Arry 配置数组
      */
-    protected function initSite() {
+    protected function initSite($Config) {
         /**
          * 判断缓存是否支持
          * @var [type]
@@ -57,8 +59,6 @@ class LubTMP extends \Think\Controller {
             $this->error('您的环境不支持Redis,系统无法正常运行！');
             return false;
         }
-        $Config = cache("Config");
-        self::$Cache['Config'] = $Config;
         $config_siteurl = $Config['siteurl'];
         if (isModuleInstall('Domains')) {
             $parse_url = parse_url($config_siteurl);

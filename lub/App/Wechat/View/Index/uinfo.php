@@ -43,14 +43,7 @@
           </div>
         </li>
        </if>
-        <li class="item-content">
-          <div class="item-media"><i class="icon icon-emoji"></i></div>
-          <div class="item-inner">
-            <div class="item-title">送水瓶数</div>
-            <div class="item-after">
-              <span class="pull-right">可送 : 90 瓶 | 已送:80 瓶</span></div>
-          </div>
-        </li>
+        
       </ul>
     </div>
     <if condition="$data['is_scene'] neq '3'">
@@ -85,7 +78,7 @@
           </li>
           
           <li>
-            <a href="{:U('Wechat/Index/focus_code');}" class="item-link item-content external">
+            <a href="{:U('Wechat/Index/reg_code');}" class="item-link item-content external">
               <div class="item-media"><i class="icon icon-share"></i></div>
               <div class="item-inner">
                 <div class="item-title">推广码</div>

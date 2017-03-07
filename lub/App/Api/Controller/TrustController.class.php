@@ -166,10 +166,24 @@ class TrustController extends LubTMP {
 	/*校验程序*/
 	function check()
 	{
-		//校验返利
-		\Libs\Service\Check::check_rebate();
-		//校验微信支付排座情况
-		\Libs\Service\Check::check_pay_order_seat();
-		return true;
+		if(IS_POST){
+			//远端手动执行
+			$pinfo = I('post.');
+			if (!empty($pinfo['start_time']) && !empty($pinfo['end_time'])) {
+	            $start_time = strtotime($pinfo['start_time']);
+	            $end_time = strtotime($pinfo['end_time']) + 86399;
+	            $where['logintime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+	        }
+	        $where['type'] = array('in','2,4,8,9');$where['status']=array('in','1,9,7,8');
+			\Libs\Service\Check::check_rebate($where,2);
+			return '200';
+		}else{
+			//校验返利
+			\Libs\Service\Check::check_rebate();
+			//校验微信支付排座情况
+			\Libs\Service\Check::check_pay_order_seat();
+			return true;	
+		}
+		
 	}
 }

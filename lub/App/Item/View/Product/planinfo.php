@@ -1,22 +1,31 @@
-<form class="form-horizontal" action="{:U('Manage/Item/add',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
 <div class="bjui-pageContent">
-	 <div class="form-group">
-    <label class="col-sm-2 control-label">商户名称:</label>
-    <input type="text" name="name" class="form-control required" data-rule="required;" size="40" placeholder="商户名称">
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">状态:</label>
-    <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
-	    <option value="">状态</option>
-	    <option value="1">启用</option>
-	    <option value="0">禁用</option>
-	</select>
-  </div>
+  <table class="table table-striped table-bordered">
+    <tbody>
+      <tr>
+        <td width="100px">当前计划</td>
+        <td><strong>{$data.id|planShow}</strong></td>
+      </tr>
+      <tr>
+        <td width="100px">计划状态</td>
+        <td><strong>{$data.id|plan_status}</strong></td>
+      </tr>
+      <tr>
+        <td width="100px">销售渠道</td>
+        <td><strong></strong></td>
+      </tr>
+      <tr>
+        <td width="100px">打印门票</td>
+        <td><strong></strong></td>
+      </tr>
+      <tr>
+        <td width="100px">检票状态</td>
+        <td><strong></strong></td>
+      </tr>
+    </tbody>
+</table>
 </div>
 <div class="bjui-pageFooter">
     <ul>
-        <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
-        <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
+        <li><button type="button" class="btn-close" data-icon="close">关闭</button></li>
     </ul>
 </div>
-</form>

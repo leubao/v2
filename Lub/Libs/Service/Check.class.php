@@ -33,6 +33,10 @@ class Check{
 					  $count++;
 					  load_redis('lpush','PreOrder',$v['order_sn']);
 					}
+					//未返利的程序
+					if($status['status'] == '1'){
+						load_redis('lpush','PreOrder_bak',$v['order_sn']);
+					}
 				}
 			}
 		}
