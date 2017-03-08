@@ -157,6 +157,45 @@ function auto_fenix(price_group,status,vmodel,type){
       });
     }
 }
+/**
+ * 订单类发送到服务器
+ * @param  {string} postData 表单数据
+ * @param  {string} url      URL地址
+ * @param  {string} asside   请求来源
+ */
+function post_server(postData,url,asside){
+  $.ajax({
+    type:'POST',
+    url:url,
+    data:postData,
+    dataType:'json',
+    timeout: 3500,
+    error: function(){
+        layer.msg('服务器请求超时，请检查网络...');
+    },
+    success:function(data){
+        if(data.statusCode == "200"){
+            switch(asside){
+                case 'payment':
+                  $(this).dialog('close','payment');
+                  break;
+                case 'work_quick':
+                  $(this).dialog('refresh', 'work_quick');
+                  break;
+                case 'preseat':
+                  //超量排座  会关闭打印窗口
+                  $(this).dialog("closeCurrent","true");
+                  break;
+            }
+            //刷新
+            $(this).dialog('refresh', data.refresh);
+            $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
+        }else{
+            $(this).alertmsg('error','出票失败!');
+        }
+    }
+  });
+}
 /*窗口打印*/
 (function($){
     $.printBox = function(rel){

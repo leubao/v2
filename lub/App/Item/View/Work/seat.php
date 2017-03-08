@@ -129,7 +129,7 @@
             </tbody>
         </table>
     <!--提交-->
-    <div class="submit_seat"><a href="#" class="btn btn-success" onclick="post_server();">立即出票</a></div>
+    <div class="submit_seat"><a href="#" class="btn btn-success" onclick="seat_server();">立即出票</a></div>
     <!--图列 s-->
     <div id="legend"></div>
     <!--left info e--> 
@@ -425,48 +425,52 @@ function autoSeat(){
   });
   return true;  
 }
-/*向服务器提交数据*/
-function post_server(){
-    var postData = '',
-        pay = '',
-        crm = '',
-        contact = $("#work-crm input[name='content']").val() ? $("#work-crm input[name='content']").val() : '0',
-        phone = $("#work-crm input[name='phone']").val() ? $("#work-crm input[name='phone']").val() : '0',
-        remark = $("#work-crm textarea[name='remark']").val() ? $("#work-crm textarea[name='remark']").val() : "空...",
-        sub_type = $("#work-crm input[type='radio']:checked").val() ? $("#work-crm input[type='radio']:checked").val() : '1',
-        toJSONString = '',
-        checkinT = '1',/*一人一票*/
-        plan = {$plan['id']},
-        areaId  = '{$area}',
-        guide = '0',
-        qditem = '0',
-        type = {$type},
-        settlement = PRODUCT_CONF.settlement,
-        is_pay = $('input[name="pay"]:checked').val(),
-        length =  $("#selected-seats-{$area} li").length,
-        cash = parseFloat($('#work-seat-total-{$area}').html());
-    if(length <= 0){
-        $(this).alertmsg('error','未找到要售出的座位!');
+function seat_server() {
+  var postData = '',
+    pay = '',
+    crm = '',
+    contact = $("#work-crm input[name='content']").val() ? $("#work-crm input[name='content']").val() : '0',
+    phone = $("#work-crm input[name='phone']").val() ? $("#work-crm input[name='phone']").val() : '0',
+    remark = $("#work-crm textarea[name='remark']").val() ? $("#work-crm textarea[name='remark']").val() : "空...",
+    sub_type = $("#work-crm input[type='radio']:checked").val() ? $("#work-crm input[type='radio']:checked").val() : '1',
+    toJSONString = '',
+    checkinT = '1',/*一人一票*/
+    plan = {$plan['id']},
+    areaId  = '{$area}',
+    guide = '0',
+    qditem = '0',
+    type = {$type},
+    settlement = PRODUCT_CONF.settlement,
+    is_pay = $('input[name="pay"]:checked').val(),
+    length =  $("#selected-seats-{$area} li").length,
+    cash = parseFloat($('#work-seat-total-{$area}').html()),
+    url = '<?php echo U('Item/Order/seatPost',array('plan'=>$plan['id'],'type'=>$type));?>';
+  if(length <= 0){
+      $(this).alertmsg('error','未找到要售出的座位!');
+      return false;
+  }
+  <?php if($type == '2'){?>
+      guide = $("#work-crm input[name='user.id']").val(),
+      qditem = $("#work-crm input[name='channel.id']").val();
+      if(phone == '' || contact == '' || guide == '' || qditem == ''){
+        $(this).alertmsg('error','请完善团队信息!');
         return false;
-    }
-    <?php if($type == '2'){?>
-        guide = $("#work-crm input[name='user.id']").val(),
-        qditem = $("#work-crm input[name='channel.id']").val();
-        if(phone == '' || contact == '' || guide == '' || qditem == ''){
-          $(this).alertmsg('error','请完善团队信息!');
-          return false;
-        }
-    <?php } ?>
-    $("#selected-seats-{$area} li").each(function(i){
-        var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-        toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
-    });
-    /*获取支付相关数据*/
-    pay = '{"cash":'+cash+',"card":0,"alipay":0}';
-    param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
-    crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":"'+phone+'","contact":"'+contact+'"}';
-    postData = 'info={"subtotal":'+cash+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"type":'+type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-    /*提交到服务器**/
+      }
+  <?php } ?>
+  $("#selected-seats-{$area} li").each(function(i){
+      var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+      toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
+  });
+  /*获取支付相关数据*/
+  pay = '{"cash":'+cash+',"card":0,"alipay":0}';
+  param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
+  crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":"'+phone+'","contact":"'+contact+'"}';
+  postData = 'info={"subtotal":'+cash+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"type":'+type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+  post_server(postData,url);
+}
+/*向服务器提交数据
+function post_server(){
+
     $.ajax({
         type:'POST',
         url:'<?php echo U('Item/Order/seatPost',array('plan'=>$plan['id'],'type'=>$type));?>',
@@ -480,11 +484,11 @@ function post_server(){
             if(data.statusCode == "200"){
                 //刷新
                 $(this).dialog('refresh', data.refresh);
-                $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+                $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
             }else{
                 $(this).alertmsg('error','出票失败!');
             }
         }
     });
-}
+}*/
 </script>

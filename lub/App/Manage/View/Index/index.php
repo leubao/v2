@@ -20,13 +20,13 @@ $(function() {
         statusCode   : {ok:200, error:300, timeout:301}, //[可选]
         ajaxTimeout  : 5000, //[可选]全局Ajax请求超时时间(毫秒)
         pageInfo     : {total:'total', pageCurrent:'pageCurrent', pageSize:'pageSize', orderField:'orderField', orderDirection:'orderDirection'}, //[可选]分页参数
-        alertMsg     : {displayPosition:'topcenter', displayMode:'slide', alertTimeout:1500}, //[可选]信息提示的显示位置，显隐方式，及[info/correct]方式时自动关闭延时(毫秒)
+        alertMsg     : {displayPosition:'topcenter', displayMode:'none', alertTimeout:1500}, //[可选]信息提示的显示位置，显隐方式，及[info/correct]方式时自动关闭延时(毫秒)
         keys         : {statusCode:'statusCode', message:'message'}, //[可选]
         ui           : {
                          windowWidth      : 0,    //框架可视宽度，0=100%宽，> 600为则居中显示
                          showSlidebar     : true, //[可选]左侧导航栏锁定/隐藏
                          clientPaging     : true, //[可选]是否在客户端响应分页及排序参数
-                         overwriteHomeTab : false //[可选]当打开一个未定义id的navtab时，是否可以覆盖主navtab(我的主页)
+                         overwriteHomeTab : true //[可选]当打开一个未定义id的navtab时，是否可以覆盖主navtab(我的主页)
                        },
         debug        : false,    // [可选]调试模式 [true|false，默认false]
         theme        : 'blue' // 若有Cookie['bjui_theme'],优先选择Cookie['bjui_theme']。皮肤[五种皮肤:default, orange, purple, blue, red, green]
@@ -57,7 +57,6 @@ $(function() {
             $('#bjui-accordionmenu').find('ul.menu-items > li').removeClass('switch')
             $li.addClass('switch')
         }
-        
         $li.addClass('active')
         if (options) {
             options.url      = $a.attr('href')
@@ -205,7 +204,6 @@ function prompt(){
             }
     },
   });
-  
 }
 /*长时间未操作系统自动退出
 $(window).keyup( function(event){

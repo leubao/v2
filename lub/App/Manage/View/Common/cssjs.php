@@ -1,7 +1,4 @@
-<!--bootstrap css
-<link href="{$config_siteurl}static/bjui/themes/css/bootstrap.css" rel="stylesheet">
-<link rel="stylesheet" href="//cdn.bootcss.com/bootstrap/3.3.5/css/bootstrap.min.css">
--->
+<!--bootstrap css-->
 <link href="{$config_siteurl}static/bjui/themes/css/bootstrap.css" rel="stylesheet">
 <!-- core - css -->
 <link href="{$config_siteurl}static/bjui/themes/css/style.css" rel="stylesheet">
@@ -65,11 +62,6 @@
 <script src="{$config_siteurl}static/js/jquery-seat.js"></script>
 <script src="{$config_siteurl}static/js/layer.js"></script>
 <!--seat e-->
-<!-- plug - css -->
-<link href="{$config_siteurl}static/bjui/plugins/kindeditor_4.1.10/themes/default/default.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/plugins/colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/plugins/niceValidator/jquery.validator.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/plugins/bootstrapSelect/bootstrap-select.css" rel="stylesheet">
 <!-- 日历-->
 <script src="{$config_siteurl}static/calendar/lib/moment.min.js"></script>
 <script src="{$config_siteurl}static/calendar/fullcalendar.min.js"></script>

@@ -8,9 +8,9 @@
   <!--条件检索 s--> 
   <div class="bjui-searchBar">
     <label>订单号:</label>
-    <input type="text" value="{$map['sn']}" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
+    <input type="text" value="{$map['sn']}" name="sn" data-rule="length[5~]" class="form-control" size="10" placeholder="单号">&nbsp;
     <label>手机号:</label>
-    <input type="text" value="{$map['phone']}" name="phone" class="form-control" size="10" placeholder="手机号">&nbsp;
+    <input type="text" value="{$map['phone']}" name="phone" data-rule="mobile" class="form-control" size="10" placeholder="手机号">&nbsp;
     <input type="hidden" name="plan.id" value="{$plan}">
     <input type="text" name="plan.name" readonly value="{$planname}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_date_plan');}" data-group="plan" data-width="600" data-height="445" data-title="销售计划(场次)" placeholder="销售计划(场次)">
     

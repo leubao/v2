@@ -13,7 +13,7 @@
     <input type="text" name="channel.name" readonly value="{$channelname}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel');}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
     <input type="hidden" name="plan.id" value="{$map['plan_id']}">
     <input type="text" name="plan.name" readonly value="{$planname}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_date_plan');}" data-group="plan" data-width="600" data-height="445" data-title="销售计划(场次)" placeholder="销售计划(场次)">
-    <input type="text" value="" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
+    <input type="text" value="" name="sn" class="form-control" data-rule="length[5~]" size="10" placeholder="单号">&nbsp;
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
   </div>

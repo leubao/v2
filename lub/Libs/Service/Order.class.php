@@ -18,7 +18,13 @@ class Order extends \Libs\System\Service {
     public $errMsg;
     public $errCode;
 	/**************************************************选座订单****************************************************/
-	function rowSeat($pinfo){
+	/**
+	 * 选座订单
+	 * @param  string $pinfo     请求数据包
+	 * @param $scena int 场景 1窗口2渠道版3网站4微信5api
+	 * @param $uinfo array 当前用户信息
+	 */
+	function rowSeat($pinfo,$scena,$uinfo = null){
 		$info = json_decode($pinfo,true);
 		$plan = F('Plan_'.$info['plan_id']);
 
@@ -36,73 +42,106 @@ class Order extends \Libs\System\Service {
 		$flag=false;
 		$money = 0;
 		$num = 0;
-		
-		//更新座位信息	
-		foreach ($info['data'] as $k=>$v){	
-			$map = array(
-				'area' => $v['areaId'],
-				'seat' => $v['seatid'],
-				'status' => array('in','0,66'),
-			);
-			$remark = print_remark($ticketType[$v['priceid']]['remark'],$plan['product_id']);
-			$data = array(
-				'order_sn' => $sn,
-				'soldtime' => $createtime,
-				'status'   => '2',
-				'price_id' => $v['priceid'],
-				'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
-											'area'=>areaName($v['areaId'],1),
-											'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
-											'games'=>$plan['games'],
-											'priceid'=>$v['priceid'],
-											'priceName'=>$ticketType[$v['priceid']]['name'],
-											'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
-											'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
-											'remark_type' => $remark['remark_type'],
-											'remark'=>$remark['remark'],
-									)),//售出信息 票型  单价
-			);
-			$status[$k]=$model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
-			//计算订单返佣金额
-			$rebate += $ticketType[$v['priceid']]['rebate'];
-			/*以下代码用于校验*/
-			if($info['param'][0]['settlement'] == '1'){
-				$money = $money+$ticketType[$v['priceid']]['price'];
-			}else{
-				$money = $money+$ticketType[$v['priceid']]['discount'];
-			}
-			
-			/*重组座位数据*/
-			$seatData[$k] = array(
-				'areaId' =>	$v['areaId'],
-				'priceid'=>$v['priceid'],
-				'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
-				'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
-				'seatid'=>	$v['seatid'],
-
-			);
-			$num = $num++;
-			if($status[$k] == false){
-				//$this->errCode = '400009';
-				//$this->errMsg = '座椅信息更新失败';
-				//error_insert('400009');
-				return false;
-				break;
-			}
-			if($count == $k+1){
-				$flag=true;
-			}
-		}
-		/*金额与数量校验*/
-		if($money == $info['subtotal']){
-			$info['subtotal'] = $money;
+		//根据支付方式判断排座方式
+		if(in_array($info['param'][0]['is_pay'],array('4','5'))){
+			$seat_type = '2';
 		}else{
-			//error_insert('400018');
-			$model->rollback();//事务回滚
-			//$this->errCode = '400018';
-			//$this->errMsg = '金额校验失败';
-			return false;
+			$seat_type = '1';
 		}
+		//同步排座
+		if($seat_type == '1'){
+			//更新座位信息	
+			foreach ($info['data'] as $k=>$v){	
+				$map = array(
+					'area' => $v['areaId'],
+					'seat' => $v['seatid'],
+					'status' => array('in','0,66'),
+				);
+				$remark = print_remark($ticketType[$v['priceid']]['remark'],$plan['product_id']);
+				$data = array(
+					'order_sn' => $sn,
+					'soldtime' => $createtime,
+					'status'   => '2',
+					'price_id' => $v['priceid'],
+					'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
+												'area'=>areaName($v['areaId'],1),
+												'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
+												'games'=>$plan['games'],
+												'priceid'=>$v['priceid'],
+												'priceName'=>$ticketType[$v['priceid']]['name'],
+												'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
+												'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
+												'remark_type' => $remark['remark_type'],
+												'remark'=>$remark['remark'],
+										)),//售出信息 票型  单价
+				);
+				$status[$k]=$model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
+				//计算订单返佣金额
+				$rebate += $ticketType[$v['priceid']]['rebate'];
+				/*以下代码用于校验*/
+				if($info['param'][0]['settlement'] == '1'){
+					$money = $money+$ticketType[$v['priceid']]['price'];
+				}else{
+					$money = $money+$ticketType[$v['priceid']]['discount'];
+				}
+				
+				/*重组座位数据*/
+				$seatData[$k] = array(
+					'areaId' =>	$v['areaId'],
+					'priceid'=>$v['priceid'],
+					'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
+					'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
+					'seatid'=>	$v['seatid'],
+
+				);
+				$num = $num++;
+				if($status[$k] == false){
+					//$this->errCode = '400009';
+					//$this->errMsg = '座椅信息更新失败';
+					//error_insert('400009');
+					return false;
+					break;
+				}
+				if($count == $k+1){
+					$flag=true;
+				}
+				//是否为团队订单 
+				if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
+					//个人允许底价结算,且有返佣
+					$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem'],$info['crm'][0]['guide']);
+					//严格验证渠道订单写入返利状态
+					if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
+						error_insert('400018');
+						$model->rollback();
+						return false;
+					}
+					//判断是否是底价结算
+					if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
+						//存储待处理数据
+						load_redis('lpush','PreOrder',$sn);
+					}
+				}
+			}
+			/*金额与数量校验*/
+			if($money == $info['subtotal']){
+				$info['subtotal'] = $money;
+			}else{
+				//error_insert('400018');
+				$model->rollback();//事务回滚
+				//$this->errCode = '400018';
+				//$this->errMsg = '金额校验失败';
+				return false;
+			}
+			$status = '1';
+		}
+		//异步排座
+		if($seat_type == '2'){
+			$seatData = $info['data'];
+			load_redis('setex',$sn,serialize($info),3600);
+			$status = '11';
+			$flag = true;
+		}
+		//结算方式
 		if($info['type'] == '2'){
 			//个人不允许底价结算
 			$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem']);
@@ -133,17 +172,21 @@ class Order extends \Libs\System\Service {
 			'guide_id'		=> $info['crm'][0]['guide'],
 			'channel_id'	=> $info['crm'][0]['qditem'],
 			'pay'	=> $info['param'][0]['is_pay'] ? $info['param'][0]['is_pay'] : '1',
-			'status' => '1',
+			'status' => $status,
 			'number' =>$count,
+			'phone'			=> $info['crm'][0]['phone'],//取票人手机
+			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
+			'take'			=> $info['crm'][0]['contact'],
+			'activity'		=> $info['param'][0]['activity'],//活动标记
 		);
 		$newInfo = array('subtotal'	=> $info['subtotal'],'type'=>$info['type'],'checkin'=> $info['checkin'],'sub_type'=>$info['sub_type'],'num'=>$info['num'],'data' => $seatData,'crm' => $info['crm'],'pay' => $info['param'][0]['is_pay'] ? $info['param'][0]['is_pay'] : '1','param'=> $info['param']);
 
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($newInfo)));
-		//dump($flag);dump($state);dump($oinfo);dump($in_team);
 		/*记录售票员操作日志*/
 		if($flag && $state && $oinfo){
 			$model->commit();//提交事务
+			$sn = array('sn' => $sn,'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
 			return $sn;
 		}else{
 			//error_insert('400006');
@@ -152,6 +195,138 @@ class Order extends \Libs\System\Service {
 			//$this->errMsg = '订单写入失败';
 			return false;
 		}	
+	}
+	/**
+	 * 选座排座
+	 * @return [type] [description]
+	 */
+	function choose_seat($seat, $info, $sub_type = '2', $channel = '0', $is_pay = null){
+		$plan = F('Plan_'.$info['plan_id']);
+		if(empty($plan)){error_insert('400005');return false;}
+		if(empty($info['order_sn'])){
+			$errMsg = '未找到有效订单';
+			return false;
+		}
+		$oinfo = $info['info'];
+		/*
+		$oinfo = load_redis('get',$info['sn']);
+		if(empty($oinfo)){
+			$oinfo = D('OrderData')->where(array('order_sn'=>$info['sn']))->field('info')->find();
+			$oinfo = unserialize($oinfo);
+		}*/
+		$count = count($seat);//统计座椅个数
+		$createtime = time();
+		$ticketType = F("TicketType".$plan['product_id']);
+		/*多表事务*/
+		$model = new Model();
+		$model->startTrans();
+		$flag=false;
+		$money = 0;
+		$num = 0;
+		//获取订单信息
+		
+		//更新座位信息	
+		foreach ($seat as $k=>$v){	
+			$map = array(
+				'area' => $v['areaId'],
+				'seat' => $v['seatid'],
+				'status' => array('in','0,66'),
+			);
+			$remark = print_remark($ticketType[$v['priceid']]['remark'],$plan['product_id']);
+			$data = array(
+				'order_sn' => $info['order_sn'],
+				'soldtime' => $createtime,
+				'status'   => '2',
+				'price_id' => $v['priceid'],
+				'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
+											'area'=>areaName($v['areaId'],1),
+											'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
+											'games'=>$plan['games'],
+											'priceid'=>$v['priceid'],
+											'priceName'=>$ticketType[$v['priceid']]['name'],
+											'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
+											'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
+											'remark_type' => $remark['remark_type'],
+											'remark'=>$remark['remark'],
+									)),//售出信息 票型  单价
+			);
+			$status[$k]=$model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
+			//计算订单返佣金额
+			$rebate += $ticketType[$v['priceid']]['rebate'];
+			/*以下代码用于校验*/
+			if($oinfo['param'][0]['settlement'] == '1'){
+				$money = $money+$ticketType[$v['priceid']]['price'];
+			}else{
+				$money = $money+$ticketType[$v['priceid']]['discount'];
+			}
+			
+			/*重组座位数据*/
+			$seatData[$k] = array(
+				'areaId' =>	$v['areaId'],
+				'priceid'=>$v['priceid'],
+				'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
+				'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
+				'seatid'=>	$v['seatid'],
+
+			);
+			$num = $num++;
+			if($status[$k] == false){
+				//$this->errCode = '400009';
+				//$this->errMsg = '座椅信息更新失败';
+				//error_insert('400009');
+				return false;
+				break;
+			}
+			if($count == $k+1){
+				$flag=true;
+			}
+		}
+		/*金额与数量校验*/
+		if($money == $info['money']){
+			$oinfo['subtotal'] = $money;
+		}else{
+			$model->rollback();//事务回滚
+			//$this->errCode = '400018';
+			//$this->errMsg = '金额校验失败';
+			return false;
+		}
+		/*写入订单信息*/
+		$orderData = array(
+			'pay'	=> $is_pay ? $is_pay : $oinfo['param'][0]['is_pay'],
+			'status' => '1',
+		);
+		//是否为团队订单 
+		if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
+			//个人允许底价结算,且有返佣
+			$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem'],$info['crm'][0]['guide']);
+			//严格验证渠道订单写入返利状态
+			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
+				error_insert('400018');
+				$model->rollback();
+				return false;
+			}
+			//判断是否是底价结算
+			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
+				//存储待处理数据
+				load_redis('lpush','PreOrder',$info['order_sn']);
+			}
+		}
+		$newInfo = array('subtotal'	=> $oinfo['subtotal'],'type'=>$oinfo['type'],'checkin'=> $oinfo['checkin'],'sub_type'=>$oinfo['sub_type'],'num'=>$oinfo['num'],'data' => $seatData,'crm' => $oinfo['crm'],'pay' => $info['is_pay'] ? $info['is_pay'] : $oinfo['param'][0]['is_pay'],'param'=> $info['param']);
+
+		$state = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn'],'status'=>array('not in','1,9')))->save($orderData);
+		$oinfo = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->save(array('info' => serialize($newInfo)));
+		//dump($flag);dump($state);dump($oinfo);
+		/*记录售票员操作日志*/
+		if($flag && $state && $oinfo){
+			$model->commit();//提交事务
+			return $info['order_sn'];
+		}else{
+			//error_insert('400006');
+			$model->rollback();//事务回滚
+			//$this->errCode = '400006';
+			//$this->errMsg = '订单写入失败';
+			return false;
+		}
 	}
 	/**************************************************窗口订单****************************************************/
 	/*快捷售票
@@ -180,10 +355,17 @@ class Order extends \Libs\System\Service {
 	 */
 	function sweep_pay_seat($info,$oinfo){
 		//获取座位区域信息
-		$param = unserialize($oinfo['info']);
-		$seat = $param['data'];
+		$oinfo['info'] = unserialize($oinfo['info']);
+		$seat = $oinfo['info']['data'];
 		//判断支付提交场景，窗口自动排座，窗口选座
-		$status = Order::quickSeat($seat,$oinfo,'',1,$info['seat_type'],$info['pay_type']);
+		//选座售票
+		if($info['order_type'] == '1'){
+			$status = Order::choose_seat($seat,$oinfo,'',1,$info['pay_type']);
+		}
+		//快捷售票
+		if($info['order_type'] == '2'){
+			$status = Order::quickSeat($seat,$oinfo,'',1,$info['seat_type'],$info['pay_type']);
+		}
 		return $status;
 	}
 	/**************************************************微信、网站**************************************************/

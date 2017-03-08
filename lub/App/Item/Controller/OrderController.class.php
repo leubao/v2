@@ -16,32 +16,53 @@ class OrderController extends ManageBase{
 	 	parent::_initialize();
 	}
 /*==================================华丽分割线  1 添加窗口订单====================================*/
-	/*选座提交*/
+	/*选座提交
+	* @param $order_type int 1 窗口散客/团队选座 2 快捷散客/团队选座
+	*/
 	function seatPost(){
 		if(IS_POST){
-			$info = $_POST['info'];
+			$pinfo = $_POST['info'];
 			$plan = I('get.plan',0,intval);
 			$type = I('get.type',1,intval);
-			//更新座位状态信息
-			//$order = new Order;
-			$sn = Order::rowSeat($info);
-			if($sn != false){
+			$uInfo = \Manage\Service\User::getInstance()->getInfo();//读取当前登录用户信息
+			$type = '1'.$type;
+			$run = Order::rowSeat($pinfo,$type,$uInfo);
+			//判断支付方式，微信支付和支付宝支付中断执行
+			if($run != false){
+				//支付方式影响返回结果
+				if(in_array($run['is_pay'],array('4','5'))){
+					$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>1));
+					$title = "网银支付";
+					$width = '600';
+					$height = '400';
+					$pageId = 'payment';
+				}else{
+					$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan));
+					$title = "门票打印";
+					$width = '213';
+					$height = '208';
+					$pageId = 'print';
+				}
 				$return = array(
 					'statusCode' => '200',
+					'title'		 =>	$title,
+					'width'		 =>	$width,
+					'height'	 =>	$height,
+					'pageid' 	 => $pageId,
 					'refresh'	 => 'work_seat',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan)),
+					'forwardUrl' => $forwardUrl,
 				);
-				$message = "下单成功!单号".$sn;
+				$message = "下单成功!单号".$run;
 				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 			}else{
 				$return = array(
 					'statusCode' => '300',
 					'forwardUrl' => '',
-					'message' => $sn->errMsg,
+					'message' => $sn->errMsg
 				);
 				$message = "下单失败!";
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
-			}
+			}			
 			//记录订单信息
 			die(json_encode($return));
 		}
@@ -368,7 +389,6 @@ class OrderController extends ManageBase{
 		}
 		return true;
 	}
-
 	
 	/**
 	 * 二次打印密码确认
@@ -412,12 +432,6 @@ class OrderController extends ManageBase{
 			$this->display();
 		}
 	}
-	/**
-	 * 一单一票
-	 */
-	function single_ticket(){
-
-	}
 /*=============================华丽分割线  2 添加快捷订单====================================*/
 	/*快捷售票*/
 	function quickPost(){
@@ -430,7 +444,7 @@ class OrderController extends ManageBase{
 		if($run != false){
 			//支付方式影响返回结果
 			if(in_array($run['is_pay'],array('4','5'))){
-				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money']));
+				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>2));
 				$title = "网银支付";
 				$width = '600';
 				$height = '400';
@@ -470,8 +484,9 @@ class OrderController extends ManageBase{
 			$pinfo = $_POST['info'];
 			$info = json_decode($pinfo,true);
 			//pos 收费 现金支付
-			$oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn'],'status'=>array('in','6,11')))->relation(true)->find();
-            if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '400','msg' => $oinfo)));}
+			$oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn'],'status'=>array('in','6,11')))->relation(true)->find();            
+			if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '400','msg' => $oinfo)));}
+            //判断订单类型 scene 1选座订单6快捷售票
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
 				$return = $this->sweep_pay_seat($info,$oinfo);
 			}else{
@@ -531,7 +546,6 @@ class OrderController extends ManageBase{
 			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
 		}
 		return $result;
-
 	}
 	/*轮询支付日志查询支付结果*/
 	function public_payment_results(){
@@ -585,7 +599,8 @@ class OrderController extends ManageBase{
 			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 		}else{
 			$return = array(
-				'statusCode' => '300'
+				'statusCode' => '300',
+				'message'=>'['.$result['errCode'].']'.$result['errMsg']
 			);
 			$message = "支付失败!";
 			D('Item/Operationlog')->record($message, 300);//记录售票员日报表

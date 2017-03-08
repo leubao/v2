@@ -249,11 +249,10 @@ class WorkController extends ManageBase{
 			'work_end_seat'	=> $work_end_seat,
 			'nwork_seat'=> $nwork_seat,
 			'pre_count'=>$pre_count,
-			);
-		echo json_encode($return);
+		);
+		die(json_encode($return));
 		return true;
 	}
-
 	/**
 	 * 快捷售票 type 1 散客快捷售票 2 团队售票
 	 */
@@ -409,7 +408,6 @@ class WorkController extends ManageBase{
 		if($result["return_code"] != "SUCCESS"){
 			return false;
 		}
-		
 		//如果结果为success且不需要重新调用撤销，则表示撤销成功
 		if($result["result_code"] != "SUCCESS" 
 			&& $result["recall"] == "N"){
@@ -429,16 +427,11 @@ class WorkController extends ManageBase{
 		$plan = I('plan_id');
 		$plan_name = I('plan_name');
 		$map = array(
-			'product_id'=>	\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+			'product_id'=>	get_product('id'),
 			'status'	=>	'1',
-			//'createtime'=>	array('GT', strtotime(date("Ymd",time()))),
+			'createtime'=>	array('GT', strtotime(date("Y"))),
 		);
 		if(!empty($sn)){
-			//单号长度不小于5
-			if(strlen($sn) < '5'){
-				$this->erun("您输入的单号太短,请输入单号后五位");
-				return false;
-			}
 			$map['order_sn'] = array('like','%'.$sn.'%');
 		}
 		if(!empty($phone)){
@@ -532,7 +525,6 @@ class WorkController extends ManageBase{
 				$this->assign('ticket',$ticket);
 
 			}
-			
 			$this->assign('data',$info)
 				->assign('type',$info['product_type'])
 				->assign('area',$area)
@@ -608,14 +600,6 @@ class WorkController extends ManageBase{
             $endtime = $starttime + 86399;
         	$where['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
         }
-        /*
-		$user_id = get_user_id();  //当前登录用户id
-		$c_data  = Operate::do_read('User',0,array("id"=>$user_id));
-		//TODO 限定显示有效数据
-		if($c_data["cid"] != ""){
-			$where["crm_id"] = $c_data["cid"];
-			$this->assign("crm_id",$where["crm_id"]);
-		}*/
 		$where['launch'] = '2';
 		$this->basePage('TicketRefund',$where);
 		$this->display();
@@ -717,10 +701,9 @@ class WorkController extends ManageBase{
 	 * 订单详情
 	 */
 	function detail(){
-		$id   = I("get.id");          //取消订单id
+		$id   = I("get.id");
 		$map  = array("id"=>$id);
 		$data = Operate::do_read('TicketRefund',0,$map);
-		//dump($data);
 		$this->assign("data",$data);
 		$this->display();
 	}
@@ -763,7 +746,6 @@ class WorkController extends ManageBase{
 					}else{
 						$map = array('order_sn'=>$pinfo['sn'],'price_id'=>$ve['area']);
 					}
-					
 					$table=ucwords($plan['seat_table']);
 					$seat =D($table)->where($map)->limit($ve['num'])->select();
 					//按座位核减 
@@ -793,7 +775,6 @@ class WorkController extends ManageBase{
 				$subNum = $oinfo['number']-1;
 			}else{
 				//渠道订单
-				//$subNum = $oinfo['number']*self::$Cache['Config']['subtract'];//最大可核减数
 				$subNum = $oinfo['number']-1;//最大可核减数
 				$subNum = (int)$subNum;
 				if($subNum < 1 || !empty($oinfo['subtract'])){
@@ -833,7 +814,6 @@ class WorkController extends ManageBase{
 				break;
 			case '2':
 				//显示当前要退的场次
-				//$plan = M('Plan')->where(array('id'=>$ginfo['plan']))->field('id')->find();
 				$return = array(
 					'statusCode' => '200',
 					'data'	=>	$ginfo['plan'],
@@ -982,56 +962,6 @@ class WorkController extends ManageBase{
 		$seat = M(ucwords($plan['seat_table']))->where(array('seat'=>$info['seat']))->find();
 		$this->assign('data',$seat)
 			->assign('sale',unserialize($seat['sale']))
-			->display();
-	}
-	/*窗口获取渠道商*/
-	function channel(){
-		if(IS_POST){
-			if($_POST["name"] != ""){
-				$map["name"] = array('like','%'.$_POST["name"].'%');
-				$map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
-				$this->assign("name",$_POST["name"]);
-			}	
-		}
-		C('VAR_PAGE','pageNum');
-		$db = M('Crm');
-		$count = $db->where($map)->count();// 查询满足要求的总记录数
-		$num = 9;
-		$p = new \Item\Service\Page($count,$num);
-		$currentPage = !empty($_REQUEST[C('VAR_PAGE')])?$_REQUEST[C('VAR_PAGE')]:1;
-		$firstRow = ($currentPage - 1) * $num;
-		$listRows = $currentPage * $num;
-		$data = $db->where($map)->order("id ASC")->limit($firstRow . ',' . $p->listRows)->select();
-		$this->assign ( 'totalCount', $count);
-		$this->assign ( 'numPerPage', $p->listRows);
-		$this->assign ( 'currentPage', !empty($_REQUEST[C('VAR_PAGE')])?$_REQUEST[C('VAR_PAGE')]:1);
-		$this->assign("list",$data)
-			->display();
-
-	}
-	/*窗口获取导游*/
-	function guide(){
-		if(IS_POST){
-			if($_POST["name"] != ""){
-				$map["nickname"] = array('like','%'.$_POST["name"].'%');
-				$this->assign("name",$_POST["name"]);
-			}	
-		}
-		//TODO 将员工筛选出去
-		C('VAR_PAGE','pageNum');
-		$db = M('User');
-		$count = $db->where($map)->count();// 查询满足要求的总记录数
-		$num = 10;
-		$p = new \Item\Service\Page($count,$num);
-		$currentPage = !empty($_REQUEST[C('VAR_PAGE')])?$_REQUEST[C('VAR_PAGE')]:1;
-		$firstRow = ($currentPage - 1) * $num;
-		$listRows = $currentPage * $num;
-		$data = $db->where($map)->order("id ASC")->limit($firstRow . ',' . $p->listRows)->select();
-		$this->assign ( 'totalCount', $count);
-		$this->assign ( 'numPerPage', $p->listRows);
-		$this->assign ( 'currentPage', !empty($_REQUEST[C('VAR_PAGE')])?$_REQUEST[C('VAR_PAGE')]:1);
-		$this->assign('type',I('type'));
-		$this->assign("list",$data)
 			->display();
 	}
 }

@@ -149,7 +149,7 @@ function getprice(event, treeId, treeNode){
         </table>
         
         <!--提交-->
-        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="post_server();">立即出票</a></div>
+        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="quick_server();">立即出票</a></div>
     </div>
 </div>
 <div class="bjui-pageFooter">
@@ -271,12 +271,10 @@ function delNum(trId,price){
     }
     var num1 = parseInt(cnum)-1;
     $("#quick-num-"+trId).val(num1);
-
     $("#quick-subtotal-"+trId).html(amount(num1,price));
     $("#quick-total").html(total());/*合计*/
 }
-/*向服务器提交数据*/
-function post_server(){
+function quick_server(){
     var postData = '',
         pay = '',
         crm = '',
@@ -291,7 +289,8 @@ function post_server(){
         qditem = '0',
         settlement = PRODUCT_CONF.settlement,
         is_pay = $('input[name="pay"]:checked').val(),
-        length =  $("#quick-price-select tr").length;
+        length =  $("#quick-price-select tr").length,
+        url = '<?php echo U('Item/Order/quickpost',array('plan'=>$plan['id'],'type'=>$type));?>';
     if(length <= 0){
         $(this).alertmsg('error','请选择要售出的票型!');
         return false;
@@ -313,10 +312,15 @@ function post_server(){
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
     postData = 'info={"subtotal":'+parseFloat($('#quick-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-    /*提交到服务器*/
+    post_server(postData,url,'work_quick');
+}
+/*向服务器提交数据
+function post_server(){
+
+
     $.ajax({
         type:'POST',
-        url:'<?php echo U('Item/Order/quickpost',array('plan'=>$plan['id'],'type'=>$type));?>',
+        url:'',
         data:postData,
         dataType:'json',
         timeout: 3500,
@@ -333,5 +337,6 @@ function post_server(){
             }
         }
     });
-}
+
+}*/
 </script>

@@ -35,7 +35,7 @@
     </tbody>
   </table>
   <!--提交-->
-  <div class="submit_seat"><a href="#" class="btn btn-success" onclick="post_server();">设置座位</a></div>
+  <div class="submit_seat"><a href="#" id="workseat_submit" class="btn btn-success" onclick="seats_server();">设置座位</a></div>
   <!--图列 s-->
   <div id="legend"></div>
   <!--left info e--> 
@@ -209,26 +209,30 @@ $(document).ready(function() {
       } 
   });
 });
-
-/*向服务器提交数据*/
+function seats_server() {
+  var postData = '',
+      toJSONString = '',
+      plan = {$plan['id']},
+      areaId  = '{$ginfo.area}',
+      sn = '{$ginfo.sn}',
+      length =  $("#set-selected-seats-{$ginfo.area} li").length,
+      url = '<?php echo U('Item/Order/row_seat',array('plan'=>$plan['id']));?>';
+  if(length <= 0){
+      $(this).alertmsg('error','未找到要售出的座位1!');
+      return false;
+  }
+  if($("#seat_num_"+areaId).val() != 0){$(this).alertmsg('error', '存在待排座位!');return false;}
+  $("#set-selected-seats-{$ginfo.area} li").each(function(i){
+      var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+      toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
+  });
+  postData = 'info={"sn":'+sn+',"data":['+ toJSONString + '],"aid":'+areaId+'}';
+  post_server(postData,url,'preseat');
+}
+/*向服务器提交数据
 function post_server(){
-    var postData = '',
-        toJSONString = '',
-        plan = {$plan['id']},
-        areaId  = '{$ginfo.area}',
-        sn = '{$ginfo.sn}',
-        length =  $("#set-selected-seats-{$ginfo.area} li").length;
-    if(length <= 0){
-        $(this).alertmsg('error','未找到要售出的座位!');
-        return false;
-    }
-    if($("#seat_num_"+areaId).val() != 0){$(this).alertmsg('error', '存在待排座位!');return false;}
-    $("#set-selected-seats-{$ginfo.area} li").each(function(i){
-        var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-        toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
-    });
-    postData = 'info={"sn":'+sn+',"data":['+ toJSONString + '],"aid":'+areaId+'}';
-    /*提交到服务器**/
+    
+    
     $.ajax({
         type:'POST',
         url:'<?php echo U('Item/Order/row_seat',array('plan'=>$plan['id']));?>',
@@ -243,5 +247,5 @@ function post_server(){
             }
         }
     });
-}
+}*/
 </script>

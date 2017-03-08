@@ -18,6 +18,7 @@
   <div class="form-group" id="payMsg">
   </div>
   <div class="form-group">
+    <label class="col-sm-2 control-label">授权码:</label>
     <input type="text" name="card" class="form-control" size="20" id="pay_card" value="">
   </div>
   <!--倒计时区域-->
@@ -28,7 +29,7 @@
 <div class="bjui-pageFooter">
     <ul>
         <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
-        <li><a href="#" class="btn btn-default" data-icon="save" onclick="pay_post();">提交</a></li>
+        <li><a href="#" id="payment_submit" class="btn btn-default" data-icon="save" onclick="pay_post();">提交</a></li>
     </ul>
 </div>
 <script>
@@ -50,8 +51,9 @@
       var plan = '{$ginfo.plan}',
           sn = '{$ginfo.sn}',
           is_pay = '{$ginfo.is_pay}',
-          payKey = $("#pay_card").val();
-      postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"seat_type":"1","paykey":'+payKey+'}';
+          payKey = $("#pay_card").val(),
+          order_type = '{$ginfo.order_type}';
+      postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"seat_type":"1","order_type":'+order_type+',"paykey":'+payKey+'}';
       paymentT = setTimeout("payment_polling()",5000);
       //向第三方支付提交支付请求
       $.ajax({
@@ -143,15 +145,16 @@
         postData = '',
         plan = '{$ginfo.plan}',
         sn = '{$ginfo.sn}',
+        order_type = '{$ginfo.order_type}',
         url = '<?php echo U('Item/Order/public_payment');?>';
     if(is_pay == '4' || is_pay == '5'){
       layer.msg('当前选择支付方式不允许此项操作,请重新选择支付方式...');
       return false;
     }
-    postData = 'info={"pay_type":'+is_pay+',"seat_type":"1","sn":'+sn+'}';
-    post_server(postData,url);
+    postData = 'info={"plan":'+plan+',"pay_type":'+is_pay+',"seat_type":"1","order_type":'+order_type+',"sn":'+sn+'}';
+    post_server(postData,url,'payment');
   }
-  //提交到服务器 TODO  通用提交到服务器
+  /*提交到服务器 TODO  通用提交到服务器
   function post_server(postData,url){
     $.ajax({
       type:'POST',
@@ -173,5 +176,5 @@
           $(this).dialog('close','payment');
       }
     });
-  }
+  }*/
 </script>
