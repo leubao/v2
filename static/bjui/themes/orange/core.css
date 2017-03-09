@@ -97,7 +97,6 @@ fieldset{border-color:#fdd5bc;}
 #bjui-navtab > .tabsPageContent{background:#fefefe; border-color:#fdd5bc;}
 /* Dialog */
 .bjui-dialog{background:#fff9f3; border:1px #DDD solid;}
-.bjui-dialog.dialogShadow{-webkit-box-shadow:0 3px 9px rgba(255,102,1, 0.9); box-shadow:0 3px 9px rgba(255,102,1, 0.9);}
 .bjui-dialog > .dialogHeader{background:#fff6ed; border-bottom:1px #fdd5bc solid;}
 .bjui-dialog > .dialogHeader a{color:#222 !important;}
 .bjui-dialog > .dialogHeader a:hover{color:#ff6601 !important;}

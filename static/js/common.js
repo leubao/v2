@@ -5,7 +5,6 @@ function getMousePoint(ev) {
         x:0,  
         y:0  
     };  
-   
     // 如果浏览器支持 pageYOffset, 通过 pageXOffset 和 pageYOffset 获取页面和视窗之间的距离  
     if(typeof window.pageYOffset != 'undefined') {  
         point.x = window.pageXOffset;  

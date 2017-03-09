@@ -237,7 +237,7 @@ td[align=right] input{text-align:right;}
 #bjui-navtab > .tabsPageContent{position:relative; display:block; overflow:hidden; border-style:solid; border-width:0 1px 1px 1px;}
 #bjui-navtab > .tabsPageContent > .navtabPage{height:100%; overflow:hidden;}
 /* Dialog */
-.bjui-dialog{position:absolute; display:block; text-align:left; border-radius:3px; box-shadow:0 2px 2px rgba(0, 0, 0, 0.3);}
+.bjui-dialog{position:absolute; display:block; text-align:left; border-radius:3px;}
 .bjui-dialog > .dialogHeader{position:relative; padding:0 5px; cursor:move;}
 .bjui-dialog > .dialogHeader{display:block; height:28px; overflow:hidden;}
 .bjui-dialog > .dialogHeader .close,
