@@ -14,6 +14,7 @@ class ComposerStaticInit0685fe7b3804375d34c97ddc081b15e6
         ),
         'P' => 
         array (
+            'Psr\\Log\\' => 8,
             'Payment\\' => 8,
         ),
     );
@@ -26,6 +27,10 @@ class ComposerStaticInit0685fe7b3804375d34c97ddc081b15e6
         'Wechat\\' => 
         array (
             0 => __DIR__ . '/..' . '/zoujingli/wechat-php-sdk/Wechat',
+        ),
+        'Psr\\Log\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/psr/log/Psr/Log',
         ),
         'Payment\\' => 
         array (

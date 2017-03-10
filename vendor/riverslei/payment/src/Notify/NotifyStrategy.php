@@ -9,13 +9,14 @@
 
 namespace Payment\Notify;
 
+use Payment\Common\ConfigInterface;
 
 abstract class NotifyStrategy
 {
 
     /**
      * 配置信息
-     * @var array $config
+     * @var ConfigInterface $config
      */
     protected $config;
 
@@ -70,7 +71,11 @@ abstract class NotifyStrategy
      */
     protected function callback(PayNotifyInterface $notify, array $notifyData)
     {
-        $data = $this->getRetData($notifyData);
+        if ($this->config->returnRaw) {
+            $data = $notifyData;
+        } else {
+            $data = $this->getRetData($notifyData);
+        }
         if ($data === false) {
             return false;
         }
@@ -86,7 +91,7 @@ abstract class NotifyStrategy
      * @return array|false
      * @author helei
      */
-    abstract protected function getNotifyData();
+    abstract public function getNotifyData();
 
     /**
      * 检查异步通知的数据是否合法
@@ -97,7 +102,7 @@ abstract class NotifyStrategy
      * @return boolean
      * @author helei
      */
-    abstract protected function checkNotifyData(array $data);
+    abstract public function checkNotifyData(array $data);
 
     /**
      * 向客户端返回必要的数据

@@ -9,7 +9,6 @@
 
 namespace Payment;
 
-
 use Payment\Common\BaseStrategy;
 use Payment\Common\PayException;
 use Payment\Refund\AliRefund;
@@ -28,19 +27,19 @@ class RefundContext
      * 设置对应的退款渠道
      * @param string $channel 退款渠道
      *  - @see Config
-     * 
+     *
      * @param array $config 配置文件
      * @throws PayException
      * @author helei
      */
     public function initRefund($channel, array $config)
     {
-        try{
+        try {
             switch ($channel) {
-                case Config::ALI:
+                case Config::ALI_REFUND:
                     $this->refund = new AliRefund($config);
                     break;
-                case Config::WEIXIN:
+                case Config::WX_REFUND:
                     $this->refund = new WxRefund($config);
                     break;
                 default:
@@ -49,20 +48,12 @@ class RefundContext
         } catch (PayException $e) {
             throw $e;
         }
-
     }
 
     /**
      * 通过环境类调用支付退款操作
      *
      * @param array $data
-     *
-     *      $data['refund_no'] = '',  退款单号，在系统内部唯一
-     *      $data['refund_data'][] => [
-     *          'transaction_id'    => '原付款支付宝交易号',
-     *          'refund_fee' => '退款总金额', // 单位元
-     *          'reason'     => '退款理由', // “退款理由”中不能有“^”、“|”、“$”、“#”
-     *      ];// 如果有多笔数据， refund_data 就写入多个数据集
      *
      * @return array
      * @throws PayException

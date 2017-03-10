@@ -1,23 +1,23 @@
 [
     {
         "name": "zoujingli/wechat-php-sdk",
-        "version": "v1.3.7",
-        "version_normalized": "1.3.7.0",
+        "version": "v1.3.8",
+        "version_normalized": "1.3.8.0",
         "source": {
             "type": "git",
             "url": "https://github.com/zoujingli/wechat-php-sdk.git",
-            "reference": "cd8c1427747531cd801ec91e934b785fce77e931"
+            "reference": "12759d48867aab14e6b66be81a5b5afe223a0476"
         },
         "dist": {
             "type": "zip",
-            "url": "https://packagist.phpcomposer.com/files/zoujingli/wechat-php-sdk/cd8c1427747531cd801ec91e934b785fce77e931.zip",
-            "reference": "cd8c1427747531cd801ec91e934b785fce77e931",
+            "url": "https://files.phpcomposer.com/files/zoujingli/wechat-php-sdk/12759d48867aab14e6b66be81a5b5afe223a0476.zip",
+            "reference": "12759d48867aab14e6b66be81a5b5afe223a0476",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.3"
         },
-        "time": "2016-12-31T10:05:37+00:00",
+        "time": "2017-02-14T08:30:06+00:00",
         "type": "project",
         "installation-source": "dist",
         "autoload": {
@@ -36,31 +36,34 @@
         ]
     },
     {
-        "name": "riverslei/payment",
-        "version": "v2.7.1",
-        "version_normalized": "2.7.1.0",
+        "name": "psr/log",
+        "version": "dev-master",
+        "version_normalized": "9999999-dev",
         "source": {
             "type": "git",
-            "url": "https://github.com/helei112g/payment.git",
-            "reference": "0833419ef88466b6861ac9efe8739d6494a5bcd6"
+            "url": "https://github.com/php-fig/log.git",
+            "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d"
         },
         "dist": {
             "type": "zip",
-            "url": "https://packagist.phpcomposer.com/files/helei112g/payment/0833419ef88466b6861ac9efe8739d6494a5bcd6.zip",
-            "reference": "0833419ef88466b6861ac9efe8739d6494a5bcd6",
+            "url": "https://files.phpcomposer.com/files/php-fig/log/4ebe3a8bf773a19edfe0a84b6585ba3d401b724d.zip",
+            "reference": "4ebe3a8bf773a19edfe0a84b6585ba3d401b724d",
             "shasum": ""
         },
         "require": {
-            "ext-bcmath": "*",
-            "ext-mbstring": "*",
-            "php": ">=5.6"
+            "php": ">=5.3.0"
         },
-        "time": "2017-01-03T14:44:48+00:00",
+        "time": "2016-10-10T12:19:37+00:00",
         "type": "library",
-        "installation-source": "dist",
+        "extra": {
+            "branch-alias": {
+                "dev-master": "1.0.x-dev"
+            }
+        },
+        "installation-source": "source",
         "autoload": {
             "psr-4": {
-                "Payment\\": "src/"
+                "Psr\\Log\\": "Psr/Log/"
             }
         },
         "notification-url": "https://packagist.org/downloads/",
@@ -69,38 +72,36 @@
         ],
         "authors": [
             {
-                "name": "helei",
-                "email": "dayugog@gmail.com",
-                "homepage": "https://helei112g.github.io/"
+                "name": "PHP-FIG",
+                "homepage": "http://www.php-fig.org/"
             }
         ],
-        "description": "集成支付宝、微信支付等流行的支付接口，后续会持续跟进中",
-        "homepage": "https://helei112g.github.io/",
+        "description": "Common interface for logging libraries",
+        "homepage": "https://github.com/php-fig/log",
         "keywords": [
-            "alipay",
-            "weixin",
-            "微信支付",
-            "支付宝支付",
-            "集成支付接口SDK"
+            "log",
+            "psr",
+            "psr-3"
         ]
     },
     {
         "name": "filp/whoops",
-        "version": "2.1.5",
-        "version_normalized": "2.1.5.0",
+        "version": "2.1.8",
+        "version_normalized": "2.1.8.0",
         "source": {
             "type": "git",
             "url": "https://github.com/filp/whoops.git",
-            "reference": "2abce9d956589122c6443d6265f01cf7e9388e3c"
+            "reference": "f2950be7da8b8d6c4e77821b6c9d486e36cdc4f3"
         },
         "dist": {
             "type": "zip",
-            "url": "https://packagist.phpcomposer.com/files/filp/whoops/2abce9d956589122c6443d6265f01cf7e9388e3c.zip",
-            "reference": "2abce9d956589122c6443d6265f01cf7e9388e3c",
+            "url": "https://files.phpcomposer.com/files/filp/whoops/f2950be7da8b8d6c4e77821b6c9d486e36cdc4f3.zip",
+            "reference": "f2950be7da8b8d6c4e77821b6c9d486e36cdc4f3",
             "shasum": ""
         },
         "require": {
-            "php": "^5.5.9 || ^7.0"
+            "php": "^5.5.9 || ^7.0",
+            "psr/log": "^1.0.1"
         },
         "require-dev": {
             "mockery/mockery": "0.9.*",
@@ -111,7 +112,7 @@
             "symfony/var-dumper": "Pretty print complex values better with var-dumper available",
             "whoops/soap": "Formats errors as SOAP responses"
         },
-        "time": "2016-12-26T16:13:31+00:00",
+        "time": "2017-03-07T09:04:45+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -144,6 +145,58 @@
             "library",
             "whoops",
             "zf2"
+        ]
+    },
+    {
+        "name": "riverslei/payment",
+        "version": "v3.0.2",
+        "version_normalized": "3.0.2.0",
+        "source": {
+            "type": "git",
+            "url": "https://github.com/helei112g/payment.git",
+            "reference": "d9ed58e7591e64c1d81c09666a64b6c1bd747264"
+        },
+        "dist": {
+            "type": "zip",
+            "url": "https://files.phpcomposer.com/files/helei112g/payment/d9ed58e7591e64c1d81c09666a64b6c1bd747264.zip",
+            "reference": "d9ed58e7591e64c1d81c09666a64b6c1bd747264",
+            "shasum": ""
+        },
+        "require": {
+            "ext-bcmath": "*",
+            "ext-mbstring": "*",
+            "php": ">=5.6"
+        },
+        "require-dev": {
+            "endroid/qrcode": "~1.9"
+        },
+        "time": "2017-03-09T08:15:18+00:00",
+        "type": "library",
+        "installation-source": "dist",
+        "autoload": {
+            "psr-4": {
+                "Payment\\": "src/"
+            }
+        },
+        "notification-url": "https://packagist.org/downloads/",
+        "license": [
+            "MIT"
+        ],
+        "authors": [
+            {
+                "name": "helei",
+                "email": "dayugog@gmail.com",
+                "homepage": "https://helei112g.github.io/"
+            }
+        ],
+        "description": "支付宝支付、微信支付集成SDK。整合集成快速接入，支持支付宝最新接口",
+        "homepage": "https://helei112g.github.io/",
+        "keywords": [
+            "alipay",
+            "weixin",
+            "微信支付",
+            "支付宝支付",
+            "集成支付接口SDK"
         ]
     }
 ]

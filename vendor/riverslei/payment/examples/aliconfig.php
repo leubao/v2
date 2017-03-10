@@ -5,25 +5,48 @@
  * @description:
  */
 
+// 一下配置均为本人的沙箱环境，贡献出来，大家测试
+
+// 个人沙箱帐号：
+/*商家账号   naacvg9185@sandbox.com
+商户UID   2088102169252684
+登录密码   111111*/
+
+/*买家账号    aaqlmq0729@sandbox.com
+登录密码    111111
+支付密码    111111
+用户名称    沙箱环境
+证件类型    身份证(IDENTITY_CARD)
+证件号码    43982819131125559X*/
+
+
 return [
-    // 老版本参数，当使用新版本时，不需要传入
-    'partner'   => '',// 请填写自己的支付宝账号信息
-    'md5_key'   => 'xxxxxx',// 此密码无效，请填写自己对应设置的值
-    // 转款接口，必须配置以下两项
-    'account'   => 'xxxxx@126.com',
-    'account_name' => 'xxxxx',
-    'sign_type' => 'RSA',// 默认方式    目前支持:RSA   MD5`
+    'use_sandbox'               => true,// 是否使用沙盒模式
 
-    // 如果没有设置以下内容，则默认使用老版本
-    // 支付宝2.0 接口  如果使用支付宝 新版 接口，请设置该参数，并且必须为 1.0。否则将默认使用支付宝老版接口
-    'ali_version'   => '1.0',// 调用的接口版本，固定为：1.0
-    'app_id'        => '2016073100130857',// 支付宝分配给开发者的应用ID
-    'use_sandbox'   => true,//  新版支付，支持沙箱调试
-    'ali_public_key'    => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'alipay_public_key.pem',// 支付宝新版本，每个应用对应的公钥都不一样了
+    'partner'                   => '2088102169252684',
+    'app_id'                    => '2016073100130857',
+    'sign_type'                 => 'RSA2',// RSA  RSA2
 
-    // 新版与老版支付  共同参数，
-    'rsa_private_key'   => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'rsa_private_key.pem',
-    "notify_url"	    => 'https://helei112g.github.io/',
-    "return_url"	    => 'https://helei112g.github.io/',// 我的博客地址
-    "time_expire"	    => '15',// 取值为分钟
+    // 可以填写文件路径，或者密钥字符串  当前字符串是 rsa2 的支付宝公钥
+    'ali_public_key'            => 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmBjJu2eA5HVSeHb7jZsuKKbPp3w0sKEsLTVvBKQOtyb7bjQRWMWBI7FrcwEekM1nIL+rDv71uFtgv7apMMJdQQyF7g6Lnn9niG8bT1ttB8Fp0eud5L97eRjFTOa9NhxUVFjGDqQ3b88o6u20HNJ3PRckZhNaFJJQzlahCpxaiIRX2umAWFkaeQu1fcjmoS3l3BLj8Ly2zRZAnczv8Jnkp7qsVYeYt01EPsAxd6dRZRw3uqsv9pxSvyEYA7GV7XL6da+JdvXECalQeyvUFzn9u1K5ivGID7LPUakdTBUDzlYIhbpU1VS8xO1BU3GYXkAaumdWQt7f+khoFoSw+x8yqQIDAQAB',
+    //'ali_public_key' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'alipay_public_key_rsa.pem',// 这里是支付宝rsa的公钥
+
+    // 可以填写文件路径，或者密钥字符串  我的沙箱模式，rsa与rsa2的私钥相同，为了方便测试
+    'rsa_private_key'           => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'rsa_private_key.pem',
+
+    'limit_pay'      => [
+        //'balance',// 余额
+        //'moneyFund',// 余额宝
+        //'debitCardExpress',// 	借记卡快捷
+        'creditCard',//信用卡
+        //'creditCardExpress',// 信用卡快捷
+        //'creditCardCartoon',//信用卡卡通
+        //'credit_group',// 信用支付类型（包含信用卡卡通、信用卡快捷、花呗、花呗分期）
+    ],// 用户不可用指定渠道支付当有多个渠道时用“,”分隔
+
+    // 与业务相关参数
+    'notify_url'                => 'https://helei112g.github.io/',
+    'return_url'                => 'https://helei112g.github.io/',
+
+    'return_raw'                => false,// 在处理回调时，是否直接返回原始数据，默认为false
 ];

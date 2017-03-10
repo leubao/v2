@@ -9,8 +9,6 @@
 
 namespace Payment;
 
-
-
 use Payment\Notify\AliNotify;
 use Payment\Notify\NotifyStrategy;
 use Payment\Notify\PayNotifyInterface;
@@ -30,28 +28,36 @@ class NotifyContext
      * 设置对应的通知渠道
      * @param string $channel 通知渠道
      *  - @see Config
-     * 
+     *
      * @param array $config 配置文件
      * @throws PayException
      * @author helei
      */
     public function initNotify($channel, array $config)
     {
-        try{
+        try {
             switch ($channel) {
-                case Config::ALI:
+                case Config::ALI_CHARGE:
                     $this->notify = new AliNotify($config);
                     break;
-                case Config::WEIXIN:
+                case Config::WX_CHARGE:
                     $this->notify = new WxNotify($config);
                     break;
                 default:
-                    throw new PayException('当前仅支持：ALI WEIXIN两个常量');
+                    throw new PayException('当前仅支持：ALI_CHARGE WX_CHARGE 两个常量');
             }
         } catch (PayException $e) {
             throw $e;
         }
+    }
 
+    /**
+     * 返回异步通知的数据
+     * @return array|false
+     */
+    public function getNotifyData()
+    {
+        return $this->notify->getNotifyData();
     }
 
     /**

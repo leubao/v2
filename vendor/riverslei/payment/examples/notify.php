@@ -8,30 +8,23 @@
 require_once __DIR__ . '/../autoload.php';
 require_once __DIR__ . '/testNotify.php';
 
-use Payment\NotifyContext;
 use Payment\Common\PayException;
-use Payment\Config;
+use Payment\Client\Notify;
 
-// 支付宝的配置文件
-$aliconfig = require_once __DIR__ . '/aliconfig.php';
-
-// 微信的配置文件
-$wxconfig = require_once __DIR__ . '/wxconfig.php';
-
-$notify = new NotifyContext();
+$aliConfig = require_once __DIR__ . '/aliconfig.php';
+$wxConfig = require_once __DIR__ . '/wxconfig.php';
 
 $callback = new TestNotify();
 
+$type = 'ali_charge';
 try {
-    // 支付宝回调
-    $notify->initNotify(Config::ALI, $aliconfig);
+    //$retData = Notify::getNotifyData($type, $aliConfig);// 获取第三方的原始数据
 
-    // 微信回调
-    //$notify->initNotify(Config::WEIXIN, $wxconfig);
-
-    $ret = $notify->notify($callback);
+    $ret = Notify::run($type, $aliConfig, $callback);
 } catch (PayException $e) {
-    echo $e->errorMessage();exit;
+    echo $e->errorMessage();
+    exit;
 }
 
-var_dump($ret);exit;
+var_dump($ret);
+exit;

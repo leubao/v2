@@ -7,46 +7,59 @@
 
 require_once __DIR__ . '/../autoload.php';
 
-$aliconfig = require_once __DIR__ . '/aliconfig.php';
-
-$wxconfig = require_once __DIR__ . '/wxconfig.php';
-
-use Payment\QueryContext;
 use Payment\Common\PayException;
-use Payment\Config;
+use Payment\Client\Query;
 
-$query = new QueryContext();
+$aliConfig = require_once __DIR__ . '/aliconfig.php';
+$wxConfig = require_once __DIR__ . '/wxconfig.php';
 
-// 通过支付宝交易号查询，  推荐
+// ali: 123123123q(14888971346355)    123123123w
+// wx:  123123123q
+
+// 支付查询
+//ali_charge
+/*$data = [
+    'out_trade_no' => '123123123q',
+    'trade_no' => '2017030721001004350200139475',
+];*/
+//wx_charge
+/*$data = [
+    'out_trade_no' => '123123123q',
+    'transaction_id' => '',
+];*/
+
+// 退款查询
+// ali_refund
+/*$data = [
+    'out_trade_no' => '123123123q',
+    'trade_no' => '2017030721001004350200139475',
+    'refund_no' => '14888971346355',
+];*/
+// wx_refund
 $data = [
-    'transaction_id'    => '2016123121001004350200119946',// 支付宝流水号
-    'refund_no'         => '2016123107452483',// 新版支付宝查询 退款 状态，必须传入该值.  即：商户自己生成的退款单号
-    //'order_no'    => '201612311430',// 商户订单号
-
-    //'transaction_id'    => '4007572001201607098672633287',// 微信订单查询  微信退款单查询
-    //'trans_no'  => '1007570439201601142692427764', // 微信批量转款查询  使用商户生成的转款单号
+    'out_trade_no' => '123123123q',
+    'refund_no' => '',
+    'transaction_id' => '',
+    'refund_id' => '',
 ];
 
+// 转账查询
+// ali_transfer
+/*$data = [
+    'trans_no' => '1488897403',
+    'transaction_id' => '20170307110070001502680000002892',
+];*/
+// wx_transfer
+/*$data = [
+    'trans_no' => '123123123q',
+];*/
+
+$type = 'wx_refund';// xx_charge  xx_refund   xx_transfer
 try {
-    // 支付宝订单查询
-    //$query->initQuery(Config::ALI, $aliconfig);
-
-    // 支付宝退款订单状态查询
-    $query->initQuery(Config::ALI_REFUND, $aliconfig);
-
-    // 微信订单查询
-    //$query->initQuery(Config::WEIXIN, $wxconfig);
-
-    // 微信退款订单状态查询
-    //$query->initQuery(Config::WEIXIN_REFUND, $wxconfig);
-
-    // 微信企业付款查询
-    //$query->initQuery(Config::WEIXIN_TRANS, $wxconfig);
-
-    $ret = $query->query($data);
-
+    $ret = Query::run($type, $wxConfig, $data);
 } catch (PayException $e) {
-    echo $e->errorMessage();exit;
+    echo $e->errorMessage();
+    exit;
 }
 
 var_dump($ret);

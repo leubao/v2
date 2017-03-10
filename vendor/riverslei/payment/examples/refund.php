@@ -7,49 +7,40 @@
 
 require_once __DIR__ . '/../autoload.php';
 
-use Payment\RefundContext;
 use Payment\Common\PayException;
-use Payment\Config;
+use Payment\Client\Refund;
 
-//  生成退款单号 便于测试
-function createPayid()
-{
-    return date('Ymdhis', time()).substr(floor(microtime()*1000),0,1).rand(0,9);
-}
 
-// 支付宝配置文件
-$aliconfig = require_once __DIR__ . '/aliconfig.php';
+$aliConfig = require_once __DIR__ . '/aliconfig.php';
+$wxConfig = require_once __DIR__ . '/wxconfig.php';
 
-// 微信配置文件
-$wxconfig = require_once __DIR__ . '/wxconfig.php';
+// ali: 123123123q    123123123w
+// wx:  123123123q    123123123w
 
-// 退款数据
-$reundData = [
-    'refund_no' => createPayid(),
-    'refund_data'   => [
-        ['transaction_id' => '2016123121001004350200119946', 'amount'   => '10', 'refund_fee' => '1', 'reason' => '新版支付宝测试金额退款'],
-        //['transaction_id' => '2016031521001004330271745693', 'amount'   => '0.01', 'refund_fee' => '0.01', 'reason' => '测试退款2'],
-    ],
+$refundNo = time() . rand(1000, 9999);
+// ali退款
+/*$data = [
+    'out_trade_no' => '123123123q',
+    'refund_fee' => '0.01',
+    'reason' => '测试帐号退款',
+    'refund_no' => $refundNo,
+];*/
+
+// wx退款
+$data = [
+    'out_trade_no' => '123123123q',
+    'total_fee' => '0.01',
+    'refund_fee' => 0.01,
+    'refund_no' => $refundNo,
 ];
-echo $reundData['refund_no'];
-$refund = new RefundContext();
+var_dump($refundNo);
+
+$channel = 'wx_refund';//xx_refund
 try {
-    // 支付宝退款  备注：新版本支付宝退款，不支持批量，就算传入多个值，也只退一笔
-    $type = Config::ALI;
-    $refund->initRefund($type, $aliconfig);
-
-    // 微信退款
-    //$type = Config::WEIXIN;
-    //$refund->initRefund(Config::WEIXIN, $wxconfig);
-
-    $ret = $refund->refund($reundData);
+    $ret = Refund::run($channel, $wxConfig, $data);
 } catch (PayException $e) {
-    echo $e->errorMessage();exit;
+    echo $e->errorMessage();
+    exit;
 }
 
-if ($type == Config::WEIXIN || $aliconfig['ali_version']) {
-    var_dump($ret);exit;
-} else {
-    // 跳转支付宝
-    header("Location:{$ret}");
-}
+var_dump($ret);exit;

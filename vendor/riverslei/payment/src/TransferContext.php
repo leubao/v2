@@ -7,7 +7,6 @@
 
 namespace Payment;
 
-
 use Payment\Common\BaseStrategy;
 use Payment\Common\PayException;
 use Payment\Trans\AliTransfer;
@@ -32,12 +31,12 @@ class TransferContext
      */
     public function initTransfer($channel, array $config)
     {
-        try{
+        try {
             switch ($channel) {
-                case Config::ALI:
+                case Config::ALI_TRANSFER:
                     $this->transfer = new AliTransfer($config);
                     break;
-                case Config::WEIXIN:
+                case Config::WX_TRANSFER:
                     $this->transfer = new WxTransfer($config);
                     break;
                 default:
@@ -46,22 +45,12 @@ class TransferContext
         } catch (PayException $e) {
             throw $e;
         }
-
     }
 
     /**
      * 通过环境类调用支付转款操作
      *
      * @param array $data
-     *
-     * $data['trans_no']    = '';// 转款单号
-     * $data['trans_data'][] = [
-     *      'serial_no' => '流水号',
-     *      'user_account'   => '收款账号',
-     *      'user_name'     => '收款人姓名',
-     *      'trans_fee'       => '付款金额',
-     *      'desc'      => '付款备注说明',
-     *  ];
      *
      * @return array
      * @throws PayException

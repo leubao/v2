@@ -8,5 +8,6 @@ $baseDir = dirname($vendorDir);
 return array(
     'Whoops\\' => array($vendorDir . '/filp/whoops/src/Whoops'),
     'Wechat\\' => array($vendorDir . '/zoujingli/wechat-php-sdk/Wechat'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/Psr/Log'),
     'Payment\\' => array($vendorDir . '/riverslei/payment/src'),
 );

@@ -7,54 +7,39 @@
 
 require_once __DIR__ . '/../autoload.php';
 
-use Payment\TransferContext;
 use Payment\Common\PayException;
-use Payment\Config;
+use Payment\Client\Transfer;
 
-//  生成转款单号 便于测试
-function createPayid()
-{
-    return date('Ymdhis', time()).substr(floor(microtime()*1000),0,1).rand(0,9);
-}
+$aliConfig = require_once __DIR__ . '/aliconfig.php';
+$wxConfig = require_once __DIR__ . '/wxconfig.php';
 
-$aliconfig = require_once __DIR__ . '/aliconfig.php';
+// ali_transfer
+/*$data = [
+    'trans_no' => time(),
+    'payee_type' => 'ALIPAY_LOGONID',
+    'payee_account' => 'aaqlmq0729@sandbox.com',// ALIPAY_USERID: 2088102169940354      ALIPAY_LOGONID：aaqlmq0729@sandbox.com
+    'amount' => '0.01',
+    'remark' => '转账拉，有钱了',
+    'payer_show_name' => '何磊',
+];*/
 
-// 微信的配置文件
-$wxconfig = require_once __DIR__ . '/wxconfig.php';
-
-// 转款数据
-$transData = [
-    'trans_no' => createPayid(),
-    'trans_data'   => [
-        [
-            'serial_no' => createPayid(),
-            //'user_account' => 'dayugog@gmail.com',// 支付宝转款时，为支付宝账号
-            'user_account' => 'otijfvr2oMz3tXnaQdKKbQeeBmhM',// 微信转款时，为用户所关注公众号的openid
-            'user_name' => '愚不可及',
-            'trans_fee' => '1',
-            'desc'  => '测试批量转款',
-        ]
-    ],
+// wx_transfer
+$data = [
+    'trans_no' => time(),
+    'openid' => '------',
+    'check_name' => 'OPTION_CHECK',// NO_CHECK：不校验真实姓名  FORCE_CHECK：强校验真实姓名   OPTION_CHECK：针对已实名认证的用户才校验真实姓名
+    'payer_real_name' => '何磊',
+    'amount' => '0.01',
+    'desc' => '测试转账',
+    'spbill_create_ip' => '127.0.0.1',
 ];
 
-$refund = new TransferContext();
+$channel = 'wx_transfer';//wx_transfer   ali_transfer
 try {
-    // 支付宝的企业付款,支持批量
-    // $type = Config::ALI;
-    //$refund->initTransfer($type, $aliconfig);
-
-    // 微信的企业付款， 仅支持单笔
-    $type = Config::WEIXIN;
-    $refund->initTransfer(Config::WEIXIN, $wxconfig);
-
-    $ret = $refund->transfer($transData);
+    $ret = Transfer::run($channel, $wxConfig, $data);
 } catch (PayException $e) {
-    echo $e->errorMessage();exit;
+    echo $e->errorMessage();
+    exit;
 }
 
-if ($type == Config::WEIXIN) {
-    var_dump($ret);
-} else {
-    // 跳转支付宝
-    header("Location:{$ret}");
-}
+var_dump($ret);

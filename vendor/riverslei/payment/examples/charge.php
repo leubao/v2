@@ -7,143 +7,58 @@
 
 require_once __DIR__ . '/../autoload.php';
 
-use Payment\ChargeContext;
-use Payment\Config;
 use Payment\Common\PayException;
+use Payment\Client\Charge;
 
 date_default_timezone_set('Asia/Shanghai');
 
-
-//  生成订单号 便于测试
-function createPayid()
-{
-    return date('Ymdhis', time()).substr(floor(microtime()*1000),0,1).rand(0,9);
-}
-
+$orderNo = time() . rand(1000, 9999);
 // 订单信息
 $payData = [
-    "order_no"	=> '201612311430',
-    "amount"	=> '10.00',// 单位为元 ,最小为0.01
-    "client_ip"	=> '127.0.0.1',
-    "subject"	=> 'test',
-    "body"	=> 'test wap pay',
-    "show_url"  => 'https://helei112g.github.io/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
-    "extra_param"	=> '',
+    'body'    => 'test body',
+    'subject'    => 'test subject',
+    'order_no'    => $orderNo,
+    'timeout_express' => time() + 600,// 表示必须 600s 内付款
+    'amount'    => '0.01',// 单位为元 ,最小为0.01
+    'return_param' => '123',
+
+    // 支付宝公有
+    'goods_type' => 1,
+    'store_id' => '',
+
+    // 条码支付
+    'operator_id' => '',
+    'terminal_id' => '',// 终端设备号(门店号或收银设备ID) 默认值 web
+    'alipay_store_id' => '',
+    'scene' => 'bar_code',// 条码支付：bar_code 声波支付：wave_code
+    'auth_code' => '1231212232323123123',
+
+    // web支付
+    'qr_mod' => '',//0、1、2、3 几种方式
+    'paymethod' => 'creditPay',// creditPay  directPay
+
+    'client_ip' => '127.0.0.1',
+
+    'openid' => 'ohQeiwnNrAg5bD7EVvmGFIhba--k',
+    'product_id' => '123',
 ];
 
-// 微信扫码支付，需要设置的参数
-$payData['product_id']  = '123456';
+$aliConfig = require_once __DIR__ . '/aliconfig.php';
+$wxConfig = require_once __DIR__ . '/wxconfig.php';
 
-// 微信公众号支付，需要的参数
-$payData['openid'] = 'oinNst2_hWU_5oBigLd8n3-59PCc';// 需要通过微信提供的api获取该openid
-
-/**
- * 包含客户的配置文件
- * 本次 2.0 版本，主要的改变是将配置文件独立出来，便于客户多个账号的情况
- * 已经使用不同方式读取配置文件，如：db  file   cache等
- */
-$aliconfig = require_once __DIR__ . '/aliconfig.php';
-$wxconfig = require_once __DIR__ . '/wxconfig.php';
-
-/**
- * 实例化支付环境类，进行支付创建
- */
-$charge = new ChargeContext();
-
+// ali_app  ali_wap  ali_web  ali_qr  ali_bar
+// wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap
+$channel = 'ali_wap';
 try {
-    // 支付宝即时到帐接口  新版本，不再支持该方式
-    //$type = Config::ALI_CHANNEL_WEB;
-
-    // 支付宝 手机网站支接口
-    $type = Config::ALI_CHANNEL_WAP;
-
-    // 支付宝 移动支付接口
-    //$type = Config::ALI_CHANNEL_APP;
-
-    // 支付宝  扫码支付
-    //$type = Config::ALI_CHANNEL_QR;
-
-    $charge->initCharge($type, $aliconfig);
-
-    // 微信 扫码支付
-    //$type = Config::WX_CHANNEL_QR;
-
-    // 微信 APP支付
-    //$type = Config::WX_CHANNEL_APP;
-
-    // 微信 公众号支付
-    //$type = Config::WX_CHANNEL_PUB;
-
-    //$charge->initCharge($type, $wxconfig);
-    $ret = $charge->charge($payData);
+    $ret = Charge::run($channel, $aliConfig, $payData);
 } catch (PayException $e) {
-    echo $e->errorMessage();exit;
+    echo $e->errorMessage();
+    exit;
 }
 
-if ($type === Config::ALI_CHANNEL_APP) {
-    echo $ret;exit;
-} elseif ($type === Config::ALI_CHANNEL_QR) {
-    $url = \Payment\Utils\DataParser::toQRimg($ret);// 内部会用到google 生成二维码的api  可能有些同学反应很慢
-    echo "<img alt='支付宝扫码支付' src='{$url}' style='width:150px;height:150px;'/>";exit;
-} elseif ($type === Config::WX_CHANNEL_QR) {
-    $url = \Payment\Utils\DataParser::toQRimg($ret);
-    echo "<img alt='微信扫码支付' src='{$url}' style='width:150px;height:150px;'/>";exit;
-} elseif ($type === Config::WX_CHANNEL_PUB) {
-    $json = $ret;
-    var_dump($json);
-} elseif (stripos($type, 'wx') !== false) {
-    var_dump($ret);exit;
-} elseif (stripos($type, 'ali') !== false) {
-    // 跳转支付宝
-    header("Location:{$ret}");
+if (is_array($ret)) {
+    var_dump($ret);
+} else {
+    echo htmlspecialchars($ret);
 }
-
-?>
-
-<!--微信公众号支付-->
-<?php if ($type === Config::WX_CHANNEL_PUB) { ?>
-
-    <html>
-    <head>
-        <meta http-equiv="content-type" content="text/html;charset=utf-8"/>
-        <meta name="viewport" content="width=device-width, initial-scale=1"/>
-        <title>微信支付样例-支付</title>
-        <script type="text/javascript">
-            //调用微信JS api 支付
-            function jsApiCall()
-            {
-                WeixinJSBridge.invoke(
-                    'getBrandWCPayRequest',
-                    <?php echo $json; ?>,
-                    function(res){
-                        WeixinJSBridge.log(res.err_msg);
-                        alert(res.err_code+res.err_desc+res.err_msg);
-                    }
-                );
-            }
-
-            function callpay()
-            {
-                if (typeof WeixinJSBridge == "undefined"){
-                    if( document.addEventListener ){
-                        document.addEventListener('WeixinJSBridgeReady', jsApiCall, false);
-                    }else if (document.attachEvent){
-                        document.attachEvent('WeixinJSBridgeReady', jsApiCall);
-                        document.attachEvent('onWeixinJSBridgeReady', jsApiCall);
-                    }
-                }else{
-                    jsApiCall();
-                }
-            }
-        </script>
-    </head>
-    <body>
-    <br/>
-    <font color="#9ACD32"><b>该笔订单支付金额为<span style="color:#f00;font-size:50px">1分</span>钱</b></font><br/><br/>
-    <div align="center">
-        <button style="width:210px; height:50px; border-radius: 15px;background-color:#FE6714; border:0px #FE6714 solid; cursor: pointer;  color:white;  font-size:16px;" type="button" onclick="callpay()" >立即支付</button>
-    </div>
-    </body>
-    </html>
-<?php } ?>
-
+exit;

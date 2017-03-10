@@ -11,6 +11,7 @@ namespace Payment\Charge\Ali;
 
 use Payment\Common\Ali\AliBaseStrategy;
 use Payment\Common\Ali\Data\Charge\WebChargeData;
+use Payment\Common\AliConfig;
 
 class AliWebCharge extends AliBaseStrategy
 {
@@ -21,8 +22,21 @@ class AliWebCharge extends AliBaseStrategy
      */
     protected function getBuildDataClass()
     {
+        $this->config->method = AliConfig::PC_PAY_METHOD;
         // 以下两种方式均可以
         return WebChargeData::class;
         //return 'Payment\Common\Ali\Data\Charge\WebChargeData';
+    }
+
+    /**
+     * 即时到账，支付宝目前尚未迁移到新网关
+     * @param array $data
+     * @return string
+     */
+    protected function retData(array $data)
+    {
+        $oldGateWayUrl = 'https://mapi.alipay.com/gateway.do?';
+
+        return $oldGateWayUrl . http_build_query($data);
     }
 }

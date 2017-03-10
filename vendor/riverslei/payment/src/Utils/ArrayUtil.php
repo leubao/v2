@@ -9,7 +9,6 @@
 
 namespace Payment\Utils;
 
-
 class ArrayUtil
 {
     /**
@@ -20,8 +19,8 @@ class ArrayUtil
      */
     public static function paraFilter($para)
     {
-        $para_filter = array();
-        while (list ($key, $val) = each ($para)) {
+        $paraFilter = [];
+        while (list($key, $val) = each($para)) {
             if ($val == "") {
                 continue;
             } else {
@@ -29,11 +28,11 @@ class ArrayUtil
                     $para[$key] = is_bool($para[$key]) ? $para[$key] : trim($para[$key]);
                 }
 
-                $para_filter[$key] = $para[$key];
+                $paraFilter[$key] = $para[$key];
             }
         }
 
-        return $para_filter;
+        return $paraFilter;
     }
 
     /**
@@ -48,17 +47,23 @@ class ArrayUtil
             $keys = explode(',', $keys);
         }
 
-        if (empty($keys) || ! is_array($keys)) return $inputs;
+        if (empty($keys) || ! is_array($keys)) {
+            return $inputs;
+        }
 
         $flag = true;
         foreach ($keys as $key) {
             if (array_key_exists($key, $inputs)) {
-                if (is_int($key)) $flag = false;
+                if (is_int($key)) {
+                    $flag = false;
+                }
                 unset($inputs[$key]);
             }
         }
 
-        if (! $flag) $inputs = array_values($inputs);
+        if (! $flag) {
+            $inputs = array_values($inputs);
+        }
         return $inputs;
     }
 
@@ -90,12 +95,12 @@ class ArrayUtil
 
         reset($para);
         $arg  = "";
-        while (list ($key, $val) = each ($para)) {
+        while (list($key, $val) = each($para)) {
             if (is_array($val)) {
                 continue;
             }
 
-            $arg.=$key."=".$val."&";
+            $arg.=$key."=".urldecode($val)."&";
         }
         //去掉最后一个&字符
         $arg = substr($arg, 0, count($arg) - 2);
