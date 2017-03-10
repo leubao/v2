@@ -15,7 +15,7 @@ spl_autoload_register(function ($class) {
         file_exists($filename) && require($filename);
     }
 });
- 
+
 /**
  * 微信SDK加载器
  * @author Anyon <zoujingli@qq.com>
