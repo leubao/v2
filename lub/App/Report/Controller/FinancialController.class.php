@@ -231,18 +231,18 @@ class FinancialController extends ManageBase{
 	        if(!empty($pinfo['plan_id'])){
 	        	$map['plan_id'] = $pinfo['plan_id'];
 	        }
-	        $map['product_id'] = $this->pid;
+	        $map['product_id'] = get_product('id');
 	    	//获取订单
-			$list = Report::strip_order($map,date('Ymd',strtotime($pinfo['starttime'])),2);//dump($list);
+			$list = Report::strip_order($map,date('Ymd',strtotime($pinfo['starttime'])),2);
 			//构造报表生成数据
 			$list = Report::operator($list);
 			$list = Report::day_fold($list,$work);
+			//售票员代收款报表 TODO
 			//缓存用于导出
 			S('Operator'.get_user_id(),$list);
 			$export_map['user'] = $pinfo['user'];
 			$export_map['datetime'] = $pinfo['starttime'];
 			$export_map['report'] = 'operator';
-
 			$this->assign('data',$list)->assign('work',$work)->assign('export_map',$export_map)->assign('map',$pinfo);
 		}
 		//查询有售票权限的角色 TODO   不够精确   通过配置售票员角色来解决。并希望是支持多角色
@@ -251,9 +251,11 @@ class FinancialController extends ManageBase{
 		$map = array('status'=>1,'is_scene'=>1,'role_id'=>array('in',implode(',',array_unique(explode(',',arr2string($access,'role_id'))))));
 		$user = M('User')->where($map)->field('id,nickname')->select();
 		$this->assign('user',$user)->assign('starttime',$pinfo['starttime'])
-			->assign('product_id',$this->pid)
+			->assign('product_id',$map['product_id'])
+			->assign('empty','<span class="empty">没有数据</span>')
 			->display();
 	}
+
 	/*授信记录*/
 	function top_up(){
 		$starttime = I('starttime');

@@ -9,13 +9,13 @@
           <tbody>
           <tr>
             <td width="120px">APPID:</td>
-            <td><input type="text" name="wx_sub_appid" value="{$vo.wx_sub_appid}" size="10"><span class="remark">微信分配的公众账号ID</span></td>
+            <td><input type="text" name="wx_sub_appid" value="{$vo.wx_sub_appid}" size="20"><span class="remark">微信分配的公众账号ID</span></td>
           </tr>
                
           <tr>
             <td>商户号:</td>
             <td>
-            <input type="text" name="wx_sub_mch_id" value="{$vo.wx_sub_mch_id}" size="10"><span class="remark">微信分配的子商户公众账号ID</span>
+            <input type="text" name="wx_sub_mch_id" value="{$vo.wx_sub_mch_id}" size="20"><span class="remark">微信分配的子商户公众账号ID</span>
             </td>
           </tr>
           <tr>
@@ -35,21 +35,21 @@
           <tbody>
           <tr>
             <td width="120px">账号:</td>
-            <td><input type="text" name="ali_sub_account" value="{$vo.ali_sub_appid}" size="10"><span class="remark">账号ID</span></td>
+            <td><input type="text" name="ali_sub_account" value="{$vo.ali_sub_appid}" size="20"><span class="remark">账号ID</span></td>
           </tr>
           <tr>
             <td width="120px">密码:</td>
-            <td><input type="text" name="ali_sub_pwd" value="{$vo.ali_sub_pwd}" size="10"><span class="remark">账号ID</span></td>
+            <td><input type="text" name="ali_sub_pwd" value="{$vo.ali_sub_pwd}" size="20"><span class="remark">账号ID</span></td>
           </tr>
           <tr>
             <td width="120px">APPID:</td>
-            <td><input type="text" name="ali_sub_appid" value="{$vo.ali_sub_appid}" size="10"><span class="remark">账号ID</span></td>
+            <td><input type="text" name="ali_sub_appid" value="{$vo.ali_sub_appid}" size="20"><span class="remark">账号ID</span></td>
           </tr>
                
           <tr>
             <td>商户UID:</td>
             <td>
-            <input type="text" name="ali_sub_mch_id" value="{$vo.ali_sub_mch_id}" size="10"><span class="remark">子商户ID</span>
+            <input type="text" name="ali_sub_mch_id" value="{$vo.ali_sub_mch_id}" size="20"><span class="remark">子商户ID</span>
             </td>
           </tr>
           <tr>

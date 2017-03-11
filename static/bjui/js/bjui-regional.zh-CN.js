@@ -127,7 +127,7 @@
         BJUI.setRegional('sessiontimeout', '会话超时，请重新登陆！')
         
         /* 占位符对应选择器无有效值提示 */
-        BJUI.setRegional('plhmsg', '占位符对应的选择器无有效值！')
+        BJUI.setRegional('plhmsg', '未选择数据行，或选择数据行无效！')
         
         /* 未定义复选框组名提示 */
         BJUI.setRegional('nocheckgroup', '未定义选中项的组名[复选框的"data-group"]！')
@@ -168,9 +168,7 @@
                 ,mobile: [/^1[3-9]\d{9}$/, '手机号格式不正确']
                 ,email: [/^[\w\+\-]+(\.[\w\+\-]+)*@[a-z\d\-]+(\.[a-z\d\-]+)*\.([a-z]{2,4})$/i, '邮箱格式不正确']
                 ,qq: [/^[1-9]\d{4,}$/, 'QQ号格式不正确']
-                //,date: [/^\d{4}-\d{1,2}-\d{1,2}$/, '请输入正确的日期,例:yyyy-mm-dd']
                 ,date:[/^\d{4}[\/\-](0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])$/, '请输入正确的日期，例：yyyy-MM-dd']
-                //,time: [/^([01]\d|2[0-3])(:[0-5]\d){1,2}$/, '请输入正确的时间,例:14:30或14:30:00']
                 ,time: [/^(2[0123]|(1|0?)[0-9]){1}:([0-5][0-9]){1}:([0-5][0-9]){1}$/, '请输入正确的时间，例：HH:mm:ss']
                 ,datetime: [/^\d{4}[\/\-](0?[1-9]|1[012])[\/\-](0?[1-9]|[12][0-9]|3[01])\s+(2[0123]|(1|0?)[0-9]){1}:([0-5][0-9]){1}:([0-5][0-9]){1}$/,
                             '请输入正确的日期时间，例：yyyy-MM-dd HH:mm:ss']
@@ -182,16 +180,12 @@
                 ,password: [/^[0-9a-zA-Z]{6,16}$/, '密码由6-16位数字、字母组成']
                 ,pattern:function(element, params) {
                     if (!params) return true
-                    
                     var date = element.value.parseDate(params)
-                    
                     return (!date ? this.renderMsg('错误的日期时间格式！', params) : true)
                 }
                 ,accept: function(element, params) {
                     if (!params) return true
-                    
                     var ext = params[0]
-                    
                     return (ext === '*') ||
                            (new RegExp('.(?:' + (ext || 'png|jpg|jpeg|gif') + ')$', 'i')).test(element.value) ||
                            this.renderMsg('只接受{1}后缀', ext.replace('|', ','))

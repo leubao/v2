@@ -429,7 +429,7 @@ class WorkController extends ManageBase{
 		$map = array(
 			'product_id'=>	get_product('id'),
 			'status'	=>	'1',
-			'createtime'=>	array('GT', strtotime(date("Y"))),
+			'createtime'=>	array('GT', strtotime("-30 day")),
 		);
 		if(!empty($sn)){
 			$map['order_sn'] = array('like','%'.$sn.'%');
@@ -747,7 +747,7 @@ class WorkController extends ManageBase{
 						$map = array('order_sn'=>$pinfo['sn'],'price_id'=>$ve['area']);
 					}
 					$table=ucwords($plan['seat_table']);
-					$seat =D($table)->where($map)->limit($ve['num'])->select();
+					$seat = D($table)->where($map)->limit($ve['num'])->select();
 					//按座位核减 
 					foreach ($seat as $k=>$v){
 						if($plan['product_type'] == '1'){
@@ -783,7 +783,7 @@ class WorkController extends ManageBase{
 			}
 			$seat = unserialize($oinfo['info']);
 			foreach ($seat['data'] as $k=>$v){
-				if($info['product_type'] == '1'){
+				if($oinfo['product_type'] == '1'){
 					$area[$v['areaId']][$k] = $v;
 					$area[$v['areaId']]['areaname'] = areaName($v['areaId'],1);
 					$area[$v['areaId']]['area']	=	$v['areaId'];

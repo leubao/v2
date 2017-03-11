@@ -26,8 +26,8 @@ class TrustController extends LubTMP {
 			);
 			$this->ajaxReturn($return);
 		}*/
-
 	}
+	function index(){}
 	//信任计划获取
 	function get_plan(){
 		$ginfo = I('get.');

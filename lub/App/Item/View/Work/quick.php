@@ -314,29 +314,4 @@ function quick_server(){
     postData = 'info={"subtotal":'+parseFloat($('#quick-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
     post_server(postData,url,'work_quick');
 }
-/*向服务器提交数据
-function post_server(){
-
-
-    $.ajax({
-        type:'POST',
-        url:'',
-        data:postData,
-        dataType:'json',
-        timeout: 3500,
-        error: function(){
-          layer.msg('服务器请求超时，请检查网络...');
-        },
-        success:function(data){
-            if(data.statusCode == "200"){
-                //刷新
-                $(this).dialog('refresh', 'work_quick');
-                $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
-            }else{
-                $(this).alertmsg('error','出票失败!');
-            }
-        }
-    });
-
-}*/
 </script>

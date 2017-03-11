@@ -852,4 +852,14 @@ function if_plan_print($plan_id){
         $plan = M('Plan')->where(array('id'=>$plan_id))->find();
     }
     return true;
-} 
+}
+/**
+ * 获取产品配置信息
+ * @param  int $product_id 产品ID
+ * @param  int $type       配置信息类型
+ * @return array
+ */
+function get_proconf($product_id,$type){
+    $proconf = cache('ProConfig');
+    return $proconf[$product_id][$type];
+}

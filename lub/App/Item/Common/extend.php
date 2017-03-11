@@ -57,4 +57,24 @@ function kpi_fill($param = null){
 
     }
 }
+/**
+ * 记录窗口售票代收款
+ * @param  订单内容 $info
+ * @return [type]       [description]
+ */
+function collection_log($info,$pay)
+{
+	$data = array(
+		'user_id' 	=> 	get_user_id(),
+		'moeny'	  	=> 	$info['moeny'],
+		'pay'	  	=> 	$pay,
+		'order_sn'	=> 	$info['order_sn'],
+		'product_id'=>	$info['product_id'],
+		'plan_id'	=>	$info['plan_id'],
+		'status'    => '1',
+		'createtime'=>	time()	
+	);
+	M('Collection')->add($data);
+	return true;
+}
 ?>

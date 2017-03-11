@@ -35,8 +35,7 @@ class IndexController extends LubTMP {
             session('pid',$this->pid);
         }
         //加载产品配置信息
-        $proconf = Cache('ProConfig');
-        $proconf = $proconf[$this->pid][2];
+        $proconf = get_proconf($this->pid,2);
         $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf);
     }
     /**
@@ -281,7 +280,6 @@ class IndexController extends LubTMP {
     function reg(){
         if(IS_POST){
             $info = json_decode($_POST['info'],true);
-   
             $verify = genRandomString();
             $data = array(
                 'username' => $info['phone'],
@@ -568,20 +566,14 @@ class IndexController extends LubTMP {
                     //产品名称
                     $product_name = product_name($this->pid,1);
                     $pay = & load_wechat('Pay',$this->pid);
-                    //dump($pay);
 					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
-                    //dump($prepayid);
                     if($prepayid){
                         $options = $pay->createMchPay($prepayid);
                     }else{
                         // 创建JSAPI签名参数包，这里返回的是数组
-                        
-                        //dump($options);
                         $this->assign('error',$pay->errMsg.$pay->errCode);
 
                     }
-					
-                    
 					$this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                     
                 }
@@ -614,7 +606,7 @@ class IndexController extends LubTMP {
                     'out_trade_no' => $info['sn'],
                     'attach' => serialize($attach),
                 );
-                $this->to_tplmsg($result);
+                $this->to_tplmsg($result,$oinfo['product_id']);
                 $return = array(
                     'statusCode' => 200,
                     'url' => U('Wechat/Index/pay_success',array('sn'=>$sn,'pid'=>$this->pid)),
@@ -665,8 +657,9 @@ class IndexController extends LubTMP {
                 $result = array(
                     'openid' => $openid,
                     'out_trade_no' => $info['sn'],
+                    'attach' => serialize($attach)
                 );
-                //$this->to_tplmsg($result);
+                $this->to_tplmsg($result,$oinfo['product_id']);
                 $return = array(
                     'statusCode' => 200,
                     'url' => U('Wechat/Index/pay_success',array('sn'=>$sn,'pid'=>$this->pid)),
@@ -676,6 +669,59 @@ class IndexController extends LubTMP {
             }
             die(json_encode($return));
         }
+    }
+    /**发送模板消息
+     * {{first.DATA}}
+     * 订单号：{{OrderID.DATA}}
+     * 产品名称：{{PkgName.DATA}}
+     * 使用日期：{{TakeOffDate.DATA}}
+     * {{remark.DATA}}
+     *      * {
+     *      "touser":"OPENID",
+     *       "template_id":"ngqIpbwh8bUfcSsECmogfXcV14J0tQlEpBO27izEYtY",
+     *       "url":"http://weixin.qq.com/download",
+     *       "topcolor":"#FF0000",
+     *       "data":{
+     *           "参数名1": {
+     *           "value":"参数",
+     *           "color":"#173177"     //参数颜色
+     *       },
+     *       "Date":{
+     *           "value":"06月07日 19时24分",
+     *           "color":"#173177"
+     *       },
+     *       "CardNumber":{
+     *           "value":"0426",
+     *           "color":"#173177"
+     *      },
+     *      "Type":{
+     *          "value":"消费",
+     *          "color":"#173177"
+     *       }
+     *   }
+     * }
+     * 
+    */
+    function to_tplmsg($info,$product_id){
+        $proconf = get_proconf($product_id,2);
+        $attach = unserialize($info['attach']);
+        $template = array(
+            'touser'=>$info['openid'],//指定用户openid
+            'template_id'=>$proconf['wx_tplmsg_order_id'],
+            'url'   =>  U('Wechat/Index/order_info',array('sn' => $info['out_trade_no'])),
+            'topcolor'=>"#7B68EE",
+            'data'=>array(
+                'first'=>array('value'=>'您好，您的门票订单已预订成功。'."\n"),
+                'OrderID' =>array('value'=>$info['out_trade_no'],'color'=>'#5cb85c'),
+                'PkgName'=>array('value'=>$attach['product_name'],'color'=>'#5cb85c'),
+                'TakeOffDate'=>array('value'=>$attach['plan']."\n",'color'=>'#5cb85c'),
+                'remark'=>array('value'=>$proconf['wx_tplmsg_order_remark']), 
+            )
+        );
+        $sndMsg = & load_wechat('Receive',$product_id,1);
+
+        $res = $sndMsg->sendTemplateMessage($template);
+        //TODO  回传模板消息发送状态
     }
     /*微信API 相关处理  后期完善
 	文本消息

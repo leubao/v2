@@ -1481,7 +1481,7 @@
     * 判断打印订单类型
     */
     function order_type($sn){
-        $type = M('Order')->where(array('order_sn'=>$sn))->field('status,type,user_id,plan_id,channel_id')->find();
+        $type = M('Order')->where(array('order_sn'=>$sn))->field('status,pay,type,user_id,plan_id,channel_id')->find();
         return $type;
     }
     /*
@@ -1758,16 +1758,6 @@
             return $arr;
         }
     }
-    /*对象转数组 原微信处理 5:20日
-function objectToArray($e){
-    $e=(array)$e;
-    foreach($e as $k=>$v){
-        if( gettype($v)=='resource' ) return;
-        if( gettype($v)=='object' || gettype($v)=='array' )
-            $e[$k]=(array)objectToArray($v);
-    }
-    return $e;
-} */
     //数组转对象
     function arrayToObject($arr){
         if(is_array($arr)){
@@ -1811,7 +1801,6 @@ function qr_base64($data,$name){
     $image_file = SITE_PATH."d/upload/".$name.'.png';
     //二维码是否已经生成
     if(!file_exists($image_file)){
-       
         //生成二维码
         \Libs\Service\Qrcode::createQrcode($data,$name);
     }

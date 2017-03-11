@@ -229,23 +229,4 @@ function seats_server() {
   postData = 'info={"sn":'+sn+',"data":['+ toJSONString + '],"aid":'+areaId+'}';
   post_server(postData,url,'preseat');
 }
-/*向服务器提交数据
-function post_server(){
-    
-    
-    $.ajax({
-        type:'POST',
-        url:'<?php echo U('Item/Order/row_seat',array('plan'=>$plan['id']));?>',
-        data:postData,
-        dataType:'json',
-        success:function(data){
-            if(data.statusCode == "200"){
-                $(this).dialog("closeCurrent","true");
-                $(this).alertmsg('ok', '排座成功！');
-            }else{
-                $(this).alertmsg('error','排座失败!');
-            }
-        }
-    });
-}*/
 </script>

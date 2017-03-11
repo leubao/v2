@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Author: zhoujing <admin@leubao.com>
 // +----------------------------------------------------------------------
-namespace App\Controller;
+namespace Apps\Controller;
 use Common\Controller\ManageBase;
 class AliController extends ManageBase{
 	//短信发送记录

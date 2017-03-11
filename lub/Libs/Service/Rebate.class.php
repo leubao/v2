@@ -19,6 +19,7 @@ class Rebate extends \Libs\System\Service {
 		//判断队列是否存在数据
 		$ln = load_redis('lsize','PreOrder');
 		if($ln > 0){
+			$fenrun = false;
 			//获取队列中最后一个元素，且移除
 			$sn = load_redis('rPop','PreOrder');
 			$map = array(
@@ -26,6 +27,7 @@ class Rebate extends \Libs\System\Service {
 	        	'status' => array('in','1,6,7,9'),
 	        	'type'  => array('in','2,4,8,9'),
 	      	);
+	      	$datatime = time();
 	      	$info = D('Item/Order')->where($map)->relation(true)->find();
 	      	//判断系统设置是否有存在返利
 			$proconf = cache('ProConfig');
@@ -60,29 +62,77 @@ class Rebate extends \Libs\System\Service {
 				  $type = '2';
 				}
 				$ticketType = F('TicketType'.$info['product_id']);
+				//判断订单类型1、渠道版订单
+				//查询应得返利人,根据导游导游员ID
+				switch ($info['type']) {
+					case '2':
+						//窗口渠道
+						$get_user_list['ul1'] =  $info['info']['crm'][0]['guide'];
+						break;
+					case '4':
+						//渠道版
+						$get_user_list['ul1'] =  $info['info']['crm'][0]['guide'];
+						break;
+					case '8':
+						//全员销售
+						$get_user_list['ul1'] =  $info['info']['crm'][0]['guide'];
+						break;
+					case '9':
+						//三级分销
+						$guide = $info['info']['crm'][0]['guide'];
+						//拉取订单相关人，判断下单人的级别，若是1级直接拿取全部奖金 2级拿取2级和三级的奖金 3级拿取三级奖金
+						$fenrun = true;
+						$get_user_list = Rebate::get_user_list($guide);
+						break;
+				}
 				//计算返利金额
 				foreach ($info['info']['data'] as $k => $v) {
 				  $rebate += $ticketType[$v['priceid']]['rebate'];
+				  if($fenrun){
+				  	//分润
+				  	$param = $ticketType[$v['priceid']]['param']['level3'];
+				  	$level1 += $param['l1'];
+				  	$level2 += $param['l2'];
+				  	$level3 += $param['l3'];
+				  }
 				}
-				//组装写入数据
-				$teamData = array(
-				  'order_sn'    => $info['order_sn'],
-				  'plan_id'     => $info['plan_id'],
-				  'subtype'   => '0',
-				  'product_type'  => $info['product_type'],//产品类型
-				  'product_id'  => $info['product_id'],
-				  'user_id'     => $info['user_id'],
-				  'money'     => $rebate,
-				  'number'    => $info['number'],
-				  'guide_id'    => $info['info']['crm'][0]['guide'],
-				  'qd_id'     => $info['info']['crm'][0]['qditem'],
-				  'status'    => '1',
-				  'type'      => $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-				  'userid'    => '0',
-				  'uptime'    =>  time(),
-				  'createtime'=> time()
-				);
-				$status = $model->add($teamData);
+				//组合数据
+				if($fenrun){
+					$get_user_list = Rebate::get_user_list($guide,$level1,$level2,$level3);
+				}
+				$count = count($get_user_list);
+				foreach ($get_user_list as $key => $value) {
+					//组装写入数据
+					if($fenrun){
+						$changeData = array(
+						  'money'     => $v['ul'.$k]['money'],
+						  'guide_id'  => $v['ul'.$k]['guide'],
+						);
+					}else{
+						$changeData = array(
+						  'money'     => $rebate,
+						  'guide_id'  => $info['info']['crm'][0]['guide'],
+						);
+					}
+					$baseData = array(
+					  'order_sn'    => $info['order_sn'],
+					  'plan_id'     => $info['plan_id'],
+					  'subtype'   	=> '0',
+					  'product_type'=> $info['product_type'],//产品类型
+					  'product_id'  => $info['product_id'],
+					  'user_id'     => $info['user_id'],
+					  'number'    	=> $info['number'],
+					  'qd_id'     	=> $info['info']['crm'][0]['qditem'],
+					  'status'    	=> '1',
+					  'type'      	=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
+					  'userid'    	=> '0',
+					  'uptime'    	=> $datatime,
+					  'createtime'	=> $datatime
+					);
+					$teamData[] = array_merge($baseData,$changeData);
+				}
+				
+				$status = $model->addAll($teamData);
 				if($status){
 					return $status;
 				}else{
@@ -128,16 +178,39 @@ class Rebate extends \Libs\System\Service {
 		);
 	}
 	/**
+	 * 写入补贴记录
+	 */
+	function insert_team_data(){
+
+	}
+	/**
 	 * 拉取订单关联用户
 	 * @param  int $userid 下单人ID
 	 */
-	function get_user_list($userid){
-		$fid2 = M('User')->where(array('id'=>$userid))->getField('salesman');
+	function get_user_list($userid,$level1 = '',$level2 = '',$level3 = ''){
+		//基于微信
+		$db = D('WxMember');
+		$fid2 = $db->where(array('user_id'=>$userid))->getField('promote');
 		if(!empty($fid)){
-			$fid3 = M('User')->where(array('id'=>$userid))->getField('salesman');
-		}else{
-			return $userid;
+			$fid1 = $db->where(array('user_id'=>$fid2))->getField('promote');
 		}
+		if(!empty($fid1)){
+			$return['ul1']['guide'] = $fid1;
+			$return['ul1']['money'] = $level1;
+			$return['ul2']['guide'] = $userid;
+			$return['ul2']['money'] = $level2+$level3;
+		}elseif(!empty($fid2)){
+			$return['ul1']['guide'] = $fid1;
+			$return['ul1']['money'] = $level1;
+			$return['ul2']['guide'] = $fid2;
+			$return['ul2']['money'] = $level2;
+			$return['ul3']['guide'] = $userid;
+			$return['ul3']['money'] = $level3;
+		}else{
+			$return['ul1']['guide'] = $userid;
+			$return['ul1']['money'] = $level1+$level2+$level3;
+		}
+		return $return;
 	}
 
 	/*渠道返利

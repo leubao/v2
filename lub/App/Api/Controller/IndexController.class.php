@@ -492,7 +492,7 @@ class IndexController extends ApiBase {
     function api_check_network(){
       if(IS_POST){
         $return = array('code' => 200,'msg' => '网络正常');
-        echo json_encode($return);
+        die(json_encode($return));
       } 
     }
     /**
@@ -656,12 +656,12 @@ class IndexController extends ApiBase {
     }
 
     function c_network(){
-      $url = "http://new.leubao.com/api.php?a=api_check_network";
+      $url = "http://www.yxpttk.com/api.php?a=api_check_network";
       $post = array(
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
-load_redis('lpush','WechatPayOrder','70301190632334');
+      //load_redis('lpush','WechatPayOrder','70301190632334');
       /*
       $len = load_redis('lsize','test','1212211212');
       load_redis('set','work','qqqqq');
@@ -745,7 +745,9 @@ load_redis('lpush','WechatPayOrder','70301190632334');
           // 跳转支付宝
           header("Location:{$ret}");
       }*/
-      //dump($aa);
+      $post['data'] = json_encode($post);
+      $aa = $this->curl_server($url,$post);
+      dump($aa);
     }
     //构造订单请求
     //$pinfo1 = '{"subtotal":288,"checkin":1,"data":[ {"areaId":21,"priceid":27,"price":288,"num":"1"} ],"param":[{"guide":"测试","qditem":"爱上大声地","phone":18631451216,"contact":"啊实打实"},{"cash":288,"card":0,"alipay":0}]}';

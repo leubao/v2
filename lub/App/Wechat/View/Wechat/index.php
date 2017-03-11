@@ -4,15 +4,16 @@
   <div class="tabs-container" style="padding: 15px">
       <div class="tabs-left">
           <ul class="nav nav-tabs nav-stacked">
-              <li  class="active"><a data-toggle="tab" href="#wtab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  基础设置</a></li>
+              <li  class="active"><a data-toggle="tab" href="#wtab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  微信公众平台</a></li>
               <li class=""><a data-toggle="tab" href="#wtab-5" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  分享设置</a></li>
               <li class=""><a data-toggle="tab" href="#wtab-6" aria-expanded="false"><i class="fa fa-cc-visa"></i>  页面设置</a></li>
+              <li class=""><a data-toggle="tab" href="#wtab-7" aria-expanded="false"><i class="fa fa-cc-visa"></i>  微信支付</a></li>
           </ul>
           <div class="tabs-content">
               <div id="wtab-4" class="tab-pane active">
                 <div class="panel-body">
                     <fieldset style="height:100%;">
-                      <legend>微信设置</legend>
+                      <legend>微信公众平台</legend>
                       <div style="height:94%; overflow:hidden;">
                       <table class="table  table-bordered">
                       <tbody>
@@ -41,51 +42,7 @@
                           <td><input type="text" name="wx_url" class="form-control" value="{$vo.wx_url}" size="40" placeholder="url">
                           </td>
                         </tr>
-                        <tr>
-                          <td width="120px">商户id:</td>
-                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">商户支付密钥Key:</td>
-                          <td><input type="text" name="wx_sub_mchkey" class="form-control" value="{$vo.wx_sub_mchkey}" size="40" placeholder="商户支付密钥Key">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">apiclient_cert.pem:</td>
-                          <td>
-                              <div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
-                                        data-file-size-limit="1024000000"
-                                        data-file-type-exts="*.pem"
-                                        data-multi="true"
-                                        data-auto="true"
-                                        data-on-upload-success="doc_upload_success"
-                                        data-icon="cloud-upload"></div>
-
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">apiclient_key.pem:</td>
-                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
-                                        data-file-size-limit="1024000000"
-                                        data-file-type-exts="*.pem"
-                                        data-multi="true"
-                                        data-auto="true"
-                                        data-on-upload-success="doc_upload_success"
-                                        data-icon="cloud-upload"></div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">rootca.pem:</td>
-                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
-                                        data-file-size-limit="1024000000"
-                                        data-file-type-exts="rootca.pem"
-                                        data-multi="true"
-                                        data-auto="true"
-                                        data-on-upload-success="doc_upload_success"
-                                        data-icon="cloud-upload"></div>
-                          </td>
-                        </tr>
+                        
 
                         <tr>
                           <td width="120px">订单模板消息:</td>
@@ -108,6 +65,14 @@
                           </td>
                         </tr>
                         <tr>
+                          <td width="120px">价格显示:</td>
+                          <td>
+                            <input type="radio" name="price_view" value="1" <eq name="vo.price_view" value="1"> checked</eq>> 票型名称
+                            <input type="radio" name="price_view" value="2" <eq name="vo.price_view" value="2"> checked</eq>> 座位区域名称+票型备注
+                            <input type="radio" name="price_view" value="3" <eq name="vo.price_view" value="3"> checked</eq>> 票型名称+票型备注
+                          </td>
+                        </tr>
+                        <tr>
                           <td width="120px">立即购票地址:</td>
                           <td><textarea cols="30" rows="3">{$view}</textarea></td>
                         </tr>
@@ -122,6 +87,14 @@
                         <tr>
                           <td width="120px">活动地址:</td>
                           <td><textarea cols="30" rows="3">{$acty}</textarea></td>
+                        </tr>
+                        <tr>
+                          <td width="120px">个人中心:</td>
+                          <td><textarea cols="30" rows="3">{$uinfo}</textarea></td>
+                        </tr>
+                        <tr>
+                          <td width="120px">订单管理:</td>
+                          <td><textarea cols="30" rows="3">{$uorder}</textarea></td>
                         </tr>
                       </tbody>
                       </table>
@@ -264,6 +237,83 @@
                           </table>
                       </fieldset>
                   </div>
+              </div>
+              <div id="wtab-7" class="tab-pane">
+                <div class="panel-body">
+                    <fieldset style="height:100%;">
+                      <legend>微信支付 -- 收款</legend>
+                      <div style="height:94%; overflow:hidden;">
+                      <table class="table  table-bordered">
+                      <tbody>
+                        <tr>
+                          <td width="120px">商户id:</td>
+                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">商户支付密钥Key:</td>
+                          <td><input type="text" name="wx_sub_mchkey" class="form-control" value="{$vo.wx_sub_mchkey}" size="40" placeholder="商户支付密钥Key">
+                          </td>
+                        </tr>
+                      </tbody>
+                      </table>
+                    </div>
+                    </fieldset>
+                    <fieldset style="height:100%;">
+                      <legend>微信支付 -- 企业付款</legend>
+                      <div style="height:94%; overflow:hidden;">
+                      <table class="table  table-bordered">
+                      <tbody>
+                        <tr>
+                          <td width="120px">商户id:</td>
+                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">商户支付密钥Key:</td>
+                          <td><input type="text" name="wx_sub_mchkey" class="form-control" value="{$vo.wx_sub_mchkey}" size="40" placeholder="商户支付密钥Key">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">apiclient_cert.pem:</td>
+                          <td>
+                              <div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                        data-file-size-limit="1024000000"
+                                        data-file-type-exts="*.pem"
+                                        data-multi="true"
+                                        data-auto="true"
+                                        data-on-upload-success="doc_upload_success"
+                                        data-icon="cloud-upload"></div>
+
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">apiclient_key.pem:</td>
+                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                        data-file-size-limit="1024000000"
+                                        data-file-type-exts="*.pem"
+                                        data-multi="true"
+                                        data-auto="true"
+                                        data-on-upload-success="doc_upload_success"
+                                        data-icon="cloud-upload"></div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">rootca.pem:</td>
+                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                        data-file-size-limit="1024000000"
+                                        data-file-type-exts="rootca.pem"
+                                        data-multi="true"
+                                        data-auto="true"
+                                        data-on-upload-success="doc_upload_success"
+                                        data-icon="cloud-upload"></div>
+                          </td>
+                        </tr>
+                      </tbody>
+                      </table>
+                    </div>
+                    </fieldset>
+                </div>
               </div>
           </div>
       </div>

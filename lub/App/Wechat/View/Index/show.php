@@ -3,7 +3,7 @@
     var global = {$goods_info};
 </script>
 <div class="page">
-
+{$proconf.wx_page_title}
   <header class="bar bar-nav">
     <h1 class="title"><i class="iconfont">&#xe603</i>{$proconf.wx_page_title}</h1>
     <if condition="empty($uinfo['promote'])">
@@ -183,13 +183,11 @@
       mousewheelControl: true,
       autoHeight:true
     });
-    
     var getPlantpl = document.getElementById('plantpl').innerHTML;
     var getPricetpl = document.getElementById('pricetpl').innerHTML;
     laytpl(getPlantpl).render(global, function(html){
         document.getElementById('plan').innerHTML = html;
     });
-    
     var plan = '0',
         area = '0',
         ticket = '0',
@@ -225,7 +223,6 @@
         document.getElementById('price').innerHTML = html;
       });
     });
-    
     $(document).on("click","#price li",function(){
        //判断是否已经选择计划
       if(!$(this).hasClass("unavailable")){
@@ -346,7 +343,6 @@
         }
       }
     });
-    
     /*验证身份证取票 type  1验证 2 不验证  */
     function post_server(type,card){
       //计算金额
@@ -390,14 +386,13 @@
               $.toast('配额不足，请联系渠道负责人');
             }
         }
-      });
-      
+      }); 
     }
   });
   var text = "<p style='text-align:left'>1、1.2米以下儿童可免费进场但无座；1.2米以上请购成人票。<br>"+
-"2、门票一旦售出，恕不退换。<br >"+
-"3、请观众提前30分钟检票入场，对号入座，如遇开演请听从工作人员安排。<br>"+
-"4、任何通过微信购买门票的人均认为已经阅读、理解并接受了以上条款。</p>";
+  "2、门票一旦售出，恕不退换。<br >"+
+  "3、请观众提前30分钟检票入场，对号入座，如遇开演请听从工作人员安排。<br>"+
+  "4、任何通过微信购买门票的人均认为已经阅读、理解并接受了以上条款。</p>";
   $(document).on('click','.open-goods-cart', function () {
     $.alert(text, '购票须知', function () {
       $.popup('.goods-cart');
@@ -408,10 +403,10 @@
 {{# for(var i = 0, len = d.plan.length; i < len; i++){ }}
     <li class="tag sku-tag pull-left ellipsis" data-plan="{{ d.plan[i].id }}" data-num="{{d.plan[i].num}}">{{ d.plan[i].title }}</li>
 {{# $(".stock-num").html(d.plan[i].num); } }}
-</script>
+</script> 
 <script id="pricetpl" type="text/html">
 {{# $(d.area[laytpl.fn]).each(function(i){ }}
-  <li class="tag sku-tag pull-left ellipsis {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.money }}" data-discount="{{ this.moneys }}" data-area="{{ this.area }}" data-priceid="{{ this.priceid }}" data-num="{{ this.num }}">{{this.money}}元 ({{this.name}}{{this.remark}})</li>
+  <li class="tag sku-tag pull-left ellipsis {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.money }}" data-discount="{{ this.moneys }}" data-area="{{ this.area }}" data-priceid="{{ this.priceid }}" data-num="{{ this.num }}">{{this.money}}元 (<?php if($proconf['price_view'] == '2'){ ?>{{this.name}}{{this.remark}}<?php }else{ ?>{{this.pricename}} <?php }?>)</li>
 {{#    });}}
 </script>
 

@@ -90,6 +90,13 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">渠道版首页布局:</td>
+                                <td>
+                                <input type="radio" name="channel_view" data-toggle="icheck" value="1" <eq name="vo['channel_view']" value="1"> checked</eq> data-label="表格&nbsp;">
+                                <input type="radio" name="channel_view" data-toggle="icheck" value="2" <eq name="vo['channel_view']" value="2"> checked</eq> data-label="功能块">
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">窗口结算方式:</td>
                                 <td>
                                 <input type="radio" name="settlement" data-toggle="icheck" value="1" <eq name="vo['settlement']" value="1"> checked</eq> data-label="票面价计算&nbsp;">

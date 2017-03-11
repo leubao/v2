@@ -57,7 +57,7 @@
     <if condition="$data.type eq '1' || $data.type eq '8' || $data.type eq '6'">
     <p><a href="#" class="button button-big button-fill button-success" id="wxpay">微信支付</a></p>
     <p><a href="{:U('Wechat/Index/dfpay',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));}" class="button button-big button-fill wxpay button-warning" id="dfpay">请人代付</a></p>
-    </if>
+    </if><p><a href="#" id="window_pay" class="button button-big button-fill">窗口现金支付 </a></p>
     <if condition="$data.type eq '6'">
     <p><a href="#" id="window_pay" class="button button-big button-fill">窗口现金支付 </a></p>
     </if>
@@ -76,7 +76,6 @@
     <if condition="in_array($data['type'],array('1','6','8'))">
     /*微信支付*/
     $(document).on('click', '#wxpay',function () {
-      
       if (typeof WeixinJSBridge == "undefined"){
          if(document.addEventListener){
              document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false);
@@ -101,7 +100,6 @@
            }
        ); 
     }
-
     /*窗口支付*/
     $(document).on('click', '#window_pay',function () {
       $.confirm("系统已成功为您预留座位，请尽快付款确认，或是演出前一小时到景区现金窗口付款，逾期座位不再保留。",

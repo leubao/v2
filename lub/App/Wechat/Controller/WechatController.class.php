@@ -75,11 +75,15 @@ class WechatController extends ManageBase{
             $view = $oauth->getOauthRedirect(U('Wechat/Index/show',array('pid'=>$product_id)), $state, 'snsapi_base');
             $channel = $oauth->getOauthRedirect(U('Wechat/Index/auth_channel',array('pid'=>$product_id)), $state, 'snsapi_base');
             $active = $oauth->getOauthRedirect(U('Wechat/Index/acty',array('pid'=>$product_id,'act'=>1)), $state, 'snsapi_base');
+            $uinfo = $oauth->getOauthRedirect(U('Wechat/Index/uinfo',array('pid'=>$product_id)), $state, 'snsapi_base');
+            $uorder = $oauth->getOauthRedirect(U('Wechat/Index/orderlist',array('pid'=>$product_id)), $state, 'snsapi_base');
             $this->assign('price',$price)
                 ->assign('view',$view)
                 ->assign('reg',$reg)
                 ->assign('acty',$active)
                 ->assign('channel',$channel)
+                ->assign('uinfo',$uinfo)
+                ->assign('uorder',$uorder)
                 ->assign("vo",$config)
                 ->display(); 
         }

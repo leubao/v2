@@ -35,22 +35,26 @@
         <else />
         完成审核
         </if></td>
-      <td>客户组</td>
-      <td><select name="groupid" class="required combox">
+      <td>分销类型</td>
+      <td><select name="type" class="required combox">
             <option selected value="0">===请选择===</option>
-            <volist name="group" id="v">
-              <option value="{$v.id}" <if condition="$data['groupid'] eq $v['id']">selected</if>>{$v.name}</option>
-            </volist>
+            <option selected value="8" <if condition="$data['type'] eq '8'">selected</if>>全员销售</option>
+            <option selected value="9" <if condition="$data['type'] eq '9'">selected</if>>三级分销</option>
           </select></td>
     </tr>
-    <!--
     <tr>
-      <td>QQ</td>
+      <td>客户分组</td>
+      <td>
+        <select name="groupid" class="required combox">
+            <option selected value="0">===请选择===</option>
+          <volist name="group" id="v">
+            <option value="{$v.id}" <if condition="$data['groupid'] eq $v['id']">selected</if>>{$v.name}</option>
+          </volist>
+        </select>
+      </td>
       <td></td>
-      <td>邮箱</td>
       <td></td>
     </tr>
-    -->
     <tr>
       <td>备注</td>
       <td colspan="3"><textarea name="remark" cols="55" rows="1">{$data.remark}</textarea></td>

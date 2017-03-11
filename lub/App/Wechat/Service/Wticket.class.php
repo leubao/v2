@@ -134,17 +134,15 @@ class Wticket {
             return false;
         }
         $winfo = M('WxMember')->where(array('openid'=>$open_id))->field('user_id,openid,unionid,channel')->find();
+        $db = M('User');
         if(!empty($winfo['user_id']) && $winfo['channel'] == '1'){
-            $uInfo = M('User')->where(array('id'=>$winfo['user_id'],'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
+            $uInfo = $db->where(array('id'=>$winfo['user_id'],'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
+        }elseif (!empty($promote)) {
+            $uInfo = $db->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
+            $uInfo['promote'] = $promote;//推广标记
         }else{
-            if(!empty($promote)){
-                $uInfo = M('User')->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid')->find();
-                $uInfo['promote'] = $promote;//推广标记
-            }else{
-                error_insert('198');
-                //当微信为散客时，默认用户为微信售票
-                return '0';
-            }
+            //当微信为散客时，默认用户为微信售票
+            return '0';
         }
         if(!empty($uInfo)){
             //查询所属分组信息

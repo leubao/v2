@@ -7,12 +7,12 @@
   <!--条件检索 s--> 
   <div class="bjui-searchBar">
     <label>统计日期:</label>
-    <input type="text" size="11" name="starttime" data-toggle="datepicker" value="{$map['starttime']}">
+    <input type="text" size="11" name="starttime" data-toggle="datepicker" value="{$map['starttime']}" data-rule="required">
     &nbsp;
     <input type="hidden" name="plan.id" value="{$map['plan_id']}">
     <input type="text" name="plan.name" readonly value="{$map['plan_name']}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_date_plan',array('ifadd'=>1));}" data-group="plan" data-width="600" data-height="445" data-title="销售计划(场次)" placeholder="销售计划(场次)">
     &nbsp;
-  	<select class="required" name="user" data-toggle="selectpicker">
+  	<select class="required" name="user" data-toggle="selectpicker" data-rule="required">
         <option value="">售票员</option>
         <volist name="user" id="vo">
           <option value="{$vo.id}"  <if condition="$vo['id'] eq $map['user']">selected</if>>{$vo.nickname}</option>
@@ -66,7 +66,7 @@
   </tr>
   </thead>
   <tbody>
-  <volist name="data" id="channel">
+  <volist name="data" id="channel" empty="$empty">
   <?php $price_count = count($channel['price']);?>
     <volist name="channel['price']" id="item" key="k">
       <if condition="$price_count neq '1'">

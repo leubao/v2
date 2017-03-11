@@ -48,9 +48,7 @@
 <script src="{$config_siteurl}static/bjui/plugins/dragsort/jquery.dragsort-0.5.1.min.js"></script>
 <!-- other plugins -->
 <script src="{$config_siteurl}static/bjui/plugins/other/jquery.autosize.js"></script>
-<!-- bootstrap plugins 
-<script src="{$config_siteurl}static/bjui/plugins/bootstrap.min.js"></script>
--->
+<!-- bootstrap plugins -->
 <script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
 <script src="{$config_siteurl}static/bjui/plugins/bootstrapSelect/bootstrap-select.min.js"></script>
 <script src="{$config_siteurl}static/bjui/plugins/bootstrapSelect/defaults-zh_CN.min.js"></script>

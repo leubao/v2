@@ -17,7 +17,7 @@ class OrderController extends ManageBase{
 	}
 /*==================================华丽分割线  1 添加窗口订单====================================*/
 	/*选座提交
-	* @param $order_type int 1 窗口散客/团队选座 2 快捷散客/团队选座
+	* @param $order_type int 1 窗口散客/团队选座 2 快捷散客/团队选座 3 政企订单收款
 	*/
 	function seatPost(){
 		if(IS_POST){
@@ -121,6 +121,11 @@ class OrderController extends ManageBase{
 			);
 			die(json_encode($return));
 		}
+		//判断是否需要当面收款 现金||签单
+		if(in_array($order_type['pay'], array('1','3'))){
+			$url = U('Item/Order/public_payment',array('plan'=>$ginfo['plan_id'],'sn'=>$ginfo['sn'],'is_pay'=>$order_type['pay'],'order_type'=>3));
+			redirect($url);
+		}
 		//判断是否是二次打印
 		if($order_type['status'] == '9' && empty($user)){
 			$return = array(
@@ -183,7 +188,7 @@ class OrderController extends ManageBase{
 			foreach ($list as $k=>$v){
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);//dump($sale);
-				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."^2017^#";
+				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."^".date('Y')."^#";
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
@@ -200,9 +205,6 @@ class OrderController extends ManageBase{
 				);
 			}
 		}
-		//$oinfo['info'] = unserialize($oinfo['info']);
-		//dump($info);
-
 		//更新门票打印状态
 		$up_print = $model->table(C('DB_PREFIX'). $table)->where(array('order_sn'=>$ginfo['sn']))->setInc('print',1);	
 		//判断订单类型
@@ -484,7 +486,13 @@ class OrderController extends ManageBase{
 			$pinfo = $_POST['info'];
 			$info = json_decode($pinfo,true);
 			//pos 收费 现金支付
-			$oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn'],'status'=>array('in','6,11')))->relation(true)->find();            
+			if($info['order_type'] == '3'){
+				//政企订单收款
+				$where = array('order_sn'=>$info['sn'],'status'=>array('in','1'));
+			}else{
+				$where = array('order_sn'=>$info['sn'],'status'=>array('in','6,11'));
+			}
+			$oinfo = D('Item/Order')->where($where)->relation(true)->find();            
 			if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '400','msg' => $oinfo)));}
             //判断订单类型 scene 1选座订单6快捷售票
 			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
@@ -550,7 +558,14 @@ class OrderController extends ManageBase{
 	/*轮询支付日志查询支付结果*/
 	function public_payment_results(){
 		$ginfo = I('get.');
-		$oinfo = D('Item/Order')->where(array('order_sn'=>$ginfo['sn'],'status'=>array('in','5,11')))->relation(true)->find();
+		//pos 收费 现金支付
+		if($ginfo['order_type'] == '3'){
+			//政企订单收款
+			$where = array('order_sn'=>$ginfo['sn'],'status'=>array('in','1'));
+		}else{
+			$where = array('order_sn'=>$ginfo['sn'],'status'=>array('in','6,11'));
+		}
+		$oinfo = D('Item/Order')->where($where)->relation(true)->find();
         if(empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => '订单获取失败')));}
 		if($ginfo['pay_type'] == '5'){
 			$pay = & load_wechat('Pay',$oinfo['product_id']);
@@ -559,6 +574,7 @@ class OrderController extends ManageBase{
 	            $param = array(
             		'seat_type' => $ginfo['seat_type'],
             		'pay_type'  => $ginfo['pay_type'],
+            		'order_type'=> $ginfo['order_type']
             	);
             	$return = $this->sweep_pay_seat($param,$oinfo);
             	$hit = (int)S('pay'.$ginfo['sn'])+1;
@@ -585,7 +601,13 @@ class OrderController extends ManageBase{
 	//刷卡支付排座
 	function sweep_pay_seat($info,$oinfo)
 	{
-		$run = Order::sweep_pay_seat($info,$oinfo);
+		if($info['order_type'] == '3' && $oinfo['status'] == '1'){
+			//政企窗口收款
+			$run = true;
+			collection_log($oinfo,$info['pay_type']);
+		}else{
+			$run = Order::sweep_pay_seat($info,$oinfo);
+		}
 		if($run != false){
 			//支付方式影响返回结果
 			$return = array(
@@ -607,56 +629,30 @@ class OrderController extends ManageBase{
 		}
 		return $return;
 	}
-	/*======================================================================华丽分割线 团队售票订单====================================================*/
-/*	function teamPost(){
-		$info = $_POST['info'];
-		//$sn = Order::team($info,1);
-		$uInfo = \Item\Service\Partner::getInstance()->getInfo();//读取当前登录用户信息
-		$sn = Order::quick($info,12,$uInfo);
-		$plan = session('plan');
-		if($sn != false){
-				$return = array(
-					'statusCode' => '200',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan['id'])),
-				);
-				$message = "下单成功!单号".$sn;
-				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
-			}else{
-				$return = array(
-					'statusCode' => '300',
-					'forwardUrl' => '',
-				);
-				$message = "下单失败!";
-				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
-			}
-			//记录订单信息	
-			echo json_encode($return);
-			return true;
-	}*/
-/*======================================================================分割线3 景区门票订单=============================================================*/
+/*======================分割线3 景区门票订单=======================================*/
 	function scenicPost(){
 		$info = $_POST['info'];
 		$sn = Order::scenic($info);
 		$plan = session('plan');
 		if($sn != false){
-				$return = array(
-					'statusCode' => '200',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan['id'])),
-				);
-				$message = "下单成功!单号".$sn;
-				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
-			}else{
-				$return = array(
-					'statusCode' => '300',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn)),
-				);
-				$message = "下单失败!";
-				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
-			}
-			//记录订单信息
-			echo json_encode($return);
+			$return = array(
+				'statusCode' => '200',
+				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan['id'])),
+			);
+			$message = "下单成功!单号".$sn;
+			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
+		}else{
+			$return = array(
+				'statusCode' => '300',
+				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn)),
+			);
+			$message = "下单失败!";
+			D('Item/Operationlog')->record($message, 300);//记录售票员日报表
+		}
+		//记录订单信息
+		die(json_encode($return));
 	}
-/*======================================================================分割线4 @大红袍 =============================================================*/
+/*======================分割线4 @大红袍 =============================================================*/
 	/**
 	 * 预订单处理 type 1    同意排座 2拒绝 退款
 	 */

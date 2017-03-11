@@ -10,6 +10,7 @@
     <input type="radio" name="is_pay" value="5" data-toggle="icheck" data-label="微信支付" <if condition="$ginfo['is_pay'] eq 5">checked</if>> 
     <input type="radio" name="is_pay" value="6" data-toggle="icheck" data-label="银联支付" <if condition="$ginfo['is_pay'] eq 6">checked</if>> 
     <input type="radio" name="is_pay" value="1" data-toggle="icheck" data-label="现金支付" <if condition="$ginfo['is_pay'] eq 1">checked</if>> 
+    <input type="radio" name="is_pay" value="3" data-toggle="icheck" data-label="签单" <if condition="$ginfo['is_pay'] eq 3">checked</if>> 
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">金额:</label>
@@ -91,7 +92,7 @@
   function payment_polling(){
     $.ajax({
       type:'GET',
-      url:"{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay'],'seat_type'=>1));}",
+      url:"{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay'],'seat_type'=>1,'order_type'=>$ginfo['order_type']));}",
       dataType:'json',
       timeout: 3500,
       error: function(){
@@ -154,27 +155,4 @@
     postData = 'info={"plan":'+plan+',"pay_type":'+is_pay+',"seat_type":"1","order_type":'+order_type+',"sn":'+sn+'}';
     post_server(postData,url,'payment');
   }
-  /*提交到服务器 TODO  通用提交到服务器
-  function post_server(postData,url){
-    $.ajax({
-      type:'POST',
-      url:url,
-      data:postData,
-      dataType:'json',
-      timeout: 3500,
-      error: function(){
-        layer.msg('服务器请求超时，请检查网络...');
-      },
-      success:function(data){
-          if(data.statusCode == "200"){
-              //刷新
-              $(this).dialog('refresh', data.refresh);
-              $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
-          }else{
-              $(this).alertmsg('error','出票失败!');
-          }
-          $(this).dialog('close','payment');
-      }
-    });
-  }*/
 </script>

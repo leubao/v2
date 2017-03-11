@@ -107,17 +107,17 @@ class FullController extends ManageBase{
     function audit(){
     	if(IS_POST){
     		$pinfo = I('post.');
-    		//所属分组，状态
-    		$data = array('id'=>$pinfo['id'],'groupid'=>$pinfo['groupid'],'status'=>$pinfo['status'],'remark'=>$pinfo['remark']);
+            //所属分组，状态
+            $data = array('id'=>$pinfo['id'],'type'=>$pinfo['type'],'groupid'=>$pinfo['groupid'],'status'=>$pinfo['status'],'remark'=>$pinfo['remark']);
            // $ticket = (string)\Wechat\Controller\WechatController::get_wechat_code($pinfo['id']);
             //链接微信获取专属推广二维码
-    		if(D('User')->save($data)){
-    			//发送审核通过的短信 
-    			//\Libs\Service\Sms::order_msg(array('title'=>$pinfo['name'],'phone'=>$pinfo['phone']),8);
-    			$this->srun("审核成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-    		}else{
-    			$this->erun("审核失败");
-    		}
+            if(D('User')->save($data)){
+                //发送审核通过的短信 
+                //\Libs\Service\Sms::order_msg(array('title'=>$pinfo['name'],'phone'=>$pinfo['phone']),8);
+                $this->srun("审核成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+            }else{
+                $this->erun("审核失败");
+            }
     	}else{
     		$ginfo = I('get.');
            // \Wechat\Controller\WechatController::get_wechat_code($pinfo['id']);
@@ -165,8 +165,6 @@ class FullController extends ManageBase{
             $oauth = & load_wechat('Oauth',$product_id,1);
             // 执行接口操作
             $urls = $oauth->getOauthRedirect($callback, $state, $scope);
-            return $urls;
-            $urls = $this->api->get_authorize_url('snsapi_base',$url);
         }
         $base64_image_content = qr_base64($urls,'u-'.$ginfo['id']);
     	$this->assign('qr',$base64_image_content)->assign('id',$ginfo['id'])->display();
