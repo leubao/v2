@@ -360,7 +360,7 @@ class Order extends \Libs\System\Service {
 		//判断支付提交场景，窗口自动排座，窗口选座
 		//选座售票
 		if($info['order_type'] == '1'){
-			$status = Order::choose_seat($seat,$oinfo,'',1,$info['pay_type']);
+			$status = Order::choose_seat($seat,$oinfo,'',1,'',$info['pay_type']);
 		}
 		//快捷售票
 		if($info['order_type'] == '2'){
@@ -726,9 +726,6 @@ class Order extends \Libs\System\Service {
 					'createtime'	=> $createtime,
 					'uptime'		=> $createtime,
 				);
-				
-				//error_insert('4000100');
-				
 				//窗口团队时判断是否是底价结算
 				if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
 					$in_team = true;
@@ -747,7 +744,7 @@ class Order extends \Libs\System\Service {
 		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField('status','1');
 		if($state && $status){
 			$model->commit();//提交事务
-			if($info['addsid'] <> '1' && $no_sms <> '1'){
+			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
 			    //发送成功短信
 				if($proconf[$plan['product_id']]['1']['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
 				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
@@ -817,8 +814,6 @@ class Order extends \Libs\System\Service {
 				$model->rollback();//事务回滚
 				return false;
 			}
-		}else{
-			//网银支付记录支付记录
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		/*==============================自动排座开始 start =============================================*/
@@ -980,7 +975,7 @@ class Order extends \Libs\System\Service {
 		if($flag && $flags && $state && $o_status && $pre){
 			$model->commit();//提交事务
 			//发送成功短信
-			if($info['addsid'] <> '1' && $no_sms <> '1'){
+			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
 			    if($proconf['crm_sms']){
 			    	$crminfo = Order::crminfo($plan['product_id'],$oInfo['crm'][0]['qditem']);
 			    }
@@ -1257,7 +1252,7 @@ class Order extends \Libs\System\Service {
 	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
 	*/
-	function is_scena($param = null,$is_pay = null){//dump($is_pay);
+	function is_scena($param = null,$is_pay = null){
 		switch ($param) {
 			case '11':
 				//窗口选座散客

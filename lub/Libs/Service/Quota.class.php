@@ -124,6 +124,7 @@ class Quota extends \Libs\System\Service {
 		if($today == $plan_day && date("H") > 11){
 			return '200';
 		}
+		Quota::check_quota($plan_id,$plan['product_id'],$crm_id);
 		$config = cache("Config");
     	//判断渠道商级别,写入消耗配额
 		$cinfo = M('Crm')->where(array('id'=>$crm_id))->field('id,level,f_agents')->find();
@@ -201,7 +202,7 @@ class Quota extends \Libs\System\Service {
             'type'=>$type,
         );
         $db = M('QuotaUse');
-        if(!$db->where($map)->find()){
+        if(!$db->where($map)->field('id')->find()){
         	$db->add($map);
         }
         return true;

@@ -1388,32 +1388,25 @@
      * @param  string $date 日期
      * @param  int $games 场次
      * @param  int $type 类型 1 全部列表 2 指定场次 
-     * @param  int $product_type 产品类型
+     * @param  int $status 是否可用
      * @return TODO 获取列表
      */
-    function get_date_plan($date,$games = '1',$product_type,$product_id,$type = '1'){
+    function get_date_plan($date,$games = '1',$status = '',$product_id,$type = '1'){
         $datetime = strtotime($date);
         //构造条件
         $map = array();
-        switch ($product_type) {
-            case '1':
-                //剧场
-                $map['plantime'] = $datetime;
-                $map['games']   =   $games;
-                $map['product_id'] = $product_id;
-                $map['status']  =   '2';
-                break;
-            case '2':
-                //景区
-                $map['plantime'] = $datetime;
-                break;
-            case '3':
-                //漂流
-                $map['plantime'] = $datetime;
-                $map['games']   =   $games;
-                break;
+        $map['plantime'] = $datetime;
+        $map['product_id'] = $product_id;
+        if(!empty($status)){
+             $map['status']  =  $status;
         }
-        $plan = M('Plan')->where($map)->field('id')->find();
+        if($type == '1'){
+            $plan = M('Plan')->where($map)->field('id')->select();
+        }else{
+            $map['games']   =   $games;
+            $plan = M('Plan')->where($map)->field('id')->find(); 
+        }
+        
         return $plan;
     }
     /**

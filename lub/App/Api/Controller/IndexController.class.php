@@ -569,7 +569,7 @@ class IndexController extends ApiBase {
     function booking_order($pinfo,$appInfo){
       $proList = cache('Product');
       $product = $proList[$pinfo['product_id']];
-      $plan = get_date_plan($pinfo['datetime'],'1',$product['type'],$pinfo['product_id']);
+      $plan = get_date_plan($pinfo['datetime'],'1','2',$pinfo['product_id'],2);
       foreach ($pinfo['oinfo'] as $k => $v) {
         $oinfo[] = array(
           'areaId'=>get_ticket_area($v['priceid'],$pinfo['product_id']),
@@ -1010,6 +1010,7 @@ class IndexController extends ApiBase {
         foreach ($list as $key => $value) {
            //$info[$key] = \Libs\Service\Rebate::rebate($value,1);
         }
+
       /*
       $map = array(
         'order_sn' => $sn,

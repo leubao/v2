@@ -492,10 +492,10 @@ class OrderController extends ManageBase{
 			}else{
 				$where = array('order_sn'=>$info['sn'],'status'=>array('in','6,11'));
 			}
-			$oinfo = D('Item/Order')->where($where)->relation(true)->find();            
+			$oinfo = D('Item/Order')->where($where)->relation(true)->find();
 			if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '400','msg' => $oinfo)));}
             //判断订单类型 scene 1选座订单6快捷售票
-			if($info['pay_type'] == '1' || $info['pay_type'] == '6'){
+			if($info['pay_type'] == '1' || $info['pay_type'] == '6' || $info['pay_type'] == '3'){
 				$return = $this->sweep_pay_seat($info,$oinfo);
 			}else{
 				$product = product_name($oinfo['product_id'],1);

@@ -133,6 +133,120 @@
       </tr>
   </tbody>
 </table>
+<table class="table table-bordered">
+  <caption><h3 align="center">{$product_id|productName}售票员资金一览表</h3></caption>
+  <thead>
+    <tr>
+      <th rowspan="2" align="center" width="160px">销售计划</th>
+      <th colspan="5" align="center">门票销售</th>
+      <th colspan="5" align="center">政企代收</th>
+      <th rowspan="2" align="center" width="100px">备注</th>
+    </tr>
+    <tr>
+      <th align="center" width="80px">现金</th>
+      <th align="center" width="80px">签单</th>
+      <th align="center" width="80px">POS机划卡</th>
+      <th align="center" width="80px">支付宝</th>
+      <th align="center" width="80px">微信支付</th>
+      <th align="center" width="80px">现金</th>
+      <th align="center" width="80px">签单</th>
+      <th align="center" width="80px">POS机划卡</th>
+      <th align="center" width="80px">支付宝</th>
+      <th align="center" width="80px">微信支付</th>
+    </tr>
+  </thead>
+  <tbody>
+    <volist name="conductor['money']" id="co">
+    <tr>
+      <td align="center">{$co.plan|planShow}</td>
+      <td align="right">{$co.data.cash|format_money}</td>
+      <td align="right">{$co.data.sign|format_money}</td>
+      <td align="right">{$co.data.stamp|format_money}</td>
+      <td align="right">{$co.data.alipay|format_money}</td>
+      <td align="right">{$co.data.wxpay|format_money}</td>
+      
+      <td align="right">{$co.data.dcash|format_money}</td>
+      <td align="right">{$co.data.dsign|format_money}</td>
+      <td align="right">{$co.data.dstamp|format_money}</td>
+      <td align="right">{$co.data.dalipay|format_money}</td>
+      <td align="right">{$co.data.dwxpay|format_money}</td>
+      
+      <td>&nbsp;</td>
+    </tr>
+    </volist>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td rowspan="5" align="center"><strong>合计:</strong></td>
+      <td align="right"><strong>现金:</strong></td>
+      <td align="right">{$conductor.sum.cash|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+     
+      <td align="right"><strong>签单:</strong></td>
+      <td align="right">{$conductor.sum.sign|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    
+      <td align="right"><strong>POS机划卡:</strong></td>
+      <td align="right">{$conductor.sum.stamp|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td align="right"><strong>支付宝:</strong></td>
+      <td align="right">{$conductor.sum.alipay|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td align="right"><strong>微信支付:</strong></td>
+      <td align="right">{$conductor.sum.wxpay|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+
+  </tbody>
+</table>
 </div>
 <div class="bjui-pageFooter">
     <ul>
@@ -170,8 +284,8 @@ $(document).ready(function() {
   sub_subsidy = sub_subsidy.toFixed(2);
 
   $("#sub-operator-num").html(sub_num);
-  $("#sub-operator-money").html(sub_money);
-  $("#sub-operator-moneys").html(sub_moneys);
-  $("#sub-operator-subsidy").html(sub_subsidy);
+  $("#sub-operator-money").html('￥'+sub_money);
+  $("#sub-operator-moneys").html('￥'+sub_moneys);
+  $("#sub-operator-subsidy").html('￥'+sub_subsidy);
 });
 </script>

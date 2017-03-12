@@ -308,7 +308,7 @@ class Refund extends \Libs\System\Service {
 				}else{
 					if(Refund::check_seat($plan['seat_table'],$sn) != false){
 						$map = array('order_sn'=>$sn,'status'=>array('notin','99'));
-					}else{//echo "14";
+					}else{
 						error_insert('400015');
 						$model->rollback();return false;
 					}
@@ -410,7 +410,7 @@ class Refund extends \Libs\System\Service {
 		//返回金额
 		$money_back = $subtotal-$cost+$child_moeny;
 		//订单金额
-		$money = $info['money'] - $subtotal - $child_moeny;//dump($type);dump($unit);
+		$money = $info['money'] - $subtotal - $child_moeny;
 		/*=============处理返利===============*/
 		if(in_array($type,array('91','92','82','81'))){
 			//无返利
@@ -443,8 +443,9 @@ class Refund extends \Libs\System\Service {
 				'balance'	=>  balance($cid),
 			);
 			$c_pay_return2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
-			//dump($money_back);dump($cid);dump($c_pay_return);dump($c_pay_return2);dump($in_team);
+			//dump($money_back);dump($cid);dump($c_pay_return);dump($c_pay_return2);
 			if($c_pay_return == false || $c_pay_return2 == false || $in_team == false){
+				//dump($money_back);dump($cid);dump($c_pay_return);dump($c_pay_return2);
 				error_insert("400016");
 				$model->rollback();//事务回滚
 				return false;
@@ -514,7 +515,7 @@ class Refund extends \Libs\System\Service {
 		}
 		$order = $model->table(C('DB_PREFIX'). 'order')->where(array('order_sn'=>$sn))->save($ordeData);
 		$order_data = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$sn))->save(array('info' => serialize($newData)));
-		//dump($up);dump($order);dump($refund);dump($order_data);
+		dump($up);dump($order);dump($refund);dump($order_data);
 		if($up && $order && $refund && $order_data){
 			$model->commit();//提交事务
 			return true;

@@ -978,5 +978,90 @@ class Report{
  		}
  		return $return;
  	}
- 	
+ 	//售票员资金一览表
+ 	function conductor($datatime = '',$plan_id = '',$user_id = '')
+ 	{	
+
+ 		if(empty($plan_id)){
+ 			$product_id = get_product('id');
+ 			$list = D('Item/Order')->where($datatime)->field('plan_id')->select();
+ 			$plan = array_unique($list);
+ 			foreach ($plan as $k => $v) {
+ 				$conductor = Report::sum_pay($v['plan_id'],$user_id);
+ 				$collection = Report::collection($v['plan_id'],$user_id);
+ 				$money[$v['plan_id']] = array(
+ 					'plan'   => $v['plan_id'],
+ 					'data' => array_merge($conductor,$collection)
+ 				);
+ 			}
+ 		}else{
+ 			$conductor = Report::sum_pay($plan_id);
+ 			$collection = Report::collection($plan_id);
+
+ 			$money[$plan_id] = array(
+ 				'plan'   => $plan_id,
+ 				'data' => array_merge($conductor,$collection)
+ 			);
+ 		}
+ 		
+ 		foreach ($money as $key => $value) {	
+ 			foreach ($value['data'] as $ke => $val) {
+ 				if(in_array($ke,array('cash','dcash'))){$sum['cash'] += $val;}
+ 				if(in_array($ke,array('sign','dsign'))){$sum['sign'] += $val;}
+ 				if(in_array($ke,array('alipay','dalipay'))){$sum['alipay'] += $val;}
+ 				if(in_array($ke,array('wxpay','dwxpay'))){$sum['wxpay'] += $val;}
+ 				if(in_array($ke,array('stamp','dstamp'))){$sum['stamp'] += $val;}
+ 			}
+ 		}
+ 		$return['money'] = $money;
+ 		$return['sum'] = $sum;
+ 		return $return;
+ 	}
+ 	//根据计划按支付类型汇总金额
+ 	function sum_pay($plan_id,$user_id){
+ 		$map = array(
+ 			'product_id' => get_product('id'), 
+ 			'status'	 => array('in','1,7,9'),
+ 			'user_id'	 => $user_id,
+ 			'plan_id'	 =>	$plan_id
+ 		);
+ 		$model = D('Item/Order');
+ 		$pay = array(
+ 			'1' => array('pay'=>1,'name'=>'cash'),
+ 			//'2' => array('pay'=>2,'name'=>'difference'),
+ 			'3' => array('pay'=>3,'name'=>'sign'),
+ 			'4' => array('pay'=>4,'name'=>'alipay'),
+ 			'5' => array('pay'=>5,'name'=>'wxpay'),
+ 			'6' => array('pay'=>6,'name'=>'stamp'),
+ 		);
+ 		foreach ($pay as $k => $v) {
+ 			$map['pay'] = $v['pay'];
+ 			$return[$v['name']] = $model->where($map)->sum('money');
+ 		}
+ 		return $return;
+ 	}
+ 	/**
+ 	 * 窗口代收款
+ 	 */
+ 	function collection($plan_id,$user_id)
+ 	{
+ 		$map = array(
+ 			'product_id' => get_product('id'),
+ 			'user_id'	 => $user_id,
+ 			'plan_id'	 =>	$plan_id
+ 		);
+ 		$pay = array(
+ 			'1' => array('pay'=>1,'name'=>'cash'),
+ 			'3' => array('pay'=>3,'name'=>'sign'),
+ 			'4' => array('pay'=>4,'name'=>'alipay'),
+ 			'5' => array('pay'=>5,'name'=>'wxpay'),
+ 			'6' => array('pay'=>6,'name'=>'stamp'),
+ 		);
+ 		$db = D('Collection');
+ 		foreach ($pay as $k => $v) {
+ 			$map['pay'] = $v['pay'];
+ 			$return['d'.$v['name']] = $db->where($map)->sum('money');
+ 		}
+ 		return $return;
+ 	}
 }

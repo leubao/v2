@@ -8,7 +8,7 @@
     <label class="col-sm-2 control-label">支付方式:</label>
     <input type="radio" name="is_pay" value="4" data-toggle="icheck" data-label="支付宝支付" <if condition="$ginfo['is_pay'] eq 4">checked</if>> 
     <input type="radio" name="is_pay" value="5" data-toggle="icheck" data-label="微信支付" <if condition="$ginfo['is_pay'] eq 5">checked</if>> 
-    <input type="radio" name="is_pay" value="6" data-toggle="icheck" data-label="银联支付" <if condition="$ginfo['is_pay'] eq 6">checked</if>> 
+    <input type="radio" name="is_pay" value="6" data-toggle="icheck" data-label="POS机划卡" <if condition="$ginfo['is_pay'] eq 6">checked</if>> 
     <input type="radio" name="is_pay" value="1" data-toggle="icheck" data-label="现金支付" <if condition="$ginfo['is_pay'] eq 1">checked</if>> 
     <input type="radio" name="is_pay" value="3" data-toggle="icheck" data-label="签单" <if condition="$ginfo['is_pay'] eq 3">checked</if>> 
   </div>

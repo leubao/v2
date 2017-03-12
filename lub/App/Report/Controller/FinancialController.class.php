@@ -230,6 +230,11 @@ class FinancialController extends ManageBase{
 	        }
 	        if(!empty($pinfo['plan_id'])){
 	        	$map['plan_id'] = $pinfo['plan_id'];
+	        	$collection = Report::conductor('',$pinfo['plan_id'],$pinfo['user']);
+	        }else{
+	        	//获取售票员单天所有销售过的场次
+	        	
+	        	$collection = Report::conductor($map,'',$pinfo['user']);
 	        }
 	        $map['product_id'] = get_product('id');
 	    	//获取订单
@@ -237,13 +242,13 @@ class FinancialController extends ManageBase{
 			//构造报表生成数据
 			$list = Report::operator($list);
 			$list = Report::day_fold($list,$work);
-			//售票员代收款报表 TODO
+			
 			//缓存用于导出
 			S('Operator'.get_user_id(),$list);
 			$export_map['user'] = $pinfo['user'];
 			$export_map['datetime'] = $pinfo['starttime'];
 			$export_map['report'] = 'operator';
-			$this->assign('data',$list)->assign('work',$work)->assign('export_map',$export_map)->assign('map',$pinfo);
+			$this->assign('data',$list)->assign('conductor',$collection)->assign('work',$work)->assign('export_map',$export_map)->assign('map',$pinfo);
 		}
 		//查询有售票权限的角色 TODO   不够精确   通过配置售票员角色来解决。并希望是支持多角色
 		$access = M('Access')->where(array('controller' => 'Work', 'action'=>array('in','quick,per_window,seatpost')))->field('role_id')->select();
@@ -251,7 +256,7 @@ class FinancialController extends ManageBase{
 		$map = array('status'=>1,'is_scene'=>1,'role_id'=>array('in',implode(',',array_unique(explode(',',arr2string($access,'role_id'))))));
 		$user = M('User')->where($map)->field('id,nickname')->select();
 		$this->assign('user',$user)->assign('starttime',$pinfo['starttime'])
-			->assign('product_id',$map['product_id'])
+			->assign('product_id',get_product('id'))
 			->assign('empty','<span class="empty">没有数据</span>')
 			->display();
 	}
@@ -459,7 +464,7 @@ class FinancialController extends ManageBase{
         	$map['datetime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
         }
         $map['status'] = '1';
-		$map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+		$map['product_id'] = get_product('id');
 		$db = D('ReportData');
 		$list = $db->where($map)->field('id,plan_id,pay,moneys')->select();
 		//dump($list);
