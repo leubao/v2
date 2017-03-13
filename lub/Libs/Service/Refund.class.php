@@ -522,8 +522,7 @@ class Refund extends \Libs\System\Service {
 		}else{
 			$model->rollback();//事务回滚
 			return false;
-		}
-		
+		}	
 	}
 	/*
 	* 检测是否存在已检票的座位

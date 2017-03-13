@@ -116,16 +116,16 @@
         },
         {
             "name": "riverslei/payment",
-            "version": "v3.0.2",
+            "version": "v3.0.3",
             "source": {
                 "type": "git",
                 "url": "https://github.com/helei112g/payment.git",
-                "reference": "d9ed58e7591e64c1d81c09666a64b6c1bd747264"
+                "reference": "c38d7fb1e7b38a32c21a94d3cb94f3427c916c24"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://files.phpcomposer.com/files/helei112g/payment/d9ed58e7591e64c1d81c09666a64b6c1bd747264.zip",
-                "reference": "d9ed58e7591e64c1d81c09666a64b6c1bd747264",
+                "url": "https://files.phpcomposer.com/files/helei112g/payment/c38d7fb1e7b38a32c21a94d3cb94f3427c916c24.zip",
+                "reference": "c38d7fb1e7b38a32c21a94d3cb94f3427c916c24",
                 "shasum": ""
             },
             "require": {
@@ -162,7 +162,7 @@
                 "支付宝支付",
                 "集成支付接口SDK"
             ],
-            "time": "2017-03-09T08:15:18+00:00"
+            "time": "2017-03-11T11:54:18+00:00"
         },
         {
             "name": "zoujingli/wechat-php-sdk",

@@ -4,6 +4,8 @@
 
 -----
 
+# [Payment3.x 使用教程](https://helei112g.github.io/categories/payment-3/)
+
 # Payment 能够做什么 #
 
 Paymeng 主要帮助 php 开发者在服务端快速接入主流的支付平台(支付宝支付、微信支付等)。节省时间少走弯路。
@@ -34,11 +36,12 @@ Payment 针对不同支付平台，提供了统一的调用方式，开发者无
 
 *招商一网通支付 正在开发中... ...*
 
-更多详细情况请[点击这里](https://helei112g.github.io/categories/payment/)
+更多详细情况请[点击这里](https://helei112g.github.io/categories/payment-3/)
 
 由于 `payment v1` 版本在设计开发时的缺陷，不在进行维护升级。并且 `v2` 版本也不与之兼容。建议大家都升级v2版本
 
 ## 重要变更 ##
+- 即时到账支付宝异步通知自动识别处理，example演示demo优化 (from v3.0.3)
 - 支付宝密钥支持字符串、文件两种方式配置，微信支持HMAC-SHA256加密（from v3.0.1）
 - 支持支付宝rsa2签名 加入支付宝当面付-条码支付(条码与声波两种模式)   微信加入刷卡支付、小程序支付、H5支付  提供客户端静态调用类 不再兼容支付宝老版本接口（from v3.0.0）
 - 支持支付宝新版本支付接口（from v2.7.0）
@@ -73,7 +76,7 @@ Payment 针对不同支付平台，提供了统一的调用方式，开发者无
 - cURL extension
 - mbstring
 
-Payment SDK使用文档[请看这里](https://helei112g.github.io/categories/payment/)
+Payment SDK使用文档[请看这里](https://helei112g.github.io/categories/payment-3/)
 
 ## 联系&打赏 ##
 
@@ -93,7 +96,8 @@ Payment SDK使用文档[请看这里](https://helei112g.github.io/categories/pay
 
 名字 | 金额 | 说明 | 时间
 ---|---|---|---
-彦 | 88 | 感觉还不错，特打赏88元，略表感谢。 | 2017-02-28
+阿笨 | 10.00 | 打算使用，先感谢一下 | 2017-03-10
+彦 | 88.00 | 感觉还不错，特打赏88元，略表感谢。 | 2017-02-28
 汤明洋 | 66.66 | 支持一下 | 2017-02-19
 李仕建同学 | 18.88 | 新春快乐 | 2017-02-09
 凡额 | 50.00 | 帮助调试，谢谢了 | 2017-01-18
