@@ -127,10 +127,15 @@ $(document).ready(function(){
               if(rdata.statusCode == '200'){
                 planId = rdata.plan;
                  /*写入*/
-                $(rdata.goods).each(function(idx,goods){
-                  content += "<tr data-id='"+goods.id+"' data-name='"+goods.title+"' data-discount='"+goods.discount+"' data-price='"+goods.price+"'><td align='center'>"+goods.title+"</td><td>"+goods.price+"</td><td>"+goods.discount+"</td><td>"+goods.number+"</td>"
-                    +"</tr>";
-                });
+                if(rdata.goods != null){
+                  $(rdata.goods).each(function(idx,goods){
+                    content += "<tr data-id='"+goods.id+"' data-name='"+goods.title+"' data-discount='"+goods.discount+"' data-price='"+goods.price+"'><td align='center'>"+goods.title+"</td><td>"+goods.price+"</td><td>"+goods.discount+"</td><td>"+goods.number+"</td>"
+                      +"</tr>";
+                  });
+                }else{
+                  content = "<tr><td style='padding:15px;' colspan='5' align='center'><strong style='color:red;font-size:18px;'>未找到可售票型</strong></td></tr>";
+                }
+                
               }
               $(this).alertmsg('ok', '售票场次,切换成功!');
               $("#work_cashier_goods").html(content); 
@@ -159,10 +164,14 @@ $(document).ready(function(){
               if(rdata.statusCode == '200'){
                 planId = rdata.plan;
                  /*写入*/
-                $(rdata.goods).each(function(idx,goods){
-                  content += "<tr data-id='"+goods.id+"' data-name='"+goods.title+"' data-discount='"+goods.discount+"' data-price='"+goods.price+"'><td align='center'>"+goods.title+"</td><td>"+goods.price+"</td><td>"+goods.discount+"</td><td>"+goods.number+"</td>"
-                    +"</tr>";
-                });
+                if(rdata.goods != null){
+                  $(rdata.goods).each(function(idx,goods){
+                    content += "<tr data-id='"+goods.id+"' data-name='"+goods.title+"' data-discount='"+goods.discount+"' data-price='"+goods.price+"'><td align='center'>"+goods.title+"</td><td>"+goods.price+"</td><td>"+goods.discount+"</td><td>"+goods.number+"</td>"
+                      +"</tr>";
+                  });
+                }else{
+                  content = "<tr><td style='padding:15px;' colspan='5' align='center'><strong style='color:red;font-size:18px;'>未找到可售票型</strong></td></tr>";
+                }
               }
               $(this).alertmsg('ok', '售票场次,切换成功!');
               $("#work_cashier_goods").html(content); 

@@ -84,7 +84,7 @@
         <td align="center">{$vo['user_id']|userName=$vo['addsid']}</td>
         <td align="center">{$vo['status']|order_status}</td>
         <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}" data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">查看</a>
-              <a data-toggle="dialog" data-id="print" data-width="213" data-height="208" data-title="门票打印" href="{:U('Item/Order/drawer',array('sn'=>$vo['order_sn'],'plan_id'=>$vo['plan_id']))}" data-resizable="false" data-maxable="false" data-mask="true">出票</a>
+        {$vo['type']|print_buttn_show=$vo['pay'],$vo['order_sn'],$vo['plan_id']}
         </td>
        </tr>
     </volist>

@@ -426,9 +426,7 @@ function autoSeat(){
   return true;  
 }
 function seat_server() {
-  var postData = '',
-    pay = '',
-    crm = '',
+  var postData = '',pay = '',crm = '',
     contact = $("#work-crm input[name='content']").val() ? $("#work-crm input[name='content']").val() : '0',
     phone = $("#work-crm input[name='phone']").val() ? $("#work-crm input[name='phone']").val() : '0',
     remark = $("#work-crm textarea[name='remark']").val() ? $("#work-crm textarea[name='remark']").val() : "空...",
@@ -468,27 +466,4 @@ function seat_server() {
   postData = 'info={"subtotal":'+cash+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"type":'+type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
   post_server(postData,url);
 }
-/*向服务器提交数据
-function post_server(){
-
-    $.ajax({
-        type:'POST',
-        url:'<?php echo U('Item/Order/seatPost',array('plan'=>$plan['id'],'type'=>$type));?>',
-        data:postData,
-        dataType:'json',
-        timeout: 3500,
-        error: function(){
-            layer.msg('服务器请求超时，请检查网络...');
-        },
-        success:function(data){
-            if(data.statusCode == "200"){
-                //刷新
-                $(this).dialog('refresh', data.refresh);
-                $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
-            }else{
-                $(this).alertmsg('error','出票失败!');
-            }
-        }
-    });
-}*/
 </script>

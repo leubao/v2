@@ -743,6 +743,9 @@
      */
     function goodsInfo($product_id, $field = '', $param, $type = NULL){
         $goodsList = F('Goods_'.$product_id);
+        if(empty($goodsList)){
+            D('Item/Goods')->goods_cache($product_id);
+        }
         if(empty($field)){
             $return = $goodsList[$param];
         }else{
@@ -1829,6 +1832,24 @@ function payLog($money,$sn,$scene,$type,$pattern,$data){
     //快速缓存 缓存有效期300秒
     S('pay'.$sn,'400',300);
     return D('Manage/Pay')->add($pay_log);
+}
+//订单售票
+function print_buttn_show($type,$pay,$sn,$plan_id){
+    if(in_array($pay, array('1','3')) && $type == '6'){
+        $title = "网银支付";
+        $width = '600';
+        $height = '400';
+        $pageId = 'payment';
+        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'order_type'=>3));
+    }else{
+        $pageId = 'print';
+        $width = '213';
+        $height = '208';
+        $title = '门票打印';
+        $url = U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan_id));
+    }
+    $viewbut = "<a data-toggle='dialog' data-id='".$pageId."' data-width='".$width."' data-height='".$height."' data-title='".$title."' href='".$url."' data-resizable='false' data-maxable='false' data-mask='true'>出票</a>";
+    echo $viewbut;
 }
 /**
  * 模拟请求

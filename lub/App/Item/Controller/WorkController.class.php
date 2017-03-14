@@ -16,7 +16,7 @@ use Libs\Service\Sms;
 class WorkController extends ManageBase{
 	protected function _initialize() {
 		parent::_initialize();
-	 }
+	}
 	/*加载初始售票框架*/
 	function index(){
 		//售票类型
@@ -128,7 +128,6 @@ class WorkController extends ManageBase{
 				);
 				$return = array(
 					'statusCode' => '200',
-					'info'	=>	'',
 					'plan'	=> $plan['id'],
 					'area'	=> $area,
 					'sale'	=> $sale,
@@ -143,11 +142,13 @@ class WorkController extends ManageBase{
 					); 
 					$goods[] = array_merge($info,$number);
 				}
+				if(empty($goods)){
+					$goods = 'null';
+				}
 				$return = array(
 					'statusCode' => '200',
-					'info'	=>	'',
 					'plan'	=> $plan['id'],
-					'goods'	=> $goods				
+					'goods'	=> $goods			
 				);
 			}
 			//设置session

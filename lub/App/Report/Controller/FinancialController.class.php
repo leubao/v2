@@ -233,7 +233,6 @@ class FinancialController extends ManageBase{
 	        	$collection = Report::conductor('',$pinfo['plan_id'],$pinfo['user']);
 	        }else{
 	        	//获取售票员单天所有销售过的场次
-	        	
 	        	$collection = Report::conductor($map,'',$pinfo['user']);
 	        }
 	        $map['product_id'] = get_product('id');

@@ -17,7 +17,6 @@
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
   </div>
-  
   <!--检索条件 e-->
 </form>
 <!--Page end-->
@@ -28,9 +27,7 @@
       <tr>
         <th align="center">订单号</th>
         <th align="center">所属计划</th>
-        
         <th align="center">数量</th>
-        
         <th align="center">渠道商</th>
         <th align="center">订单(场景)类型</th>
         <th align="center">创建时间</th>
@@ -50,8 +47,8 @@
         <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>
         <td align="center">{$vo['status']|status}</td>
         <td align="center">
-                    <a data-toggle="dialog" data-id="print" data-width="213" data-height="208" data-title="门票打印" href="{:U('Item/Order/drawer',array('sn'=>$vo['order_sn'],'plan_id'=>$vo['plan_id']))}" data-resizable="false" data-maxable="false" data-mask="true">出票</a>
-                    </td>
+          {$vo['type']|print_buttn_show=$vo['pay'],$vo['order_sn'],$vo['plan_id']}
+        </td>
        </tr>
     </volist>
     </tbody>

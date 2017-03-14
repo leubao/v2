@@ -72,7 +72,6 @@ $(document).ready(function() {
   var seatMapW = $(window).width() - 314,
       seatMapH = $(window).height() - 130,
       areaId  = '{$ginfo.area}',
-      
       planId = '{$ginfo.plan}',
       priceid = '{$ginfo.priceid}',
       price = '{$ginfo.price}',
@@ -111,7 +110,6 @@ $(document).ready(function() {
           return row+"排"+column+"号";
         }
       },
-    
       click: function () {
         var obj = this.data();
         seat_num = parseInt($("#seat_num_"+areaId).val());
@@ -130,8 +128,6 @@ $(document).ready(function() {
             .attr('data-seat',this.settings.id)
             .attr('data-price',price)
             .appendTo(seat_cart);
-
-            
             /*更新待排数和已排数*/
             count = seat_num-1,
             counts = seat_nums+1;
@@ -145,7 +141,6 @@ $(document).ready(function() {
             $("#seat_nums_"+areaId).html(counts);
             /*删除已预订座位*/
             $('#seat-cart-item-'+this.settings.id).remove();
-            
             return 'available';
         } else if (this.status() == 'unavailable') {/*已售出*/
             return 'unavailable';

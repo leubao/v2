@@ -995,8 +995,8 @@ class Report{
  				);
  			}
  		}else{
- 			$conductor = Report::sum_pay($plan_id);
- 			$collection = Report::collection($plan_id);
+ 			$conductor = Report::sum_pay($plan_id,$user_id);
+ 			$collection = Report::collection($plan_id,$user_id);
 
  			$money[$plan_id] = array(
  				'plan'   => $plan_id,
@@ -1041,7 +1041,7 @@ class Report{
  		return $return;
  	}
  	/**
- 	 * 窗口代收款
+ 	 * 窗口代收款 
  	 */
  	function collection($plan_id,$user_id)
  	{

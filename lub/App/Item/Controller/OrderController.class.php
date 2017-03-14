@@ -15,7 +15,7 @@ class OrderController extends ManageBase{
 	function _initialize(){
 	 	parent::_initialize();
 	}
-/*==================================华丽分割线  1 添加窗口订单====================================*/
+	/*==================================华丽分割线  1 添加窗口订单====================================*/
 	/*选座提交
 	* @param $order_type int 1 窗口散客/团队选座 2 快捷散客/团队选座 3 政企订单收款
 	*/
@@ -121,11 +121,7 @@ class OrderController extends ManageBase{
 			);
 			die(json_encode($return));
 		}
-		//判断是否需要当面收款 现金||签单
-		if(in_array($order_type['pay'], array('1','3'))){
-			$url = U('Item/Order/public_payment',array('plan'=>$ginfo['plan_id'],'sn'=>$ginfo['sn'],'is_pay'=>$order_type['pay'],'order_type'=>3));
-			redirect($url);
-		}
+		
 		//判断是否是二次打印
 		if($order_type['status'] == '9' && empty($user)){
 			$return = array(
@@ -422,17 +418,6 @@ class OrderController extends ManageBase{
 			}
 			$this->assign('data',$ginfo)->display();
 		}	
-	}
-	
-	/*发送电子门票*/
-	function electronicTicket(){
-		if(IS_POST){
-		
-		}else{
-			$sn = I('get.sn');
-			$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
-			$this->display();
-		}
 	}
 /*=============================华丽分割线  2 添加快捷订单====================================*/
 	/*快捷售票*/

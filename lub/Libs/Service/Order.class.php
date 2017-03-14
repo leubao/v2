@@ -1244,11 +1244,176 @@ class Order extends \Libs\System\Service {
 			return false;
 		}	
 	}
+	/**
+	 * 小商品售出
+	 */
+	function sales_goods($pinfo){
+		$info['info'] = unserialize($info['info']);
+		$createtime = time();
+		$model = new Model();
+		$model->startTrans();
+		if(empty($plan)){
+			$plan = F('Plan_'.$info['plan_id']);
+		}
+		$proconf = cache('ProConfig');
+		$ticketType = F('TicketType'.$plan['product_id']);
+		//构造打印数据
+		//$dataList = Order::create_print($info['order_sn'],$info['info']['data']['area'],$plan);
+		$table = 'drifting';
+		$map = array('plan_id' => $info['plan_id'],'status'=>'0');//dump($info);
+		foreach ($info['info']['data']['area'] as $key => $value) {
+			/*判断是否联合售票*/
+			if(!empty($info['info']['child_ticket'])){
+				foreach ($info['info']['child_ticket'] as $ck => $cv) {
+					$child_t[$cv['priceid']] = array(
+						'priceid'	=>	$cv['priceid'],
+						'priceName' =>	ticket_single($ticketType[$cv['priceid']]['single_id'],1),
+						'price'     =>	$ticketType[$cv['priceid']]['price'],/*票面价格*/
+						'discount'  =>	$ticketType[$cv['priceid']]['discount'],/*结算价格*/
+					);
+				}
+				$remark = array(
+					'remark_type' => '99',
+					'remark'	=>	$child_t,
+				);
+			}else{
+				$remark = print_remark($ticketType[$value['priceid']]['remark'],$plan['product_id']);
+			}
+			//获取票型数据
+			$param = array(
+				'plantime'	=>  date('Y-m-d ',$plan['plantime']),
+				'games'	   	=>  $plan['games'],
+				'product_name' => $plan['product_name'],
+				'priceid'   =>	$value['priceid'],
+				'priceName' =>	$ticketType[$value['priceid']]['name'],
+				'price'     =>	$ticketType[$value['priceid']]['price'],/*票面价格*/
+				'discount'  =>	$ticketType[$value['priceid']]['discount'],/*结算价格*/
+				'remark_type'=>	$remark['remark_type'],
+				'remark'	=>	$remark['remark'],
+			);
+			//计算消耗配额的票型 只有团队订单时才执行此项操作 21060118
+			if($info['type'] == '2' || $info['type'] == '4' && $ticketType[$value['priceid']]['param']['quota'] <> '1'){
+				$quota_num += $value['num'];
+			}
+			//计算补贴
+			$rebate += $ticketType[$value['priceid']]['rebate']*$value['num'];
+			$printList = array(
+				'order_sn' => $info['order_sn'],
+				'price_id'   =>	$value['priceid'],
+				'sale' => serialize($param),
+				'status' => '2',
+				'createtime' => $createtime,
+			);
+			$state = $model->table(C('DB_PREFIX').$table)->where($map)->limit($value['num'])->lock(true)->save($printList);
+			if($proconf[$plan['product_id']]['1']['ticket_sms'] == '1'){
+				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num']."张";
+			}else{
+				$msg = $info['number']."张";
+			}
+		}
+		//获取售票信息
+		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id')->select();
+		foreach ($saleList as $ks => $vs) {
+			$sale[$ks]=unserialize($vs['sale']);
+			$dataList[] = array(
+					'ciphertext' =>	$vs['ciphertext'],
+					'priceid'=>	$sale[$ks]['priceid'],
+					'price'=>$ticketType[$sale[$ks]['priceid']]['price'],
+					'discount'=>$ticketType[$sale[$ks]['priceid']]['discount'],/*结算价格*/
+					'id'	=>	$vs['id'],
+					'plan_id' => $info['plan_id'],
+					'child_ticket' => arr2string($child_t,'priceid'),
+				);
+		}
+		//是否为团队订单 
+		if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8'){
+			/*查询是否开启配额 读取是否存在不消耗配额的票型*/
+			if($proconf[$plan['product_id']]['1']['quota'] == '1'){
+				if(in_array($info['type'],array('2','4'))){
+					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id']);
+				}else{
+					//TODO  全员营销的配额
+					//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
+				}
+				if($up_quota == '400'){
+					error_insert('400012');
+					$model->rollback();
+					return false;
+				}
+			}
+			//个人允许底价结算,且有返佣
+			$crmInfo = google_crm($plan['product_id'],$info['info']['crm'][0]['qditem'],$info['info']['crm'][0]['guide']);
+			//严格验证渠道订单写入返利状态
+			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
+				error_insert('400018');
+				$model->rollback();
+				return false;
+			}
+			//判断是否是底价结算
+			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
+				if($crmInfo['group']['type'] == '4'){
+					//当所属分组为个人时，补贴到个人
+					$type = '1';
+				}else{
+					$type = '2';
+				}
+				$teamData = array(
+					'order_sn' 		=> $info['order_sn'],
+					'plan_id' 		=> $info['plan_id'],
+					'subtype'		=> '0',
+					'product_type'	=> $info['product_type'],//产品类型
+					'product_id' 	=> $info['product_id'],
+					'user_id' 		=> $info['user_id'],
+					'money'			=> $rebate,
+					'number'		=> $info['number'],
+					'guide_id'		=> $info['info']['crm'][0]['guide'],
+					'qd_id'			=> $info['info']['crm'][0]['qditem'],
+					'status'		=> '1',
+					'type'			=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
+					'userid'		=> '0',
+					'createtime'	=> $createtime,
+					'uptime'		=> $createtime,
+				);
+				//窗口团队时判断是否是底价结算
+				if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
+					$in_team = true;
+				}else{
+					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
+					if(!$in_team){error_insert('400017');$model->rollback();return false;}
+				}
+			}
+		}
+		
+		//更新订单详情
+		//重新组合订单详情  增加座位信息  与选做订单详情一至
+		$newData = array('subtotal'	=> $info['info']['subtotal'],'checkin'	=> $info['info']['checkin'],'data' => $dataList,'crm' => $info['info']['crm'],'pay' => $is_pay ? $is_pay : $info['info']['pay'],'param'	=> $info['info']['param'],'child_ticket'=>$child_t);
+		$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->setField('info',serialize($newData));
+		//改变订单状态
+		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField('status','1');
+		if($state && $status){
+			$model->commit();//提交事务
+			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
+			    //发送成功短信
+				if($proconf[$plan['product_id']]['1']['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
+				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
+				if($info['pay'] == '1' || $info['pay'] == '3'){
+					Sms::order_msg($msgs,6);
+				}else{
+					Sms::order_msg($msgs,1);
+				}
+			}
+			return $info['order_sn'];
+		}else{
+			error_insert('400006');
+			$model->rollback();//事务回滚
+			return false;
+		}
+	}
 	/*订单场景初始值 
 	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
 	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
 	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
-	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售9三级分销
+	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售9三级分销 3小商品 5 物品租聘
 	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
 	*/
@@ -1261,6 +1426,14 @@ class Order extends \Libs\System\Service {
 			case '12':
 				//窗口选座团队
 				$return = array('type'=>2,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '13':
+				//小商品订单
+				$return = array('type'=>3,'addsid'=>1,'pay'=>0,'status'=>2,'createtime'=>time());
+				break;
+			case '15':
+				//物品租聘
+				$return = array('type'=>5,'addsid'=>1,'pay'=>0,'status'=>2,'createtime'=>time());
 				break;
 			case '61':
 				//窗口快捷散客
@@ -1281,7 +1454,6 @@ class Order extends \Libs\System\Service {
 			case '31':
 				//网站散客
 				$return = array('type'=>1,'addsid'=>3,'pay'=>0,'status'=>2,'createtime'=>time());
-				break;
 			case '41':
 				//微信散客
 				$return = array('type'=>1,'addsid'=>4,'pay'=>5,'status'=>11,'createtime'=>time());

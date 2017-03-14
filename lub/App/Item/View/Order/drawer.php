@@ -19,13 +19,14 @@
   <input type="radio" name="type" id="print_type" value="1" <if condition="$proconf['print_type'] eq '1'">checked</if>> 一人一票  
   <input type="radio" name="type" id="print_type" value="2" <if condition="$proconf['print_type'] eq '2'">checked</if>> 一单一票
   </div>
-  <button type="button" style="width:200px; height:130px" id="print_ticket" onclick="printTicket({$data.sn},{$data.plan_id})">打印门票</button>
+  <button type="button" style="width:200px; height:130px" id="print_ticket">打印门票</button>
   </div>
 </div>
 </div>
 <script>
 var LODOP; //声明为全局变量  
-function printTicket(sn,planid){
+$("#print_ticket").click(function() {
+	var sn = '{$data.sn}',planid = '{$data.plan_id}';
 	$("#print_ticket").attr("disabled", true).val('打印中..');
 	var type = $('#print_type:checked').val();
 	$.ajax({
@@ -39,8 +40,12 @@ function printTicket(sn,planid){
             layer.msg('服务器请求超时，请检查网络...');
         },
 		success:function(data){
-			var selSeat = eval(data.info);/*返回的座位信息*/
+			if(data.status == '300'){
+				//订单收款
+            	$(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
+			}
 			if(data.status == '1'){
+				var selSeat = eval(data.info);/*返回的座位信息*/
 				$.each(selSeat,function(){
 					/*打印设置部分*/
 					CreateFullBill(this);
@@ -51,14 +56,14 @@ function printTicket(sn,planid){
 					/*关闭当前弹窗*/
 					$(this).dialog('close','print');
 				});
-			}else{
+			}
+			if(data.status != '1' && data.status != '300'){
 				$(this).alertmsg('error',data.message);
 				$(this).dialog('close','print');
 			}
 		}
 	});
-
-	}
+});
 /*打印页面控制*/
 function CreateFullBill(data) {
 		LODOP=getLodop();
