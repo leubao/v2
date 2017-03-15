@@ -18,6 +18,7 @@ class Rebate extends \Libs\System\Service {
 		//读取队列中未处理订单
 		//判断队列是否存在数据
 		$ln = load_redis('lsize','PreOrder');
+		load_redis('set','ajax_rebate_order_time',date('Y-m-d H:i:s'));
 		if($ln > 0){
 			$fenrun = false;
 			//获取队列中最后一个元素，且移除
@@ -105,8 +106,8 @@ class Rebate extends \Libs\System\Service {
 					//组装写入数据
 					if($fenrun){
 						$changeData = array(
-						  'money'     => $v['ul'.$k]['money'],
-						  'guide_id'  => $v['ul'.$k]['guide'],
+						  'money'     => $value['ul'.$k]['money'],
+						  'guide_id'  => $value['ul'.$k]['guide'],
 						);
 					}else{
 						$changeData = array(
@@ -129,9 +130,11 @@ class Rebate extends \Libs\System\Service {
 					  'uptime'    	=> $datatime,
 					  'createtime'	=> $datatime
 					);
-					$teamData[] = array_merge($baseData,$changeData);
+					if($changeData['money'] > 0){
+						$teamData[] = array_merge($baseData,$changeData);
+					}
+					
 				}
-				
 				$status = $model->addAll($teamData);
 				if($status){
 					return $status;
@@ -220,7 +223,6 @@ class Rebate extends \Libs\System\Service {
 	*/
 	function rebate($info, $user_id = 1){
 		if(empty($info)){return array('order_sn'=>$sn,'user_id'=>$user_id,'status'=>'0','msg'=>"未找订单");}
-		//dump($info);
 		$model = new \Think\Model();
 		$model->startTrans();
 		//先充值  后标记.

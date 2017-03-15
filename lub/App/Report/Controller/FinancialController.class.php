@@ -225,9 +225,7 @@ class FinancialController extends ManageBase{
 	    		'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 	    		'createtime' => array(array('EGT', $starttime), array('ELT', $endtime), 'AND'),
 	    	);
-	    	if(!empty($pinfo['user'])){
-				$map['user_id'] = $pinfo['user'];
-	        }
+	    	$map['product_id'] = get_product('id');
 	        if(!empty($pinfo['plan_id'])){
 	        	$map['plan_id'] = $pinfo['plan_id'];
 	        	$collection = Report::conductor('',$pinfo['plan_id'],$pinfo['user']);
@@ -235,7 +233,9 @@ class FinancialController extends ManageBase{
 	        	//获取售票员单天所有销售过的场次
 	        	$collection = Report::conductor($map,'',$pinfo['user']);
 	        }
-	        $map['product_id'] = get_product('id');
+	        if(!empty($pinfo['user'])){
+				$map['user_id'] = $pinfo['user'];
+	        }
 	    	//获取订单
 			$list = Report::strip_order($map,date('Ymd',strtotime($pinfo['starttime'])),2);
 			//构造报表生成数据

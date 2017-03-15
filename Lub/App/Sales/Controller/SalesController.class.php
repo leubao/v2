@@ -43,7 +43,7 @@ class SalesController extends ManageBase{
 		if(IS_POST){
 			$pinfo = $_POST;
             //判断是否开启多级分销
-            if($pinfo['wechat_level_3'] == '1'){
+            if($this->procof['wechat_level'] == '1'){
                 //新建多级返利表  作为票型表的扩展 
                 $dbs = M('TicketType');
                 //根据提交过来的票型分组拉去所有票型
@@ -101,7 +101,7 @@ class SalesController extends ManageBase{
             $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME)); 
 		}else{
 			$this->assign("vo",$config);
-            //获取价格分组
+            //获取价格分组 TODO 多产品时  价格分组的问题
             $group = M('CrmGroup')->where(array('status'=>1,'type'=>4,'product_id'=>$product_id))->field('id,name,price_group')->select();
             $oauth = & load_wechat('Oauth',$product_id,1);
             // 执行接口操作

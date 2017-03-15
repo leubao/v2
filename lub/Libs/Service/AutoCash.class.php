@@ -15,7 +15,7 @@ class AutoCash extends \Libs\System\Service {
         $map = array(
             'status' => '1',
             'cash'  =>  array('neq','0'),
-            );
+        );
         //查询余额不为0的客户
         $list = M('User')->where($map)->field('id,nickname,cash')->select();
         if(!empty($list)){

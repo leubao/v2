@@ -37,7 +37,7 @@ class FullController extends ManageBase{
         if(IS_POST){
             $pinfo = $_POST;
             //判断是否开启多级分销
-            if($pinfo['wechat_full'] == '1'){
+            if($this->procof['wechat_full'] == '1'){
                 //新建多级返利表  作为票型表的扩展 
                 $dbs = M('TicketType');
                 //根据提交过来的票型分组拉去所有票型
