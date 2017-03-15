@@ -242,7 +242,6 @@ class IndexController extends ManageBase{
 				'type' => $pinfo['type'],
 				'privilege' => $pinfo['privilege'],
 				'settlement'=> $pinfo['settlement'],
-				'group_quota'=>$pinfo['group_quota'],
 				'status' => $pinfo['status'],
 				'price_group' => implode(',',$pinfo['price_group']),
 				);
