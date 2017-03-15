@@ -49,6 +49,7 @@ class OrderController extends ManageBase{
 					'width'		 =>	$width,
 					'height'	 =>	$height,
 					'pageid' 	 => $pageId,
+					'dialog'	 =>	true,
 					'refresh'	 => 'work_seat',
 					'forwardUrl' => $forwardUrl,
 				);
@@ -449,6 +450,7 @@ class OrderController extends ManageBase{
 				'width'		 =>	$width,
 				'height'	 =>	$height,
 				'pageid' 	 => $pageId,
+				'dialog'	 =>	true,
 				'refresh'	 => 'work_quick',
 				'forwardUrl' => $forwardUrl,
 			);
@@ -587,9 +589,11 @@ class OrderController extends ManageBase{
 	function sweep_pay_seat($info,$oinfo)
 	{
 		if($info['order_type'] == '3' && $oinfo['status'] == '1'){
-			//政企窗口收款
+			//政企窗口收款,判断是否已经收款
+			if(check_collection_pay($info['sn'])){
+				collection_log($oinfo,$info['pay_type']);
+			}
 			$run = true;
-			collection_log($oinfo,$info['pay_type']);
 		}else{
 			$run = Order::sweep_pay_seat($info,$oinfo);
 		}
@@ -600,7 +604,8 @@ class OrderController extends ManageBase{
 				'title'		 =>	"门票打印",
 				'width'		 =>	'213',
 				'height'	 =>	'208',
-				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan)),
+				'dialog'	 =>	true,
+				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$oinfo['order_sn'],'plan_id'=>$oinfo['plan_id'])),
 			);
 			$message = "支付成功!单号".$run;
 			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
@@ -614,6 +619,7 @@ class OrderController extends ManageBase{
 		}
 		return $return;
 	}
+
 /*======================分割线3 景区门票订单=======================================*/
 	function scenicPost(){
 		$info = $_POST['info'];
@@ -702,7 +708,7 @@ class OrderController extends ManageBase{
 				$list[$k]=$v;
 				$list[$k]['info']= unserialize($v['info']);
 			}
-		}//dump($list);
+		}
 		$this->assign('data',$list)
 			->display();
 	}
@@ -715,26 +721,27 @@ class OrderController extends ManageBase{
 			if(Order::govSeat($pinfo)){
 				$return = array(
 					'statusCode' => '200',
-					'msg'	=> 	"排座成功",
+					'message'	 => "排座成功",
+					'dialog'	 =>	false,
+					'refresh'	=> '348Item'		
 				);
 				$message = "排座成功!单号";
 				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 			}else{
 				$return = array(
 					'statusCode' => '300',
-					'msg'	=> 	"排座失败!",
+					'message'	=> 	"排座失败!",
 				);
 				$message = "排座失败!";
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
 			}
-			echo json_encode($return);
-			return true;
+			die(json_encode($return));
 		}else{
 			$ginfo = I('get.');
 			if(empty($ginfo)){$this->erun('参数错误!');}
 			$map = array(
-				'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
-				//'status'=>6,//只查询未出票的订单
+				'product_id'=>get_product('id'),
+			  //'status'=>6,//只查询未出票的订单
 				'order_sn' => $ginfo['id'],
 			);
 			if($ginfo['plan_id']){
@@ -746,7 +753,7 @@ class OrderController extends ManageBase{
 					'statusCode' => '300',
 					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn)),
 				);
-				echo json_encode($return);
+				die(json_encode($return));
 			}else{
 				$list = Operate::do_read('Order',0,$map,'','',true);
 				$info = unserialize($list['info']);
@@ -759,7 +766,7 @@ class OrderController extends ManageBase{
 					);
 				}
 				//只支持单个区域
-				if(count($info['data']['area']) == 1){
+				if(count($info['data']['area']) === (int)1){
 					$this->assign('data',$list)
 						->assign('area',$area)
 						->assign('num',$num)
@@ -768,20 +775,6 @@ class OrderController extends ManageBase{
 				}else{
 					$this->erun("非常抱歉该功能目前只支持单个区域!");
 				}
-				/*
-				foreach ($info['data']['area'] as $key => $value) {
-					$area[]=array(
-						'area' => $key,
-						'num'  => $value['num'],
-						'priceid' => $value['seat'][0]['priceid'],
-						'price' => $value['seat'][0]['price'],
-						);
-				}dump($area);
-				$this->assign('data',$list)
-					->assign('area',$area)
-					->assign('num',$num)
-					->assign('plan',$list['plan_id'])
-					->display();*/
 			}
 		}
 	}
@@ -805,7 +798,6 @@ class OrderController extends ManageBase{
 					$ginfo['priceid'] = $value['seat'][0]['priceid'];
 					$ginfo['price'] = $value['seat'][0]['price'];
 				}
-				
 			}
 			//加载座椅
 			$info = Operate::do_read('Area',0,array('id'=>$ginfo['area'],'status'=>1),'','id,name,face,is_mono,seats,num,template_id');

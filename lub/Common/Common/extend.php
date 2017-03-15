@@ -1834,13 +1834,13 @@ function payLog($money,$sn,$scene,$type,$pattern,$data){
     return D('Manage/Pay')->add($pay_log);
 }
 //订单售票
-function print_buttn_show($type,$pay,$sn,$plan_id){
-    if(in_array($pay, array('1','3')) && $type == '6'){
+function print_buttn_show($type,$pay,$sn,$plan_id,$money){
+    if(in_array($pay, array('1','3')) && $type == '6' && check_collection_pay($sn)){
         $title = "网银支付";
         $width = '600';
         $height = '400';
         $pageId = 'payment';
-        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'order_type'=>3));
+        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'money'=>$money,'order_type'=>3));
     }else{
         $pageId = 'print';
         $width = '213';
@@ -1850,6 +1850,15 @@ function print_buttn_show($type,$pay,$sn,$plan_id){
     }
     $viewbut = "<a data-toggle='dialog' data-id='".$pageId."' data-width='".$width."' data-height='".$height."' data-title='".$title."' href='".$url."' data-resizable='false' data-maxable='false' data-mask='true'>出票</a>";
     echo $viewbut;
+}
+/*判断是否已经收款*/
+function check_collection_pay($sn){
+    $status = D('Collection')->where(array('order_sn'=>$sn))->field('id')->find();
+    if(empty($status)){
+        return true;
+    }else{
+        return false;
+    }
 }
 /**
  * 模拟请求

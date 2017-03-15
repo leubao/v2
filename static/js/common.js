@@ -161,6 +161,7 @@ function auto_fenix(price_group,status,vmodel,type){
  * @param  {string} postData 表单数据
  * @param  {string} url      URL地址
  * @param  {string} asside   请求来源
+ * 返回数据  statusCode 200|300|400 dialog true|false forwardUrl 在dialog  为true有效  refresh 要刷新的弹窗或tab框架
  */
 function post_server(postData,url,asside){
   $.ajax({
@@ -187,10 +188,16 @@ function post_server(postData,url,asside){
                   break;
             }
             //刷新
-            $(this).dialog('refresh', data.refresh);
-            $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
+            if(data.dialog){
+              //弹窗
+              $(this).dialog('refresh', data.refresh);
+              $(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
+            }else{
+              //navtab
+              $(this).navtab('refresh', data.refresh);
+            }
         }else{
-            $(this).alertmsg('error','出票失败!');
+            $(this).alertmsg('error',data.message);
         }
     }
   });

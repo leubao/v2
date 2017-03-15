@@ -102,6 +102,7 @@ class IndexController extends Base{
 		//根据商户ID查询相应产品
 		$pro = Operate::do_read('Item',0,array('id'=>$uInfo['item_id']),'',array('product'));
 		$proArr = explode(',', $pro['product']);
+		//TODO 判断产品是否都可用
 		foreach ($proArr as $k=>$v){
 			$list[$k] = Operate::do_read('Product',0,array('id'=>$v,'status'=>1));
 			$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'prodct_id'=>$v))->getField('quota');

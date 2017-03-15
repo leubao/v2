@@ -1259,7 +1259,7 @@ class Order extends \Libs\System\Service {
 		$ticketType = F('TicketType'.$plan['product_id']);
 		//构造打印数据
 		//$dataList = Order::create_print($info['order_sn'],$info['info']['data']['area'],$plan);
-		$table = 'drifting';
+		$table = 'sales_goods';
 		$map = array('plan_id' => $info['plan_id'],'status'=>'0');//dump($info);
 		foreach ($info['info']['data']['area'] as $key => $value) {
 			/*判断是否联合售票*/

@@ -66,7 +66,7 @@ function collection_log($info,$pay)
 {
 	$data = array(
 		'user_id' 	=> 	get_user_id(),
-		'moeny'	  	=> 	$info['moeny'],
+		'money'	  	=> 	$info['money'],
 		'pay'	  	=> 	$pay,
 		'order_sn'	=> 	$info['order_sn'],
 		'product_id'=>	$info['product_id'],

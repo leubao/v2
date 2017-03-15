@@ -29,7 +29,7 @@ class MsgController extends ManageBase {
 				'title'  => '待审核订单',
 				'msg' => '系统中存在'.$pre.'个待审核订单等待处理!',
 				'url' => U('Item/Work/bookticket'),
-				'tabid'=>'384Item',
+				'tabid'=>'348Item',
 				'title'=>'待审核订单',
 				'titp'=> 'warning',
 			);
