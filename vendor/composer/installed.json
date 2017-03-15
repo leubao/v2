@@ -149,17 +149,17 @@
     },
     {
         "name": "riverslei/payment",
-        "version": "v3.0.3",
-        "version_normalized": "3.0.3.0",
+        "version": "v3.0.5",
+        "version_normalized": "3.0.5.0",
         "source": {
             "type": "git",
             "url": "https://github.com/helei112g/payment.git",
-            "reference": "c38d7fb1e7b38a32c21a94d3cb94f3427c916c24"
+            "reference": "6b21bee48ab54716dbedb4eacaa848a92e4d966b"
         },
         "dist": {
             "type": "zip",
-            "url": "https://files.phpcomposer.com/files/helei112g/payment/c38d7fb1e7b38a32c21a94d3cb94f3427c916c24.zip",
-            "reference": "c38d7fb1e7b38a32c21a94d3cb94f3427c916c24",
+            "url": "https://files.phpcomposer.com/files/helei112g/payment/6b21bee48ab54716dbedb4eacaa848a92e4d966b.zip",
+            "reference": "6b21bee48ab54716dbedb4eacaa848a92e4d966b",
             "shasum": ""
         },
         "require": {
@@ -170,7 +170,7 @@
         "require-dev": {
             "endroid/qrcode": "~1.9"
         },
-        "time": "2017-03-11T11:54:18+00:00",
+        "time": "2017-03-14T09:48:11+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {
