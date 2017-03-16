@@ -198,7 +198,7 @@ class ProductController extends ManageBase{
 				$this->assign('gid',$group_id)->display('ticket_type');
 			}else{
 				//获取分组
-				$group = Operate::do_read('TicketGroup',1,array('product_id'=>$product_id));
+				$group = Operate::do_read('TicketGroup',1,array('product_id'=>$product_id,'status'=>1));
 				$this->assign('data',$group);
 				$this->display();
 			}	

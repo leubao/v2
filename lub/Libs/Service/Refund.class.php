@@ -453,6 +453,13 @@ class Refund extends \Libs\System\Service {
 		}else{
 			//现金 TODO  微信或者支付宝退款
 		}
+		//微信支付4支付宝5微信支付
+		if($info['pay'] == '5'){
+			Refund::weixin_refund($sn,$info['product_id'],$money_back);
+		}
+		if($info['pay'] == '4'){
+			Refund::alipay_refund($sn,$info['product_id'],$money_back);
+		}
 		/*=============处理日志===============*/
 		if($info['status'] <> '7'){
 			$refund_data = array(
@@ -714,11 +721,48 @@ class Refund extends \Libs\System\Service {
 		}
 	}
 	//微信退款
-	function weixin_refund($sn,$product_id){
+	function weixin_refund($sn,$product_id,$money){
 		//读取支付日志
 		$info = D('Item/Pay')->where(array('order_sn'=>$sn))->find();
 		$pay = & load_wechat('Pay',$product_id);
-		$money = $info['money']*100;
+		if($money > $info['money']){
+			return false;
+		}
+		$money = $money*100;
+		$rsn = get_order_sn($product_id);
+		$result = $pay->refund($sn,$info['out_trade_no'],$rsn,$money,$money);
+		// 处理创建结果
+		if($result===FALSE){
+		    //TODO  写入紧急处理错误
+		    //写入待处理事件
+		    load_redis('lpush','WeixinPayRefund',$sn);
+		}else{
+		    // 接口成功的处理
+		    $param = unserialize($info['param']);
+		    $param['refund'] = $result;
+		    $uppaylog = array(
+		    	'status'		=>	4,
+		    	'out_refund_no'	=>	$result['refund_id'],
+		    	'refund_sn'		=>	$result['out_refund_no'],
+		    	'refund_moeny'	=>	$result['cash_refund_fee'],
+		    	'param'			=>  serialize($param),
+		    	'user_id'		=>	get_user_id(),
+		    	'update_time'	=>	time()
+		    );
+            $paylog = D('Item/Pay')->where(array('order_sn'=>$sn))->save($uppaylog);
+		}
+		return $result;
+	}
+	//支付宝退款
+	function alipay_refund($sn,$product_id,$money)
+	{
+		//读取支付日志
+		$info = D('Item/Pay')->where(array('order_sn'=>$sn))->find();
+		$pay = & load_wechat('Pay',$product_id);
+		if($money > $info['money']){
+			return false;
+		}
+		$money = $money*100;
 		$rsn = get_order_sn($product_id);
 		$result = $pay->refund($sn,$info['out_trade_no'],$rsn,$money,$money);
 		// 处理创建结果

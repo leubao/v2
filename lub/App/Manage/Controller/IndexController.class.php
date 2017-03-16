@@ -223,10 +223,10 @@ class IndexController extends ManageBase {
     function public_get_group_ticket(){
         $group_id = I('get.group_id');
         $scene = I('get.scene');
-        if(empty($scene)){
+        if(!empty($scene)){
             $map['scene'] = array('find_in_set',$scene);
         }
-        $map = array('group_id'=>array('in',$group_id),'product_id'=>(int) $this->pid,'status'=>1);
+        $map = array('group_id'=>array('in',$group_id),'product_id'=>get_product('id'),'status'=>1);
         $lists = M('TicketType')->where($map)->field('id,name,price,param')->select();
         foreach ($lists as $k => $v) {
             $param = unserialize($v['param']);
@@ -236,7 +236,7 @@ class IndexController extends ManageBase {
                 'price' =>  $v['price'],
                 'full'  =>  $param['full'],
                 'level3'=>  $param['level3']
-                );
+            );
         }
         $return = array('statusCode'=>'200','data'=>$list);
         die(json_encode($return));

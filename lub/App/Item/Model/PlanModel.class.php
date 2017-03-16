@@ -291,7 +291,7 @@ class PlanModel extends Model{
 			        		$this->commit();
 			        		//批量写入配额
 			        		$proconf = cache('ProConfig');
-					        if($proconf[$info['product_id']]['quota'] == '1'){
+					        if($proconf[$info['product_id']][1]['quota'] == '1'){
 					        	\Libs\Service\Quota::reg_quota($planid,$info['product_id']);
 					        }
 			        		return true;
@@ -511,7 +511,8 @@ sql;
 			$group_map = array(
 				'id'	=>	array('in',$auto_group),
 				'status'=>	'1',
-				'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+				'product_id'=>get_product('id'),
+				'template_id'=>$template_id,
 			);
 			$group  = M('AutoSeat')->where($group_map)->field('id,sort,seat')->select();
 			foreach ($group as $ke=>$va){

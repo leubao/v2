@@ -981,29 +981,28 @@ class Report{
  	//售票员资金一览表
  	function conductor($datatime = '',$plan_id = '',$user_id = '')
  	{	
-
  		if(empty($plan_id)){
- 			$product_id = get_product('id');
  			$list = D('Item/Order')->where($datatime)->field('plan_id')->select();
- 			$plan = array_unique($list);
+ 			$list = array_column($list,'plan_id');
+ 			$plan = array_flip($list);
  			foreach ($plan as $k => $v) {
- 				$conductor = Report::sum_pay($v['plan_id'],$user_id);
- 				$collection = Report::collection($v['plan_id'],$user_id);
- 				$money[$v['plan_id']] = array(
- 					'plan'   => $v['plan_id'],
+ 				//窗口售票
+ 				$conductor = Report::sum_pay($k,$user_id);
+ 				//代收款
+ 				$collection = Report::collection($k,$user_id);
+ 				$money[$k] = array(
+ 					'plan' => $k,
  					'data' => array_merge($conductor,$collection)
  				);
  			}
  		}else{
  			$conductor = Report::sum_pay($plan_id,$user_id);
  			$collection = Report::collection($plan_id,$user_id);
-
  			$money[$plan_id] = array(
  				'plan'   => $plan_id,
  				'data' => array_merge($conductor,$collection)
  			);
  		}
- 		
  		foreach ($money as $key => $value) {	
  			foreach ($value['data'] as $ke => $val) {
  				if(in_array($ke,array('cash','dcash'))){$sum['cash'] += $val;}
@@ -1048,7 +1047,8 @@ class Report{
  		$map = array(
  			'product_id' => get_product('id'),
  			'user_id'	 => $user_id,
- 			'plan_id'	 =>	$plan_id
+ 			'plan_id'	 =>	$plan_id,
+ 			'status'	 =>	'1'
  		);
  		$pay = array(
  			'1' => array('pay'=>1,'name'=>'cash'),

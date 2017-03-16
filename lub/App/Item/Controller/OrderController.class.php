@@ -571,7 +571,7 @@ class OrderController extends ManageBase{
 						'message' => '订单创建遇到严重错误,无法继续执行,已经执行退款程序,请提醒客户查收',
 					);
 					//微信
-					\Libs\Service\Refund::weixin_refund($ginfo['sn'],$oinfo['product_id']);
+					\Libs\Service\Refund::weixin_refund($ginfo['sn'],$oinfo['product_id'],$oinfo['money']);
 					S('pay'.$ginfo['sn'],null);
 				}
 				S('pay'.$ginfo['sn'],$hit);
