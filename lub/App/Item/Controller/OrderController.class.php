@@ -518,6 +518,12 @@ class OrderController extends ManageBase{
 					$uppaylog = array('status'=>1,'out_trade_no'=>$result['transaction_id']);
                 	$paylog = D('Manage/Pay')->where(array('order_sn'=>$result['out_trade_no'],'type'=>2))->save($uppaylog);
 					$return = $this->sweep_pay_seat($info,$oinfo);
+				}else{
+					$return = array(
+						'statusCode' => '400',
+						'message'=>'['.$result['errCode'].']'.$result['errMsg']
+					);
+					error_insert($result['errMsg']);
 				}
 			}
 			die(json_encode($return));
@@ -528,8 +534,7 @@ class OrderController extends ManageBase{
 	}
 	//支付宝扫码支付 当面付
 	function alipay_code($odata)
-	{
-		
+	{	
 	}
 	//微信扫码支付
 	function weixin_code($product_id,$paykey,$payData)
@@ -575,10 +580,15 @@ class OrderController extends ManageBase{
 					S('pay'.$ginfo['sn'],null);
 				}
 				S('pay'.$ginfo['sn'],$hit);
-			}else{
+			}elseif($query['result_code'] == 'SUCCESS' && $query['return_code'] == 'SUCCESS'){
 				$return = array(
 					'statusCode' => '300',
 					'message'	=>	'等待客户付款...'
+				);
+			}else{
+				$return = array(
+					'statusCode' => '400',
+					'message'=>'['.$result['errCode'].']'.$result['errMsg']
 				);
 				error_insert($pay->errMsg.[$pay->errCode]);
 			}

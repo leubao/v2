@@ -1,5 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<div class="bjui-pageContent">
+<div class="bjui-pageContent" id="payPage">
 	<div class="form-group">
     <label class="col-sm-2 control-label">支付单号:</label>
     <input type="text" name="sn" class="form-control" size="40" value="{$ginfo['sn']}" disabled>
@@ -38,24 +38,34 @@
   $(document).ready(function(){
     settime('countdown',90);
   });*/
+  /*更新支付方式清空授权码*/
+  $("input:radio[name='is_pay']").on('ifChanged', function(e) {
+    $("#pay_card").val("");
+    $("#pay_card").focus();
+  });
   var paymentT = '',
       payMsg = $('#payMsg');
   $("#pay_card").focus();
   $('#pay_card').keydown(function(e){
     var pay_card = $("#pay_card").val(),
+        is_pay = $('input[name="is_pay"]:checked').val(),
         keycode = (e.keyCode ? e.keyCode : e.which);
     if(keycode == 13){
       if(isNull(pay_card) == false){
         layer.msg('扫码失败...');
         return false;
       }
+      alert(is_pay != '4');
+      if(is_pay == '1' || is_pay == '3' || is_pay == '6'){
+        layer.msg('请选择微信支付或支付宝支付...');
+        return false;
+      }
       var plan = '{$ginfo.plan}',
           sn = '{$ginfo.sn}',
-          is_pay = '{$ginfo.is_pay}',
           payKey = $("#pay_card").val(),
           order_type = '{$ginfo.order_type}';
       postData = 'info={"plan":'+plan+',"sn":'+sn+',"pay_type":'+is_pay+',"seat_type":"1","order_type":'+order_type+',"paykey":'+payKey+'}';
-      paymentT = setTimeout("payment_polling()",5000);
+      paymentT = setTimeout("payment_polling("+is_pay+")",5000);
       //向第三方支付提交支付请求
       $.ajax({
         type:'POST',
@@ -89,10 +99,11 @@
       });
     } 
   });
-  function payment_polling(){
+
+  function payment_polling(is_pay){
     $.ajax({
       type:'GET',
-      url:"{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'pay_type'=>$ginfo['is_pay'],'seat_type'=>1,'order_type'=>$ginfo['order_type']));}",
+      url:"{:U('Item/Order/public_payment_results',array('sn'=>$ginfo['sn'],'seat_type'=>1,'order_type'=>$ginfo['order_type']));}&pay_type="+is_pay,
       dataType:'json',
       timeout: 3500,
       error: function(){
@@ -110,16 +121,11 @@
         if(result.statusCode == "300"){
             //刷新
             payMsg.html(result.message);
-            paymentT = setTimeout("payment_polling()",5000);
+            paymentT = setTimeout("payment_polling("+is_pay+")",5000);
         }
         if(result.statusCode == "400"){
-          clearTimeout(paymentT); 
-          layer.msg(result.message);
-          $(this).dialog('refresh', 'work_quick');
-           //关闭当前窗口
-          $(this).dialog('close','payment');
+          clearTimeout(paymentT);
         }
-        console.log(result.statusCode);
       }
     });
   }
