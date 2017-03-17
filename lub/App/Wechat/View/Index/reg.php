@@ -44,13 +44,22 @@
             </div>
           </div>
         </li>
-        
         <li>
           <div class="item-content">
             <div class="item-inner">
               <div class="item-title label">密码</div>
               <div class="item-input">
                 <input type="password" id="pwd" placeholder="密码" class="">
+              </div>
+            </div>
+          </div>
+        </li>
+        <li>
+          <div class="item-content">
+            <div class="item-inner">
+              <div class="item-title label">行业选择</div>
+              <div class="item-input">
+                <input type="text" id="industry" value="" placeholder="行业选择">
               </div>
             </div>
           </div>
@@ -89,9 +98,10 @@ $(function() {
     var name = $("#name").val(),
         phone = $('#phone').val(),
         legally = $("#legally").val(),
-        pwd = $("#pwd").val();
-    if(name == '' || pwd == '' || legally == ''){
-      msg = "姓名、密码、身份证号不能为空";
+        pwd = $("#pwd").val(),
+        industry = $("#industry").val();
+    if(name == '' || pwd == '' || legally == '' || industry == ''){
+      msg = "姓名、密码、身份证号、行业不能为空";
     }
     if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(phone)){
       msg = "手机号码格式不正确!";
@@ -113,7 +123,7 @@ $(function() {
         },
         success:function(data){
           if(data.statusCode == '200'){
-            post_server(name,pwd, phone, legally,groupid, openid);
+            post_server(name,pwd, phone, legally,groupid, openid,industry);
           }else{
             $.toast(data.msg);
           }
@@ -122,8 +132,8 @@ $(function() {
 
     }
   });
-  function post_server(name,pwd,phone,legally,groupid,openid){
-    var postData = 'info={"username":"'+name+'","password":"'+pwd+'","phone":"'+phone+'","legally":"'+legally+'","group":"'+groupid+'","openid":"'+openid+'"}';
+  function post_server(name,pwd,phone,legally,groupid,openid,industry){
+    var postData = 'info={"username":"'+name+'","password":"'+pwd+'","phone":"'+phone+'","legally":"'+legally+'","group":"'+groupid+'","industry":"'+industry+'","openid":"'+openid+'"}';
     /*提交到服务器**/
     $.ajax({
         type:'POST',
@@ -145,7 +155,20 @@ $(function() {
         }
     });
   }
+  $("#industry").picker({
+    toolbarTemplate: '<header class="bar bar-nav">\
+    <button class="button button-link pull-right close-picker">确定</button>\
+    <h1 class="title">行业选择</h1>\
+    </header>',
+    cols: [
+      {
+        textAlign: 'center',
+        values: ['导游', '运输', '餐饮', '商户', '住宿', '其它']
+      }
+    ]
+  });
 });
+
 </script>
 </body>
 </html>

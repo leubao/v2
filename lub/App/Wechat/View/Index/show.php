@@ -3,7 +3,6 @@
     var global = {$goods_info};
 </script>
 <div class="page">
-{$proconf.wx_page_title}
   <header class="bar bar-nav">
     <h1 class="title"><i class="iconfont">&#xe603</i>{$proconf.wx_page_title}</h1>
     <if condition="empty($uinfo['promote'])">
@@ -24,9 +23,7 @@
     <div class="swiper-pagination"></div>-->
   </div>
   <!--内容-->
-
 </div>
-
 <!-- About Popup -->
 <div class="popup goods-cart">
   <header class="bar bar-nav">
@@ -125,6 +122,7 @@
 <script type="text/javascript">
   $(function() {
     wx.ready(function(){
+      /*
         wx.checkJsApi({
             jsApiList: [
                 'onMenuShareAppMessage',
@@ -132,7 +130,7 @@
         });
         wx.showMenuItems({
             menuList: ['menuItem:share:appMessage','menuItem:share:timeline']
-        });
+        });*/
         wx.onMenuShareAppMessage({
             title: '{$proconf.wx_share_title}',
             desc: '{$proconf.wx_share_desc}',
@@ -150,22 +148,13 @@
             }
         });
         wx.onMenuShareTimeline({
-            title: '{$proconf.share_title}',
-            desc: '{$proconf.share_desc}',
+            title: '{$proconf.wx_share_title}',
+            desc: '{$proconf.wx_share_desc}',
             link: '{$urls}',
             imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
             trigger: function (res) {
             },
             success: function (res) {
-              /*
-                $.post('../api/v0.0.1/marketing.php', {
-                        action:'ShareLog',
-                        openid:'',
-                        page_id: ''
-                    }, function (json) {
-                    alert('分享成功');
-
-                }, 'json');*/
             },
             cancel: function (res) {
             },

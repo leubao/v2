@@ -81,8 +81,8 @@ class FinancialController extends ManageBase{
         	$map['channel_id'] = array('in',agent_channel($channel,2));
         }
         //设置订单类型为团队或渠道
-        //按照客户分组来统计报表 TODO
-        $map['type'] = array('in','2,4,6,7');
+        //按照客户分组来统计报表 TODO 政企订单不计算在内
+        $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
         $db = M('ReportData');
 		$map['product_id'] = $this->pid;
@@ -124,7 +124,7 @@ class FinancialController extends ManageBase{
 		$plan_name = I('plan_name');
 
 	    $type = I('type') ? I('type') : '1';//1明细2合计
-	    $map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+	    $map['product_id'] = get_product('id');
 	    //传递条件
 	    $this->assign('starttime',$starttime ? $starttime : $endtime)
         	->assign('endtime',$endtime)->assign('plan_id',$plan_id)

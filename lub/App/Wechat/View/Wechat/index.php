@@ -124,7 +124,7 @@
                             </tr>
                             <tr>
                               <td width="100px">分享描述:</td>
-                              <td><textarea name="wx_share_desc" cols="30" rows="3">{$vo.share_desc}</textarea>
+                              <td><textarea name="wx_share_desc" cols="30" rows="3">{$vo.wx_share_desc}</textarea>
                               </td>
                             </tr>
                             <tr>
@@ -240,6 +240,7 @@
               </div>
               <div id="wtab-7" class="tab-pane">
                 <div class="panel-body">
+                <!--
                     <fieldset style="height:100%;">
                       <legend>微信支付 -- 收款</legend>
                       <div style="height:94%; overflow:hidden;">
@@ -258,9 +259,9 @@
                       </tbody>
                       </table>
                     </div>
-                    </fieldset>
+                    </fieldset>-->
                     <fieldset style="height:100%;">
-                      <legend>微信支付 -- 企业付款</legend>
+                      <legend>微信支付 -- 企业收款</legend>
                       <div style="height:94%; overflow:hidden;">
                       <table class="table  table-bordered">
                       <tbody>

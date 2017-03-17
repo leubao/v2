@@ -10,7 +10,6 @@
     <h1 class="title">账号登录</h1>
   </header>
   <div class="content">
-    <form action="{:U('Wechat/Index/login',array('param'=>$param));}" method="post">
     <div class="list-block">
       <ul>
         <li>
@@ -40,7 +39,6 @@
         <div class="col-100"><a href="#" type="submit" class="button button-big button-fill button-success sub">登录</a></div>
       </div>
     </div>
-    </form>
   </div>
 </div>
 
@@ -58,8 +56,13 @@ $(function() {
     if(name == '' || pwd == ''){
       msg = "用户密码不能为空";
     }
+    if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(name)){
+        msg = "手机号码格式不正确!";
+    }
     if(msg != ''){
       msgs(msg);msg = '';return false;
+    }else{
+      post_server(name,pwd,openid);
     }
   });
   function post_server(name,pwd,openid){
@@ -72,7 +75,7 @@ $(function() {
         dataType:'json',
         timeout: 1500,
         error: function(){
-          layer.msg('服务器请求超时，请检查网络...');
+          $.toast('服务器请求超时，请检查网络...');
         },
         success:function(data){
             if(data.statusCode == "200"){

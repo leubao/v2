@@ -98,7 +98,7 @@
           dataType:'json',
           timeout: 1500,
           error: function(){
-            layer.msg('服务器请求超时，请检查网络...');
+            $.toast('服务器请求超时，请检查网络...');
           },
           success:function(data){
               if(data.statusCode == "200"){

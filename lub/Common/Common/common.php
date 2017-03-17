@@ -716,44 +716,45 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
     return $wechat[$index];
 }
 /**
- * 获取支付操作对象
- * @param $pay string wxpay || alipay
+ * 获取支付操作配置信息
+ * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar || wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap
+ * @param $product_id 产品ID
+ * @param $sub 是否开启子商户
+ * @param $define 是否采用默认配置
  */
-function load_payment($pay = '',$product_id = ''){
+function load_payment($pay = '',$product_id = '',$submch = '',$define = ''){
     static $payment = array();
     //根据产品读取配置信息
     if(empty($product_id)){return false;}
-    dump($product_id);
     $proconf = cache('ProConfig_'.$product_id);
-    dump($proconf);
-    if($pay == 'alipay'){
-        /*
+    /*
+    if (stripos($pay, 'ali') !== false) {
+        $config = $proconf[$product_id]['2'];
         $options = array(
-            // 老版本参数，当使用新版本时，不需要传入
-            'partner'   => '',// 请填写自己的支付宝账号信息
-            'md5_key'   => 'xxxxxx',// 此密码无效，请填写自己对应设置的值
-            // 转款接口，必须配置以下两项
-            'account'   => 'xxxxx@126.com',
-            'account_name' => 'xxxxx',
-            'sign_type' => 'RSA',// 默认方式    目前支持:RSA   MD5`
-            // 如果没有设置以下内容，则默认使用老版本
-            // 支付宝2.0 接口  如果使用支付宝 新版 接口，请设置该参数，并且必须为 1.0。否则将默认使用支付宝老版接口
-            'ali_version'   => '1.0',// 调用的接口版本，固定为：1.0
-            'app_id'        => '2016073100130857',// 支付宝分配给开发者的应用ID
-            'use_sandbox'   => true,//  新版支付，支持沙箱调试
-            'ali_public_key'    => SITE_PATH . 'pay/alipay/' . 'alipay_public_key.pem',// 支付宝新版本，每个应用对应的公钥都不一样了
-
-            // 新版与老版支付  共同参数，
-            'rsa_private_key'   => SITE_PATH . 'pay/alipay/' . 'rsa_private_key.pem',
-            'notify_url'        => 'https://helei112g.github.io/',
-            'return_url'        => 'https://helei112g.github.io/',// 我的博客地址
-            'time_expire'       => '15',// 取值为分钟
-        );*/
+            'app_id'        => 'xxxxxx',  // 公众账号ID
+            'mch_id'        => 'xxxxx',// 商户id
+            'md5_key'       => 'xxxxxx',// md5 秘钥
+            'app_cert_pem'  => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
+            'app_key_pem'   => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
+            'sign_type'     => 'MD5',// MD5  HMAC-SHA256
+            'limit_pay'     => [
+                //'no_credit',
+            ],// 指定不能使用信用卡支付   不传入，则均可使用
+            'fee_type' => 'CNY',// 货币类型  当前仅支持该字段
+            'notify_url'    => 'https://helei112g.github.io/',
+            'redirect_url' => 'https://helei112g.github.io/',// 如果是h5支付，可以设置该值，返回到指定页面
+            'return_raw'                => true,// 在处理回调时，是否直接返回原始数据，默认为false
+        );
+        if($submch == '1'){
+            $options = array(
+                'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
+                'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
+            );
+        }
+    } else {
+        $config = $proconf[$product_id]['2'];
         $options = array(
-
-
             'use_sandbox'               => true,// 是否使用沙盒模式
-
             'partner'                   => '2088102169252684',
             'app_id'                    => '2016073100130857',
             'sign_type'                 => 'RSA2',// RSA  RSA2
@@ -778,28 +779,16 @@ function load_payment($pay = '',$product_id = ''){
             // 与业务相关参数
             'notify_url'                => 'https://helei112g.github.io/',
             'return_url'                => 'https://helei112g.github.io/',
-
             'return_raw'                => false,// 在处理回调时，是否直接返回原始数据，默认为false
         );
-
-    }else{
-        $options = array(
-            'app_id'    => 'wxxxxx',  // 公众账号ID
-            'mch_id'    => 'xxxxx',// 商户id
-            'md5_key'   => 'xxxxxx',// md5 秘钥
-
-            'notify_url'    => 'https://helei112g.github.io/',
-            'time_expire'   => '14',
-
-            // 涉及资金流动时 退款  转款，需要提供该文件
-            //'cert_path' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'wx' . DIRECTORY_SEPARATOR . 'apiclient_cert.pem',
-            //'key_path'  => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'wx' . DIRECTORY_SEPARATOR . 'apiclient_key.pem',
-            'cert_path' => SITE_PATH . 'pay/wxpay/' . $product_id . '/apiclient_cert.pem',
-            'key_path'  => SITE_PATH . 'pay/wxpay/' . $product_id . '/apiclient_key.pem',
-        );
     }
+    //是否开启子商户
+    //判断收款跟付款
+    dump($proconf);
+
     //根据支付类型选择驱动
     return $options;
+    */
 }
 /**
  * lubTicket redis 操作API

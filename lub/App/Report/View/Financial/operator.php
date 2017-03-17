@@ -139,7 +139,7 @@
     <tr>
       <th rowspan="2" align="center" width="160px">销售计划</th>
       <th colspan="5" align="center">门票销售</th>
-      <th colspan="5" align="center">政企代收</th>
+      <th colspan="5" align="center">政企销售</th>
       <th rowspan="2" align="center" width="100px">备注</th>
     </tr>
     <tr>

@@ -1709,7 +1709,7 @@
     */
     function is_order_plan($param, $type = null){
         //获取当前可售销售计划
-        $plan = S('plan');
+        $plan = F('planlist');
         if(in_array($param,explode(',',$plan))){
             //正常
             return true;

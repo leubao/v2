@@ -59,14 +59,7 @@
               </div>
             </a>
           </li>
-          <li>
-            <a href="{:U('Wechat/Index/remove');}" class="item-link item-content external">
-              <div class="item-media"><i class="icon icon-remove"></i></div>
-              <div class="item-inner">
-                <div class="item-title">注销用户</div>
-              </div>
-            </a>
-          </li>
+          
           
           <li>
             <a href="{:U('Wechat/Index/promote');}" class="item-link item-content external">
@@ -76,7 +69,15 @@
               </div>
             </a>
           </li>
-          
+          <!--
+          <li>
+            <a href="{:U('Wechat/Index/remove');}" class="item-link item-content external">
+              <div class="item-media"><i class="icon icon-remove"></i></div>
+              <div class="item-inner">
+                <div class="item-title">注销用户</div>
+              </div>
+            </a>
+          </li>
           <li>
             <a href="{:U('Wechat/Index/reg_code');}" class="item-link item-content external">
               <div class="item-media"><i class="icon icon-share"></i></div>
@@ -85,7 +86,7 @@
               </div>
             </a>
           </li>
-
+          -->
           
         </ul>
       </div>

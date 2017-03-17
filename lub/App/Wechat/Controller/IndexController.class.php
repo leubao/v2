@@ -36,7 +36,10 @@ class IndexController extends LubTMP {
         }
         //加载产品配置信息
         $proconf = get_proconf($this->pid,2);
-        $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf);
+        $script = &  load_wechat('Script',$this->pid,1);
+        //获取JsApi使用签名，通常这里只需要传 $ur l参数
+        $options = $script->getJsSign(U('Wechat/Index/show'));
+        $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf)->assign('options',$options);
     }
     /**
      * 微信开发几步走
@@ -206,12 +209,13 @@ class IndexController extends LubTMP {
      * LubTicket 门票单品购买页面
      */
     function show(){
-        session('user',null);//TODO  生产环境删除
+        //session('user',null);//TODO  生产环境删除
         //判断用户是否登录   检查session 是否为空
         $user = session('user');
         if(empty($user)){
            $user = Wticket::tologin($this->ginfo);
         }
+        $this->check_login();
         //与数据比对、是否绑定渠道商\
         //根据当前用户属性  加载价格及座位
         $plan = Wticket::getplan($this->pid);
@@ -223,6 +227,15 @@ class IndexController extends LubTMP {
         //限制单笔订单最大数
         $this->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
             ->assign('urls',$urls)->assign('param',$param)->display();
+    }
+    function check_login(){
+        $user = session('user');
+        if(empty($user['user']['openid'])){
+            session('user',null);
+            $oauth = & load_wechat('Oauth',$this->pid,1);
+            $url = $oauth->getOauthRedirect(U('Wechat/Index/show',array('pid'=>$this->pid)), $state, 'snsapi_base');
+            redirect($url);
+        }
     }
     /**
      * 订单详情
@@ -305,15 +318,12 @@ class IndexController extends LubTMP {
                 $user_id = D('User')->add($data);
             }
             if($user_id){
-                D('UserData')->add(array('user_id'=>$user_id,'wechat'=>'1'));
+                D('UserData')->add(array('user_id'=>$user_id,'wechat'=>'1','industry'=>industry($info['industry'])));
                 $updata = array('user_id'=>$user_id,'channel'=>'1');
                 D('WxMember')->where(array('openid'=>$info['openid']))->save($updata);
                 session('user',null);
                 $url = Wticket::reg_link($user_id,$this->pid);
-                $return = array(
-                    'statusCode' => 200,
-                    'url' => $url,
-                ); 
+                $return = array('statusCode' => 200,'url' => $url); 
             }else{
                 $return = array(
                     'statusCode' => 300,
@@ -333,6 +343,7 @@ class IndexController extends LubTMP {
             }
         }
     }
+
     //注册二维码
     function reg_code()
     {
@@ -384,8 +395,78 @@ class IndexController extends LubTMP {
     }
     //账号登录
     function login()
-    {
-        # code...
+    {   
+        if(IS_POST){
+            $pinfo = $_POST;
+            $pinfo = json_decode($pinfo['info'],true);
+            if(empty($pinfo)){
+                $return = array(
+                    'statusCode' => 300,
+                    'msg'        => '登录信息不能为空'
+                ); 
+                die(json_encode($return)); 
+            }            
+            $db = D('User');
+            $info = $db->where(array('username'=>$pinfo['username']))->field('id,username,password,verify')->find();
+            if(!$info){
+                $return = array('statusCode' => 300,'msg' => '用户名或密码错误'); 
+                die(json_encode($return)); 
+            }else{
+                $password = md5($pinfo['password'].md5($info['verify']));
+                if (!empty($pinfo['password']) && $password != $info['password']) {
+                    $return = array('statusCode' => 300,'msg' => '用户名或密码错误'); 
+                    die(json_encode($return)); 
+                }
+                $uinfo = Wticket::get_auto_auth($pinfo['openid']);
+                //判断是否是政企渠道用户
+                switch ($uinfo['group']['type']) {
+                    case '1':
+                        $type = 2;
+                        $pay = '2';/*支持授信额支付*/
+                        $scene = '42';
+                        break;
+                    case '3':
+                        $type = 4;/*政企渠道*/
+                        $pay = '5';/*支持微信支付*/
+                        $scene = '46';
+                        break;
+                    case '4':
+                        $type = 8;/*全员销售*/
+                        $pay = '5';/*支持微信支付*/
+                        $scene = '48';
+                        break;
+                    case '5':
+                        $type = 9;/*全员销售*/
+                        $pay = '5';/*支持微信支付*/
+                        $scene = '49';
+                        break;
+                }
+                $user['user'] = array(
+                    'id'      => $uinfo['id'],
+                    'openid'  => $pinfo['openid'],
+                    'nickname'=> $uinfo['nickname'],
+                    'maxnum'  => '30',
+                    'guide'   => $uinfo['id'],
+                    'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
+                    'scene'   => $scene,
+                    'channel' => '1',
+                    'epay'    => $uinfo['group']['settlement'],
+                    'pricegroup'=> $uinfo['group']['price_group'],
+                    'wxid'      => $uinfo['wechat']['user_id'],//微信id
+                    'fx'        => $uinfo['type'],
+                    'promote'   => $uinfo['promote']
+                );
+                //保存openid
+                session('openid',$pinfo['openid']);
+                session('user',$user);
+                $return = array('statusCode' => 200,'msg' => '登录成功','url'=>U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$uinfo['id']))); 
+                die(json_encode($return)); 
+            }
+        }else{
+            session('user',null);
+            $this->display();
+        }
+        
     }
     //提现
     function mention(){
@@ -566,7 +647,7 @@ class IndexController extends LubTMP {
                     //产品名称
                     $product_name = product_name($this->pid,1);
                     $pay = & load_wechat('Pay',$this->pid);
-                    dump($pay);
+                    
 					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
 
                     if($prepayid){

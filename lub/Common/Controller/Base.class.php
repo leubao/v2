@@ -35,6 +35,7 @@ class Base extends LubTMP {
         //验证登录
         $this->competence();
         $product = I('get.productid',0,intval);
+        //dump($this->pro_conf($product));
         $this->assign("SUBMENU_CONFIG", json_encode(D("Home/Menu")->getMenuList()));
         $this->assign('USER_INFO', json_encode($this->senuInfo()));
         $this->assign('PRO_CONF',json_encode($this->pro_conf($product)));

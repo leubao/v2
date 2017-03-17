@@ -128,7 +128,7 @@ class Wticket {
     * 微信号id
     * 当已经是渠道人员的人打开带推广的连接依然使用自己的渠道政策，当是散客的人员打开推广连接查询是否包含推广人，包含则执行推广人的价格政策
      */
-    function get_auto_auth($open_id,$promote){
+    function get_auto_auth($open_id,$promote = ''){
         //查询数据库是否已经绑定账号
         if(empty($open_id)){//error_insert('98');
             return false;

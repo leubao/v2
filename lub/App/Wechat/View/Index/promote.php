@@ -1,7 +1,7 @@
 <Managetemplate file="Wechat/Public/header"/>
 <div class="page">
   	<div class="content">
-		<img src="d/wap/banner.jpg" height="120px" width="100%">
+		<!--img src="d/wap/banner.jpg" height="120px" width="100%"-->
   		<div class="card" style="text-align: center;">
   			<img src="{$qr}">
   		</div>
@@ -11,7 +11,7 @@
 	    <p class="remark">点击右上角按钮分享给朋友</p>
   	</div>
     <div class="shareit">
-      <img class="arrow" src="http://new.leubao.com/static/images/guide.png">
+      <img class="arrow" src="http://ticket.leubao.com/static/images/guide.png">
     </div>
 </div>
 <Managetemplate file="Wechat/Public/footer"/>
