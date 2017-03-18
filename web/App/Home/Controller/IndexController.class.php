@@ -6,7 +6,7 @@ use Think\Controller;
 class IndexController extends Controller
 {
     protected function _initialize() {
-        $this->url = 'http://www.yxpttk.com/';
+        $this->url = 'http://ticket.leubao.com/';
         $this->initweb();
     }
     function initweb(){

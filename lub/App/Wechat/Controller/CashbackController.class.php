@@ -19,15 +19,6 @@ use Wechat\Service\Utils\SHA1;
 class CashbackController extends ManageBase{
 	protected function _initialize() {
         parent::_initialize();
-        /*
-        $proconf = cache('ProConfig');
-       // $proconf = $proconfs['41'];
-        // 开发者中心-配置项-AppID(应用ID)
-        $this->appId = $proconf['appid'];
-        //受理商ID，身份标识
-        $this->mchid = $proconf['mchid'];
-        //商户支付密钥Key。审核通过后，在微信发送的邮件中查看
-        $this->mchkey = $proconf['mchkey'];*/
     }
     //提现列表
     function index(){

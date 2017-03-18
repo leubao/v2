@@ -717,7 +717,8 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
 }
 /**
  * 获取支付操作配置信息
- * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar || wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap
+ * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar 
+ * || wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap
  * @param $product_id 产品ID
  * @param $sub 是否开启子商户
  * @param $define 是否采用默认配置
@@ -726,69 +727,31 @@ function load_payment($pay = '',$product_id = '',$submch = '',$define = ''){
     static $payment = array();
     //根据产品读取配置信息
     if(empty($product_id)){return false;}
-    $proconf = cache('ProConfig_'.$product_id);
-    /*
+    $proconf = cache('ProConfig');
+    $proconf = $proconf[$product_id][11];
+    $config = cache('Config');
+    //判断是否是企业付款
     if (stripos($pay, 'ali') !== false) {
-        $config = $proconf[$product_id]['2'];
+
+    }else{
+        //付款
         $options = array(
-            'app_id'        => 'xxxxxx',  // 公众账号ID
-            'mch_id'        => 'xxxxx',// 商户id
-            'md5_key'       => 'xxxxxx',// md5 秘钥
+            'app_id'        => $proconf['wx_mch_appid'],  // 公众账号ID
+            'mch_id'        => $proconf['wx_payment_mch_id'],// 商户id
+            'md5_key'       => $proconf['wx_payment_mchkey'],// md5 秘钥
             'app_cert_pem'  => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
             'app_key_pem'   => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
             'sign_type'     => 'MD5',// MD5  HMAC-SHA256
-            'limit_pay'     => [
-                //'no_credit',
-            ],// 指定不能使用信用卡支付   不传入，则均可使用
+            'limit_pay'     => [/*'no_credit', */],// 指定不能使用信用卡支付   不传入，则均可使用
             'fee_type' => 'CNY',// 货币类型  当前仅支持该字段
-            'notify_url'    => 'https://helei112g.github.io/',
-            'redirect_url' => 'https://helei112g.github.io/',// 如果是h5支付，可以设置该值，返回到指定页面
-            'return_raw'                => true,// 在处理回调时，是否直接返回原始数据，默认为false
-        );
-        if($submch == '1'){
-            $options = array(
-                'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
-                'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
-            );
-        }
-    } else {
-        $config = $proconf[$product_id]['2'];
-        $options = array(
-            'use_sandbox'               => true,// 是否使用沙盒模式
-            'partner'                   => '2088102169252684',
-            'app_id'                    => '2016073100130857',
-            'sign_type'                 => 'RSA2',// RSA  RSA2
-
-            // 可以填写文件路径，或者密钥字符串  当前字符串是 rsa2 的支付宝公钥
-            'ali_public_key'            => 'MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmBjJu2eA5HVSeHb7jZsuKKbPp3w0sKEsLTVvBKQOtyb7bjQRWMWBI7FrcwEekM1nIL+rDv71uFtgv7apMMJdQQyF7g6Lnn9niG8bT1ttB8Fp0eud5L97eRjFTOa9NhxUVFjGDqQ3b88o6u20HNJ3PRckZhNaFJJQzlahCpxaiIRX2umAWFkaeQu1fcjmoS3l3BLj8Ly2zRZAnczv8Jnkp7qsVYeYt01EPsAxd6dRZRw3uqsv9pxSvyEYA7GV7XL6da+JdvXECalQeyvUFzn9u1K5ivGID7LPUakdTBUDzlYIhbpU1VS8xO1BU3GYXkAaumdWQt7f+khoFoSw+x8yqQIDAQAB',
-            //'ali_public_key' => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'alipay_public_key_rsa.pem',// 这里是支付宝rsa的公钥
-
-            // 可以填写文件路径，或者密钥字符串  我的沙箱模式，rsa与rsa2的私钥相同，为了方便测试
-            'rsa_private_key'           => dirname(__FILE__) . DIRECTORY_SEPARATOR . 'rsa_private_key.pem',
-
-            'limit_pay'      => [
-                //'balance',// 余额
-                //'moneyFund',// 余额宝
-                //'debitCardExpress',//     借记卡快捷
-                'creditCard',//信用卡
-                //'creditCardExpress',// 信用卡快捷
-                //'creditCardCartoon',//信用卡卡通
-                //'credit_group',// 信用支付类型（包含信用卡卡通、信用卡快捷、花呗、花呗分期）
-            ],// 用户不可用指定渠道支付当有多个渠道时用“,”分隔
-
-            // 与业务相关参数
-            'notify_url'                => 'https://helei112g.github.io/',
-            'return_url'                => 'https://helei112g.github.io/',
-            'return_raw'                => false,// 在处理回调时，是否直接返回原始数据，默认为false
+            'notify_url'    => 'http://ticket.leuao.com',
+            'redirect_url' => 'http://ticket.leuao.com',// 如果是h5支付，可以设置该值，返回到指定页面
+            'return_raw'   => true,// 在处理回调时，是否直接返回原始数据，默认为false
         );
     }
-    //是否开启子商户
-    //判断收款跟付款
-    dump($proconf);
 
     //根据支付类型选择驱动
     return $options;
-    */
 }
 /**
  * lubTicket redis 操作API

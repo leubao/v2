@@ -52,7 +52,6 @@ class WxTransfer extends WxBaseStrategy
             'CURLOPT_SSLKEY'    => $this->config->appKeyPem,
             'CURLOPT_CAINFO'    => $this->config->cacertPath,
         ])->post($xml)->submit($url);
-
         return $responseTxt;
     }
 

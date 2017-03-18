@@ -86,7 +86,7 @@ class AutoCash extends \Libs\System\Service {
     function invalid($userid,$cash_id,$cash){
         $map['id'] = $cash_id;
         $map['status'] = '3';
-        $status = M('Cash')->where($map)->save(array('money'=>$cash,'createtime'=>time()));
+        $status = M('Cash')->where($map)->save(array('money'=>array('exp','cash+'.$cash),'createtime'=>time()));
         if($status){
             AutoCash::up_user_cash($userid,$cash);
             return '300';

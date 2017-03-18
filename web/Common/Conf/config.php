@@ -50,12 +50,12 @@ return array(
 
     /* 数据库设置 */
     'DB_TYPE' => 'mysql', // 数据库类型
-    'DB_HOST' => '', // 服务器地址
-    'DB_NAME' => '', // 数据库名
-    'DB_USER' => '', // 用户名
-    'DB_PWD' => '', // 密码
+    'DB_HOST' => 'rdset30picxyk8ll6uh8i.mysql.rds.aliyuncs.com',
+    'DB_NAME' => 'tickets', // 数据库名
+    'DB_USER' => 'yx_dhpticket', // 用户名
+    'DB_PWD' => 'chengde360', // 密码
     'DB_PORT' => '3306', // 端口
-    'DB_PREFIX' => '', // 数据库表前缀
+    'DB_PREFIX' => 'lub_', // 数据库表前缀
     'DB_FIELDTYPE_CHECK' => true, // 是否进行字段类型检查
     'DB_FIELDS_CACHE' => true, // 启用字段缓存
     'DB_CHARSET' => 'utf8', // 数据库编码默认采用utf8
@@ -160,5 +160,5 @@ return array(
     'CHECK_APP_DIR' => false, // 是否检查应用目录是否创建
     'FILE_UPLOAD_TYPE' => 'Local', // 文件上传方式
     'DATA_CRYPT_TYPE' => 'Think', // 数据加密方式
-
+    'LOAD_EXT_FILE' => 'extend',
 );

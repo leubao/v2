@@ -287,7 +287,7 @@ class WechatPay {
         );
         empty($goods_tag) || $postdata['goods_tag'] = $goods_tag;
         $result = $this->postXml($postdata, self::MCH_BASE_URL . '/pay/micropay');
-        $json = Tools::xml2arr($result);//dump($this->_parseResult($json));
+        $json = Tools::xml2arr($result);
         if (!empty($json) && false === $this->_parseResult($json)) {
             return false;
         }

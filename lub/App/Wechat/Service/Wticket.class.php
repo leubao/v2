@@ -128,12 +128,14 @@ class Wticket {
     * 微信号id
     * 当已经是渠道人员的人打开带推广的连接依然使用自己的渠道政策，当是散客的人员打开推广连接查询是否包含推广人，包含则执行推广人的价格政策
      */
-    function get_auto_auth($open_id,$promote = ''){
+    function get_auto_auth($open_id = '',$promote = '',$user_id = ''){
         //查询数据库是否已经绑定账号
         if(empty($open_id)){//error_insert('98');
-            return false;
+            $map = array('user_id'=>$user_id);
+        }else{
+            $map = array('openid'=>$open_id);
         }
-        $winfo = M('WxMember')->where(array('openid'=>$open_id))->field('user_id,openid,unionid,channel')->find();
+        $winfo = M('WxMember')->where($map)->field('user_id,openid,unionid,channel')->find();
         $db = M('User');
         if(!empty($winfo['user_id']) && $winfo['channel'] == '1'){
             $uInfo = $db->where(array('id'=>$winfo['user_id'],'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();

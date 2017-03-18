@@ -311,7 +311,7 @@ class Order extends \Libs\System\Service {
 				load_redis('lpush','PreOrder',$info['order_sn']);
 			}
 		}
-		$newInfo = array('subtotal'	=> $oinfo['subtotal'],'type'=>$oinfo['type'],'checkin'=> $oinfo['checkin'],'sub_type'=>$oinfo['sub_type'],'num'=>$oinfo['num'],'data' => $seatData,'crm' => $oinfo['crm'],'pay' => $info['is_pay'] ? $info['is_pay'] : $oinfo['param'][0]['is_pay'],'param'=> $info['param']);
+		$newInfo = array('subtotal'	=> $oinfo['subtotal'],'type'=>$oinfo['type'],'checkin'=> $oinfo['checkin'],'sub_type'=>$oinfo['sub_type'],'num'=>$oinfo['num'],'data' => $seatData,'crm' => $oinfo['crm'],'pay' => $is_pay ? $is_pay : $oinfo['param'][0]['is_pay'],'param'=> $info['param']);
 
 		$state = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn'],'status'=>array('not in','1,9')))->save($orderData);
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->save(array('info' => serialize($newInfo)));
@@ -360,7 +360,7 @@ class Order extends \Libs\System\Service {
 		//判断支付提交场景，窗口自动排座，窗口选座
 		//选座售票
 		if($info['order_type'] == '1'){
-			$status = Order::choose_seat($seat,$oinfo,'',1,'',$info['pay_type']);
+			$status = Order::choose_seat($seat,$oinfo,'',1,$info['pay_type']);
 		}
 		//快捷售票
 		if($info['order_type'] == '2'){

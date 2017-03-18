@@ -48,6 +48,5 @@ return [
     // 与业务相关参数
     'notify_url'                => 'https://helei112g.github.io/',
     'return_url'                => 'https://helei112g.github.io/',
-
     'return_raw'                => false,// 在处理回调时，是否直接返回原始数据，默认为false
 ];

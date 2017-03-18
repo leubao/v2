@@ -317,8 +317,8 @@ class IndexController extends LubTMP {
             if($info['openid']){
                 $user_id = D('User')->add($data);
             }
-            if($user_id){
-                D('UserData')->add(array('user_id'=>$user_id,'wechat'=>'1','industry'=>industry($info['industry'])));
+            if(!empty($user_id)){
+                $userdata = D('UserData')->add(array('user_id'=>$user_id,'wechat'=>'1','industry'=>industry($info['industry'],1)));
                 $updata = array('user_id'=>$user_id,'channel'=>'1');
                 D('WxMember')->where(array('openid'=>$info['openid']))->save($updata);
                 session('user',null);
@@ -406,8 +406,9 @@ class IndexController extends LubTMP {
                 ); 
                 die(json_encode($return)); 
             }            
-            $db = D('User');
-            $info = $db->where(array('username'=>$pinfo['username']))->field('id,username,password,verify')->find();
+            $db = D('User');//
+            $map = array('username'=>$pinfo['username'],'status'=>array('in','1,3'));
+            $info = $db->where($map)->field('id,username,password,verify')->find();
             if(!$info){
                 $return = array('statusCode' => 300,'msg' => '用户名或密码错误'); 
                 die(json_encode($return)); 
@@ -417,54 +418,63 @@ class IndexController extends LubTMP {
                     $return = array('statusCode' => 300,'msg' => '用户名或密码错误'); 
                     die(json_encode($return)); 
                 }
-                $uinfo = Wticket::get_auto_auth($pinfo['openid']);
-                //判断是否是政企渠道用户
-                switch ($uinfo['group']['type']) {
-                    case '1':
-                        $type = 2;
-                        $pay = '2';/*支持授信额支付*/
-                        $scene = '42';
-                        break;
-                    case '3':
-                        $type = 4;/*政企渠道*/
-                        $pay = '5';/*支持微信支付*/
-                        $scene = '46';
-                        break;
-                    case '4':
-                        $type = 8;/*全员销售*/
-                        $pay = '5';/*支持微信支付*/
-                        $scene = '48';
-                        break;
-                    case '5':
-                        $type = 9;/*全员销售*/
-                        $pay = '5';/*支持微信支付*/
-                        $scene = '49';
-                        break;
+                $uinfo = Wticket::get_auto_auth('','',$info['id']);
+                if($uinfo){
+                    //判断是否是政企渠道用户
+                    switch ($uinfo['group']['type']) {
+                        case '1':
+                            $type = 2;
+                            $pay = '2';/*支持授信额支付*/
+                            $scene = '42';
+                            break;
+                        case '3':
+                            $type = 4;/*政企渠道*/
+                            $pay = '5';/*支持微信支付*/
+                            $scene = '46';
+                            break;
+                        case '4':
+                            $type = 8;/*全员销售*/
+                            $pay = '5';/*支持微信支付*/
+                            $scene = '48';
+                            break;
+                        case '5':
+                            $type = 9;/*全员销售*/
+                            $pay = '5';/*支持微信支付*/
+                            $scene = '49';
+                            break;
+                    }
+                    $user['user'] = array(
+                        'id'      => $uinfo['id'],
+                        'openid'  => $uinfo['wechat']['openid'],
+                        'nickname'=> $uinfo['nickname'],
+                        'maxnum'  => '30',
+                        'guide'   => $uinfo['id'],
+                        'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
+                        'scene'   => $scene,
+                        'channel' => '1',
+                        'epay'    => $uinfo['group']['settlement'],
+                        'pricegroup'=> $uinfo['group']['price_group'],
+                        'wxid'      => $uinfo['wechat']['user_id'],//微信id
+                        'fx'        => $uinfo['type'],
+                        'promote'   => $uinfo['promote']
+                    );
+                    session('user',$user);
+                    $return = array('statusCode' => 200,'msg' => '登录成功','url'=>U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$uinfo['id'])));
+                }else{
+                    $return = array('statusCode' => 300,'msg' => '登录失败,请联系管理员');
                 }
-                $user['user'] = array(
-                    'id'      => $uinfo['id'],
-                    'openid'  => $pinfo['openid'],
-                    'nickname'=> $uinfo['nickname'],
-                    'maxnum'  => '30',
-                    'guide'   => $uinfo['id'],
-                    'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
-                    'scene'   => $scene,
-                    'channel' => '1',
-                    'epay'    => $uinfo['group']['settlement'],
-                    'pricegroup'=> $uinfo['group']['price_group'],
-                    'wxid'      => $uinfo['wechat']['user_id'],//微信id
-                    'fx'        => $uinfo['type'],
-                    'promote'   => $uinfo['promote']
-                );
-                //保存openid
-                session('openid',$pinfo['openid']);
-                session('user',$user);
-                $return = array('statusCode' => 200,'msg' => '登录成功','url'=>U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$uinfo['id']))); 
+                 
                 die(json_encode($return)); 
             }
         }else{
-            session('user',null);
-            $this->display();
+            $user = session('user');
+            if(empty($user) || $user['user']['id'] == '2'){
+                session('openid',$user['openid']);
+                session('user',null);$this->display();
+            }else{
+                $this->redirect('Wechat/Index/uinfo');
+            }
+            
         }
         
     }
@@ -751,6 +761,53 @@ class IndexController extends LubTMP {
                 $return = array('statusCode' => 300,'msg' => "订单状态不允许此项操作");
             }
             die(json_encode($return));
+        }
+    }
+        //解除绑定
+    function remove(){
+        //输入密码
+        //解除绑定
+        if(IS_POST){
+            $pinfo = json_decode($_POST['info'],true);
+            $user = session('user');
+            $map = array('id'=>$user['user']['id'],'wechat'=>'1');
+            //读取用户信息
+            $uinfo = M('User')->where($map)->find();
+            $pwd = md5($pinfo['password'].md5($uinfo['verify']));
+            //验证用户密码
+            if($uinfo['password'] == $pwd){
+                //删除用户授权信息
+                $updata = array('user_id'=>'0','channel'=>'0');
+                D('WxMember')->where(array('openid'=>$info['openid']))->save($updata);
+                //停用用户表
+                $status = D('User')->where(array('id'=>$user['user']['id']))->setField('status','3');
+                if($status){
+                    session('user',null);
+                    $url = U('Wechat/Index/show',array('pid'=>$this->pid));
+                    // SDK实例对象
+                    $oauth = & load_wechat('Oauth',$this->pid,1);
+                    // 执行接口操作
+                    $urls = $oauth->getOauthRedirect($url, 'alizhiyou', 'snsapi_base');
+                    $return = array(
+                        'statusCode' => 200,
+                        'url' => $urls,
+                    ); 
+                }else{
+                    $return = array(
+                        'statusCode' => 300,
+                        'msg' => '注销失败...',
+                    );  
+                }
+            }else{
+                $return = array(
+                    'statusCode' => 300,
+                    'msg' => '密码验证失败...',
+                );  
+            }
+            
+            die(json_encode($return));
+        }else{
+            $this->display();
         }
     }
     /**发送模板消息
