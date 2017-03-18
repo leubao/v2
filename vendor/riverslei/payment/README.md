@@ -76,6 +76,7 @@ Payment 针对不同支付平台，提供了统一的调用方式，开发者无
 **Payment**需要 PHP >= 5.6，并且需要安装以下扩展：
 - cURL extension
 - mbstring
+- BC Math
 
 Payment SDK使用文档[请看这里](https://helei112g.github.io/categories/payment-3/)
 
@@ -97,7 +98,7 @@ Payment SDK使用文档[请看这里](https://helei112g.github.io/categories/pay
 
 名字 | 金额 | 说明 | 时间
 ---|---|---|---
-李 | 50.00 | 打赏支持 | 2017-03-14
+李 | 100.00 | 打赏支持 | 2017-03-14
 Alex.Ma | 6.66 | 支持 | 2017-03-13
 阿笨 | 10.00 | 打算使用，先感谢一下 | 2017-03-10
 彦 | 88.00 | 感觉还不错，特打赏88元，略表感谢。 | 2017-02-28

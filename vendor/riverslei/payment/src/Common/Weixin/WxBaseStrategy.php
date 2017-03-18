@@ -10,7 +10,6 @@ namespace Payment\Common\Weixin;
 use Payment\Common\BaseData;
 use Payment\Common\BaseStrategy;
 use Payment\Common\PayException;
-use Payment\Common\Weixin\Data\Charge\AppChargeData;
 use Payment\Common\WxConfig;
 use Payment\Utils\ArrayUtil;
 use Payment\Utils\Curl;
@@ -137,6 +136,7 @@ abstract class WxBaseStrategy implements BaseStrategy
 
         $xml = DataParser::toXml($this->reqData->getData());
         $ret = $this->sendReq($xml);
+
         // 检查返回的数据是否被篡改
         $flag = $this->signVerify($ret);
         if (!$flag) {
