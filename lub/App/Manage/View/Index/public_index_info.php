@@ -83,7 +83,7 @@
           <strong>手册及其它</strong>
           <h5>渠道版手册 : <a href="http://ticket.leubao.com/help.pdf" target="_blank">渠道版V1.0手册</a></h5>
           <h5>系统手册 : <a href="http://www.leubao.com/index.php?g=Manual" target="_blank">云鹿票务管理平台 V2.1.3 </a></h5>
-          <h5>新功能预览 : <a href="http://new.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
+          <h5>新功能预览 : <a href="http://ticket.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
           <h5>更新日志 : <a href="http://www.leubao.com/index.php?a=up_log" target="_blank">[更新日志]</a>　</h5>
       </div>
       <!--
