@@ -55,7 +55,6 @@
                                     <option value="{$vo.id}" <if condition="$Site['channel_role_id'] eq $vo['id'] "> selected</if>>{$vo.name}</option>
                                     </volist>
                                   </select>
-
                                 </td>
                               </tr>
                               <tr>
@@ -80,6 +79,19 @@
                               </tr>
                             </tbody>
                           </table>   
+                        </div>
+                      </fieldset>
+                      <fieldset style="height:100%;">
+                        <legend>运营相关</legend>
+                        <div style="height:94%; overflow:hidden;">
+                          <table class="table  table-bordered">
+                            <tbody>
+                            <tr>
+                              <td align="right"><label class="label-control">授信额阀值:</label></td>
+                              <td><input type="text" name="money_low" id="mail_from" size="30" value="{$Site.money_low}"/> </td>
+                            </tr>
+                            </tbody>
+                          </table>
                         </div>
                       </fieldset>
                   </div>

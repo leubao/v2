@@ -17,6 +17,18 @@
           </select></td>
     </tr>
     <tr>
+      <td>所属行业</td>
+      <td><select name="industry" data-toggle="selectpicker">
+        <option value="">所属行业</option>
+        <option value="1" <if condition="$data.industry eq '1'">selected</if>>导游</option>
+        <option value="2" <if condition="$data.industry eq '2'">selected</if>>运输</option>
+        <option value="3" <if condition="$data.industry eq '3'">selected</if>>餐饮</option>
+        <option value="4" <if condition="$data.industry eq '4'">selected</if>>商户</option>
+        <option value="5" <if condition="$data.industry eq '5'">selected</if>>住宿</option>
+        <option value="6" <if condition="$data.industry eq '6'">selected</if>>其它</option>
+    </select></td>
+    </tr>
+    <tr>
       <td>状态</td>
       <td><select name="status" class="required" data-toggle="selectpicker" data-rule="required">
         <option value="1" <if condition="$data['status'] eq 1">selected</if>>启用</option>

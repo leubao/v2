@@ -238,141 +238,7 @@ class OrderController extends ManageBase{
 			);
 		}
 		die(json_encode($return));
-
-		/*
-		//判断产品类型
-		if($plan['product_type'] == '1'){
-		}elseif($plan['product_type'] == '2'){
-			$data = Operate::do_read('ScenicTicket',1,array('order_sn'=>$ginfo['sn'],'status'=>'2'));
-			foreach ($data as $k=>$v){
-				$info[$k] = array_merge(array('sn' => $v['order_sn'],'print'=>$v['print']+1,),unserialize($v['sale']));
-			}
-			//更新门票打印状态
-			$up_print = M('ScenicTicket')->where(array('order_sn'=>$ginfo['sn']))->setInc('print',1);
-			if($up_print){
-				$return = array(
-					'status' => '1',
-					'message' => '订单读取成功!',
-					'info'	=> $info ? $info : 0,
-				);
-				echo json_encode($return);
-			}	
-		}else{
-			if($up_print){
-				$return = array(
-					'status' => '1',
-					'message' => '订单读取成功!',
-					'info'	=> $info ? $info : 0,
-				);
-			}else{
-				$return = array(
-					'status' => '0',
-					'message' => '订单打印失败!',
-				);
-			}
-			die(json_encode($return));
-		}*/
 	}
-	/*
-	 * 打印纸质门票
-	function printTicket(){
-		$ginfo = I('get.');
-		$plan = F('Plan_'.$ginfo['plan_id']);
-		if(empty($plan)){
-			$return = array(
-				'status' => '0',
-				'message' => '订单读取失败1!',
-				'info'	=>  0,
-			);
-			echo json_encode($return);
-			return false;
-		}
-		//判断产品类型
-		if($plan['product_type'] == '1'){
-			$list = M(ucwords($plan['seat_table']))->where(array('order_sn'=>$ginfo['sn']))->select();
-			foreach ($list as $k=>$v){
-				$info[] = $this->re_print($plan['id'],$plan['encry'],$v);
-			}
-			//更新门票打印状态
-			$model = new Model();
-			$model->startTrans();
-			$up_print = $model->table(C('DB_PREFIX'). $plan['seat_table'])->where(array('order_sn'=>$ginfo['sn']))->setInc('print',1);
-			
-			
-			//判断订单类型
-			$order_type = $this->order_type($ginfo['sn']);
-
-			//判断订单状态
-			if($order_type['status'] == '9'){
-				//二次打印处理
-				$up_order = true;
-				$top_up = true;
-				$recharge = true;
-				$up = true;
-			}else{
-				if($order_type['type'] == '2' || $order_type['type'] == '4'){
-					$user_id = \Libs\Util\Encrypt::authcode($_SESSION['lub_imuid'], 'DECODE');
-					//@大红袍  门票打印完成即返利
-					$Tinfo = Operate::do_read('TeamOrder',0,array('order_sn'=>$ginfo['sn']));
-					$result = M("Crm")->where(array('id'=>$Tinfo['qd_id']))->find();
-					$cid = money_map($result);
-					//先充值  后标记.
-					$top_up = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setInc('cash',$Tinfo['money']);
-					//充值成功后，添加一条充值记录
-					$data = array(
-							'type'=> 3,
-							'cash'=> $Tinfo['money'],
-							'user_id'  => $user_id,
-							'crm_id'   => $Tinfo['qd_id'],//售出信息 票型  单价
-							'createtime' =>time(),
-							'order_sn'	=> $Tinfo['order_sn']
-					);			
-					$recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
-					//更新返利状态
-					$up = $model->table(C('DB_PREFIX')."team_order")->where(array('id'=>$Tinfo['id']))->save(array('status'=>'4','userid'=>$user_id));
-				}else{
-					$top_up = true;
-					$recharge = true;
-					$up = true;
-				}
-				//更新订单状态
-				$up_order = $model->table(C('DB_PREFIX'). order)->where(array('order_sn'=>$ginfo['sn']))->setField('status',9);
-			}
-			
-			if($up_print && $up_order && $top_up && $recharge && $up){
-				$model->commit();//提交事务
-				$return = array(
-					'status' => '1',
-					'message' => '订单读取成功!',
-					'info'	=> $info ? $info : 0,
-				);
-				echo json_encode($return);
-			}else{
-				$model->rollback();//事务回滚
-				$return = array(
-					'status' => '0',
-					'message' => '订单读取失败!',
-					'info'	=>  0,
-				);
-				echo json_encode($return);
-			}	
-		}else{
-			$data = Operate::do_read('ScenicTicket',1,array('order_sn'=>$ginfo['sn'],'status'=>'2'));
-			foreach ($data as $k=>$v){
-				$info[$k] = array_merge(array('sn' => $v['order_sn'],'print'=>$v['print']+1,),unserialize($v['sale']));
-			}//更新门票打印状态
-			$up_print = M('ScenicTicket')->where(array('order_sn'=>$ginfo['sn']))->setInc('print',1);
-			if($up_print){
-				$return = array(
-					'status' => '1',
-					'message' => '订单读取成功!',
-					'info'	=> $info ? $info : 0,
-				);
-				echo json_encode($return);
-			}	
-		}
-	}
-	*/
 	/*发送取票短信
 	*@param $user_id 下单人id 
 	*@param $order_sn 订单号
@@ -615,6 +481,7 @@ class OrderController extends ManageBase{
 				'width'		 =>	'213',
 				'height'	 =>	'208',
 				'dialog'	 =>	true,
+				'pageid'	 => 'print',
 				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$oinfo['order_sn'],'plan_id'=>$oinfo['plan_id'])),
 			);
 			$message = "支付成功!单号".$run;

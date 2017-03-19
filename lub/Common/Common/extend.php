@@ -1876,7 +1876,7 @@ function check_collection_pay($sn){
  * 导游，运输，餐饮，商户，住宿，其他
  * @return [type] [description]
  */
-function industry($param,$type = '1'){
+function industry($param,$type = ''){
     switch ($param) {
         case '导游':
             $return = "1";
@@ -1896,11 +1896,32 @@ function industry($param,$type = '1'){
         case '其它':
             $return = "6";
             break;
+        case '1':
+            $return = "导游";
+            break;
+        case '2':
+            $return = "运输";
+            break;
+        case '3':
+            $return = "餐饮";
+            break;
+        case '4':
+            $return = "商户";
+            break;
+        case '5':
+            $return = "住宿";
+            break;
+        case '6':
+            $return = "其它";
+            break;
+        default:
+            $return = $type ? "0" : "未知";     
     }
+
     if($type == '1'){
-        return $return;
-    }else{
         echo $return;
+    }else{
+        return $return;
     }   
 }
 /**

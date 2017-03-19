@@ -169,12 +169,13 @@ class FullController extends ManageBase{
             }
             $data = array(
                 'nickname'  =>  $pinfo['nickname'],
-                'phone'     =>  $pinfo['phone'],
                 'groupid'   =>  $pinfo['groupid'],
                 'remark'    =>  $pinfo['remark'],
-                'status'    =>  $pinfo['status']
+                'status'    =>  $pinfo['status'],
+                'update_time' => time(),
             );
             $status = M('User')->where(array('id'=>$pinfo['id']))->save($data);
+            M('UserData')->where(array('user_id'=>$pinfo['id']))->setField('industry',$pinfo['industry']);
             if($status){
                 $this->srun('更新成功!',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
             }else{
@@ -182,7 +183,7 @@ class FullController extends ManageBase{
             }
         }else{
             $ginfo = I('get.');
-            $info = M('User')->where(array('id'=>$ginfo['id']))->field('id,nickname,groupid,phone')->find();
+            $info = D('Crm/UserView')->where(array('id'=>$ginfo['id']))->field('id,nickname,groupid,phone,industry')->find();
             $group = M('CrmGroup')->where(array('status'=>1,'type'=>4))->field('id,name')->select();
             $this->assign('group',$group)->assign('data',$info)->display();
         }
