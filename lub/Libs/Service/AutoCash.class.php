@@ -12,26 +12,29 @@ class AutoCash extends \Libs\System\Service {
      * 批量生成提现申请
      */
     function cach_all(){
+        $datetime = date('Ymd',strtotime("-1 day"));
         $map = array(
             'status' => '1',
             'cash'  =>  array('neq','0'),
+            'datetime' => $datetime,
         );
         //查询余额不为0的客户
         $list = M('User')->where($map)->field('id,nickname,cash')->select();
         if(!empty($list)){
             //构造提现数据
             foreach ($list as $key => $v) {
-                if(AutoCash::check_cash($v['id'],$v['cash']) == '200'){
+                if(AutoCash::check_cash($v['id'],$v['cash'],$datetime) == '200'){
                     $postData[] = array(
-                        'sn' => get_order_sn('6'),
-                        'user_id' => $v['id'],
-                        'openid'  => AutoCash::get_openid($v['id']),
-                        'createtime'=>  time(),
+                        'sn'        => get_order_sn('6'),
+                        'user_id'   => $v['id'],
+                        'openid'    => AutoCash::get_openid($v['id']),
+                        'datetime'  => $datetime,
+                        'createtime'=> time(),
                         'uptime'    => time(),
-                        'money' =>  $v['cash'],
-                        'remark'=>  '系统自动创建',
-                        'pay_type'=> '5',
-                        'status'=>'3',//待审核
+                        'money'     => $v['cash'],
+                        'remark'    => '系统自动创建',
+                        'pay_type'  => '5',
+                        'status'    => '3',//待审核
                     );
                 }
             }
@@ -58,13 +61,14 @@ class AutoCash extends \Libs\System\Service {
      * @param $userid 角色id
      * 存在即作废
      */
-    function check_cash($userid,$cash){
-        $map = array('user_id'=>$userid,'status'=>'3');
+    function check_cash($userid,$cash,$datetime){
+        $map = array('user_id'=>$userid,'status'=>'3','datetime'=>$datetime);
         $count = M('Cash')->where($map)->getField('id');
         if(empty($count)){
             return '200';
         }else{
-            return AutoCash::invalid($userid,$count,$cash);
+           // return AutoCash::invalid($userid,$count,$cash);
+           return '400';
         }
     }
     /**
@@ -86,7 +90,7 @@ class AutoCash extends \Libs\System\Service {
     function invalid($userid,$cash_id,$cash){
         $map['id'] = $cash_id;
         $map['status'] = '3';
-        $status = M('Cash')->where($map)->save(array('money'=>array('exp','cash+'.$cash),'createtime'=>time()));
+        $status = M('Cash')->where($map)->save(array('money'=>array('exp','money+'.$cash),'createtime'=>time()));
         if($status){
             AutoCash::up_user_cash($userid,$cash);
             return '300';

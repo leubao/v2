@@ -28,38 +28,7 @@ function wechat_type($param,$type = '1'){
 		return $return;
 	}
 }
-/**
- * 行业类型
- * 导游，运输，餐饮，商户，住宿，其他
- * @return [type] [description]
- */
-function industry($param,$type = '1'){
-    switch ($param) {
-		case '导游':
-			$return = "1";
-			break;
-		case '运输':
-			$return = "2";
-			break;
-		case '餐饮':
-			$return = "3";
-			break;
-		case '商户':
-			$return = "4";
-			break;
-		case '住宿':
-			$return = "5";
-			break;
-		case '其它':
-			$return = "6";
-			break;
-	}
-	if($type == '1'){
-		return $return;
-	}else{
-		echo $return;
-	}   
-}
+
 /*判断用户是否已经授权*/
 function if_auth($openid = null){
 	if(empty($open_id)){

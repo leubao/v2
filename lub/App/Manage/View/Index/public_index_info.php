@@ -85,20 +85,19 @@
           <h5>系统手册 : <a href="http://www.leubao.com/index.php?g=Manual" target="_blank">云鹿票务管理平台 V2.1.3 </a></h5>
           <h5>新功能预览 : <a href="http://ticket.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
           <h5>更新日志 : <a href="http://www.leubao.com/index.php?a=up_log" target="_blank">[更新日志]</a>　</h5>
+          <h5>最新操作 : <a href="{:U('Manage/Index/public_action_log');}" data-id="public_action_log" data-toggle="navtab" data-title="最新操作日志">[更新日志]</a>　</h5>
       </div>
-      <!--
       <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
             <strong>更新日志</strong>
       </div>
+      <!--
       <div class="alert alert-warning" role="alert" style="margin:0 0 5px; padding:5px 15px;">
             <strong>通知公告</strong>
             <br><span class="label label-default">开发：</span>孤星</a>
             <br><span class="label label-default">测试 & 推广：</span> <a href="#">@Jack Yuan （成都锦杨）</a>
             <br><span class="label label-default">测试 & 试用：</span> <a href="#">@管书清 （小小正能量）</a>
-      </div>  
+      </div>
       -->
-                                       
-    </div>
   </div>
     <!--未取票的订单
     <div class="col-md-4" id="index_order" data-toggle="autoajaxload" data-autorefresh="1660" data-url="{:U('Manage/index/index_order');}">

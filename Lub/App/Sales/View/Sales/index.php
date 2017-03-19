@@ -24,6 +24,15 @@
         <option value="8" <if condition="$map.type eq '8'">selected</if>>全员分销</option>
         <option value="9" <if condition="$map.type eq '9'">selected</if>>三级分销</option>
     </select>
+    <select name="industry" data-toggle="selectpicker">
+        <option value="">所属行业</option>
+        <option value="1" <if condition="$map.industry eq '1'">selected</if>>导游</option>
+        <option value="2" <if condition="$map.industry eq '2'">selected</if>>运输</option>
+        <option value="3" <if condition="$map.industry eq '3'">selected</if>>餐饮</option>
+        <option value="4" <if condition="$map.industry eq '4'">selected</if>>商户</option>
+        <option value="5" <if condition="$map.industry eq '5'">selected</if>>住宿</option>
+        <option value="6" <if condition="$map.industry eq '6'">selected</if>>其它</option>
+    </select>
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
   </div>
@@ -38,7 +47,7 @@
         <th>姓名</th>
         <th>分销类型</th>
         <th>分组</th>
-        <th>编号</th>
+        <th>行业</th>
         <th width="70">状态</th>
         <th>余额</th>
         <th>创建时间</th> 
@@ -48,12 +57,12 @@
     <tbody>
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
-        <td>{$vo.nickname}</td>
+        <td><a href="{:U('Sales/Sales/public_uinfo',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="700" data-height="500" data-id="uinfo">{$vo.nickname}</a></td>
         <td>{$vo.type|sales_type}</td>
         <td>{$vo.groupid|crmgroupName}</td>
-        <td>{$vo.legally}</td>
+        <td>{$vo.industry|industry}</td>
         <td>{$vo.status|status}</td>
-        <td>{$vo.cash}</td>
+        <td align="right">{$vo.cash}</td>
         <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
         <td>
           <a href="{:U('Sales/Full/qrcode',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="fullqr">二维码</a>

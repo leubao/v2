@@ -1028,6 +1028,12 @@
    function balance($param){
         if(empty($param)){return '0.00';}
         $return = M('Crm')->where(array('id'=>$param))->getField('cash');
+        //判断是否达到最低额
+        $config = cache('Config');
+        if(bccomp($return, $config['money_low']) > 0){
+            //写入待处理事项
+            load_redis('lpush','preEvent','money_low|'.$param);
+        }
         return $return;
    }
    /**
@@ -1582,6 +1588,11 @@
         }else{
             $product = M('Product')->where(array('id'=>$product_id))->find();
         }
+        /* 默认读取缓存 TODO
+        $product = F('Product')
+        if(){
+
+        }*/
         return $product;
     }
     /*
@@ -1859,6 +1870,38 @@ function check_collection_pay($sn){
     }else{
         return false;
     }
+}
+/**
+ * 行业类型
+ * 导游，运输，餐饮，商户，住宿，其他
+ * @return [type] [description]
+ */
+function industry($param,$type = '1'){
+    switch ($param) {
+        case '导游':
+            $return = "1";
+            break;
+        case '运输':
+            $return = "2";
+            break;
+        case '餐饮':
+            $return = "3";
+            break;
+        case '商户':
+            $return = "4";
+            break;
+        case '住宿':
+            $return = "5";
+            break;
+        case '其它':
+            $return = "6";
+            break;
+    }
+    if($type == '1'){
+        return $return;
+    }else{
+        echo $return;
+    }   
 }
 /**
  * 模拟请求

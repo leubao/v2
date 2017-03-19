@@ -13,18 +13,6 @@ class FullController extends ManageBase{
 	protected function _initialize() {
         parent::_initialize();
     }
-    //销售人员列表 登录场景为4
-    function index(){
-        $phone = I('phone');
-        $legally = I('legally');
-        $user = I('user_id');
-        if(!empty($phone)){$map['phone'] = $phone;}
-        if(!empty($legally)){$map['legally'] = $legally;}
-        if(!empty($user)){$map['id'] = $user;}
-        $map['is_scene'] = '4';
-    	$this->basePage('User',$map,array('id'=>'DESC'));
-		$this->display();
-    }
     //全员销售设置
     function setfull(){
         $db = M("ConfigProduct");   //产品设置表 
@@ -184,6 +172,7 @@ class FullController extends ManageBase{
                 'phone'     =>  $pinfo['phone'],
                 'groupid'   =>  $pinfo['groupid'],
                 'remark'    =>  $pinfo['remark'],
+                'status'    =>  $pinfo['status']
             );
             $status = M('User')->where(array('id'=>$pinfo['id']))->save($data);
             if($status){

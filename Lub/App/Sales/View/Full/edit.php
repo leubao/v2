@@ -7,10 +7,6 @@
       <td width="100px">姓名</td>
       <td><input type="text" name="nickname" value="{$data.nickname}" placeholder="姓名"></td>
     </tr>
-      <td>电话</td>
-      <td><input type="text" name="phone" value="{$data.phone}" placeholder="电话"></td>
-    <tr>
-    </tr>
     <tr>
       <td>分组</td>
       <td><select name="groupid" class="required combox">
@@ -19,6 +15,13 @@
               <option value="{$v.id}" <if condition="$data['groupid'] eq $v['id']">selected</if>>{$v.name}</option>
             </volist>
           </select></td>
+    </tr>
+    <tr>
+      <td>状态</td>
+      <td><select name="status" class="required" data-toggle="selectpicker" data-rule="required">
+        <option value="1" <if condition="$data['status'] eq 1">selected</if>>启用</option>
+        <option value="2" <if condition="$data['status'] eq 2">selected</if>>停用</option>
+    </select></td>
     </tr>
     <tr>
       <td>备注</td>

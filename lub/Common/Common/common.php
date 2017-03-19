@@ -730,15 +730,47 @@ function load_payment($pay = '',$product_id = '',$submch = '',$define = ''){
     $proconf = cache('ProConfig');
     $proconf = $proconf[$product_id][11];
     $config = cache('Config');
+    //判断收款还是付款
+    //收款
+    $a = array();
+    //付款
+    $b = array('wx_transfer','wx_red','wx_refund','ali_transfer','ali_red','ali_refund');
+    if(in_array($pay,$b)){
+        //付款
+        if (stripos($pay, 'ali') !== false) {
+
+        }else{
+            $basedata = [
+                'app_id'        => $proconf['wx_mch_appid'],  // 公众账号ID
+                'mch_id'        => $proconf['wx_payment_mch_id'],// 商户id
+                'md5_key'       => $proconf['wx_payment_mchkey'],// md5 秘钥
+            ];
+        }
+    }else{
+        //收款
+        if($proconf['wx_submch'] == '1'){
+            $basedata = [
+                'app_id'        => $proconf['wx_mch_appid'],  // 公众账号ID
+                'mch_id'        => $proconf['wx_payment_mch_id'],// 商户id
+                'md5_key'       => $proconf['wx_payment_mchkey'],// md5 秘钥
+                'sub_appid'     => $proconf['wx_sub_appid'], //子APPiD
+                'sub_mch_id'    => $proconf['wx_sub_mch_id'],
+            ];
+        }else{
+            $basedata = [
+                'app_id'        => $proconf['wx_mch_appid'],  // 公众账号ID
+                'mch_id'        => $proconf['wx_payment_mch_id'],// 商户id
+                'md5_key'       => $proconf['wx_payment_mchkey'],// md5 秘钥
+            ];
+        }
+    }
     //判断是否是企业付款
     if (stripos($pay, 'ali') !== false) {
 
     }else{
         //付款
         $options = array(
-            'app_id'        => $proconf['wx_mch_appid'],  // 公众账号ID
-            'mch_id'        => $proconf['wx_payment_mch_id'],// 商户id
-            'md5_key'       => $proconf['wx_payment_mchkey'],// md5 秘钥
+            
             'app_cert_pem'  => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
             'app_key_pem'   => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
             'sign_type'     => 'MD5',// MD5  HMAC-SHA256
@@ -749,7 +781,7 @@ function load_payment($pay = '',$product_id = '',$submch = '',$define = ''){
             'return_raw'   => true,// 在处理回调时，是否直接返回原始数据，默认为false
         );
     }
-
+    $options = array_merge($basedata,$options);
     //根据支付类型选择驱动
     return $options;
 }

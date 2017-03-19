@@ -1,5 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<form class="form-horizontal" action="{:U('Wechat/Cashback/subsidies',array('menuid'=>$menuid))}" method="post" data-toggle="validate">
+<form class="form-horizontal" action="{:U('Sales/Cashback/subsidies',array('menuid'=>$menuid))}" method="post" data-toggle="validate">
 <div class="bjui-pageContent">
   <div class="visible-print-block">
       <h3 align="center">渠道商提现确认单</h3>

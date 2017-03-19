@@ -18,15 +18,27 @@ class SalesController extends ManageBase{
         $user = I('user_id');
         $type = I('type');
         $status = I('status');
+        $industry = I('industry');
         if(!empty($phone)){$map['phone'] = $phone;}
         if(!empty($legally)){$map['legally'] = $legally;}
         if(!empty($user)){$map['id'] = $user;}
         if(!empty($type)){$map['type'] = $type;}
         if(!empty($status)){$map['status'] = $status;}
+        if(!empty($industry)){$map['industry'] = $industry;}
         $map['is_scene'] = '4';
-    	$this->basePage('User',$map,array('id'=>'DESC'));
+    	$this->basePage('Crm/UserView',$map,array('id'=>'DESC'));
 		$this->assign('map',$map)->display();
 	}
+    //用户视图
+    function public_uinfo(){
+        $user_id = I('get.id');
+        if(empty($user_id)){
+            $this->erun('参数错误!');
+        }
+        $info = D('Crm/UserView')->where(array('id'=>$user_id))->find();
+        $this->assign('data',$info)
+            ->display();
+    }
 	//全员
 	/**
 	 * 三级分销设置
