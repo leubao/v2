@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "8cff4142feb405f46d786de0c4ff6c85",
+    "content-hash": "f670a27ff86c65f63c79aeafce310504",
     "packages": [
         {
             "name": "filp/whoops",
@@ -116,16 +116,16 @@
         },
         {
             "name": "riverslei/payment",
-            "version": "v3.0.5",
+            "version": "v3.0.6",
             "source": {
                 "type": "git",
                 "url": "https://github.com/helei112g/payment.git",
-                "reference": "6b21bee48ab54716dbedb4eacaa848a92e4d966b"
+                "reference": "cf80f5afad798d527c3caff5449502f377d88c8a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://files.phpcomposer.com/files/helei112g/payment/6b21bee48ab54716dbedb4eacaa848a92e4d966b.zip",
-                "reference": "6b21bee48ab54716dbedb4eacaa848a92e4d966b",
+                "url": "https://files.phpcomposer.com/files/helei112g/payment/cf80f5afad798d527c3caff5449502f377d88c8a.zip",
+                "reference": "cf80f5afad798d527c3caff5449502f377d88c8a",
                 "shasum": ""
             },
             "require": {
@@ -162,7 +162,7 @@
                 "支付宝支付",
                 "集成支付接口SDK"
             ],
-            "time": "2017-03-14T09:48:11+00:00"
+            "time": "2017-03-18T16:12:55+00:00"
         },
         {
             "name": "zoujingli/wechat-php-sdk",

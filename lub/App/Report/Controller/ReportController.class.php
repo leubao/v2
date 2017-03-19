@@ -216,7 +216,7 @@ class ReportController extends ManageBase{
 	}
 	//加载当前产品的区域
 	function area(){
-		$product_id = (int) $this->pid;
+		$product_id = (int) get_product('id');
 		if(!empty($product_id)){
 			$info = Operate::do_read('TicketGroup',1,array('product_id'=>$product_id));
 			$template_id = M('Product')->where(array('id'=>$product_id))->getField('template_id');
@@ -486,11 +486,12 @@ class ReportController extends ManageBase{
 	    $priceid = I('ticket_type');
 	    $channel = I('channel_id');
 	    $channelname = I('channel_name');
+	    $industry = I('industry');
 	    //传递条件
 	    $this->assign('starttime',$start_time);
         $this->assign('endtime',$end_time);
         $export_map['datetime'] = $start_time.'至'.$end_time;
-        $this->assign('channel_id',$channel)->assign('channel_name',$channelname);
+        $this->assign('channel_id',$channel)->assign('channel_name',$channelname)->assign('industry',$industry);
 		if (!empty($start_time) && !empty($end_time)) {
             $start_time = date("Ymd",strtotime($start_time));
             $end_time = date("Ymd",strtotime($end_time));
@@ -504,11 +505,21 @@ class ReportController extends ManageBase{
         if(!empty($channel)){
         	$map['channel_id'] = array('in',agent_channel($channel,2));
         }
+        if(!empty($industry)){
+        	//获取行业内所有人员
+        	$where = [
+        		'status' => '1',
+        		'industry' => $industry,
+        	];
+        	$user = D('Crm/UserView')->where($where)->field('id')->select();
+        	$user_id = arr2string($user,'id');
+        	$map['user_id'] = array('in',$user_id);
+        }
         //设置订单类型为团队或渠道
-        $map['type'] = array('in','8');
+        $map['type'] = array('in','8,9');
         $map['status'] = '1';
+        $map['product_id'] = get_product('id');
         $db = M('ReportData');
-		$map['product_id'] = $this->pid;
 		$list = $db->where($map)->order('plantime ASC,games')->select();
 		if($this->procof['agent'] == '1'){
 			//开启代理商制度，时执行
@@ -516,7 +527,7 @@ class ReportController extends ManageBase{
 		}
 		if($type == '1'){
 			//根据计划汇总
-		//	$plan_fold = Report::plan_fold($list);
+			//$plan_fold = Report::plan_fold($list);
 			//根据票型汇总
 			//$list = Report::channel_ticket_fold($plan_fold,$map['datetime'],$channel);
 			$list = Report::channel_plan_fold($list);

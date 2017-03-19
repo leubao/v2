@@ -13,7 +13,15 @@
     &nbsp;
     <input type="hidden" name="channel.id" value="{$channel_id}">
     <input type="text" name="channel.name" readonly value="{$channel_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel',array('ifadd'=>1));}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
-
+    <select name="industry" data-toggle="selectpicker">
+        <option value="">所属行业</option>
+        <option value="1" <if condition="$industry eq '1'">selected</if>>导游</option>
+        <option value="2" <if condition="$industry eq '2'">selected</if>>运输</option>
+        <option value="3" <if condition="$industry eq '3'">selected</if>>餐饮</option>
+        <option value="4" <if condition="$industry eq '4'">selected</if>>商户</option>
+        <option value="5" <if condition="$industry eq '5'">selected</if>>住宿</option>
+        <option value="6" <if condition="$industry eq '6'">selected</if>>其它</option>
+    </select>
   	<input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
     <input type="radio" name="type" data-toggle="icheck" value="2" <if condition="$type eq '2'"> checked="checked"</if> data-label="汇总">
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
