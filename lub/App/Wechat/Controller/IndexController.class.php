@@ -10,6 +10,12 @@ namespace Wechat\Controller;
 use Common\Controller\LubTMP;
 use Wechat\Service\Wticket;
 use \Wechat\WechatReceive;
+
+//新支付
+use Payment\Common\PayException;
+use Payment\Client\Charge;
+use Payment\Client\Query;
+
 class IndexController extends LubTMP {
 	/**
      * 微信消息对象
@@ -241,6 +247,9 @@ class IndexController extends LubTMP {
      * 订单详情
      */
     function order_info(){
+        if($this->ginfo['sn']){
+           $this->error('参数错误'); 
+        }
         $info = D('Item/Order')->where(array('order_sn'=>$this->ginfo['sn']))->relation(true)->find();
         $info['info'] = unserialize($info['info']);
         //区域分类
@@ -273,8 +282,10 @@ class IndexController extends LubTMP {
     function orderlist(){
         //加密参数
         $user = session('user');
-        $uid = $user['user']['id'];
-        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id')->limit('10')->select();
+        if(empty($user) || $user['user']['id'] == '2'){
+            $this->redirect('Wechat/Index/login');
+        }
+        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$user['user']['id']))->field('order_sn,status,createtime,money,plan_id')->limit('10')->order('createtime DESC')->select();
         $this->wx_init($this->pid);
         $this->assign('data',$list)->display();
     }
@@ -523,6 +534,40 @@ class IndexController extends LubTMP {
     //支付成功提示页面
     function pay_success(){
         $sn = I('sn');
+        //判断是否已经完成支付
+        $data = [
+            'out_trade_no' => $sn        
+        ];
+        $config = load_payment('wx_charge',$this->pid);
+        try {
+            $return = Query::run('wx_charge', $config, $data);
+            if($return['return_code'] == 'SUCCESS' && $return['result_code'] == 'SUCCESS' && $return['trade_state'] == 'SUCCESS'){
+
+                $oinfo = D('Item/Order')->where(array('order_sn'=>$return["out_trade_no"]))->relation(true)->find();
+                $info = array(
+                 'seat_type' => '1',
+                 'pay_type' =>   '5'
+                );
+                $status = \Libs\Service\Order::mobile_seat($info,$oinfo);
+                if($status){
+                    $openid = $return['openid'];
+                    $attach =  array(
+                        'number'=>$oinfo['number'],
+                        'product_name'=>productName($oinfo['product_id'],1),
+                        'plan'=> planShow($oinfo['plan_id'],4,1),
+                    );
+                    $result = array(
+                        'openid' => $openid,
+                        'out_trade_no' => $return["out_trade_no"],
+                        'attach' => serialize($attach),
+                    );
+                    $this->to_tplmsg($result,$oinfo['product_id']);
+                }
+            }
+        } catch (PayException $e) {
+            echo $e->errorMessage();
+            exit;
+        }
         $this->wx_init($this->pid);
         $this->assign('sn',$sn)->display();
     }
@@ -619,7 +664,6 @@ class IndexController extends LubTMP {
             $uinfo = session('user');
             $sn = \Libs\Service\Order::mobile($info,$uinfo['user']['scene'],$uinfo['user']);
             if($sn != false){
-               // dump(U('Wechat/Index/order',array('sn'=>$sn,'pid'=>$this->pid)));
                 $return = array(
                     'statusCode' => 200,
                     'url' => U('Wechat/Index/order',array('pid'=>$this->pid,'sn'=>$sn)),
@@ -646,9 +690,9 @@ class IndexController extends LubTMP {
                     }
                     // 获取预支付ID
                     if($info['money'] == '0'){
-                       $money = 0.1*100;
+                       $money = 0.1;
                     }else{
-                       $money = $info['money']*100; 
+                       $money = $info['money']; 
                     }
                     //$money = 1;
                     $proconf = cache('ProConfig');
@@ -656,19 +700,25 @@ class IndexController extends LubTMP {
                     $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
                     $product_name = product_name($this->pid,1);
-                    $pay = & load_wechat('Pay',$this->pid);
-                    
-					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
-
-                    if($prepayid){
-                        $options = $pay->createMchPay($prepayid);
-                    }else{
-                        // 创建JSAPI签名参数包，这里返回的是数组
-                        $this->assign('error',$pay->errMsg.$pay->errCode);
-
+                    $config = load_payment('wx_pub',$this->pid);
+                    $payData = [
+                        'body'          => $product_name,
+                        'subject'       => $product_name,
+                        'order_no'      => $info['order_sn'],
+                        'timeout_express' => time() + 600,// 表示必须 600s 内付款
+                        'amount'        => $money,// 单位为元 ,最小为0.01
+                        'return_param'  => $product_name,
+                        'openid'        => $user['user']['openid'],
+                        'notify_url'    => $notify_url,
+                    ];
+                    try {
+                        $ret = Charge::run('wx_pub', $config, $payData);
+                    } catch (PayException $e) {
+                        echo $e->errorMessage();
+                        exit;
                     }
-					$this->assign('jsapi',$prepayid)->assign('wxpay',$options);
-                    
+                    load_redis('set','sings',$ret);
+					$this->assign('jsapi',$prepayid)->assign('wxpay',$ret);
                 }
             }
             $this->assign('data',$info)->display();
@@ -863,6 +913,8 @@ class IndexController extends LubTMP {
         $res = $sndMsg->sendTemplateMessage($template);
         //TODO  回传模板消息发送状态
     }
+    //支付完成后异步回调
+    
     /*微信API 相关处理  后期完善
 	文本消息
     */

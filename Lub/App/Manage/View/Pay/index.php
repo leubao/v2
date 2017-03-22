@@ -16,13 +16,28 @@
                       <table class="table  table-bordered">
                       <tbody>
                         <tr>
+                          <td width="120px">开启服务商:</td>
+                          <td> <input type="radio" name="wx_submch" data-toggle="icheck" value="1" <eq name="vo['wx_submch']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="wx_submch" data-toggle="icheck" value="0" <eq name="vo['wx_submch']" value="0"> checked</eq> data-label="关闭"></td>
+                        </tr>
+                        <tr>
+                          <td width="120px">服务商APPID:</td>
+                          <td><input type="text" name="wx_fw_appid" class="form-control" size="30" value="{$vo.wx_fw_appid}" placeholder="appID">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">服务商MCHID:</td>
+                          <td><input type="text" name="wx_fw_mchid" class="form-control" size="30" value="{$vo.wx_fw_mchid}" placeholder="mchID">
+                          </td>
+                        </tr>
+                        <tr>
                           <td width="120px">APPID:</td>
                           <td><input type="text" name="wx_sub_appid" class="form-control" size="30" value="{$vo.wx_sub_appid}" placeholder="appID">
                           </td>
                         </tr>
                         <tr>
                           <td width="120px">商户id:</td>
-                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
+                          <td><input type="text" name="wx_sub_mchid" class="form-control" value="{$vo.wx_sub_mchid}" size="20" placeholder="商户id">
                           </td>
                         </tr>
                         <tr>
@@ -84,11 +99,6 @@
                       </table>
                     </div>
                     </fieldset>
-                    <!--主商户-->
-                    <input type="text" name="wx_appid" value="{$vo.wx_appid}">
-                    <input type="text" name="wx_mchid" value="{$vo.wx_mchid}">
-                    <input type="text" name="wx_mchkey" value="{$vo.wx_mchkey}">
-                    <input type="text" name="appsecret" value="{$vo.appsecret}">
                 </div>
               </div>
               <div id="paytab-5" class="tab-pane">

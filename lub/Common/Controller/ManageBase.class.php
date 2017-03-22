@@ -19,14 +19,13 @@ class ManageBase extends LubTMP {
 
     //初始化
     protected function _initialize() {
-        //dump($_SESSION);
         C(array(
             "USER_AUTH_ON" => true, //是否开启权限认证
             "USER_AUTH_TYPE" => 1, //默认认证类型 1 登录认证 2 实时认证
             "REQUIRE_AUTH_MODULE" => "", //需要认证模块
             "NOT_AUTH_MODULE" => "Public", //无需认证模块
             "USER_AUTH_GATEWAY" => U("Manage/Public/login"), //登录地址
-        ));//dump(RBAC::AccessDecision(MODULE_NAME));
+        ));
         if (false == RBAC::AccessDecision(MODULE_NAME)) {
             //检查是否登录
             if (false === RBAC::checkLogin()) {

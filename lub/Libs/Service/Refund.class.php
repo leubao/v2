@@ -453,13 +453,13 @@ class Refund extends \Libs\System\Service {
 		}else{
 			//现金 TODO  微信或者支付宝退款
 		}
-		//微信支付4支付宝5微信支付
+		/*微信支付4支付宝5微信支付
 		if($info['pay'] == '5'){
 			Refund::weixin_refund($sn,$info['product_id'],$money_back);
 		}
 		if($info['pay'] == '4'){
 			Refund::alipay_refund($sn,$info['product_id'],$money_back);
-		}
+		}*/
 		/*=============处理日志===============*/
 		if($info['status'] <> '7'){
 			$refund_data = array(
@@ -522,7 +522,7 @@ class Refund extends \Libs\System\Service {
 		}
 		$order = $model->table(C('DB_PREFIX'). 'order')->where(array('order_sn'=>$sn))->save($ordeData);
 		$order_data = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$sn))->save(array('info' => serialize($newData)));
-		dump($up);dump($order);dump($refund);dump($order_data);
+		//dump($up);dump($order);dump($refund);dump($order_data);
 		if($up && $order && $refund && $order_data){
 			$model->commit();//提交事务
 			return true;

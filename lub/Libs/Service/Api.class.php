@@ -54,7 +54,6 @@ class Api extends \Libs\System\Service {
                 $valu['title'] = planShow($valu['id'],4,1);
                 $valu['product_id'] = $valu['product_id'];
                 $valu['num'] = M(ucwords($valu['seat_table']))->where(array('status'=>array('in','0')))->count();
-                
                 $plan[] = $valu;
             }
             $value['plan'] = $plan;

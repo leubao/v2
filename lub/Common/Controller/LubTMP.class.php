@@ -35,8 +35,44 @@ class LubTMP extends \Think\Controller {
         $this->initSite($this->config);
         //默认跳转时间
         $this->assign("waitSecond", 3);
+        $this->action_lock();
     }
-
+    //判断是否可操作
+    protected function action_lock(){
+        /*判断请求方法  是否需要锁验证 */
+        $url = ucwords(MODULE_NAME).'/'.ucwords(CONTROLLER_NAME).'/'.ACTION_NAME;
+        $getUrlArr = [
+            'Item/Order/drawer',
+            'Item/Work/refunds',
+            'Item/Work/agree',
+            'Item/Work/subtract',
+            'Item/Order/printTicket'
+        ];
+        if(IS_GET && in_array($url, $getUrlArr)){
+            //检查锁是否存在,存在返回错误，不存在加锁
+            $sn = I('get.sn');
+            $info = load_redis('get','lock_'.$sn);
+            if(empty($info)){
+                load_redis('setex','lock_'.$sn,'警告:该订单被锁定,稍后再试...',40);
+            }else{
+                $this->erun($info);
+            }
+        }
+        $postUrlArr = array(
+            'Item/Work/refunds',
+            'Item/Work/agree',
+            'Item/Work/subtract',
+            'Home/Order/cancel_order');
+        if(IS_POST && in_array($url, $postUrlArr)){
+            $sn = I('post.sn');
+            $info = load_redis('get','lock_'.$sn);
+            if(empty($info)){
+                load_redis('setex','lock_'.$sn,'警告:该订单被锁定,稍后再试...',40);
+            }else{
+                $this->erun($info);
+            }
+        }
+    }
     /**
      * 获取LubTMP 对象
      * @return type
