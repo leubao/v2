@@ -36,7 +36,7 @@
                                 <input type="radio" name="quota" data-toggle="icheck" value="0" <eq name="vo['quota']" value="0"> checked</eq> data-label="关闭">
                                 </td>
                               </tr>
-
+                                
                               <tr>
                                 <td width="120px">全员销售:</td>
                                 <td>
@@ -273,6 +273,16 @@
                                     </div>
                                   </div>
                                 </div>
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="120px">官网价格政策:</td>
+                                <td>
+                                  <select name="web_price" data-toggle="selectpicker">
+                                  <volist name="pricegroup" id="po">
+                                    <option value="{$po.id}" <if condition="$vo['web_price'] eq $po['id'] "> selected</if>>{$po.name}</option>
+                                    </volist>
+                                  </select>
                                 </td>
                               </tr>
                               <tr>

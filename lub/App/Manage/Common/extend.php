@@ -36,4 +36,26 @@ function pay_status($param)
     echo $return;
 
 }
+/**
+ * 判断文件是否存在
+ * @param  string $path 路径
+ * @param  int $type 类型
+ */
+function if_file($path,$type = ''){
+    if (file_exists($path)) {
+        $msg = "已上传";
+        $status = "success";
+        $boot = true;
+    }else{
+        $msg = "未上传";
+        $status = "danger";
+        $boot = false;
+    }
+    if($type == '1'){
+        return $boot;
+    }else{
+        $return = "<span class='label label-".$status."'>".$msg."</span>";
+        echo $return;
+    }
+}
 ?>
