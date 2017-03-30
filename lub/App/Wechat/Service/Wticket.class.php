@@ -51,15 +51,17 @@ class Wticket {
         session('user',null);
         //记录推广人员
         $promote = $ginfo['u'];
-        $oauth = & load_wechat('Oauth',$ginfo['pid'],1);
-        $wxauth = $oauth->getOauthAccessToken($ginfo['code']);
+        //$oauth = & load_wechat('Oauth',$ginfo['pid'],1);
+        //$wxauth = $oauth->getOauthAccessToken($ginfo['code']);
         //新用户写入
-        Wticket::add_wx_user($wxauth,$promote);
-        $openid = $ginfo['openid'] ? $ginfo['openid'] : $wxauth['openid'];
+        //Wticket::add_wx_user($wxauth,$promote);
+        //$openid = $ginfo['openid'] ? $ginfo['openid'] : $wxauth['openid'];
         //保存openid
         session('openid',$openid);
+        $openid = session('openid');
         //写入必要的当前用户信息
         $uinfo = Wticket::get_auto_auth($openid,$promote);
+        load_redis('set','ppp',serialize($uinfo));
         if(!empty($uinfo['wechat']) && empty($reg)){
             //根据当前登录用户获取支付方式、价格政策、可售数量、单笔订单最大量 30
             //判断是否是政企渠道用户
@@ -105,19 +107,47 @@ class Wticket {
         }else{
             $proconf = cache('ProConfig');
             $proconf = $proconf[$ginfo['pid']][2];
-            //微信散客先写死 TODO
-            $user['user'] = array(
-                'id' => 2,
-                'openid' => $openid,
-                'maxnum' => '5',
-                'guide'  => '0',
-                'qditem' => '0',
-                'scene'  => '41',
-                'epay'   => '2',//结算方式1 票面价结算2 底价结算
-                'channel'=> '0',
-                'pricegroup'=>$proconf['wx_price_group'],
-                'wxid'   => $uinfo['wechat']['user_id'],
-            );
+            if(!empty($uinfo['id']) && !empty($uinfo['group']['type'])){
+                //二维码推广或分享购买链接
+                switch ($uinfo['group']['type']) {
+                    case '4':
+                        $type = 8;/*全员销售*/
+                        $pay = '5';/*支持微信支付*/
+                        $scene = '48';
+                        break;
+                    case '5':
+                        $type = 9;/*全员销售*/
+                        $pay = '5';/*支持微信支付*/
+                        $scene = '49';
+                        break;
+                }
+                $user['user'] = array(
+                    'id' => 2,
+                    'openid' => $openid,
+                    'maxnum' => '30',
+                    'guide'  =>  $uinfo['id'],
+                    'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
+                    'scene'  => $scene,
+                    'epay'   => $uinfo['group']['settlement'],//结算方式1 票面价结算2 底价结算
+                    'channel'=> '0',
+                    'pricegroup'=>$uinfo['group']['price_group'],
+                    'wxid'   => $uinfo['wechat']['user_id'],
+                );
+            }else{
+                //微信散客先写死 TODO
+                $user['user'] = array(
+                    'id' => 2,
+                    'openid' => $openid,
+                    'maxnum' => '5',
+                    'guide'  => '0',
+                    'qditem' => '0',
+                    'scene'  => '41',
+                    'epay'   => '2',//结算方式1 票面价结算2 底价结算
+                    'channel'=> '0',
+                    'pricegroup'=>$proconf['wx_price_group'],
+                    'wxid'   => $uinfo['wechat']['user_id'],
+                );
+            }   
         }
         //缓存用户信息
         session('user',$user);
@@ -139,13 +169,13 @@ class Wticket {
         $db = M('User');
         if(!empty($winfo['user_id']) && $winfo['channel'] == '1'){
             $uInfo = $db->where(array('id'=>$winfo['user_id'],'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
-        }elseif (!empty($promote)) {
+        }elseif (!empty($promote) && empty($winfo['channel'])) {
+            
             $uInfo = $db->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
-            $uInfo['promote'] = $promote;//推广标记
-        }else{
-            //当微信为散客时，默认用户为微信售票
-            return '0';
+            load_redis('set','uoo',serialize($uInfo));
+            //$uInfo['promote'] = $promote;//推广标记
         }
+        load_redis('set','222',$promote.serialize($uInfo));
         if(!empty($uInfo)){
             //查询所属分组信息
             $uInfo['group'] = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement')->find();
@@ -159,7 +189,13 @@ class Wticket {
                 }
             }
             $uInfo['wechat'] = $winfo;
+            load_redis('set','sql',$db->_sql());
+            load_redis('set','uinfo',serialize($uInfo));
             return $uInfo;
+        }else{
+            load_redis('set','2','221');
+            //当微信为散客时，默认用户为微信售票
+            return '0';
         }
     }
     //写入微信用户 从微信服务端拉取用户
@@ -167,7 +203,7 @@ class Wticket {
         if(!empty($data)){
             //判断用户是否存在
             $db = M('WxMember');
-            $uinfo = $db->where(array('openid'=>$data['openid']))->find();
+            $uinfo = $db->where(array('openid'=>$data['openid']))->field('openid,user_id')->find();
             if($uinfo){
                 if($uinfo['user_id']){
                     return '2';
@@ -190,6 +226,23 @@ class Wticket {
         }else{
             //获取用户信息失败
             return false;
+        }
+    }
+    //判断是否已经注册
+    function is_reg($openid){
+        //读取是否存在user_id
+        //$db = D('Wechat/WxMemberView');
+        $wx = D('WxMember')->where(['openid'=>$openid])->find();
+        $info = D('User')->where(['id'=>$wx['user_id']])->find();
+        if(empty($info['status'])){
+            //可注册
+            return '400';
+        }elseif($info['status'] == '3'){
+            //已经注册 待审核
+            return '300';
+        }else{
+            //跳转到个人中心
+            return '200';
         }
     }
 }

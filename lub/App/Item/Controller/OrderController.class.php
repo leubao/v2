@@ -11,6 +11,9 @@ use Libs\Service\Operate;
 use Common\Controller\ManageBase;
 use Libs\Service\Order;
 use Common\Model\Model;
+use Payment\Common\PayException;
+use Payment\Client\Charge;
+use Payment\Client\Query;
 class OrderController extends ManageBase{	
 	function _initialize(){
 	 	parent::_initialize();
@@ -404,14 +407,23 @@ class OrderController extends ManageBase{
 	}
 	//微信扫码支付
 	function weixin_code($product_id,$paykey,$payData)
-	{
+	{	/*
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $payData['amount']*100;
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
 		if($result === FALSE){
 			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
+		}*/
+
+		$config = load_payment('wx_bar',$product_id);
+		try {
+		    $ret = Charge::run('wx_bar', $config, $payData);
+		} catch (PayException $e) {
+		    echo $e->errorMessage();
+		    exit;
 		}
-		return $result;
+
+		return $ret;
 	}
 	/*轮询支付日志查询支付结果*/
 	function public_payment_results(){

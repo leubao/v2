@@ -137,7 +137,9 @@ class SetController extends ManageBase{
 	        D('Common/Config')->config_cache();
 	        $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME));	
 		}else{
-			$this->assign("vo",$config);
+			//获取价格政策
+			$pricegroup = D('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
+			$this->assign("vo",$config)->assign('pricegroup',$pricegroup);
 			$this->display();
 		}
 	}

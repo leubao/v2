@@ -10,19 +10,12 @@ namespace Wechat\Controller;
 use Common\Controller\LubTMP;
 use Wechat\Service\Wticket;
 use \Wechat\WechatReceive;
-
-//新支付
-use Payment\Common\PayException;
-use Payment\Client\Charge;
-use Payment\Client\Query;
-
 class IndexController extends LubTMP {
 	/**
      * 微信消息对象
      * @var WechatReceive 
      */
     protected $wechat;
-
     /**
      * 微信openid
      * @var type 
@@ -32,6 +25,7 @@ class IndexController extends LubTMP {
         parent::_initialize();
         $this->ginfo = I('get.');
         $this->pid = $this->ginfo['pid'];
+        $this->user = $this->ginfo['u'];
         if(empty($this->pid) && empty(session('pid'))){
     		$this->error("参数错误");
     	}
@@ -40,19 +34,77 @@ class IndexController extends LubTMP {
         }else{
             session('pid',$this->pid);
         }
+        $openid = session('openid');
+        load_redis('set','openid',$openid.date('h:s:i'));
+        load_redis('lpush','urllist',$openid.'<>'.$this->ginfo['code'].date('h:s:i'));
+        //判断是否是授权
+        if(!$openid){
+//load_redis('lpush','urllist',$openid.'<>'.$this->ginfo['code'].date('h:s:i'));
+            if(!$this->ginfo['code']){
+                // SDK实例对象
+                $oauth = & load_wechat('Oauth',$this->pid,1);
+                //存储当期来路URL
+                $hurl = 'http://'.$_SERVER['HTTP_HOST'].$_SERVER['REQUEST_URI'];
+                load_redis('set','o-url',$hurl.date('h:s:i'));
+                session('hurl',$hurl);
+                session('oamodel','oamodel');
+                //跳转到授权页面
+                $callback = U('Wechat/Index/wxoath',array('pid'=>$this->pid,'u'=>$this->user));
+                $squrl = $oauth->getOauthRedirect($callback, 'aly', 'snsapi_base');
+                // 处理返回结果
+                if($squrl===FALSE){
+                    //接口失败的处理
+                    $this->error("授权失败...");
+                }else{
+                    session('squrl',$squrl);
+                    header("Location:" . $squrl);
+                    die();
+                }
+            }
+           
+        }
         //加载产品配置信息
         $proconf = get_proconf($this->pid,2);
-        $script = &  load_wechat('Script',$this->pid,1);
-        //获取JsApi使用签名，通常这里只需要传 $ur l参数
-        $options = $script->getJsSign(U('Wechat/Index/show'));
+        $script = & load_wechat('Script',$this->pid,1);
+        //获取JsApi使用签名，通常这里只需要传 $url参数,设置统一分享链接
+        $options = $script->getJsSign(U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$this->user)));
         $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf)->assign('options',$options);
+    }
+    /**/
+    function wxoath()
+    {   
+        //接口成功的处理
+        load_redis('set','openid-s',$this->ginfo['code'].date('h:s:i'));
+        $oauth = & load_wechat('Oauth',$this->pid,1);
+        $wxauth = $oauth->getOauthAccessToken($this->ginfo['code']);
+        if($wxauth===FALSE){
+            $this->error("授权失败...");
+        }else{
+            if(empty($wxauth['openid'])){
+                //未成功获取则再执行一次授权
+                $squrl = session('squrl');
+                header("Location:" . $squrl);
+                die();
+            }
+            session('squrl',null);
+            //缓存openID
+            session('openid',$wxauth['openid']);
+            load_redis('set','sopndi00',$wxauth['openid']);
+            Wticket::add_wx_user($wxauth,$this->user);
+            //登录
+            Wticket::tologin($wxauth);
+            $hurl = session('hurl');
+            load_redis('set','hurls',$hurl);
+            //返回访问页面
+            header("Location:" . $hurl);
+            die();
+        }
+        $this->display();
     }
     /**
      * 微信开发几步走
      * 1、获取微信产品配置信息
      * 2、构建对应信息
-     */
-    /**
      * 微信入口
      */
     function index(){
@@ -103,8 +155,7 @@ class IndexController extends LubTMP {
                 break;
 		 } 
     }
-    function stikcet($result = '')
-    {
+    function stikcet($result = ''){
          //查询是否已经写入
         $db = D('HcWx');
         $uinfo = $db->where(array('openid'=>$result['openid']))->find();
@@ -122,11 +173,8 @@ class IndexController extends LubTMP {
             $db->add($datas);
             return $datas;
         }
-        
-         //构造链接门票
     }
-    function ticket()
-    {
+    function ticket(){
         $ginfo = I('get.');
         $db = D('HcWx');
         $uinfo = $db->where(array('openid'=>$ginfo['openid']))->find();
@@ -196,10 +244,8 @@ class IndexController extends LubTMP {
         $proconf = $proconf[$product_id][2];
         //微信jssdk 签名包
 		$script = & load_wechat('Script',$product_id,1);
-
 		// 获取JsApi使用签名，通常这里只需要传 $ur l参数
 		$jsapi = $script->getJsSign($url, $timestamp, $noncestr, $appid);
-
 		// 处理执行结果
 		if($jsapi===FALSE){
 		    // 接口失败的处理
@@ -207,7 +253,6 @@ class IndexController extends LubTMP {
 		}else{
 		    // 接口成功的处理
 		}
-
         $this->assign('wechat',$proconf[$product_id][1]);
         $this->assign('jsapi',json_encode($jsapi))->assign('pid',$product_id)->assign('user',session('user'));
     }
@@ -221,6 +266,7 @@ class IndexController extends LubTMP {
         if(empty($user)){
            $user = Wticket::tologin($this->ginfo);
         }
+        //判断是否已经在登录
         $this->check_login();
         //与数据比对、是否绑定渠道商\
         //根据当前用户属性  加载价格及座位
@@ -239,7 +285,7 @@ class IndexController extends LubTMP {
         if(empty($user['user']['openid'])){
             session('user',null);
             $oauth = & load_wechat('Oauth',$this->pid,1);
-            $url = $oauth->getOauthRedirect(U('Wechat/Index/show',array('pid'=>$this->pid)), $state, 'snsapi_base');
+            $url = $oauth->getOauthRedirect(U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$this->user)), $state, 'snsapi_base');
             redirect($url);
         }
     }
@@ -247,9 +293,6 @@ class IndexController extends LubTMP {
      * 订单详情
      */
     function order_info(){
-        if($this->ginfo['sn']){
-           $this->error('参数错误'); 
-        }
         $info = D('Item/Order')->where(array('order_sn'=>$this->ginfo['sn']))->relation(true)->find();
         $info['info'] = unserialize($info['info']);
         //区域分类
@@ -270,6 +313,7 @@ class IndexController extends LubTMP {
     //用户中心
     function uinfo(){
         $user = session('user');
+        load_redis('set','user_wx',serialize($user));
         if(empty($user) || $user['user']['id'] == '2'){
             $this->redirect('Wechat/Index/login');
         }
@@ -282,10 +326,8 @@ class IndexController extends LubTMP {
     function orderlist(){
         //加密参数
         $user = session('user');
-        if(empty($user) || $user['user']['id'] == '2'){
-            $this->redirect('Wechat/Index/login');
-        }
-        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$user['user']['id']))->field('order_sn,status,createtime,money,plan_id')->limit('10')->order('createtime DESC')->select();
+        $uid = $user['user']['id'];
+        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id')->limit('10')->select();
         $this->wx_init($this->pid);
         $this->assign('data',$list)->display();
     }
@@ -343,18 +385,29 @@ class IndexController extends LubTMP {
             }
             die(json_encode($return));
         }else{
+            //判断是否已注册
+            /*已注册返回
             $user = Wticket::tologin($this->ginfo,'reg');
-            if($user['user']['openid']){
-                $this->wx_init($this->pid);
-               //$view = U('Wechat/Index/view',array('u'=>$user['user']['id'],'type'=>$this->ginfo['type']));
-                $url = Wticket::reg_link($user['user']['id'],$this->pid);
-                $this->assign('data',$user)->assign('url',$url)->assign('type',$this->ginfo['type'])->display();
-            }else{
+            if(!$user['user']['openid']){
                 $this->error("授权失败...");
+            }*/
+            $openid = $_SESSION['openid'];
+            switch (Wticket::is_reg($openid)) {
+                case '400':
+                    $this->wx_init($this->pid);
+                    $url = Wticket::reg_link($user['user']['id'],$this->pid);
+                    $this->assign('openid',$openid)->assign('url',$url)->assign('type',$this->ginfo['type'])->display();
+                    break;
+                case '300':
+                    $this->error("您已经注册,正在等待审核");
+                    break;
+                case '200':
+                    $this->redirect('Wechat/Index/uinfo');
+                    break;
             }
         }
     }
-
+    
     //注册二维码
     function reg_code()
     {
@@ -402,7 +455,7 @@ class IndexController extends LubTMP {
                $return = array('statusCode' => 200);  
            }
         }
-        echo json_encode($return);
+        die(json_encode($return));
     }
     //账号登录
     function login()
@@ -474,7 +527,6 @@ class IndexController extends LubTMP {
                 }else{
                     $return = array('statusCode' => 300,'msg' => '登录失败,请联系管理员');
                 }
-                 
                 die(json_encode($return)); 
             }
         }else{
@@ -485,9 +537,7 @@ class IndexController extends LubTMP {
             }else{
                 $this->redirect('Wechat/Index/uinfo');
             }
-            
         }
-        
     }
     //提现
     function mention(){
@@ -534,40 +584,6 @@ class IndexController extends LubTMP {
     //支付成功提示页面
     function pay_success(){
         $sn = I('sn');
-        //判断是否已经完成支付
-        $data = [
-            'out_trade_no' => $sn        
-        ];
-        $config = load_payment('wx_charge',$this->pid);
-        try {
-            $return = Query::run('wx_charge', $config, $data);
-            if($return['return_code'] == 'SUCCESS' && $return['result_code'] == 'SUCCESS' && $return['trade_state'] == 'SUCCESS'){
-
-                $oinfo = D('Item/Order')->where(array('order_sn'=>$return["out_trade_no"]))->relation(true)->find();
-                $info = array(
-                 'seat_type' => '1',
-                 'pay_type' =>   '5'
-                );
-                $status = \Libs\Service\Order::mobile_seat($info,$oinfo);
-                if($status){
-                    $openid = $return['openid'];
-                    $attach =  array(
-                        'number'=>$oinfo['number'],
-                        'product_name'=>productName($oinfo['product_id'],1),
-                        'plan'=> planShow($oinfo['plan_id'],4,1),
-                    );
-                    $result = array(
-                        'openid' => $openid,
-                        'out_trade_no' => $return["out_trade_no"],
-                        'attach' => serialize($attach),
-                    );
-                    $this->to_tplmsg($result,$oinfo['product_id']);
-                }
-            }
-        } catch (PayException $e) {
-            echo $e->errorMessage();
-            exit;
-        }
         $this->wx_init($this->pid);
         $this->assign('sn',$sn)->display();
     }
@@ -664,6 +680,7 @@ class IndexController extends LubTMP {
             $uinfo = session('user');
             $sn = \Libs\Service\Order::mobile($info,$uinfo['user']['scene'],$uinfo['user']);
             if($sn != false){
+               // dump(U('Wechat/Index/order',array('sn'=>$sn,'pid'=>$this->pid)));
                 $return = array(
                     'statusCode' => 200,
                     'url' => U('Wechat/Index/order',array('pid'=>$this->pid,'sn'=>$sn)),
@@ -674,7 +691,7 @@ class IndexController extends LubTMP {
                     'url' => '',
                 );  
             }
-            echo json_encode($return);
+            die(json_encode($return));
         }else{
             $info = D('Item/Order')->where(array('order_sn'=>$this->ginfo['sn']))->relation(true)->find();
             $info['info'] = unserialize($info['info']);
@@ -690,9 +707,9 @@ class IndexController extends LubTMP {
                     }
                     // 获取预支付ID
                     if($info['money'] == '0'){
-                       $money = 0.1;
+                       $money = 0.1*100;
                     }else{
-                       $money = $info['money']; 
+                       $money = $info['money']*100; 
                     }
                     //$money = 1;
                     $proconf = cache('ProConfig');
@@ -700,25 +717,15 @@ class IndexController extends LubTMP {
                     $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
                     $product_name = product_name($this->pid,1);
-                    $config = load_payment('wx_pub',$this->pid);
-                    $payData = [
-                        'body'          => $product_name,
-                        'subject'       => $product_name,
-                        'order_no'      => $info['order_sn'],
-                        'timeout_express' => time() + 600,// 表示必须 600s 内付款
-                        'amount'        => $money,// 单位为元 ,最小为0.01
-                        'return_param'  => $product_name,
-                        'openid'        => $user['user']['openid'],
-                        'notify_url'    => $notify_url,
-                    ];
-                    try {
-                        $ret = Charge::run('wx_pub', $config, $payData);
-                    } catch (PayException $e) {
-                        echo $e->errorMessage();
-                        exit;
+                    $pay = & load_wechat('Pay',$this->pid);
+					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
+                    if($prepayid){
+                        $options = $pay->createMchPay($prepayid);
+                    }else{
+                        // 创建JSAPI签名参数包，这里返回的是数组
+                        $this->assign('error',$pay->errMsg.$pay->errCode);
                     }
-                    load_redis('set','sings',$ret);
-					$this->assign('jsapi',$prepayid)->assign('wxpay',$ret);
+					$this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                 }
             }
             $this->assign('data',$info)->display();
@@ -760,8 +767,7 @@ class IndexController extends LubTMP {
                     'msg' => $status.'9',
                 );  
             }
-            echo json_encode($return);
-            return true;
+            die(json_encode($return));
         }
     }
     /*请人代付*/
@@ -913,8 +919,6 @@ class IndexController extends LubTMP {
         $res = $sndMsg->sendTemplateMessage($template);
         //TODO  回传模板消息发送状态
     }
-    //支付完成后异步回调
-    
     /*微信API 相关处理  后期完善
 	文本消息
     */
