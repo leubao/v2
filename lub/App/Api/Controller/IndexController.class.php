@@ -281,6 +281,12 @@ class IndexController extends ApiBase {
         $pinfo = json_decode($pinfo,true);
         $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
         if($appInfo != false && $pinfo['type'] != false){
+          //加锁
+          $sn = $pinfo['type'] == '1' ? $pinfo['sn'] : get_sn_api($pinfo['card']);
+          $lock_sn = load_redis('get','lock_'.$sn);
+          if(!empty($lock_sn)){
+            die(json_encode(['code' => 415,'info' => '','msg' => '未找到失败']));
+          }
           switch ($pinfo['type']) {
             case '1':
               if($this->print_check($pinfo['sn'],$pinfo['phone']) != false){
@@ -314,7 +320,7 @@ class IndexController extends ApiBase {
           $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
       }
       $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
-      echo json_encode($return);
+      die(json_encode($return));
     }
     /*
     * 身份证取票
@@ -377,13 +383,71 @@ class IndexController extends ApiBase {
         foreach ($list as $k=>$v){
           $info[] = re_print($plan['id'],$plan['encry'],$v);
         }
+        //锁定时间根据门票数量来确定
+        $time = (int)$info['number']*2;
+        load_redis('setex','lock_'.$sn,'警告:订单正在出票,稍后再试...',$time);
         return $info;
-      }
-      if($info['status'] == '6'){
+      }elseif($info['status'] == '6'){
         $info['code'] = '211';
+        //生成支付二维码
         return $info;
+      }else{
+
       }
-      
+    }
+    /**
+     * 自助机付款
+     * 需要传递订单号和支付类型 目前支持alipay wxpay
+     * @return [type] [description]
+     */
+    function api_payment(){
+      if(IS_POST){
+        $pinfo = $_POST['data'];
+        $pinfo = json_decode($pinfo,true);//dump($pinfo);
+        $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+        if($appInfo != false){
+          $sn = $pinfo['sn'];
+          if(empty($sn) || sn_length($sn) == false){return false;}
+          $map = array('order_sn'=>$sn,'status'=>array('in','1,6'));
+          $info = M('Order')->where($map)->field('plan_id,order_sn,status,number,take,pay,product_id,money')->find();
+          if(empty($info)){
+            die(json_encode(['code' => 414,'info' => '','msg' => '未找到失败']));
+          }
+          if(in_array($info['status'],'1,9') && !in_array($info['pay'],'1,3')){
+            $return = array('code' => 412,'info' => '','msg' => '订单已完成支付');
+          }else{
+            $product = product_name($info['product_id'],1);
+            $payData = [
+              'subject' => $product."门票",
+              'body'    => planShow($info['plan_id'],1,1).$product."门票",
+              'order_no'    => $info['order_sn'],
+              'timeout_express' => time() + 600,// 表示必须 600s 内付款
+              'amount'      => $info['money'],// 单位为元 ,最小为0.01
+              'return_param' => [],
+              'product_id'    =>  $info['product_id'],
+              // 支付宝公有
+              'goods_type' => 1,
+              'store_id' => '',
+
+              'client_ip' => get_client_ip(),
+            ];
+            if($pinfo['paytype'] == 'alipay'){
+              $qr = \Api\Service\Apipay::get_pay_qr('ali_qr',$info['product_id'],$payData);
+              $return = array('code' => 200,'info' => $qr,'msg' => '不被支持的支付方式');
+            }elseif($pinfo['paytype'] == 'wxpay'){
+              $qr = \Api\Service\Apipay::get_pay_qr('wx_qr',$info['product_id'],$payData);
+              $return = array('code' => 200,'info' => $qr,'msg' => '不被支持的支付方式');
+            }else{
+              $return = array('code' => 413,'info' => $qr,'msg' => '不被支持的支付方式');
+            }
+          }
+        }else{
+          $return = array('code' => 401,'info' => '','msg' => '认证失败');
+        }
+      }else{
+          $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+      }
+      die(json_encode($return));
     }
     /*
     * 根据身份号码获取订单列表
@@ -442,6 +506,7 @@ class IndexController extends ApiBase {
             //更新订单状态
             $up_order = $model->table(C('DB_PREFIX'). order)->where(array('order_sn'=>$sn))->setField('status',9);
             $up_print = true;
+            load_redis('delete','lock_'.$sn);
             $remark = "打印定单".$sn."完结";
             $type = '3';
           }
@@ -528,30 +593,34 @@ class IndexController extends ApiBase {
               //组合订单数据
               //$info = $this->order_info($pinfo,$appInfo);
               $info = $this->booking_order($pinfo,$appInfo);
-              //TODO API团队和API散客暂时按照支付方式来分  只记录不付费的51 API散客 52 API团队
-              if($appInfo['is_pay'] == '1'){
-                $scena = '51';
+              if($info['error'] == '1'){
+                $return = array('code' => 406,'msg' => '销售配额不足');
               }else{
-                $scena = '52';
-              }
-              $sn = Order::orderApi($info,$scena,$appInfo); 
-              if($sn){
-                $return = array(
-                  'code'  => 200,
-                  'info'  => array('plan'=>planShow($info['plan_id'],1,1)),
-                  'sn'    => $sn,
-                  'seat'  => sn_seat($sn),
-                  'msg'   => 'OK',
-                );
-              }else{
-                $return = array('code' => 403,'info' => '','msg' => '订单提交失败');
+                //TODO API团队和API散客暂时按照支付方式来分  只记录不付费的51 API散客 52 API团队
+                if($appInfo['is_pay'] == '1'){
+                  $scena = '51';
+                }else{
+                  $scena = '52';
+                }
+                $sn = Order::orderApi($info,$scena,$appInfo); 
+                if($sn){
+                  $return = array(
+                    'code'  => 200,
+                    'info'  => array('plan'=>planShow($info['plan_id'],1,1)),
+                    'sn'    => $sn,
+                    'seat'  => sn_seat($sn),
+                    'msg'   => 'OK',
+                  );
+                }else{
+                  $return = array('code' => 403,'info' => '','msg' => '订单提交失败');
+                }
               }
             }
           }else{
             $return = array('code' => 409,'info' => '','msg' => '终端标识不存在');
           }
         }else{
-          $return = array('code' => 401,'info' => '','msg' => '认证失败');
+          $return = array('code' => 401,'info' => $pinfo,'msg' => '认证失败');
         }
 
       }else{
@@ -570,13 +639,23 @@ class IndexController extends ApiBase {
       $proList = cache('Product');
       $product = $proList[$pinfo['product_id']];
       $plan = get_date_plan($pinfo['datetime'],'1','2',$pinfo['product_id'],2);
+      $number = 0;
       foreach ($pinfo['oinfo'] as $k => $v) {
         $oinfo[] = array(
           'areaId'=>get_ticket_area($v['priceid'],$pinfo['product_id']),
           'priceid'=>$v['priceid'],
           'price'=>$v['price'],
           'num'=>$v['num'],
-          );
+        );
+        $number += $v['num'];
+      }
+      //判断配额
+      $quota = $this->check_quota($plan['id'],$pinfo['product_id'],$appInfo['crm_id'],$number);
+      if($quota == false){
+          $info = [
+            'error' => '1'
+          ];
+          return $info;
       }
       //重构请求数据
       $info = array(
@@ -585,10 +664,18 @@ class IndexController extends ApiBase {
         'checkin'   => '1',
         'app_sn'    =>  $pinfo['sn'],
         'data'      =>  $oinfo,
+        'id_card' =>  $pinfo['crm']['id_card'],
         'crm'       =>  array('0'=>array('guide'=>$appInfo['id'],'qditem'=>$appInfo['crm_id'],'phone'=>$pinfo['crm']['phone'],'contact'=>$pinfo['crm']['contact'])),
-        'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'],'id_card'=>$pinfo['id_card'])),
+        'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'],'id_card'=>$pinfo['crm']['id_card'])),
       );
       return $info;
+    }
+    /**
+     * 判断配额
+     * @return [type] [description]
+     */
+    function check_quota($plan_id = '',$product_id = '',$channel_id = '', $number = ''){
+      return \Libs\Service\Quota::quota($plan_id,$product_id,$channel_id,$number);
     }
     /**
      * api 接口通知取票状态
@@ -596,7 +683,20 @@ class IndexController extends ApiBase {
      * @return [type] [description]
      */
     function api_notice(){
-      
+      if(IS_POST){
+        $pinfo = $_POST['data'];
+        $pinfo = json_decode($pinfo,true);
+        $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+        if($appInfo != false){
+            //获取订单号
+          }else{
+            $return = array('code' => 401,'info' => '','msg' => '认证失败');
+          }
+      }else{
+          $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+      }
+      $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
+      die(json_encode($return));
     }
     /**
      * 查询订单状态 条件为订单号
@@ -617,6 +717,40 @@ class IndexController extends ApiBase {
       }else{
         return true;
       }
+    }
+    /**
+     * 自助机获取付款二维码
+     */
+    function api_pay_qr(){
+      if(IS_POST){
+        $pinfo = $_POST['data'];
+        $pinfo = json_decode($pinfo,true);
+        $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+        if($appInfo != false){
+            //获取订单号
+            $map = [
+              'order_sn'=>  $pinfo['sn'],
+              'type'    =>  ['in','1,6'],
+              'addsid'  =>  ['in','3,7'],/*网站和自助机*/
+              'status'  =>  ['in','6,11']
+            ];
+            $oinfo = D('Item/Order')->where($map)->field('order_sn,product_id,money')->find();
+            $config = load_payment('wx_qr',$oinfo['product_id']);
+            try {
+                $ret = Transfer::run('wx_qr', $config, $data);
+            } catch (PayException $e) {
+                $this->erun("ERROR:".$e->errorMessage());
+                error_insert($e->errorMessage());
+                exit;
+            }
+          }else{
+            $return = array('code' => 401,'info' => '','msg' => '认证失败');
+          }
+      }else{
+          $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+      }
+      $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
+      die(json_encode($return));
     }
     /**
      * 扫码支付通知接口
@@ -661,6 +795,42 @@ class IndexController extends ApiBase {
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
       );
+      $orderNo = time() . rand(1000, 9999);
+      // 订单信息
+      $payData = [
+          'body'    => 'test body',
+          'subject'    => 'test subject',
+          'order_no'    => $orderNo,
+          'timeout_express' => time() + 600,// 表示必须 600s 内付款
+          'amount'    => '0.01',// 单位为元 ,最小为0.01
+          'return_param' => '123',
+
+          // 支付宝公有
+          'goods_type' => 1,
+          'store_id' => '',
+
+          // 条码支付
+          'operator_id' => '',
+          'terminal_id' => '',// 终端设备号(门店号或收银设备ID) 默认值 web
+          'alipay_store_id' => '',
+          'scene' => 'bar_code',// 条码支付：bar_code 声波支付：wave_code
+          'auth_code' => '1231212232323123123',
+
+          // web支付
+          'qr_mod' => '',//0、1、2、3 几种方式
+          'paymethod' => 'creditPay',// creditPay  directPay
+
+          'client_ip' => '127.0.0.1',
+
+          'openid' => 'ohQeiwnNrAg5bD7EVvmGFIhba--k',
+          'product_id' => '123',
+      ];
+      try {
+          $ret = Payment\Client\Charge::run($channel, $config, $payData);
+      } catch (Payment\Common\PayException $e) {
+          echo $e->errorMessage();
+          exit;
+      }
       //load_redis('lpush','WechatPayOrder','70301190632334');
       /*
       $len = load_redis('lsize','test','1212211212');
@@ -672,7 +842,8 @@ class IndexController extends ApiBase {
       //load_redis('delete','work');
       dump($len);
       dump($sn);
-      
+      //下单测试数据
+      {"crm":{"contact":"测试","phone":"18631451216","id_card":"350783199304213022"},"datetime":"2017-04-2","money":143,"product_id":"41","oinfo":[{"priceid":"33","num":"1","price":143}],"sn":"16088221778323","appid":"38642","appkey":"3aaa5ed4f614668ba10f4dc807b23541"}
       
       $whoops = new \Whoops\Run();
       $whoops->pushHandler(new \Whoops\Handler\PrettyPageHandler);
@@ -919,7 +1090,6 @@ class IndexController extends ApiBase {
     }
     //自助机dayin
     function c_print(){
-     // $url = "http://www.yx513.net/api.php?a=api_print";
       $url = "http://new.leubao.com/api.php?a=api_plan";
       $post = array(
         'appid' => '65535',
@@ -936,7 +1106,19 @@ class IndexController extends ApiBase {
     }
     //测试api 退票
     function c_refund(){
-
+      /*
+      $db = D('User');
+      $list = $db->where(array('groupid'=>2))->field('id')->select();
+      foreach ($list as $k => $v) {
+        $status = D('Order')->where(array('user_id'=>$v['id']))->field('id')->find();
+        if(!$status){
+          $del[] = $v['id'];
+        }
+      }
+      $delid = implode(',',$del);
+      $db->where(array('id'=>array('in',$delid)))->delete();
+      D('UserData')->where(array('user_id'=>array('in',$delid)))->delete();
+      */
     }
     //更新客源地统计
     function ky(){
@@ -1003,14 +1185,16 @@ class IndexController extends ApiBase {
     
     //生成sql语句
     function sqlshow(){
-      $map = array('status'=>array('neq','4'));
-        //$list = M('TeamOrder')->where($map)->field('order_sn')->select();
-        //dump($list);
-        //按订单返佣
-        foreach ($list as $key => $value) {
-           //$info[$key] = \Libs\Service\Rebate::rebate($value,1);
-        }
-
+      //$map = array('status'=>array('neq','4'));
+      //$list = M('TeamOrder')->where($map)->field('order_sn')->select();
+      //dump($list);
+      //按订单返佣
+      //foreach ($list as $key => $value) {
+          //$info[$key] = \Libs\Service\Rebate::rebate($value,1);
+      //}
+      $info = D('Item/Order')->where(array('order_sn'=>'70314158721843'))->relation(true)->find();
+      $info['info'] = unserialize($info['info']);
+      dump($info);
       /*
       $map = array(
         'order_sn' => $sn,
@@ -1182,6 +1366,7 @@ class IndexController extends ApiBase {
       dump($list);
     }
     //
+  
    /*
     向服务端发送验证请求
     @param $url string 服务器URL
@@ -1196,5 +1381,10 @@ class IndexController extends ApiBase {
       $output = curl_exec($ch);
       curl_close($ch);
       return $output;
+  }
+  /*****************************第三方支付******************************/
+  public function notify(){
+    //use Payment\Common\PayException;
+   // use Payment\Client\Notify;
   }
 }
