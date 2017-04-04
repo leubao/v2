@@ -32,34 +32,43 @@ class OrderController extends Base{
         $end_time = I('end_time');
         $user_id = I('user');
         $product_id = I('product');
+        $datetype = I('datetype');
+        $status = I('status');
+        $sn = I('sn');
         //传递查询时间
         $this->assign('start_time',$start_time)
-        	->assign('end_time',$end_time);
+        	->assign('end_time',$end_time)->assign('datetype',$datetype);
 		$uinfo = Partner::getInstance()->getInfo();
         if($uinfo['groupid'] == '3'){
-        	 //$status = '6';//政企用户
-        	$where =  array(
-        		'channel_id' =>	$uinfo['cid'],
-				//'type'=>6,
-        		);
+        	$where =  ['channel_id' =>	$uinfo['cid']];
         }else{
         	$where = array(
 				'channel_id' =>	array(in,$this->get_channel()),
-				//'type'=>4,
 			);
         }
-        $status = I('status');
-        $sn = I('sn');
         if(!empty($user_id)){
         	$where['user_id'] = $user_id;
         }
-		if (!empty($start_time) && !empty($end_time)) {
-            $start_time = strtotime($start_time);
-            $end_time = strtotime($end_time) + 86399;
-            $where['createtime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
-        }else{
-        	//查询时间段为空时默认查询未过期的订单
-        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
+        if($datetype == '1'){
+        	if (!empty($start_time) && !empty($end_time)) {
+	            $start_time = strtotime($start_time);
+	            $end_time = strtotime($end_time) + 86399;
+	            $where['createtime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+	        }else{
+	        	//查询时间段为空时默认查询未过期的订单
+	        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
+	        }
+        }elseif($datetype == '2' && !empty($start_time) && !empty($end_time)){
+        	//查询一段时间内所有演出计划,时间段 不超过三十天
+        	$day = timediff($start_time,$end_time);
+        	if($day['day'] < 0 || $day['day'] > 60){
+        		$this->error("根据演出日期查询时最多可查询60天的数据...");
+        	}
+        	$start_time = strtotime($start_time);
+	        $end_time = strtotime($end_time);
+	        $plantime = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+        	$planlist = M('Plan')->where(['plantime'=>$plantime,'status'=>['in','2,3,4']])->field('id')->select();
+        	$where['plan_id'] = array('in',implode(',',array_column($planlist,'id')));
         }
         if ($status != '') {
             $where['status'] = $status;
