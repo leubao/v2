@@ -566,8 +566,8 @@ sql;
 	}
 	/*计划任务缓存*/
 	function plan_cache($proid = null ){
-		S('plan',null);
-	 	$productId = $proid ? $proid : \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');	 	
+		F('planlist',null);
+	 	$productId = $proid ? $proid : get_product('id');	 	
 	 	$data = $this->where(array('status'=>'2'))->select();
         if (empty($data)) {
             return false;
@@ -580,7 +580,8 @@ sql;
         	//缓存可售列表
         	$plan[] = $rs['id']; 
         }
-        S('plan',implode(',',$plan));
+        F('planlist',implode(',',$plan));
+        //S('planlist',json_encode($plan));
         return true;
 	 }
 
