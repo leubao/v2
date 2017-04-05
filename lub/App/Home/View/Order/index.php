@@ -51,6 +51,12 @@
               </select>
             </div>
             <div class="form-group">
+              <select class="form-control" name="datetype">
+                <option value="1" <if condition="$datetype eq '1'">selected="selected"</if>>下单日期</option>
+                <option value="2" <if condition="$datetype eq '2'">selected="selected"</if>>演出日期</option>
+              </select>
+            </div>
+            <div class="form-group">
               <select class="form-control" name="user">
                 <option value="">下单人</option>
                 <volist name='user' id="user">

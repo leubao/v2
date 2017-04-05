@@ -11,8 +11,25 @@ use Common\Controller\ManageBase;
 class SmsController extends ManageBase{
 	//短信发送记录
 	function index(){
-		$this->basePage('SmsLog','','createtime DESC');
-		$this->display();
+		$where = array();
+        $start_time = I('starttime');
+        $end_time = I('endtime');
+        $sn = I('order_sn');
+        $phone = I('phone');
+        $this->assign('starttime',$start_time)->assign('endtime',$end_time);
+        if (!empty($start_time) && !empty($end_time)) {
+            $start_time = strtotime($start_time);
+            $end_time = strtotime($end_time) + 86399;
+            $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }
+        if($phone != ''){
+            $where['phone'] = $phone;
+        }
+        if($sn != ''){
+            $where['order_sn'] = $sn;
+        } 
+		$this->basePage('SmsLog',$where,'createtime DESC');
+		$this->assign('where',$where)->display();
 	}
 	//模板管理
 	function template(){

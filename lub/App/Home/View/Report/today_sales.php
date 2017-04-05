@@ -56,7 +56,6 @@
             <col>
             <col>
             <col>
-            <col>
             </colgroup>
             <volist name="data" id="vo">
             <volist name="vo['plan']" id="v">
@@ -69,7 +68,6 @@
                 <td align="center">数量</td>
                 <td align="center">票面金额</td>
                 <td align="center">结算金额</td>
-                <td align="center">补贴</td>
               </tr>
             </thead>
             <tbody>
@@ -81,10 +79,9 @@
                   <td align="center">{$vi.number}</td>
                   <td align="center">{$vi.money}</td>
                   <td align="center">{$vi.moneys}</td>
-                  <td align="center">{$vi.rebate}</td>
                 </tr>                
               </volist>
-              <tr><td align="right"></td><td align="center" colspan="2">总数：{$v.number}</td><td align="center">票面金额：{$v.money}</td><td align="center">结算金额：{$v.moneys}</td><td align="center" colspan="2">补贴金额：{$v.rebate}</td></tr>
+              <tr><td align="right"></td><td align="center"></td><td align="center"></td><td align="center">总数：{$v.number}</td><td align="center">票面金额：{$v.money}</td><td align="center">结算金额：{$v.moneys}</td></tr>
             </tbody>
             </volist>
             </volist>
@@ -100,7 +97,6 @@
             <col>
             <col>
             <col>
-            <col>
             </colgroup>
             <volist name="data" id="vo">
             <volist name="vo['plan']" id="v">
@@ -113,7 +109,6 @@
                 <td align="center">数量</td>
                 <td align="center">票面金额</td>
                 <td align="center">结算金额</td>
-                <td align="center">补贴</td>
               </tr>
             </thead>
             <tbody>
@@ -125,10 +120,9 @@
                   <td align="center">{$vi.number}</td>
                   <td align="center">{$vi.money}</td>
                   <td align="center">{$vi.moneys}</td>
-                  <td align="center">{$vi.rebate}</td>
                 </tr>                
               </volist>
-              <tr><td align="right"></td><td align="center" colspan="2">总数：{$v.number}</td><td align="center">票面金额：{$v.money}</td><td align="center">结算金额：{$v.moneys}</td><td align="center" colspan="2">补贴金额：{$v.rebate}</td></tr>
+              <tr><td align="right"></td><td align="center"></td><td align="center"></td><td align="center">总数：{$v.number}</td><td align="center">票面金额：{$v.money}</td><td align="center">结算金额：{$v.moneys}</td></tr>
             </tbody>
             </volist>
             </volist>

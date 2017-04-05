@@ -79,8 +79,7 @@ class UserController extends Base{
 	function add(){
 		if(IS_POST){
 			$info=array(
-				'is_scene'	=> '3',
-				'role_id'	=>	'9'
+				'is_scene'	=> '3'
 			);
 			$user_id = Operate::do_add('User',$info);
 			if($user_id){
@@ -90,8 +89,8 @@ class UserController extends Base{
 				$this->erun('新增失败!');
 			}
 		}else{
-			$Config = cache("Config");
-			$map['parentid'] = $Config['channel_role_id'];
+			
+			$map['parentid'] = $this->config['channel_role_id'];
 			$map['is_scene'] = 3;
 			$map['status'] = 1;
 			$level = Operate::do_read('Role',1,$map,array('id'=>DESC));
@@ -194,37 +193,6 @@ class UserController extends Base{
             $this->assign('userInfo', Partner::getInstance()->getInfo());
             $this->display();
         }
-	}
-	/**
-	*绑定银行卡号
-	*/
-	function binding(){
-		if(IS_POST){
-
-		}else{
-			$this->display();
-		}
-	}
-
-	/**
-	*修改手机号
-	*/
-	function phones(){
-		if(IS_POST){
-
-		}else{
-			$this->display();
-		}
-	}
-	/**
-	*修改备用邮箱
-	*/
-	function emails(){
-		if(IS_POST){
-
-		}else{
-			$this->display();
-		}
 	}
 	/**
 	 * 下级代理商列表

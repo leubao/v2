@@ -160,7 +160,7 @@ class IndexController extends ApiBase {
           $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
       }
       $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
-      echo json_encode($return);
+      die(json_encode($return));
     }
     /*
     *API订单查询
@@ -285,7 +285,7 @@ class IndexController extends ApiBase {
           $sn = $pinfo['type'] == '1' ? $pinfo['sn'] : get_sn_api($pinfo['card']);
           $lock_sn = load_redis('get','lock_'.$sn);
           if(!empty($lock_sn)){
-            die(json_encode(['code' => 415,'info' => '','msg' => '未找到失败']));
+            die(json_encode(['code' => 415,'info' => '','msg' => '订单锁定中...']));
           }
           switch ($pinfo['type']) {
             case '1':
@@ -360,39 +360,38 @@ class IndexController extends ApiBase {
       switch ($type) {
         case '1':
           if(empty($sn) || sn_length($sn) == false){return false;}
-          if(empty($channel_id)){
-            $map = array('order_sn'=>$sn,'status'=>array('in','1,6'),'pay'=>array('in','2,4,5'));
-          }else{
-            $map = array('order_sn'=>$sn,'status'=>array('in','1,6'),'pay'=>array('in','2,4,5'));
-          }
+          $map = array('order_sn'=>$sn,'status'=>array('in','1,6'));
           break;
         case '2':
           //TODO  身份证号码校验
           if(checkIdCard($sn) != false){
-            $map = array('id_card'=>$sn,'status'=>'1','pay'=>array('in','2,4,5'));
+            $map = array('id_card'=>$sn,'status'=>'1');
           }else{
             return false;
           }
           break;
       }
-      $info = M('Order')->where($map)->field('plan_id,order_sn,status,number,take')->find();
+      $info = M('Order')->where($map)->field('plan_id,order_sn,status,number,take,type,pay')->find();
       if($info['status'] == '1'){
-        $plan = F('Plan_'.$info['plan_id']);
-        if(empty($plan)){return false;}
-        $list = M(ucwords($plan['seat_table']))->where(array('status'=>2,'order_sn'=>$info['order_sn'],'print'=>array('eq',0)))->select();
-        foreach ($list as $k=>$v){
-          $info[] = re_print($plan['id'],$plan['encry'],$v);
+        if(in_array($info['pay'],['2','4','5'])){
+          //授信额、支付宝、微信支付
+          $plan = F('Plan_'.$info['plan_id']);
+          if(empty($plan)){return false;}
+          $list = M(ucwords($plan['seat_table']))->where(array('status'=>2,'order_sn'=>$info['order_sn'],'print'=>array('eq',0)))->select();
+          foreach ($list as $k=>$v){
+            $info[] = re_print($plan['id'],$plan['encry'],$v);
+          }
+          //锁定时间根据门票数量来确定
+          $time = (int)$info['number']*2;
+          load_redis('setex','lock_'.$sn,'警告:订单正在出票,稍后再试...',$time);
         }
-        //锁定时间根据门票数量来确定
-        $time = (int)$info['number']*2;
-        load_redis('setex','lock_'.$sn,'警告:订单正在出票,稍后再试...',$time);
+        if(in_array($info['pay'],['1','3','6'])){
+          //现金、签单
+          $info['code'] = '211';
+          //生成支付二维码
+          $info['paypage'] = U('Api/Index/paypage',array('sn'=>$info['order_sn'])); 
+        }
         return $info;
-      }elseif($info['status'] == '6'){
-        $info['code'] = '211';
-        //生成支付二维码
-        return $info;
-      }else{
-
       }
     }
     /**
@@ -428,7 +427,6 @@ class IndexController extends ApiBase {
               // 支付宝公有
               'goods_type' => 1,
               'store_id' => '',
-
               'client_ip' => get_client_ip(),
             ];
             if($pinfo['paytype'] == 'alipay'){
@@ -751,6 +749,14 @@ class IndexController extends ApiBase {
       }
       $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
       die(json_encode($return));
+    }
+
+    function paypage(){
+      $ginfo = I('get.');
+      if(!$ginfo['sn']){
+        $this->error("参数错误");
+      }
+      $this->display();
     }
     /**
      * 扫码支付通知接口
@@ -1146,7 +1152,7 @@ class IndexController extends ApiBase {
     //查询花费和返佣不匹配的订单
     function with_fill(){
       //查询所有渠道订单
-      $list = M('Order')->where(array('type'=>array('in','2,4,8,9'),'status'=>array('in','1,9,7,8')))->limit('1,500')->field('order_sn')->order('id DESC')->select();
+      $list = M('Order')->where(array('type'=>array('in','8,9'),'status'=>array('in','1,9,7,8')))->limit('1,500')->field('order_sn')->order('id DESC')->select();
       //匹配返佣订单
       foreach ($list as $k => $v) {
         $status = M('TeamOrder')->where(array('order_sn' => $v['order_sn']))->find();

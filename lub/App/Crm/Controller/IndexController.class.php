@@ -11,6 +11,9 @@ use Common\Controller\ManageBase;
 use Libs\Service\Operate;
 use Common\Model\Model;
 class IndexController extends ManageBase{
+	protected function _initialize() {
+		parent::_initialize();
+	}
 	/*管理客户*/
 	function index(){
 		/*获得客户分组信息*/
@@ -26,7 +29,7 @@ class IndexController extends ManageBase{
 		$name = I('name');
 		$level = I('level');//级别
 		$status = I('status');
-		$product_id = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+		$product_id = get_product('id');
 		//$map["id"] = $groupid;
 		//$map =  array('id'=>$groupid,'type'=>$type,'product_id'=>$product_id);
 		$map =  array('groupid'=>$groupid);
@@ -63,7 +66,7 @@ class IndexController extends ManageBase{
 	function add(){
 		if(IS_POST){
 			$data["itemid"]      = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
-			$data["product_id"]  = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+			$data["product_id"]  = get_product('id');
 			$data["create_time"] = time();
 			$data["salesman"]    = $_POST["user_id"];
 			$data['param']	=	serialize(array(
@@ -82,7 +85,7 @@ class IndexController extends ManageBase{
 			$type = I('type');
 			if($type == '1'){
 				//企业
-				$level = Operate::do_read('Role',1,array('parentid'=>self::$Cache['Config']['channel_agents_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
+				$level = Operate::do_read('Role',1,array('parentid'=>$this->config['channel_role_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
 				$this->assign("level",$level);
 			}elseif ($type == '2' || $type == '3') {
 				//个人
@@ -128,10 +131,17 @@ class IndexController extends ManageBase{
 				'rebate' => $info['rebate'],
 				));
 			$data = array_merge($info,array('salesman'=>$_POST["orgLookup_ids"],'param'=>$param));
-			$up = M('Crm')->save($data);
+			$model = D('Crm');
+			$up = $model->save($data);
+			
+			//更新所有二级及二级员工的分组属性
+			//读取关系链接
+			$channel_agents_id = agent_channel($info['id'],2);
+			$model->where(array('id'=>array('in',$channel_agents_id)))->setField('groupid',$info['groupid']);
 			//更新商户下所有员工所属的分组
-			$user_up = M('User')->where(array('cid'=>$info['id']))->setField('groupid',$info['groupid']);
+			$user_up = M('User')->where(array('cid'=>array('in',$channel_agents_id)))->setField('groupid',$info['groupid']);
 			if($up != false){
+				$model->crm_cache();
 				$this->srun('修改成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
 			}else{
 				$this->erun('修改失败!');
@@ -141,7 +151,7 @@ class IndexController extends ManageBase{
 			$type = I('type');
 			$groupid = I("groupid");//客户分组id
 			//企业
-			$level = Operate::do_read('Role',1,array('parentid'=>self::$Cache['Config']['channel_agents_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
+			$level = Operate::do_read('Role',1,array('parentid'=>$this->config['channel_role_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
 			$group = F('CrmGroup');
 			$list = Operate::do_read('Crm',0,array('id'=>$id));
 			$list['param'] = unserialize($list['param']);
@@ -187,7 +197,7 @@ class IndexController extends ManageBase{
 	 */
 	function group(){
 		//$data["itemid"] = array(array('EQ','0'),array('EQ',\Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE')),'or');  //选择系统默认以及自己添加的分组
-		$map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+		$map['product_id'] = get_product('id');
 		$this->basePage('CrmGroup',$data,array("status"=>"DESC","create_time"=>"DESC"));
 		$this->display();		
 	}
@@ -208,7 +218,7 @@ class IndexController extends ManageBase{
 		}else{
 			$price = Operate::do_read('TicketGroup',1,array('status'=>1));
 			$this->assign('price',$price)
-				->assign('product_id',\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'))
+				->assign('product_id',get_product('id'))
 				->display();
 		}
 	}
@@ -259,7 +269,7 @@ class IndexController extends ManageBase{
 			$this->assign('price',$price)
 				->assign("id",$id)
 				->assign('data',$list)
-				->assign('product_id',\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'))
+				->assign('product_id',get_product('id'))
 				->display();			
 		}
 	}
@@ -323,8 +333,8 @@ class IndexController extends ManageBase{
 				'username' => $info['username'],
 				'nickname' => $info['nickname'],
 				"item_id"  => \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE'),
-				'product'  =>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
-				'defaultpro'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+				'product'  =>get_product('id'),
+				'defaultpro'=>get_product('id'),
 				"create_time" => time(),
 				"update_time" => time(),
 				"is_scene" => 3,   //应用场景为3，渠道
@@ -348,7 +358,7 @@ class IndexController extends ManageBase{
 			$data["cid"]     = I("get.cid") != "" ?I("get.cid"):$_POST["cid"];//客户id
 			$ginfo = I('get.');
 			/*显示相关的角色id TODO*/
-			$map['parentid'] = '8';
+			$map['parentid'] = $this->config['channel_role_id'];
 			$map['is_scene'] =3;$map['status'] = 1;
 			$role = M("Role")->where($map)->field('id,name')->select();	
 			$this->assign("ginfo",$ginfo)->assign('role',$role)->display();
@@ -369,7 +379,7 @@ class IndexController extends ManageBase{
 				$this->erun('参数错误!');
 			}
 			/*显示相关的角色id TODO*/
-			$map['parentid'] = '42';
+			$map['parentid'] = $this->config['channel_role_id'];
 			$map['is_scene'] =3;$map['status'] = 1;
 			$role = M("Role")->where($map)->field('id,name')->select();	
 			$data = M('User')->where(array('id'=>$id))->find();

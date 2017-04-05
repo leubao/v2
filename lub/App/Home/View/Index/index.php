@@ -11,7 +11,7 @@
   <div class="main row">
     <div class="panel panel-default">
       <div class="panel-body">
-       当前用户：{$uinfo['cid']|itemnav} > {$uinfo['nickname']}<span style="float:right;">可用授信额: ￥<span id="cash"></span> 当前考核分: {$score} </span> 
+       当前用户：{$uinfo['cid']|itemnav} > {$uinfo['nickname']}<span style="float:right;">可用授信额: ￥<span id="cash"></span></span> 
       </div>
     </div>
     <if condition="$notice neq '1'">
@@ -55,7 +55,7 @@
           <tbody>
             <volist name="vo['plan']"  id="plan">
               <tr>
-                <td align="center">{$plan.id|planShow}</td>
+                <td align="center"> {$plan.id|planShow}</td>
                 <volist name="vo['area']" id="area">
                 <td align="center"><?php echo M($plan['seat_table'])->where(array('status'=>0,'area'=>$area['id']))->count();?></td>
                 </volist>
@@ -63,6 +63,13 @@
                 <td align="center"><a href="{:U('Home/Index/seale',array('plan'=>$plan['id']));}" data-toggle="modal" data-target="#myModal"><?php echo M('QuotaUse')->where(array('plan_id'=>$plan['id'],'channel_id'=>$uinfo['cid']))->getField('number')?></a></td>
                 <td align="center"><a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即出票</a></td>          
               </tr>
+              <tr>
+                <td align="center"></td>
+                <volist name="vo['area']" id="area"><td align="center"></td></volist>
+                <td align="center"></td>
+                <td align="center"></td>
+                <td align="center"></td>
+                </tr>
               </volist>   
           </tbody>
       </table>
@@ -85,8 +92,6 @@
     </div>
   </div>
 </div>
-
-
 <!--页脚-->
 <Managetemplate file="Home/Public/footer"/>
 <!--页脚-->

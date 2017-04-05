@@ -52,23 +52,21 @@
           <table class="table table-bordered">
             <thead>
               <tr>
-                <th rowspan="2" align="center" width="130px">销售计划</th>
-                <th colspan="7" align="center">票型</th>
-                <th colspan="4" align="center">小计</th>
+                <th rowspan="2" align="center" width="140px">销售计划</th>
+                <th colspan="6" align="center">票型</th>
+                <th colspan="3" align="center">小计</th>
                 <th rowspan="2" align="center">备注</th>
               </tr>
               <tr>
                 <th align="center" width="120px">名称</th>
                 <th align="center" width="70px">票面单价</th>
                 <th align="center" width="70px">结算单价</th>
-                <th align="center" width="40px">数量</th>
+                <th align="center" width="50px">数量</th>
                 <th align="center" width="90px">票面金额</th>
                 <th align="center" width="90px">结算金额</th>
-                <th align="center" width="90px">差额</th>
                 <th align="center" width="45px">数量</th>
                 <th align="center" width="100px">票面金额</th>
                 <th align="center" width="100px">结算金额</th>
-                <th align="center" width="100px">差额</th>
               </tr>
             </thead>
             <tbody>
@@ -76,7 +74,7 @@
               <volist name="channel['plan']" id="price" key="l">
               <if condition="$l eq '1'">
               <tr>
-                <td align="left" colspan="13">渠道商:{$price.channel_id|crmName}</td>
+                <td align="left" colspan="11">渠道商:{$price.channel_id|crmName}</td>
               </tr>
               </if>
                 <volist name="price['price']" id="item" key="k">
@@ -90,11 +88,9 @@
                         <td align="center">{$item.number}</td>
                         <td align="right">{$item.money|format_money}</td>
                         <td align="right">{$item.moneys|format_money}</td>
-                        <td align="right">{$item.rebate|format_money}</td>
                         <td rowspan="{$price['tic_num']}" align="center">{$price.number}</td>
                         <td align="right" rowspan="{$price['tic_num']}">{$price.money|format_money}</td>
                         <td align="right" rowspan="{$price['tic_num']}">{$price.moneys|format_money}</td>
-                        <td align="right" rowspan="{$price['tic_num']}">{$price.rebate|format_money}</td>
                         <td rowspan="{$price['tic_num']}">&nbsp;</td>
                       </tr>
                       <else />
@@ -105,7 +101,6 @@
                           <td align="center">{$item.number}</td>
                           <td align="right">{$item.money|format_money}</td>
                           <td align="right">{$item.moneys|format_money}</td>
-                          <td align="right">{$item.rebate|format_money}</td>
                         </tr>
                       </if>
                   <else />
@@ -117,48 +112,44 @@
                       <td align="center">{$item.number}</td>
                       <td align="right">{$item.money|format_money}</td>
                       <td align="right">{$item.moneys|format_money}</td>
-                      <td align="right">{$item.rebate|format_money}</td>
                       <td align="center">{$price.number}</td>
                       <td align="right">{$price.money|format_money}</td>
                       <td align="right">{$price.moneys|format_money}</td>
-                      <td align="right">{$price.rebate|format_money}</td>
                       <td>&nbsp;</td>
                     </tr>
                   </if>
                 </volist>
                 <!--合计金额计算-->
-                <?php $number += $price['number']; $money += $price['money']; $moneys += $price['moneys']; $rebate += $price['rebate'];?>
+                <?php $number += $price['number']; $money += $price['money']; $moneys += $price['moneys'];?>
               </volist>
-              <tr class="subtotal" data-num="{$number}" data-money="{$money}" data-moneys="{$moneys}" data-subsidy="{$rebate}">
+              <tr class="subtotal" data-num="{$number}" data-money="{$money}" data-moneys="{$moneys}" >
                   <td></td>
                   <td align="center"></td>
                   <td></td>
                   <td></td>
-                  <td></td>
+                  
                   <td></td>
                   <td></td>
                   <td align="right" width="70px"><strong>合计:</strong></td>
                   <td align="center" width="50px"><?php echo $number;?></td>
                   <td width="100px" align="right"><?php echo format_money($money);?></td>
                   <td width="100px" align="right"><?php echo format_money($moneys);?></td>
-                  <td width="100px" align="right"><?php echo format_money($rebate);?></td>
                   <td rowspan="{$price_count}">&nbsp;</td>
                 </tr>
-                <?php $number = 0; $money = 0; $moneys = 0; $rebate = 0;?>
+                <?php $number = 0; $money = 0; $moneys = 0;?>
             </volist>
               <tr>
                   <td></td>
                   <td align="center"></td>
                   <td></td>
                   <td></td>
-                  <td></td>
+                 
                   <td></td>
                   <td></td>
                   <td align="right" width="70px"><strong>总计:</strong></td>
                   <td align="center" width="50px" id="sub-channel-num">0</td>
                   <td width="100px" id="sub-channel-money" align="right">0.00</td>
                   <td width="100px" id="sub-channel-moneys" align="right">0.00</td>
-                  <td width="100px" id="sub-channel-subsidy" align="right">0.00</td>
                   <td rowspan="{$price_count}">&nbsp;</td>
                 </tr>
             </tbody>
@@ -167,23 +158,21 @@
             <table class="table table-bordered">
             <thead>
               <tr>
-                <th rowspan="2" align="center" width="130px">渠道商</th>
-                <th colspan="7" align="center">票型</th>
-                <th colspan="4" align="center">小计</th>
+                <th rowspan="2" align="center" width="140px">渠道商</th>
+                <th colspan="6" align="center">票型</th>
+                <th colspan="3" align="center">小计</th>
                 <th rowspan="2" align="center">备注</th>
               </tr>
               <tr>
                 <th align="center" width="120px">名称</th>
                 <th align="center" width="70px">票面价</th>
                 <th align="center" width="70px">结算价</th>
-                <th align="center" width="40px">数量</th>
+                <th align="center" width="50px">数量</th>
                 <th align="center" width="90px">票面金额</th>
                 <th align="center" width="90px">结算金额</th>
-                <th align="center" width="90px">差额</th>
                 <th align="center" width="45px">数量</th>
                 <th align="center" width="100px">票面金额</th>
                 <th align="center" width="100px">结算金额</th>
-                <th align="center" width="100px">差额</th>
               </tr>
               </thead>
               <tbody>
@@ -201,11 +190,9 @@
                         <td align="center">{$item.number}</td>
                         <td align="right">{$item.money|format_money}</td>
                         <td align="right">{$item.moneys|format_money}</td>
-                        <td align="right">{$item.rebate|format_money}</td>
                         <td rowspan="{$price_count}" align="center">{$channel.number}</td>
                         <td align="right" rowspan="{$price_count}">{$channel.money|format_money}</td>
                         <td align="right" rowspan="{$price_count}">{$channel.moneys|format_money}</td>
-                        <td align="right" rowspan="{$price_count}">{$channel.rebate|format_money}</td>
                         <td rowspan="{$price_count}">&nbsp;</td>
                       </tr>
                       <else />
@@ -216,7 +203,6 @@
                           <td align="center">{$item.number}</td>
                           <td align="right">{$item.money|format_money}</td>
                           <td align="right">{$item.moneys|format_money}</td>
-                          <td align="right">{$item.rebate|format_money}</td>
                         </tr>
                       </if>
                   <else />
@@ -228,11 +214,9 @@
                       <td align="center">{$item.number}</td>
                       <td align="right">{$item.money|format_money}</td>
                       <td align="right">{$item.moneys|format_money}</td>
-                      <td align="right">{$item.rebate|format_money}</td>
                       <td align="center">{$channel.number}</td>
                       <td align="right">{$channel.money|format_money}</td>
                       <td align="right">{$channel.moneys|format_money}</td>
-                      <td align="right">{$channel.rebate|format_money}</td>
                       <td>&nbsp;</td>
                     </tr>
                   </if>
@@ -244,13 +228,12 @@
                     <td></td>
                     <td></td>
                     <td></td>
-                    <td></td>
+                    
                     <td></td>
                     <td align="right" width="70px"><strong>合计:</strong></td>
                     <td align="center" width="50px" id="sub-channel-num">0</td>
                     <td width="100px" id="sub-channel-money" align="right">0.00</td>
                     <td width="100px" id="sub-channel-moneys" align="right">0.00</td>
-                    <td width="100px" id="sub-channel-subsidy" align="right">0.00</td>
                     <td rowspan="{$price_count}">&nbsp;</td>
                   </tr>
               </tbody>
@@ -260,7 +243,6 @@
       </div>
     </div>
   </div>
-  
   <!--页脚-->
   <Managetemplate file="Home/Public/footer"/>
   <!--页脚--> 
@@ -278,16 +260,13 @@ $(document).ready(function() {
       sub_num += parseInt($(this).data('num'));
       sub_money += parseFloat($(this).data('money'));
       sub_moneys += parseFloat($(this).data('moneys'));
-      sub_subsidy += parseFloat($(this).data('subsidy'));
     }
   });
   sub_money = sub_money.toFixed(2);
   sub_moneys = sub_moneys.toFixed(2);
-  sub_subsidy = sub_subsidy.toFixed(2);
 
   $("#sub-channel-num").html(sub_num);
   $("#sub-channel-money").html(sub_money);
   $("#sub-channel-moneys").html(sub_moneys);
-  $("#sub-channel-subsidy").html(sub_subsidy);
 });
 </script>

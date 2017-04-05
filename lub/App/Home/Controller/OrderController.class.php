@@ -32,7 +32,7 @@ class OrderController extends Base{
         $end_time = I('end_time');
         $user_id = I('user');
         $product_id = I('product');
-        $datetype = I('datetype');
+        $datetype = I('datetype') ? I('datetype') : '1';
         $status = I('status');
         $sn = I('sn');
         //传递查询时间
@@ -58,6 +58,7 @@ class OrderController extends Base{
 	        	//查询时间段为空时默认查询未过期的订单
 	        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
 	        }
+	        $order = 'createtime DESC plan_id DESC';
         }elseif($datetype == '2' && !empty($start_time) && !empty($end_time)){
         	//查询一段时间内所有演出计划,时间段 不超过三十天
         	$day = timediff($start_time,$end_time);
@@ -69,6 +70,7 @@ class OrderController extends Base{
 	        $plantime = array(array('GT', $start_time), array('LT', $end_time), 'AND');
         	$planlist = M('Plan')->where(['plantime'=>$plantime,'status'=>['in','2,3,4']])->field('id')->select();
         	$where['plan_id'] = array('in',implode(',',array_column($planlist,'id')));
+        	$order = 'plan_id DESC';
         }
         if ($status != '') {
             $where['status'] = $status;
@@ -84,7 +86,7 @@ class OrderController extends Base{
 		$count = $db->where($where)->count();
 		$Page  = new \Home\Service\Page($count,25);
 		$show  = $Page->show();
-		$list = $db->where($where)->order('id DESC')->limit($Page->firstRow.','.$Page->listRows)->select();
+		$list = $db->where($where)->limit($Page->firstRow.','.$Page->listRows)->order($order)->select();
 		//统计数量和金额
 		$info['num'] = $db->where($where)->sum('number');
 		$info['money'] = $db->where($where)->sum('money');

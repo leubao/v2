@@ -33,18 +33,17 @@
             <input type="phone" class="form-control" name="phone" required>
           </div>
         </div>
-        <!-- 
         <div class="form-group">
-          <label class="col-sm-2 control-label">代理商级别</label>
+          <label class="col-sm-2 control-label">产品列表</label>
           <div class="col-sm-4">
-            <select class="form-control" name="level" required>
+            <select class="form-control" name="product_id" required>
               <option value=" ">请选择</option>
-              <volist name="level" id="vo">
+              <volist name="product" id="vo">
                 <option value="{$vo.id}">{$vo.name}</option>
               </volist>
             </select>
           </div>
-        </div> -->
+        </div>
         <div class="form-group">
           <label class="col-sm-2 control-label">状态</label>
           <div class="col-sm-2">

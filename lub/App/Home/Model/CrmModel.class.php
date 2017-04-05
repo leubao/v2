@@ -7,7 +7,7 @@ class CrmModel extends Model{
 		$product = M('Product')->where(array('status'=>'1'))->field('id,name')->select();
 		$Config = cache("Config");
 		foreach ($product as $key=>$val){
-			$list = $this->where(array('status'=>1,'product_id'=>$val['id']))->field('id,name,groupid,f_agents,level,quota,phone')->select();
+			$list = $this->where(array('status'=>1,'product_id'=>$val['id']))->field('id,name,groupid,f_agents,level,phone')->select();
 	        $cache = array();
 	        foreach ($list as $rs) {
 	        	//一级渠道商单独缓存

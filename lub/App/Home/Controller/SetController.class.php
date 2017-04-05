@@ -51,6 +51,35 @@ class SetController extends Base{
 			->assign('page',$show)
 			->display();
 	}
+	function public_quota_channel(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			foreach ($pinfo['quota'] as $key => $value) {
+				$status = M('CrmQuota')->where(array('product_id'=>$key,'crm_id'=>$pinfo['crm_id']))->setField('quota',$value);
+			}
+			$this->success("更新成功!",U('Home/Set/channel'));
+		}else{
+			$id = I('get.id',0,intval);
+			if(empty($id)){
+				$this->error('参数错误!');
+			}
+			$info = Operate::do_read('Crm',0,array('id'=>$id));
+			$product = implode(',',$info['product']);
+			foreach ($product as $key => $value) {
+				$data = array(
+					'crm_id' => $id,
+					'product_id' => $value,
+				);
+				if(!M('CrmQuota')->where($data)->find()){
+					D('CrmQuota')->add($data);
+				}
+			}
+			$quota = M('CrmQuota')->where(array('crm_id'=>$id))->field('crm_id,product_id,quota')->select();
+			$this->assign('data',$info)
+				->assign('quota',$quota)
+				->display();
+		}
+	}
 	/**
 	 * 新增渠道商
 	 * 一级渠道商新增默认为二级二级新增默认为三级
@@ -61,15 +90,10 @@ class SetController extends Base{
 			//判断新增级别
 			$tlevel = M('Crm')->where(array('id'=>$uInfo['cid']))->field('agent,level')->find();
 
-			if($tlevel['level'] == self::$Cache['Config']['level_1']){
-				$level = self::$Cache['Config']['level_2'];
-				//设置配额
-				//读取上级配额
-				//$M('Crm')->where(array(''))->getField();
+			if($tlevel['level'] == $this->config['level_1']){
+				$level = $this->config['level_2'];
 			}else{
-				$level = self::$Cache['Config']['level_3'];
-				//设置配额
-				
+				$level = $this->config['level_3'];
 			}
 			$data = array(
 				'f_agents'=>$uInfo['cid'],
@@ -80,6 +104,8 @@ class SetController extends Base{
 				'level'		=> $level,
 				'agent'		=> $tlevel['agent'],
 			);
+
+			//$status = D('Crm')->add($pinfo);
 			$status = Operate::do_add('Crm',$data);
 			if($status){
 				//更新先前计划配额
@@ -93,6 +119,8 @@ class SetController extends Base{
 						'product_id'	=> $va['product_id'],
 					);
 				}
+				D('CrmQuota')->add(array('crm_id' => $status,'product_id'=>$uInfo['product']));
+
 				D('QuotaUse')->addAll($dataList);
 				//更新
 				D('Crm/Crm')->crm_cache();
@@ -101,8 +129,7 @@ class SetController extends Base{
 				$this->error("新增失败!");
 			}
 		}else{
-			$level = Operate::do_read('Role',1,array('parentid'=>self::$Cache['Config']['channel_agents_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
-			$this->assign("level",$level)
+			$this->assign("product",M('Product')->where(['status'=>1])->field('id,name')->select())
 				->display();
 		}
 	}

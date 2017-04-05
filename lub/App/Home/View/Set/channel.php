@@ -45,16 +45,14 @@
           <col>
           <col>
           <col>
-           <col>
           <col width="60px">
-          <col width="100px">
+          <col width="130px">
           </colgroup>
           <thead>
             <tr>
               <td align="center">名称</td>
               <td align="center">级别</td>
               <td align="center">联系人</td>
-              <td align="center">销售配额</td>
               <td align="center">添加时间</td>
               <td align="center">状态</td>
               <td align="center">操作</td>
@@ -66,14 +64,14 @@
                 <td align="center" ><a href="{:U('Home/Set/channel_info',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal">{$vo.name}<span class="glyphicon glyphicon-eye-open"></span></a></td>
                 <td align="center" ><?php echo D('Home/Role')->getRoleIdName($vo['level'])?></td>
                 <td align="center" >{$vo.contacts}</td>
-                <td align="center" >{$vo.quota}</td>
                 <td align="center" >{$vo.create_time|date="Y-m-d h:i",###}</td>
                 <td align="center" ><if condition="$vo['status'] eq 1"><span class="label label-success">启用</span>
                     <else />
                     <span class="label label-danger">禁用</span></if></td>
                 <td align="center"><div  class="btn-group btn-group-xs">
                 <a href="{:U('Home/Set/edit_channel',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
-                <a href="{:U('Home/User/index',array('cid'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-user"></span></a><a href="{:U('Home/Set/del_channel',array('id'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></a>
+                <a href="{:U('Home/User/index',array('cid'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-user"></span></a>
+                <a href="{:U('Home/Set/public_quota_channel',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal" class="btn btn-default"><span class="glyphicon glyphicon-inbox"></span></a><a href="{:U('Home/Set/del_channel',array('id'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></a>
                 </div></td>
               </tr>
             </volist>
