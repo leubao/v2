@@ -28,4 +28,11 @@ function sales_type($param = ''){
 	}
 	echo "<span class='label label-".$label."'>".$return."</span>";
 }
+/**
+ * 编号
+ */
+function user_coding($param = ''){
+	
+	echo 'M'.sprintf("%05d",$param);
+}
 ?>

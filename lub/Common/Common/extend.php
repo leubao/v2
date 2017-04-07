@@ -131,7 +131,6 @@
             echo $name;
         }
     }
-    
     /**
      * 获取角色名称
      *  @param $param int 角色ID
@@ -1301,6 +1300,7 @@
     */
     function price($area,$price_group,$scene,$ticket){
         $map = array('status'=>'1','area'=>$area, 'group_id'=>$price_group,'scene'=>array('like','%'.$scene.'%'),'id'=>array('in',implode(',',$ticket)));
+
         $list = M('TicketType')->where($map)->field(array('id'=>'priceid','price'=>'money','discount'=>'moneys','name','product_id','remark'))->select();
         return $list;
     }
@@ -1802,18 +1802,52 @@
  * 生成二维码后通过base64处理后返回
  * @param  string $data 二维码数据
  * @param  string $name 图片名称
+ * @param  string $header_logo 生成带logo 2维码
  * @return 返回图片base64 地址
  */
-function qr_base64($data,$name){
+function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
     $image_file = SITE_PATH."d/upload/".$name.'.png';
-    //二维码是否已经生成
-    if(!file_exists($image_file)){
+    /*二维码是否已经生成*/
+    //if(!file_exists($image_file)){
         //生成二维码
-        \Libs\Service\Qrcode::createQrcode($data,$name);
-    }
+        \Libs\Service\Qrcode::createQrcode($data,$name,$logo,$level,$size);
+    //}
     $image_info = getimagesize($image_file);
     $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
     return $base64_image_content;
+}
+/**
+ * 获取分销二维码
+ * @param  [type] $openid openID
+ * @return [type]         [description]
+ */
+function get_up_fxqr($openid){
+    $pid = get_product('id') ? get_product('id') : '43';
+    $model = D('WxMember');
+    $info = $model->where(['channel'=>1,'openid'=>$openid])->field('openid,user_id,headimgurl')->find();
+    $logo_path = SITE_PATH."d/upload/viplogo/";
+    $logo = $logo_path.'u-logo-'.$info['user_id'].'.png';
+    if(!file_exists($logo)){
+        if(!$info['headimgurl']){
+            $user = & load_wechat('User',$pid,1);
+            $result = $user->getUserInfo($openid);
+            if(!empty($result['headimgurl'])){
+                $model->where(['openid'=>$v['openid']])->setField('headimgurl',$result['headimgurl']);
+                $logo_path = \Libs\Util\Upload::getImage($result['headimgurl'],$logo_path,'u-logo-'.$info['user_id'].'.png');
+                $logo = $logo_path.'u-logo-'.$info['user_id'].'.png';
+            }else{
+                $logo = $logo_path."delogo.jpg";
+            }
+        }else{
+            $logo_path = \Libs\Util\Upload::getImage($info['headimgurl'],$logo_path,'u-logo-'.$info['user_id'].'.png');
+            $logo = $logo_path.'u-logo-'.$info['user_id'].'.png';
+        }
+    }
+    //生成新的二维码
+    $param = $pid."&".$info['user_id']."&qrcode";
+    $param = \Libs\Util\Encrypt::authcode($param,'ENCODE');
+    $url = U('Wechat/Index/show',array('u'=>$info['user_id'],'pid'=>$pid,'param'=>$param));
+    return qr_base64($url,'u-'.$info['user_id'],$logo,'M','6');
 }
 /**
  * 记录网银支付日志
@@ -1827,7 +1861,7 @@ function qr_base64($data,$name){
 function payLog($money,$sn,$scene,$type,$pattern,$data){
     if($type == '2'){
        //处理微信支付的金额对100取余 ,原因你懂得
-       $money = $money/100;
+       $money = $data['total_fee']/100;
     }
     //记录微信支付
     $pay_log = array(
@@ -1844,9 +1878,28 @@ function payLog($money,$sn,$scene,$type,$pattern,$data){
     S('pay'.$sn,'400',300);
     return D('Manage/Pay')->add($pay_log);
 }
+/**
+ * 返回支付类型
+ * @param  string $chane 支付类
+ */
+function pay_pattern($chane){
+    $collection = array('ali_app','ali_wap','ali_web','ali_qr','ali_bar','ali_charge','wx_app','wx_pub','wx_qr','wx_bar','wx_lite','wx_wap','wx_charge');
+    $payment = array('ali_red','ali_transfer','wx_red','wx_transfer');
+    $refund = array('ali_refund','wx_refund');
+    if(in_array($chane,$collection)){
+        //收款
+        return '1';
+    }
+    if(in_array($chane,$payment)){
+        return '2';
+    }
+    if(in_array($chane,$refund)){
+        return '3';
+    }
+}
 //订单售票
 function print_buttn_show($type,$pay,$sn,$plan_id,$money){
-    if(in_array($pay, array('1','3')) && $type == '6' && check_collection_pay($sn)){
+    if(in_array($pay, array('1','3')) && $type == '6' && check_collection_pay($sn) && $money > 0){
         $title = "网银支付";
         $width = '600';
         $height = '400';
@@ -1919,9 +1972,10 @@ function industry($param,$type = ''){
     }
 
     if($type == '1'){
-        echo $return;
-    }else{
         return $return;
+        
+    }else{
+       echo $return;
     }   
 }
 /**
