@@ -1003,13 +1003,20 @@ class Report{
  				'data' => array_merge($conductor,$collection)
  			);
  		}
- 		foreach ($money as $key => $value) {	
+ 		foreach ($money as $key => $value) {
+ 			$sum_money = 0;	
  			foreach ($value['data'] as $ke => $val) {
  				if(in_array($ke,array('cash','dcash'))){$sum['cash'] += $val;}
  				if(in_array($ke,array('sign','dsign'))){$sum['sign'] += $val;}
  				if(in_array($ke,array('alipay','dalipay'))){$sum['alipay'] += $val;}
  				if(in_array($ke,array('wxpay','dwxpay'))){$sum['wxpay'] += $val;}
  				if(in_array($ke,array('stamp','dstamp'))){$sum['stamp'] += $val;}
+ 				//判断是否显示该计划
+	 			$sum_money += $val;
+ 			}
+ 			if($sum_money == 0){
+ 				//array_splice($money,$value['plan'],1);
+ 				unset($money[$value['plan']]);
  			}
  		}
  		$return['money'] = $money;
