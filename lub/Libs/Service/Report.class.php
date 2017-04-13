@@ -939,7 +939,7 @@ class Report{
  	 * 资金来源汇总
  	 * @param  array $param 待处理的数据包
  	 * @return [type]       [description]
- 	 * 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
+ 	 * 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡 
  	 */
  	function source_cash($list){
  		foreach ($list as $k => $v) {
@@ -987,17 +987,17 @@ class Report{
  			$plan = array_flip($list);
  			foreach ($plan as $k => $v) {
  				//窗口售票
- 				$conductor = Report::sum_pay($k,$user_id);
+ 				$conductor = Report::sum_pay($k,$user_id,$datatime);
  				//代收款
- 				$collection = Report::collection($k,$user_id);
+ 				$collection = Report::collection($k,$user_id,$datatime);
  				$money[$k] = array(
  					'plan' => $k,
  					'data' => array_merge($conductor,$collection)
  				);
  			}
  		}else{
- 			$conductor = Report::sum_pay($plan_id,$user_id);
- 			$collection = Report::collection($plan_id,$user_id);
+ 			$conductor = Report::sum_pay($plan_id,$user_id,'');
+ 			$collection = Report::collection($plan_id,$user_id,'');
  			$money[$plan_id] = array(
  				'plan'   => $plan_id,
  				'data' => array_merge($conductor,$collection)
@@ -1017,13 +1017,16 @@ class Report{
  		return $return;
  	}
  	//根据计划按支付类型汇总金额
- 	function sum_pay($plan_id,$user_id){
+ 	function sum_pay($plan_id = '',$user_id,$datatime = ''){
  		$map = array(
  			'product_id' => get_product('id'), 
  			'status'	 => array('in','1,7,9'),
  			'user_id'	 => $user_id,
- 			'plan_id'	 =>	$plan_id
+ 			'plan_id'	 => $plan_id
  		);
+ 		if(!empty($datatime)){
+ 			$map['createtime'] = $datatime['createtime'];
+ 		}
  		$model = D('Item/Order');
  		$pay = array(
  			'1' => array('pay'=>1,'name'=>'cash'),
@@ -1042,14 +1045,17 @@ class Report{
  	/**
  	 * 窗口代收款 
  	 */
- 	function collection($plan_id,$user_id)
+ 	function collection($plan_id = '',$user_id,$datatime = '')
  	{
  		$map = array(
  			'product_id' => get_product('id'),
  			'user_id'	 => $user_id,
- 			'plan_id'	 =>	$plan_id,
- 			'status'	 =>	'1'
+ 			'status'	 =>	'1',
+ 			'plan_id'	 => $plan_id
  		);
+ 		if(!empty($datatime)){
+ 			$map['createtime'] = $datatime['createtime'];
+ 		}
  		$pay = array(
  			'1' => array('pay'=>1,'name'=>'cash'),
  			'3' => array('pay'=>3,'name'=>'sign'),
