@@ -55,15 +55,15 @@
     <tr>
       <th align="center" width="120px">名称</th>
       <th align="center" width="70px">票面单价</th>
-      <th align="center" width="70px">结算单价</th>
+      <th align="center" width="70px">销售单价</th>
       <th align="center" width="40px">数量</th>
       <th align="center" width="90px">票面金额</th>
-      <th align="center" width="90px">结算金额</th>
-      <th align="center" width="90px">差额</th>
+      <th align="center" width="90px">销售金额</th>
+      <th align="center" width="90px">分账金额</th>
       <th align="center" width="45px">数量</th>
       <th align="center" width="100px">票面金额</th>
-      <th align="center" width="100px">结算金额</th>
-      <th align="center" width="100px">差额</th>
+      <th align="center" width="100px">销售金额</th>
+      <th align="center" width="100px">分账金额</th>
     </tr>
     </thead>
     <tbody>
@@ -171,15 +171,15 @@
     <tr>
       <th align="center" width="120px">名称</th>
       <th align="center" width="70px">票面价</th>
-      <th align="center" width="70px">结算价</th>
+      <th align="center" width="70px">销售单价</th>
       <th align="center" width="40px">数量</th>
       <th align="center" width="90px">票面金额</th>
-      <th align="center" width="90px">结算金额</th>
-      <th align="center" width="90px">差额</th>
+      <th align="center" width="90px">销售金额</th>
+      <th align="center" width="90px">分账金额</th>
       <th align="center" width="45px">数量</th>
       <th align="center" width="100px">票面金额</th>
-      <th align="center" width="100px">结算金额</th>
-      <th align="center" width="100px">差额</th>
+      <th align="center" width="100px">销售金额</th>
+      <th align="center" width="100px">分账金额</th>
     </tr>
     </thead>
     <tbody>

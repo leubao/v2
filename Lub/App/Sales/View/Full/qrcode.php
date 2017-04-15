@@ -6,6 +6,10 @@
       <td width="100px">二维码</td>
       <td colspan="3"><img src="{$qr}"></td>
     </tr>
+    <tr>
+      <td width="100px">注意</td>
+      <td colspan="3">未关注服务号的用户,不能获取到用户头像,采用默认头像</td>
+    </tr>
     <!--
     <tr>
       <td>下载</td>

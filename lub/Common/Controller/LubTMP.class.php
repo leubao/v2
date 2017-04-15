@@ -35,7 +35,7 @@ class LubTMP extends \Think\Controller {
         $this->initSite($this->config);
         //默认跳转时间
         $this->assign("waitSecond", 3);
-        $this->action_lock();
+       // $this->action_lock();
     }
     //判断是否可操作
     protected function action_lock(){
@@ -100,17 +100,23 @@ class LubTMP extends \Think\Controller {
             $config_siteurl = (is_ssl() ? 'https://' : 'http://') . "{$_SERVER['HTTP_HOST']}{$parse_url['path']}";
         }
         defined('CONFIG_SITEURL_MODEL') or define('CONFIG_SITEURL_MODEL', $config_siteurl);
-        /*
-         * 判断必须缓存是否存在
-        if(empty(cache('Item')) || empty(cache('Product'))){
-        	
-        }*/
-        //停用已过期的场次
-        check_plan();
+        $this->initApp();
         $this->assign("config_siteurl", $config_siteurl);
         $this->assign("Config", $Config);
     }
-	
+	/**
+     *  系统初始化 
+     */
+    function initApp(){
+        /*
+         * 判断必须缓存是否存在
+         */
+        if(empty(cache('Product'))){
+            D('Manage/Product')->product_cache();
+        }
+        //停用已过期的场次
+        check_plan();
+    }
     /**
      * Ajax方式返回数据到客户端
      * @access protected
@@ -352,7 +358,7 @@ class LubTMP extends \Think\Controller {
      * @return void
      */
     final public function erun($message = '', $param = null){
-         $return = array(
+        $return = array(
             'statusCode' => '300',
             'message'   => $message,
         );
@@ -361,6 +367,31 @@ class LubTMP extends \Think\Controller {
         }
         D('Manage/Operationlog')->record($message, 0);
         $this->ajaxReturn($return,'json');
+    }
+    /**
+     * 系统提示 系统多态提示
+     * @param  状态码 $code    200成功500警告300错误 
+     * @param  标题   $title 
+     * @param  string $message [description]
+     * @param  [type] $param   [description]
+     * @return [type]          [description]
+     */
+    final public function prompt($code = '200',$message = '',$title = '', $param = null,$return = '1')
+    {
+        $return = array(
+            'statusCode'=>  $code,
+            'title'     =>  $title,
+            'message'   =>  $message,
+        );
+        if($param){
+            $return = array_merge($return,$param);
+        }
+        if($return == '1'){
+            $this->assign('info',$return)->display();
+        }else{
+            $this->ajaxReturn($return,'json');
+        }
+        
     }
     /**
      * 验证码验证

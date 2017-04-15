@@ -96,7 +96,7 @@ function MainMenuClick(event, treeId, treeNode) {
 <div id="bjui-window">
   <header id="bjui-header">
     <nav id="bjui-hnav-navbar-box" class='navbar navbar-inverse navbar-fixed-top'>
-      <div class='navbar-header'> <a class='navbar-brand' href=''>LUB-TICKETS</a> </div>
+      <div class='navbar-header'> <a class='navbar-brand' href=''>  <i class="fa fa-ticket"></i>云鹿票务[剧院]</a> </div>
       <div class='collapse navbar-collapse'>
         <ul id="bjui-hnav-navbar" class='nav navbar-nav'>
           <volist name="SUBMENU_CONFIG" id="menu" key='k'>

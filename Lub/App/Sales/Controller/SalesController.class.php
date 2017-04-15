@@ -135,4 +135,21 @@ class SalesController extends ManageBase{
         }
         $status = D('WxMember')->where(array('user_id'=>$ginfo['id']))->getField('');
     }
+    /**
+     * 重置密码
+     */
+    function reset_pwd(){
+        $id = I('get.id');
+        $verify = genRandomString(6);
+        $data =  array(
+            'password' => hashPassword('123456',$verify),
+            'verify' => $verify,
+            'status' => '1',
+        );
+        if(M('User')->where(array('id'=>$id))->save($data)){
+            $this->srun('重置成功!',array('dialogid'=>'crm_user'));
+        }else{
+            $this->erun('重置失败!');
+        }
+    }
 }

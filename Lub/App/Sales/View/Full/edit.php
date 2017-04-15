@@ -17,6 +17,13 @@
           </select></td>
     </tr>
     <tr>
+      <td>分销类型</td>
+      <td><select name="type" class="required combox">
+            <option value="8" <if condition="$data['type'] eq '8'">selected</if>>全员销售</option>
+            <option value="9" <if condition="$data['type'] eq '9'">selected</if>>三级分销</option>
+          </select></td>
+    </tr>
+    <tr>
       <td>所属行业</td>
       <td><select name="industry" data-toggle="selectpicker">
         <option value="">所属行业</option>

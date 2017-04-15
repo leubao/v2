@@ -1015,7 +1015,6 @@ class Report{
 	 			$sum_money += $val;
  			}
  			if($sum_money == 0){
- 				//array_splice($money,$value['plan'],1);
  				unset($money[$value['plan']]);
  			}
  		}

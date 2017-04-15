@@ -404,7 +404,6 @@ class FinancialController extends ManageBase{
         $map['product_id'] = $this->pid;
         //设置订单类型为团队或渠道
         //$map['type'] = array('in','2,4,7');
-    
 		$list = M('OtherIncome')->where($map)->select();
 		if($type == '2'){
 			//按渠道商合并
@@ -433,25 +432,6 @@ class FinancialController extends ManageBase{
 		$this->assign('starttime',$starttime ? $starttime : $endtime)
         	->assign('endtime',$endtime)->assign('plan_id',$plan_id)
         	->assign('plan_name',$plan_name);
-        /*
-        if(!empty($plan_id)){
-        	$map['plan_id'] = $plan_id;
-        }else{
-        	if (!empty($starttime) && !empty($endtime)) {
-	            $starttime = strtotime($starttime);
-	            $endtime = strtotime($endtime) + 86399;;
-	            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
-	        }else{
-	        	//默认显示当天的订单
-	        	$starttime = strtotime(date("Ymd"));
-	            $endtime = $starttime + 86399;;
-	        	$map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
-	        }
-        }
-        $status = array('in','1,7,9');
-        $db = D('Order');
-		*/
-
         if (!empty($starttime) && !empty($endtime)) {
             $starttime = date("Ymd",strtotime($starttime));
             $endtime = date("Ymd",strtotime($endtime));
@@ -466,7 +446,6 @@ class FinancialController extends ManageBase{
 		$map['product_id'] = get_product('id');
 		$db = D('ReportData');
 		$list = $db->where($map)->field('id,plan_id,pay,moneys')->select();
-		//dump($list);
 		$data = Report::source_cash($list);
 		$this->assign('data',$data)->assign('map',$map)->assign('product_id',$map['product_id'])->display();
 	}

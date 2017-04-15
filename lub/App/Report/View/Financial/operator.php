@@ -37,7 +37,7 @@
 <!--Page end-->
 </div>
 
-<div class="bjui-pageContent tableContent" id="w_operator_print">
+<div class="bjui-pageContent tableContent" id="w_operator_print" style="padding: 20px;">
 <div class="visible-print-block">
     <h3 align="center">{$product_id|productName}售票员日报表</h3>
     <span class="pull-left mb10">统计日期：{$starttime} &nbsp;&nbsp;售票员：{$map['user']|userName}</span>
@@ -242,9 +242,11 @@
       <td></td>
       <td align="right"><strong>微信支付:</strong></td>
       <td align="right">{$conductor.sum.wxpay|format_money}</td>
-      <td>&nbsp;</td>
+      <td></td>
     </tr>
-
+    <tr>
+      <td colspan="12"><strong>说明:</strong>因微信支付、支付宝支付无凭证，收入金额以资金来源表为准，不计入售票员报表。</td>
+    </tr>
   </tbody>
 </table>
 </div>
