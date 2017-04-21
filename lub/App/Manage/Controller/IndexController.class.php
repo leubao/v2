@@ -101,8 +101,9 @@ class IndexController extends ManageBase {
         }
     }
     public function public_index_info(){
-       
-    	$this->display();
+        $pid = \Libs\Util\Encrypt::authcode(get_product('id'),'ENCODE');
+        $seale = U('Api/figure/index',array('pid'=>$pid,'type'=>$this->product['type']));
+    	$this->assign('seale',$seale)->display();
     }
     //登录超时
     function login_time()
@@ -281,6 +282,10 @@ class IndexController extends ManageBase {
     }
     //授权证书
     function auth(){
+        $this->display();
+    }
+    //查询操作日志当前一小时内的所有操作
+    function public_action_log(){
         $this->display();
     }
 }
