@@ -29,4 +29,33 @@ class KpiChannelModel extends Model{
 		);
 		return $this->add($add);
 	}
+	/**
+	 * 缓存
+	 */
+	function kpi_channel_cache(){	 	
+	 	$data = $this->where(array('status'=>1))->select();
+        if (empty($data)) {
+            return false;
+        }
+        $cache = array();
+        foreach ($data as $rs) {
+        	//缓存当前产品的票型缓存
+        	$cache[$rs['crm_id']] = $rs;
+        }
+        F('KpiChannel', $cache);
+        return true;
+	 }
+	/**
+     * 插入成功后的回调方法
+     */
+    protected function _after_insert() {
+        $this->kpi_channel_cache();
+    }
+    /**
+     *更新成功后的回调方法
+     *
+     */
+	protected function _after_update(){
+		$this->kpi_channel_cache();
+	}
 }

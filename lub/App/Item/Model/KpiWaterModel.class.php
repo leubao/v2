@@ -9,12 +9,24 @@
 namespace Item\Model;
 use Common\Model\Model;
 class KpiWaterModel extends Model{
-	public function insert($data='',$product_id = '',$channel_id = '', $fill = '2')
+	/**
+	 * 更新考核分值
+	 * @param  array $data      提交数据包
+	 * @param  int $product_id 
+	 * @param  int $channel_id 考核对象
+	 * @param  int $fill  类型2自定义触发1标准处罚	    
+	 * @param  int $type  类型 默认手动 1自动
+	 */
+	public function insert($data='',$product_id = '',$channel_id = '', $fill = '2',$type = '')
 	{
 		if(empty($data) || empty($product_id) || empty($channel_id)){
 			return false;
 		}
-
+		if($type == '1'){
+			$uid = '1';
+		}else{
+			$uid = get_user_id();
+		}
 		//1、新增记录  2、改变分值
 		/*多表事务*/
 		$model = new Model();
@@ -27,7 +39,7 @@ class KpiWaterModel extends Model{
 			'type'		=>	$data['type'],
 			'remark'	=>	$data['remark'],
 			'status'	=>	'1',
-			'user_id'	=>	get_user_id(),
+			'user_id'	=>	$uid,
 			'create_time'=>	time(),
 			'update_time'=> time(),
 		);

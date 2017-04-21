@@ -114,6 +114,22 @@ class LubTMP extends \Think\Controller {
         if(empty(cache('Product'))){
             D('Manage/Product')->product_cache();
         }
+        if(empty(cache('Config')) || empty(cache('ProConfig'))){
+            D('Common/Config')->config_cache();
+        }
+        $crm = F('Crm');
+        if(empty($crm)){
+            D('Crm/Crm')->crm_cache();
+            
+        }
+        $crmGroup = F('CrmGroup');
+        if(empty($crmGroup)){
+            D('Crm/CrmGroup')->crm_group_cache();
+        }
+        $province = F('Province');
+        if(empty($province)){D('Item/Province')->province_cache();}
+        $kpimoney = F('KpiMoney');
+        if(empty($kpimoney)){D('Item/KpiChannel')->kpi_channel_cache();}
         //停用已过期的场次
         check_plan();
     }
