@@ -41,7 +41,7 @@ class Api extends \Libs\System\Service {
         $product = $param['product'];
         $proArr = explode(',', $product);
         foreach ($proArr as $k=>$v){
-            $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname')->select();
+            $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname,type')->select();
             if($list[$v] != false){
                 $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC')->field(array('id,plantime,starttime,endtime,games,param,product_id,seat_table'))->select();
             }
@@ -61,7 +61,81 @@ class Api extends \Libs\System\Service {
         }
         return $info;
     }
-    
+    //获取场次及相关信息
+    function get_plan($product_id,$pinfo,$ginfo)
+    {
+        $info = explode('-', $pinfo['plan']);
+        $map = array(
+            'product_id'=>$product_id,
+            'status'=>2,//状态必为售票中
+            'plantime' => (int)$info[0] ? (int)$info[0] : $today,
+            'games' => (int)$info[1] ? (int)$info[1] : 1 ,
+        );
+        $plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,plantime,starttime,endtime,games')->find();
+        $param = unserialize($plan['param']);
+        //拉取坐席
+        if($ginfo == '1'){
+            foreach ($param['seat'] as $k => $v) {
+                $area[] = array(
+                    'id'    =>  $v,
+                    'name'  =>  areaName($v,1),
+                    'number'=>  areaSeatCount($v,1),
+                    'num'   =>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
+                    'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99'),'area'=>$v),1),//已售出
+                    'numb'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','66'),'area'=>$v),1),//预定数
+                    'cnum'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','99'),'area'=>$v),1),//已检票
+                ); 
+            }
+            $sale = array(
+                'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99')),1),
+                'numb'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','66')),1),
+                'money' =>  format_money(M('Order')->where(array('status'=>array('in','1,7,9'),'plan_id'=>$plan['id']))->sum('money')),
+            );
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => $plan['id'],
+                'area'  => $area,
+                'sale'  => $sale,
+            );
+        }
+        if($ginfo == '3'){
+            foreach ($param['seat'] as $k => $v) {
+                $area[] = array(
+                    'id'    =>  $v,
+                    'name'  =>  areaName($v,1),
+                    'number'=>  areaSeatCount($v,1),
+                    'num'   =>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
+                    'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99'),'area'=>$v),1),//已售出
+                ); 
+            }
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => planShow($plan['id'],1,1),
+                'area'  => $area
+            );
+        }
+        //拉取小商品
+        if($ginfo == '2'){
+            foreach ($param['goods'] as $k => $v) {
+                $info = goodsInfo($product_id,'',$v,1);
+                $number = array(
+                    'number'=>  '1',//已售出
+                ); 
+                $goods[] = array_merge($info,$number);
+            }
+            if(empty($goods)){
+                $goods = 'null';
+            }
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => $plan['id'],
+                'goods' => $goods           
+            );
+        }
+        //设置session
+        session('plan',$plan);
+        return $return;
+    }
     /**
      * 时间场次验证
      * $plan 检票场次
@@ -102,7 +176,7 @@ class Api extends \Libs\System\Service {
             $crm = F('Crm');
             $info['groupid'] = $crm[$info['crm_id']]['groupid'];
             $info['group'] = M('CrmGroup')->where(array('id'=>$info['groupid']))->field('id,price_group,type,product_id,settlement')->find();
-            $info['scene'] = '4';
+            $info['scene'] = '5';
             return $info;
         }else{
             return false;

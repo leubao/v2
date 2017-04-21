@@ -124,7 +124,7 @@
     </li>
     <if condition="$data['status'] eq '1' ">
     <li>
-      <button type="button" class="btn-info" data-icon="print" id="print_window">打印</button>
+      <button type="button" class="btn-info" data-icon="print" data-url="{$prshow.url}" data-width="{$prshow.width}" data-height="{$prshow.height}" data-title="{$prshow.title}" data-pageid="{$prshow.pageId}" id="print_window">打印</button>
     </li>
     </if>
     <li>
@@ -135,9 +135,8 @@
 </form>
 <script>
 $('#print_window').click(function(){
-    var url = '{:U('Item/Order/drawer',array('sn'=>$data['order_sn'],'plan_id'=>$data['plan_id']))}';
     /*关闭订单详情的窗口*/
     $(this).dialog('close','orderinfo');
-    $(this).dialog({id:'print', url:''+url+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
+    $(this).dialog({id:''+$(this).data('pageid')+'', url:''+$(this).data('url')+'', title:''+$(this).data('title')+'',width:''+$(this).data('width')+'',height:''+$(this).data('height')+'',resizable:false,maxable:false,mask:true});
 });
 </script>

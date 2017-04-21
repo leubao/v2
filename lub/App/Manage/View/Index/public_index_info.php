@@ -86,6 +86,7 @@
           <h5>新功能预览 : <a href="http://ticket.leubao.com/" target="_blank">LUB-Tickets</a>　</h5>
           <h5>更新日志 : <a href="http://www.leubao.com/index.php?a=up_log" target="_blank">[更新日志]</a>　</h5>
           <h5>最新操作 : <a href="{:U('Manage/Index/public_action_log');}" data-id="public_action_log" data-toggle="navtab" data-title="最新操作日志">[更新日志]</a>　</h5>
+          <h5>销售情况 : <a href="{$seale}" target="_blank" data-title="销售情况">{$seale}</a>　</h5>
       </div>
       <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
             <strong>更新日志</strong>

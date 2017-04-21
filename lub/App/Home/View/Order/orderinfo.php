@@ -16,7 +16,7 @@
       {$data.createtime|date="Y-m-d h:i:s",###} </div>
     <div class="col-md-6">
       <label>下单人:</label>
-      {$data.user_id|userName} </div>
+      {$data['user_id']|userName=$data['addsid']} </div>
     <div class="col-md-6">
       <label>订单金额：</label>
       {$data['info']['subtotal']} </div>

@@ -83,7 +83,7 @@ class IndexController extends ManageBase {
 		$this->assign('map',$map)->assign('export_map',$export_map)->display();
 	}
 	/*订单导出*/
-	function export_order(){
+	function public_export_order(){
 		$starttime = I('starttime');
 	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
 	    $status = I('status');

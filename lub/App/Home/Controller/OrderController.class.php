@@ -53,7 +53,7 @@ class OrderController extends Base{
         	if (!empty($start_time) && !empty($end_time)) {
 	            $start_time = strtotime($start_time);
 	            $end_time = strtotime($end_time) + 86399;
-	            $where['createtime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+	            $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
 	        }else{
 	        	//查询时间段为空时默认查询未过期的订单
 	        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
@@ -408,7 +408,7 @@ class OrderController extends Base{
 					$subNum = $oinfo['number'];
 				}else{
 					//渠道订单
-					$subNum = $oinfo['number']*self::$Cache['Config']['subtract'];//最大可核减数
+					$subNum = $oinfo['number']*$this->config['subtract'];//最大可核减数
 					$subNum = (int)$subNum;
 					if($subNum < 1 || !empty($oinfo['subtract'])){
 						$data = array('statusCode' => 300,'msg' => "订单未能满足核减要求!");

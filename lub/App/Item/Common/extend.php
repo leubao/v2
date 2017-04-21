@@ -74,7 +74,12 @@ function collection_log($info,$pay)
 		'status'    => '1',
 		'createtime'=>	time()	
 	);
-	M('Collection')->add($data);
+	$model = D('Collection');
+	if($model->where(array('order_sn'=>$info['order_sn'],'plan_id'=>$info['product_id']))->find()){
+		$model->save($data);
+	}else{
+		$model->add($data);
+	}
 	return true;
 }
 ?>

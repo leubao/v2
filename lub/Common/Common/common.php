@@ -454,7 +454,7 @@ if (!function_exists('array_column')) {
   * @param string $end_time
   * @return string
   */
-function timediff($begin_time,$end_time) {
+function timediff($begin_time,$end_time,$type = 'all') {
     $begin_time = strtotime($begin_time);
     $end_time = strtotime($end_time);  
     if($begin_time < $end_time){ 
@@ -463,15 +463,31 @@ function timediff($begin_time,$end_time) {
     }else{ 
         $starttime = $end_time; 
         $endtime = $begin_time; 
-    } 
+    }
     $timediff = $endtime - $starttime;
-    $days = intval($timediff/86400); 
-    $remain = $timediff%86400; 
-    $hours = intval($remain/3600); 
-    $remain = $remain%3600; 
-    $mins = intval($remain/60); 
-    $secs = $remain%60; 
-    $res = array("day" => $days,"hour" => $hours,"min" => $mins,"sec" => $secs); 
+    switch ($type) {
+        case 'day':
+            $days = intval($timediff/86400);
+            $res = array("day" => $days); 
+            break;
+        case 'hour':
+            $hours = intval($timediff/3600);
+            $res = array("hour" => $hours); 
+            break;
+        case 'min':
+            $mins = intval($timediff/60);
+            $res = array("min" => $mins); 
+            break;
+        case 'all':
+            $days = intval($timediff/86400); 
+            $remain = $timediff%86400; 
+            $hours = intval($remain/3600); 
+            $remain = $remain%3600; 
+            $mins = intval($remain/60); 
+            $secs = $remain%60;
+            $res = array("day" => $days,"hour" => $hours,"min" => $mins,"sec" => $secs); 
+            break;
+    }
     return $res; 
 }
 /*二维数组转字符串
@@ -729,13 +745,15 @@ function load_payment($pay = '',$product_id = ''){
     if(empty($product_id)){
         $proconf = cache('Config');
         $options = array(
-            'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
-            'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
+            'app_id'  => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
+            'mch_id'  => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
         );
         return $options;
     }
     $proconf = cache('ProConfig');
     $proconf = $proconf[$product_id][11];
+    //服务商模式,支持服务商模式与不支持
+    $payment = array('wx_transfer','wx_red','wx_refund','ali_transfer','ali_red','ali_refund');
     //判断收款还是付款
     //收款
     $collection = array();
@@ -774,7 +792,7 @@ function load_payment($pay = '',$product_id = ''){
     if (stripos($pay, 'ali') !== false) {
 
     }else{
-        $notify_url = 'http://www.chengde360.com/index.php/Wechat/Notify/notify.html';
+        $notify_url = U('Api/Index/paynotify');
         $options = array(
             'app_cert_pem'  => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
             'app_key_pem'   => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
@@ -860,6 +878,15 @@ function if_plan_print($plan_id){
         $plan = M('Plan')->where(array('id'=>$plan_id))->find();
     }
     return true;
+}
+/**
+ * 对明文密码，进行加密，返回加密后的密文密码
+ * @param string $password 明文密码
+ * @param string $verify 认证码
+ * @return string 密文密码
+ */
+function hashPassword($password, $verify = "") {
+    return md5($password . md5($verify));
 }
 /**
  * 获取产品配置信息

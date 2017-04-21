@@ -7,454 +7,458 @@
 // | Author: zhoujing <admin@leubao.com>
 // +----------------------------------------------------------------------
 /** =============================================================票务系统设置===========================================================================*/
-    /**
-     * 根据产品ID获取产品名称
-     */
-    function itemName($param){
-        echo M('Item')->where(array('id'=>$param))->getField('name');
+/**
+ * 根据产品ID获取产品名称
+ */
+function itemName($param){
+    echo M('Item')->where(array('id'=>$param))->getField('name');
+}
+/**
+ * 根据分组ID获取票型分组名称
+ */
+function groupName($param){
+    echo M('TicketGroup')->where(array('id'=>$param))->getField('name');
+}
+/*客户分组名称 crm_group*/
+function crmgroupName($param){
+    echo M('CrmGroup')->where(array('id'=>$param))->getField('name');
+}
+/**
+ * 获取场景类型
+ */
+function scene($param){
+    switch ($param){
+        case 1 :
+            echo "窗口";
+            break;
+        case 3 :
+            echo "渠道版";
+            break;
+        case 4 :
+            echo "运营平台";
+            break;
+        case 5 :
+            echo "API";
+            break;
+        case 7 :
+            echo "自助机";
+            break;
     }
-    /**
-     * 根据分组ID获取票型分组名称
-     */
-    function groupName($param){
-        echo M('TicketGroup')->where(array('id'=>$param))->getField('name');
+}
+/**
+ * 获取票型类型
+ * @param $param int 类型参数
+ */
+function ticket_type($param){
+    switch ($param){
+        case 1 :
+            echo "散客票";
+            break;
+        case 2 :
+            echo "团队票";
+            break;
+        case 3 :
+            echo "散客、团队票";
+            break;
+        case 4 :
+            echo "政企渠道票";
+            break;
     }
-    /*客户分组名称 crm_group*/
-    function crmgroupName($param){
-        echo M('CrmGroup')->where(array('id'=>$param))->getField('name');
-    }
-    /**
-     * 获取场景类型
-     */
-    function scene($param){
-        switch ($param){
-            case 1 :
-                echo "窗口";
+}
+/**
+ * 获取产品名称
+ * @param $param int 产品ID
+ */
+function product_name($param,$type=NULL){
+    if(!empty($param)){
+         $name = M('Product')->where(array('id'=>$param))->getField('name');
+         if($type){
+            return $name;
+         }else{
+            echo $name;
+         }
+    }else{
+        echo "未知";
+    }   
+}
+
+/**
+ * 获取操作员名称  窗口售票
+ * @param $param int 操作员ID
+ */
+function userName($param,$scene = '1',$type=NULL){
+    if(!empty($param)){
+        switch ($scene) {
+            case '1':
+                $table = 'User';
+                $field = 'nickname';
                 break;
-            case 3 :
-                echo "渠道版";
+            case '5':
+                //api时
+                $table = 'App';
+                $field = 'name';
                 break;
-            case 4 :
-                echo "运营平台";
-                break;
-            case 5 :
-                echo "API";
-                break;
-            case 7 :
-                echo "自助机";
+            default:
+                $table = 'User';
+                $field = 'nickname';
                 break;
         }
+        $name = M($table)->where(array('id'=>$param))->getField($field);
+    }else{
+        $name = "未知";
     }
-    /**
-     * 获取票型类型
-     * @param $param int 类型参数
-     */
-    function ticket_type($param){
-        switch ($param){
-            case 1 :
-                echo "散客票";
-                break;
-            case 2 :
-                echo "团队票";
-                break;
-            case 3 :
-                echo "散客、团队票";
-                break;
-            case 4 :
-                echo "政企渠道票";
-                break;
-        }
+    if($type){
+        return $name ? $name : "未知";
+    }else{
+        echo $name;
     }
-    /**
-     * 获取产品名称
-     * @param $param int 产品ID
-     */
-    function product_name($param,$type=NULL){
-        if(!empty($param)){
-             $name = M('Product')->where(array('id'=>$param))->getField('name');
-             if($type){
-                return $name;
-             }else{
-                echo $name;
-             }
+}
+/**
+ * 获取导游身份证号码
+ * @param  [type] $param [description]
+ * @param  [type] $type  [description]
+ * @return [type]        [description]
+ */
+function userCard($param,$type=NULL){
+    if(!empty($param)){
+        $name = M('User')->where(array('id'=>$param))->getField('legally');
+    }else{
+        $name = "未知";
+    }
+    if($type){
+        return $name ? $name : "未知";
+    }else{
+        echo $name;
+    }
+}
+/**
+ * 获取角色名称
+ *  @param $param int 角色ID
+ */
+function roleName($param){
+    if(!empty($param)){
+        echo M('Role')->where(array('id'=>$param))->getField('name');
+    }else{
+        echo "角色未知";
+    }
+}
+/**
+ * 区域名称
+ *  @param $param int 区域ID
+ *  @param $type int 数据返回方式 
+ */
+function areaName($param,$type=NULL){
+    if(!empty($param)){
+        $area = F('Area');
+        if(!empty($area)){
+            $name = $area[$param]['name'];
         }else{
-            echo "未知";
-        }   
-    }
-    
-    /**
-     * 获取操作员名称  窗口售票
-     * @param $param int 操作员ID
-     */
-    function userName($param,$scene = '1',$type=NULL){
-        if(!empty($param)){
-            switch ($scene) {
-                case '1':
-                    $table = 'User';
-                    $field = 'nickname';
-                    break;
-                case '5':
-                    //api时
-                    $table = 'App';
-                    $field = 'name';
-                    break;
-                default:
-                    $table = 'User';
-                    $field = 'nickname';
-                    break;
-            }
-            $name = M($table)->where(array('id'=>$param))->getField($field);
-        }else{
-            $name = "未知";
+            $name = M('Area')->where(array('id'=>$param))->getField('name');
         }
         if($type){
-            return $name ? $name : "未知";
+          return $name;
         }else{
-            echo $name;
+          echo $name;
         }
+    }else{
+        echo "区域未知";
     }
-    /**
-     * 获取导游身份证号码
-     * @param  [type] $param [description]
-     * @param  [type] $type  [description]
-     * @return [type]        [description]
-     */
-    function userCard($param,$type=NULL){
-        if(!empty($param)){
-            $name = M('User')->where(array('id'=>$param))->getField('legally');
+}
+/*根据区域id获取座位数
+ *  @param $param int 区域ID
+ *  @param $type int 数据返回方式 
+ */
+function areaSeatCount($param,$type=NULL){
+    if(!empty($param)){
+        $area = F('Area');
+        if(!empty($area)){
+            $num = $area[$param]['num'];
         }else{
-            $name = "未知";
+            $num = M('Area')->where(array('id'=>$param))->getField('num');
         }
         if($type){
-            return $name ? $name : "未知";
+          return $num;
         }else{
-            echo $name;
+          echo $num;
         }
+    }else{
+        echo "区域未知";
     }
-    /**
-     * 获取角色名称
-     *  @param $param int 角色ID
-     */
-    function roleName($param){
-        if(!empty($param)){
-            echo M('Role')->where(array('id'=>$param))->getField('name');
-        }else{
-            echo "角色未知";
-        }
-    }
-    /**
-     * 区域名称
-     *  @param $param int 区域ID
-     *  @param $type int 数据返回方式 
-     */
-    function areaName($param,$type=NULL){
-        if(!empty($param)){
-            $area = F('Area');
-            if(!empty($area)){
-                $name = $area[$param]['name'];
-            }else{
-                $name = M('Area')->where(array('id'=>$param))->getField('name');
-            }
-            if($type){
-              return $name;
-            }else{
-              echo $name;
-            }
-        }else{
-            echo "区域未知";
-        }
-    }
-    /*根据区域id获取座位数
-     *  @param $param int 区域ID
-     *  @param $type int 数据返回方式 
-     */
-    function areaSeatCount($param,$type=NULL){
-        if(!empty($param)){
-            $area = F('Area');
-            if(!empty($area)){
-                $num = $area[$param]['num'];
-            }else{
-                $num = M('Area')->where(array('id'=>$param))->getField('num');
-            }
-            if($type){
-              return $num;
-            }else{
-              echo $num;
-            }
-        }else{
-            echo "区域未知";
-        }
-    }
-    /**
-     * 票型名称
-     * @param $param
-     */
-    function ticketName($param,$type=NULL){
-        if(!empty($param)){
-            $name = M('TicketType')->where(array('id'=>$param))->getField('name');
-            if($type){
-                return $name;
-             }else{
-                echo $name;
-             }
-        }else{
-            echo "票型未知";
-        }
-    }
-    /*单票名称*/
-    
-    function ticket_single($param,$type=NULL){
-        if(!empty($param)){
-            $name = M('TicketSingle')->where(array('id'=>$param))->getField('name');
-            if($type){
-                return $name;
-             }else{
-                echo $name;
-             }
-        }else{
-            echo "票型未知";
-        }
-    }
-    /**
-     * 漂流工具类型
-     * @param  int $param id
-     * @param  int $type  类型
-     * @return [type]        [description]
-     */
-    function tooltype($param,$type = null){
-        if(!empty($param)){
-            $name = M('ToolType')->where(array('id'=>$param))->getField('title');
-            if($type){
-                return $name;
-             }else{
-                echo $name;
-             }
-        }else{
-            echo "未知";
-        }
-    }
-    /*
-    *获取所有票型
-    *@param $param 产品id
-    */
-    function getPrice($param){
-        if(!empty($param)){
-            $list = F('TicketType'.$param);
-            if($list){
-                $list = M('TicketType')->where(array('status'=>'1'))->select();
-            }
-            return $list;
-        }else{
-            return false;
-        }
-    }
-    /*模板名称*/
-    function templateName($param){
-        if(!empty($param)){
-            $name = M('TemplateList')->where(array('id'=>$param))->getField('name');
-            echo $name;
-        }else{
-            return false;
-        }
-    }
-    /**
-     * 座椅显示处理
-     * @param $param 座椅iD
-     */
-    function seatShow($param,$type=NULL){
-        if(!empty($param)){
-            $seta = explode('-', $param);
-            $name = $seta['0']."排".$seta['1']."号";
-            if($type){
-                return $name;
-             }else{
-                echo $name;
-             }
-        }else{
-            echo "未知";
-        }
-    }
-    /*查询座椅所属的订单
-    * @param $param 座椅iD
-    * @param $plan_id 计划id
-    */
-    function seatOrder($param,$plan_id,$type=NULL){
-        if(!empty($param) && !empty($plan_id)){
-            $plan = F('Plan_'.$plan_id);
-            if(empty($plan)){
-                $plantime = strtotime(" -7 day ",strtotime(date('Y-m-d')));
-                $plan = M('Plan')->where(array('plantime'=>array('egt',$plantime),'id'=>$plan_id))->field('id,product_type,seat_table')->find();
-            }
-            if(empty($plan)){
-                $name = "订单已过期";
-            }else{
-                switch ($plan['product_type']) {
-                    case '1':
-                        $map = array('seat'=>$param);
-                        $table = $plan['seat_table'];
-                        break;
-                    case '2':
-                        $map = array('id'=>$param);
-                        $table = 'scenic';
-                        break;
-                    case '3':
-                        $map = array('id'=>$param);
-                        $table = 'drifting';
-                        break;
-                }
-                $info = M(ucwords($table))->where($map)->field('order_sn,status,print,checktime')->find();
-                $checktime = $info['checktime'] ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
-                $name = $info['order_sn'].'/'.seat_status($info['status'],1).'/'.$info['print'].'/'.$checktime;
-            }
-            if($type){
-                return $name;
-             }else{
-                echo $name;
-             }
-        }else{
-            echo "未知";
-        }
-    }
-    /**
-     * 根据ID显示销售计划信息
-     * @param $param 计划ID
-     * @param $stype 显示方式
-     */
-    function planShow($param,$stype = 1,$type=NULL){
-        if(!empty($param)){
-            $plan = F('Plan_'.$param);
-            if(!empty($plan)){
-                $info = $plan;
-            }else{
-               $info = M('Plan')->where(array('id'=>$param))->field('plantime,games,starttime,endtime,product_type')->find(); 
-            }
-            //判断产品类型
-            switch ($info['product_type']) {
-                case '1':
-                    $types = '1'.$stype;
-                    break;
-                case '2':
-                    $types = '2'.$stype;
-                    break;
-                case '3': 
-                    $types = '3'.$stype;
-                    break;
-            }
-            switch ($types) {
-                case '11':
-                //完全展示 剧场
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")". "&nbsp;&nbsp;第".$info['games']."场&nbsp;&nbsp;".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
-                    break;
-                case '12':
-                    //不显示场次 剧场
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
-                    break;
-                case '13':
-                    //不现实场次且简短日期显示 2014-12-16 19:00 剧场 
-                    $name = date('Y-m-d',$info['plantime'])."&nbsp;&nbsp;".date('H:i',$info['starttime']);
-                    break;
-                case '14':
-                    //不显示场次 和结束时间 剧场
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
-                    break;
-                case '15':
-                    //简单短信
-                    $name = date('m月d日',$info['plantime']).date('H:i',$info['starttime']);
-                    break;    
-                case '21':
-                    //不显示场次 和结束时间
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
-                    break;
-                case '31':
-                    //不显示场次 和结束时间
-                    //$name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
-                    $starttime = date('H:i',$info['starttime']);
-                    $start_time = date('H:i',strtotime("$starttime -30 minute"));
-                    $endtime = date('H:i',$info['endtime']);
-                    $end_time = date('H:i',strtotime("$endtime -30 minute"));
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".$start_time."-".$end_time;
-                    break;
-                case '22':
-                    //短信发送
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
-                    break;
-                case '32':
-                    //不显示场次 和结束时间
-                    $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
-                    break;
-            }
-        }else{
-            $name = "场次未知";
-        }
+}
+/**
+ * 票型名称
+ * @param $param
+ */
+function ticketName($param,$type=NULL){
+    if(!empty($param)){
+        $name = M('TicketType')->where(array('id'=>$param))->getField('name');
         if($type){
             return $name;
-        }else{
+         }else{
             echo $name;
-        }
+         }
+    }else{
+        echo "票型未知";
     }
-    /**
-     * 短信发送，演出计划显示
-     */
-    function planShows($param){
-        if(!empty($param)){
-            $plan = F('Plan_'.$param);
-            if(empty($plan)){
-                $plan = M('Plan')->where(array('id'=>$param))->field('product_id,plantime,starttime,games,product_type')->find();
-            }
-            $proconf = cache('ProConfig');
-            $proconf = $proconf[$plan['product_id']][1];
+}
+/*单票名称*/
+
+function ticket_single($param,$type=NULL){
+    if(!empty($param)){
+        $name = M('TicketSingle')->where(array('id'=>$param))->getField('name');
+        if($type){
+            return $name;
+         }else{
+            echo $name;
+         }
+    }else{
+        echo "票型未知";
+    }
+}
+/**
+ * 漂流工具类型
+ * @param  int $param id
+ * @param  int $type  类型
+ * @return [type]        [description]
+ */
+function tooltype($param,$type = null){
+    if(!empty($param)){
+        $name = M('ToolType')->where(array('id'=>$param))->getField('title');
+        if($type){
+            return $name;
+         }else{
+            echo $name;
+         }
+    }else{
+        echo "未知";
+    }
+}
+/*
+*获取所有票型
+*@param $param 产品id
+*/
+function getPrice($param){
+    if(!empty($param)){
+        $list = F('TicketType'.$param);
+        if($list){
+            $list = M('TicketType')->where(array('status'=>'1'))->select();
+        }
+        return $list;
+    }else{
+        return false;
+    }
+}
+/*模板名称*/
+function templateName($param){
+    if(!empty($param)){
+        $name = M('TemplateList')->where(array('id'=>$param))->getField('name');
+        echo $name;
+    }else{
+        return false;
+    }
+}
+/**
+ * 座椅显示处理
+ * @param $param 座椅iD
+ */
+function seatShow($param,$type=NULL){
+    if(!empty($param)){
+        $seta = explode('-', $param);
+        $name = $seta['0']."排".$seta['1']."号";
+        if($type){
+            return $name;
+         }else{
+            echo $name;
+         }
+    }else{
+        echo "未知";
+    }
+}
+/*查询座椅所属的订单
+* @param $param 座椅iD
+* @param $plan_id 计划id
+*/
+function seatOrder($param,$plan_id,$type=NULL){
+    if(!empty($param) && !empty($plan_id)){
+        $plan = F('Plan_'.$plan_id);
+        if(empty($plan)){
+            $plantime = strtotime(" -7 day ",strtotime(date('Y-m-d')));
+            $plan = M('Plan')->where(array('plantime'=>array('egt',$plantime),'id'=>$plan_id))->field('id,product_type,seat_table')->find();
+        }
+        if(empty($plan)){
+            $name = "订单已过期";
+        }else{
             switch ($plan['product_type']) {
                 case '1':
-                    if($proconf['plan_start_time'] == '1'){
-                        $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场,开演时间".date('H:i',$plan['starttime']);
-                    }else{
-                        $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场";
-                    }
+                    $map = array('seat'=>$param);
+                    $table = $plan['seat_table'];
                     break;
                 case '2':
-                    $name = date('m月d日',$plan['plantime']);
+                    $map = array('id'=>$param);
+                    $table = 'scenic';
                     break;
                 case '3':
-                    $name = date('m月d日',$plan['plantime']);
+                    $map = array('id'=>$param);
+                    $table = 'drifting';
                     break;
             }
-            return $name;
-        }else{
-            return "场次未知";
-        }
-    }
-    /**
-     * 汉化星期
-     */
-    function get_chinese_weekday($datetime){
-        $weekday  = date('w', $datetime);
-        $weeklist = array('日', '一', '二', '三', '四', '五', '六');
-        return '周' . $weeklist[$weekday];
-    }
-    /**
-     * 获取当天的演出场次
-     */
-    function get_today_plan(){
-        $today = strtotime(date('Ymd'));
-        $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
-        return $plan;
-    }
-    /*
-     * 获取取票人名称
-     * @param $param int 操作员ID
-     */
-    function crmName($param,$type=NULL){
-        if(!empty($param)){
-            $name = M('Crm')->where(array('id'=>$param))->getField('name');
-        }else{
-            $name = "渠道商";
+            $info = M(ucwords($table))->where($map)->field('order_sn,status,print,checktime')->find();
+            $checktime = $info['checktime'] ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
+            $name = $info['order_sn'].'/'.seat_status($info['status'],1).'/'.$info['print'].'/'.$checktime;
         }
         if($type){
             return $name;
-        }else{
+         }else{
             echo $name;
-        } 
+         }
+    }else{
+        echo "未知";
     }
+}
+/**
+ * 根据ID显示销售计划信息
+ * @param $param 计划ID
+ * @param $stype 显示方式
+ */
+function planShow($param,$stype = 1,$type=NULL){
+    if(!empty($param)){
+        $plan = F('Plan_'.$param);
+        if(!empty($plan)){
+            $info = $plan;
+        }else{
+           $info = M('Plan')->where(array('id'=>$param))->field('plantime,games,starttime,endtime,product_type')->find(); 
+        }
+        //判断产品类型
+        switch ($info['product_type']) {
+            case '1':
+                $types = '1'.$stype;
+                break;
+            case '2':
+                $types = '2'.$stype;
+                break;
+            case '3': 
+                $types = '3'.$stype;
+                break;
+        }
+        switch ($types) {
+            case '11':
+            //完全展示 剧场
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")". "&nbsp;&nbsp;第".$info['games']."场&nbsp;&nbsp;".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
+                break;
+            case '12':
+                //不显示场次 剧场
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
+                break;
+            case '13':
+                //不现实场次且简短日期显示 2014-12-16 19:00 剧场 
+                $name = date('Y-m-d',$info['plantime'])."&nbsp;&nbsp;".date('H:i',$info['starttime']);
+                break;
+            case '14':
+                //不显示场次 和结束时间 剧场
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
+                break;
+            case '15':
+                //简单短信
+                $name = date('m月d日',$info['plantime']).date('H:i',$info['starttime']);
+                break;    
+            case '21':
+                //不显示场次 和结束时间
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
+                break;
+            case '24':
+                //不显示场次 和结束时间 景区
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
+                break;
+            case '31':
+                //不显示场次 和结束时间
+                //$name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
+                $starttime = date('H:i',$info['starttime']);
+                $start_time = date('H:i',strtotime("$starttime -30 minute"));
+                $endtime = date('H:i',$info['endtime']);
+                $end_time = date('H:i',strtotime("$endtime -30 minute"));
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".$start_time."-".$end_time;
+                break;
+            case '22':
+                //短信发送
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
+                break;
+            case '32':
+                //不显示场次 和结束时间
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
+                break;
+        }
+    }else{
+        $name = "场次未知";
+    }
+    if($type){
+        return $name;
+    }else{
+        echo $name;
+    }
+}
+/**
+ * 短信发送，演出计划显示
+ */
+function planShows($param){
+    if(!empty($param)){
+        $plan = F('Plan_'.$param);
+        if(empty($plan)){
+            $plan = M('Plan')->where(array('id'=>$param))->field('product_id,plantime,starttime,games,product_type')->find();
+        }
+        $proconf = cache('ProConfig');
+        $proconf = $proconf[$plan['product_id']][1];
+        switch ($plan['product_type']) {
+            case '1':
+                if($proconf['plan_start_time'] == '1'){
+                    $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场,开演时间".date('H:i',$plan['starttime']);
+                }else{
+                    $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场";
+                }
+                break;
+            case '2':
+                $name = date('m月d日',$plan['plantime']);
+                break;
+            case '3':
+                $name = date('m月d日',$plan['plantime']);
+                break;
+        }
+        return $name;
+    }else{
+        return "场次未知";
+    }
+}
+/**
+ * 汉化星期
+ */
+function get_chinese_weekday($datetime){
+    $weekday  = date('w', $datetime);
+    $weeklist = array('日', '一', '二', '三', '四', '五', '六');
+    return '周' . $weeklist[$weekday];
+}
+/**
+ * 获取当天的演出场次
+ */
+function get_today_plan(){
+    $today = strtotime(date('Ymd'));
+    $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
+    return $plan;
+}
+/*
+ * 获取取票人名称
+ * @param $param int 操作员ID
+ */
+function crmName($param,$type=NULL){
+    if(!empty($param)){
+        $name = M('Crm')->where(array('id'=>$param))->getField('name');
+    }else{
+        $name = "渠道商";
+    }
+    if($type){
+        return $name;
+    }else{
+        echo $name;
+    } 
+}
 /****================================状态=======================================*******/
     /*状态码
      * 产品状态（0,1）、计划状态(1，2)、订单状态(0,2,3,4,5,6)
@@ -1299,8 +1303,8 @@
     * @param $ticket array  当前场次允许的票型
     */
     function price($area,$price_group,$scene,$ticket){
-        $map = array('status'=>'1','area'=>$area, 'group_id'=>$price_group,'scene'=>array('like','%'.$scene.'%'),'id'=>array('in',implode(',',$ticket)));
-
+        $map = array('status'=>'1','area'=>$area, 'group_id'=>$price_group,'id'=>array('in',implode(',',$ticket)));
+        $map['_string']="FIND_IN_SET(".$scene.",scene)";
         $list = M('TicketType')->where($map)->field(array('id'=>'priceid','price'=>'money','discount'=>'moneys','name','product_id','remark'))->select();
         return $list;
     }
@@ -1468,13 +1472,12 @@
     * $gudie 导游id  全民销售
     */
     function google_crm($product_id,$crm_id = '',$gudie = ''){
+        $crm = F('Crm');$crmGroup = F('CrmGroup');
         if(!empty($crm_id)){
-            $crm = F('Crm');
             $return = $crm[$crm_id];
         }else{
             $return['groupid'] = M('User')->where(array('id'=>$gudie))->getField('groupid');
         }
-        $crmGroup = F('CrmGroup');
         $return['group'] = $crmGroup[$return['groupid']];
         return $return;
     }
@@ -1685,10 +1688,11 @@
                 break;
         }
         if($scene <> '1'){
-            $map = array('status'=>1,'type'=>$types,'scene'=>array('like','%'.$scene.'%'),'product_id'=>$plan['product_id'],'group_id'=>array('in',$group));
+            $map = array('status'=>1,'type'=>$types,'product_id'=>$plan['product_id'],'group_id'=>array('in',$group));
         }else{
-            $map = array('status'=>1,'type'=>$types,'scene'=>array('like','%'.$scene.'%'),'product_id'=>$plan['product_id']); 
+            $map = array('status'=>1,'type'=>$types,'product_id'=>$plan['product_id']); 
         }
+        $map['_string']="FIND_IN_SET(".$scene.",scene)";
         if(!empty($area)){
             $map = array_merge($area,$map);
         }
@@ -1739,7 +1743,6 @@
             if (is_numeric($val))
             {
                 $xml.="<".$key.">".$val."</".$key.">";
-
             }
             else
                 $xml.="<".$key."><![CDATA[".$val."]]></".$key.">";
@@ -1808,10 +1811,10 @@
 function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
     $image_file = SITE_PATH."d/upload/".$name.'.png';
     /*二维码是否已经生成*/
-    //if(!file_exists($image_file)){
+    if(!file_exists($image_file)){
         //生成二维码
         \Libs\Service\Qrcode::createQrcode($data,$name,$logo,$level,$size);
-    //}
+    }
     $image_info = getimagesize($image_file);
     $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
     return $base64_image_content;
@@ -1898,7 +1901,7 @@ function pay_pattern($chane){
     }
 }
 //订单售票
-function print_buttn_show($type,$pay,$sn,$plan_id,$money){
+function print_buttn_show($type,$pay,$sn,$plan_id,$money,$view = '1'){
     if(in_array($pay, array('1','3')) && $type == '6' && check_collection_pay($sn) && $money > 0){
         $title = "网银支付";
         $width = '600';
@@ -1912,8 +1915,23 @@ function print_buttn_show($type,$pay,$sn,$plan_id,$money){
         $title = '门票打印';
         $url = U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan_id));
     }
-    $viewbut = "<a data-toggle='dialog' data-id='".$pageId."' data-width='".$width."' data-height='".$height."' data-title='".$title."' href='".$url."' data-resizable='false' data-maxable='false' data-mask='true'>出票</a>";
-    echo $viewbut;
+    if($view == '2'){
+        //return 返回
+        $return = [
+            'title' =>  $title,
+            'width' =>  $width,
+            'height'=>  $height,
+            'pageId'=>  $pageId,
+            'url'   =>  $url
+        ];
+        return $return;
+    }
+    if($view == '1'){
+        //echo 输出
+        $viewbut = "<a data-toggle='dialog' data-id='".$pageId."' data-width='".$width."' data-height='".$height."' data-title='".$title."' href='".$url."' data-resizable='false' data-maxable='false' data-mask='true'>出票</a>";
+        echo $viewbut;
+    }
+    
 }
 /*判断是否已经收款*/
 function check_collection_pay($sn){

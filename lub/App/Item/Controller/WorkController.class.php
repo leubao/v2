@@ -26,7 +26,11 @@ class WorkController extends ManageBase{
 			case '1':
 				//今天时间戳
 				$today = strtotime(date('Y-m-d'))."-1";
-				$plan = Operate::do_read('Plan',1,array('product_id'=>get_product('id'),'status'=>2));
+				$where = [
+					'product_id'=>get_product('id'),
+					'status'=>2
+				];
+				$plan = D('Plan')->where($where)->order('plantime ASC,games ASC')->select();
 				//剧场
 				$template = 'index';
 				break;
@@ -98,63 +102,9 @@ class WorkController extends ManageBase{
 		if(IS_POST){
 			$pinfo = json_decode($_POST['info'],true);
 			$ginfo = I('get.param',0,intval) ? I('get.param',0,intval) : '1';
-			$info = explode('-', $pinfo['plan']);
 			$product_id = get_product('id');
-			$map = array(
-				'product_id'=>$product_id,
-				'status'=>2,//状态必为售票中
-				'plantime' => (int)$info[0] ? (int)$info[0] : $today,
-				'games' => (int)$info[1] ? (int)$info[1] : 1 ,
-			);
-			$plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,plantime,starttime,endtime,games')->find();
-			$param = unserialize($plan['param']);
-			//拉取坐席
-			if($ginfo == '1'){
-				foreach ($param['seat'] as $k => $v) {
-					$area[] = array(
-						'id'	=>	$v,
-						'name'	=>	areaName($v,1),
-						'number'=>  areaSeatCount($v,1),
-						'num'	=>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
-						'nums'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99'),'area'=>$v),1),//已售出
-						'numb'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','66'),'area'=>$v),1),//预定数
-						'cnum'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','99'),'area'=>$v),1),//已检票
-					); 
-				}
-				$sale = array(
-					'nums'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99')),1),
-					'numb'	=>	area_count_seat($plan['seat_table'],array('status'=>array('in','66')),1),
-					'money' =>	format_money(M('Order')->where(array('status'=>array('in','1,7,9'),'plan_id'=>$plan['id']))->sum('money')),
-				);
-				$return = array(
-					'statusCode' => '200',
-					'plan'	=> $plan['id'],
-					'area'	=> $area,
-					'sale'	=> $sale,
-				);
-			}
-			//拉取小商品
-			if($ginfo == '2'){
-				foreach ($param['goods'] as $k => $v) {
-					$info = goodsInfo($product_id,'',$v,1);
-					$number = array(
-						'number'=>  '1',//已售出
-					); 
-					$goods[] = array_merge($info,$number);
-				}
-				if(empty($goods)){
-					$goods = 'null';
-				}
-				$return = array(
-					'statusCode' => '200',
-					'plan'	=> $plan['id'],
-					'goods'	=> $goods			
-				);
-			}
-			//设置session
-			session('plan',$plan);
+			$return = \Libs\Service\Api::get_plan($product_id,$pinfo,$ginfo);
 			die(json_encode($return));
-			
 		}
 	}
 	/**
@@ -288,136 +238,7 @@ class WorkController extends ManageBase{
 			->assign('aid',$aid)
 			->display();
 	}
-	/**
-	 * 窗口扫码付款
-	 * @param  string $type 窗口扫码付款分为支付宝 alipay  微信支付 wxpay
-	 */
-	function micropay($type = 'wxpay'){
-		//微信支付
-		if($type == 'wxpay'){
-			//加载微信支付
-			$pay = & load_wechat('Pay','6',$this->pid);
-			//①、提交被扫支付
-			$result = $pay->micropay();
-			//如果返回成功
-			if(!array_key_exists("return_code", $result)
-				|| !array_key_exists("out_trade_no", $result)
-				|| !array_key_exists("result_code", $result))
-			{
-				echo "接口调用失败,请确认是否输入是否有误！";
-				throw new WxPayException("接口调用失败！");
-			}
-			
-			//签名验证
-			$out_trade_no = $microPayInput->GetOut_trade_no();
-			
-			//②、接口调用成功，明确返回调用失败
-			if($result["return_code"] == "SUCCESS" &&
-			   $result["result_code"] == "FAIL" && 
-			   $result["err_code"] != "USERPAYING" && 
-			   $result["err_code"] != "SYSTEMERROR")
-			{
-				return false;
-			}
 
-			//③、确认支付是否成功
-			$queryTimes = 10;
-			while($queryTimes > 0)
-			{
-				$succResult = 0;
-				$queryResult = $this->query($out_trade_no, $succResult);
-				//如果需要等待1s后继续
-				if($succResult == 2){
-					sleep(2);
-					continue;
-				} else if($succResult == 1){//查询成功
-					return $queryResult;
-				} else {//订单交易失败
-					return false;
-				}
-			}
-			
-			//④、次确认失败，则撤销订单
-			if(!$this->cancel($out_trade_no))
-			{
-				throw new WxpayException("撤销单失败！");
-			}
-			
-			return false;
-		}
-		//支付宝支付
-		if($type == 'alipay'){
-
-		}
-	}
-	/**
-	 * 
-	 * 查询订单情况
-	 * @param string $out_trade_no  商户订单号
-	 * @param int $succCode         查询订单结果
-	 * @return 0 订单不成功，1表示订单成功，2表示继续等待
-	 */
-	public function query($out_trade_no, &$succCode)
-	{
-		$queryOrderInput = new WxPayOrderQuery();
-		$queryOrderInput->SetOut_trade_no($out_trade_no);
-		$result = WxPayApi::orderQuery($queryOrderInput);
-		
-		if($result["return_code"] == "SUCCESS" 
-			&& $result["result_code"] == "SUCCESS")
-		{
-			//支付成功
-			if($result["trade_state"] == "SUCCESS"){
-				$succCode = 1;
-			   	return $result;
-			}
-			//用户支付中
-			else if($result["trade_state"] == "USERPAYING"){
-				$succCode = 2;
-				return false;
-			}
-		}
-		
-		//如果返回错误码为“此交易订单号不存在”则直接认定失败
-		if($result["err_code"] == "ORDERNOTEXIST")
-		{
-			$succCode = 0;
-		} else{
-			//如果是系统错误，则后续继续
-			$succCode = 2;
-		}
-		return false;
-	}
-	
-	/**
-	 * 
-	 * 撤销订单，如果失败会重复调用10次
-	 * @param string $out_trade_no
-	 * @param 调用深度 $depth
-	 */
-	public function cancel($out_trade_no, $depth = 0)
-	{
-		if($depth > 10){
-			return false;
-		}
-		
-		$clostOrder = new WxPayReverse();
-		$clostOrder->SetOut_trade_no($out_trade_no);
-		$result = WxPayApi::reverse($clostOrder);
-		
-		//接口调用失败
-		if($result["return_code"] != "SUCCESS"){
-			return false;
-		}
-		//如果结果为success且不需要重新调用撤销，则表示撤销成功
-		if($result["result_code"] != "SUCCESS" 
-			&& $result["recall"] == "N"){
-			return true;
-		} else if($result["recall"] == "Y") {
-			return $this->cancel($out_trade_no, ++$depth);
-		}
-		return false;
-	}
 
 	/**
 	 * 订单出票
@@ -526,9 +347,12 @@ class WorkController extends ManageBase{
 				$this->assign('ticket',$ticket);
 
 			}
+			//生成打印URl
+			$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2);
 			$this->assign('data',$info)
 				->assign('type',$info['product_type'])
 				->assign('area',$area)
+				->assign('prshow',$prshow)
 				->display();
 		}
 	}
@@ -637,10 +461,12 @@ class WorkController extends ManageBase{
 		//退订单所有门票
 		if($ginfo['order'] == '1'){
 			//订单内所有门票全退
-			if(Refund::refund($ginfo,1,'','',1,1) != false){
-				$this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
-			}else{
-				$this->erun('退票失败!');
+			try {
+			    $ret = Refund::refund($ginfo,1,'','',1,1);
+			    $this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
+			} catch (PayException $e) {
+			    $this->erun($e->errorMessage());
+			    exit;
 			}
 		}
 		//退单个座位
@@ -652,7 +478,7 @@ class WorkController extends ManageBase{
 				$this->erun('退票失败!');
 			}		
 		}
-		//退子票 TODO   子票只能单张退
+		//退子票 TODO  子票只能单张退
 		if($ginfo['order'] == '5'){
 			if(Refund::refund($ginfo,5,$ginfo['area'],$ginfo['seatid'],1,1) != false){
 				$this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
@@ -686,14 +512,18 @@ class WorkController extends ManageBase{
 				"id" => $pinfo["id"],
 				"against_reason" => $pinfo["against_reason"],
 				"status" => 2,
-				"user_id" => \Libs\Util\Encrypt::authcode($_SESSION['lub_imuid'], 'DECODE'),
+				"user_id" => get_user_id(),
 			);
-			//改变订单状态
-			$order_up = M('Order')->where(array('order_sn'=>$pinfo['sn']))->setField('status',1);
-			$up = M('TicketRefund')->save($data);
+			//改变订单状态 事务处理
+			$model = new \Common\Model\Model();
+			$model->startTrans();
+			$order_up = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$pinfo['sn'],'status'=>7))->setField('status',1);
+			$up = $model->table(C('DB_PREFIX').'ticket_refund')->save($data);
 			if($up && $order_up){
-				$this->srun('退款申请驳回成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				$model->commit();
+				$this->srun('退款申请驳回成功',array('tabid'=>$this->Denuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
+				$model->rollback();
 				$this->erun("退款申请驳回失败!");
 			}
 		}
@@ -807,6 +637,7 @@ class WorkController extends ManageBase{
 	*/
 	function refund_entire(){
 		$ginfo = I('get.');
+		//TODO 整场退票时先解除该场次所有的锁 退票之前检查返利池是否存在待返利订单 
 		switch ($ginfo['type']) {
 			case '1':
 				//只能退当天的场次
@@ -852,7 +683,7 @@ class WorkController extends ManageBase{
 						'msg'	=>	"订单".$order['order_sn']."读取成功...开始取消...",
 						);
 				}
-				echo json_encode($return);
+				die(json_encode($return));
 				break;
 			case '4':
 				//逐个订单处理退单

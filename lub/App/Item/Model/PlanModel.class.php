@@ -16,7 +16,7 @@ class PlanModel extends Model{
 	 * 座椅模板表 名称规则
 	 * 前缀+名称+产品ID+日期+场次
 	 * lub_seat_2_140607_2
-	 * @param unknown_type $data
+	 * @param unknown_type $data 
 	 */
 	function add_plan($data = null){
 		if (empty($data)) {return false;}

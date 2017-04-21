@@ -152,7 +152,7 @@ class Checkin extends \Libs\System\Service{
 		//检票基准时间
 		$starttime = date('H:i',$plan['starttime']);
 		//检票时间
-		$start = date('H:i',strtotime("$starttime -40 minute"));
+		$start = date('H:i',strtotime("$starttime -55 minute"));
 		$ends = date('H',strtotime("$starttime +50 minute"));
 		if($ends == '00' || $ends == '01'){
 			$end = '24:'.date('i',strtotime("$starttime +50 minute"));
