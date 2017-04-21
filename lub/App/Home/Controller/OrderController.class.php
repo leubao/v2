@@ -58,7 +58,7 @@ class OrderController extends Base{
 	        	//查询时间段为空时默认查询未过期的订单
 	        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
 	        }
-	        $order = 'createtime DESC plan_id DESC';
+	        $order = 'createtime DESC';
         }elseif($datetype == '2' && !empty($start_time) && !empty($end_time)){
         	//查询一段时间内所有演出计划,时间段 不超过三十天
         	$day = timediff($start_time,$end_time);
@@ -67,7 +67,7 @@ class OrderController extends Base{
         	}
         	$start_time = strtotime($start_time);
 	        $end_time = strtotime($end_time);
-	        $plantime = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+	        $plantime = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
         	$planlist = M('Plan')->where(['plantime'=>$plantime,'status'=>['in','2,3,4']])->field('id')->select();
         	$where['plan_id'] = array('in',implode(',',array_column($planlist,'id')));
         	$order = 'plan_id DESC';
