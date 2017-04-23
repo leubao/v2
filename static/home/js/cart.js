@@ -95,7 +95,7 @@ $(function(){
 	    remark = $("#remark").val();
     if($(".contact_input").css("display") == "block"){
 	    vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    vmima = $("#contacts").val();
@@ -114,7 +114,7 @@ $(function(){
 	/*是否开启黑名单*/
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
@@ -210,7 +210,7 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
@@ -228,7 +228,7 @@ $(function(){
 	}
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
@@ -318,7 +318,7 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
@@ -336,7 +336,7 @@ $(function(){
 	}
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,6,7,8]))\d{8}$/)) {
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{

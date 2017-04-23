@@ -79,17 +79,13 @@ class FullController extends ManageBase{
         }else{
             $this->assign("vo",$config);
             //获取价格分组
-            $group = M('CrmGroup')->where(array('status'=>1,'type'=>4,'product_id'=>$product_id))->field('id,name,price_group')->select();
+            $map = array('status'=>1,'type'=>4,'product_id'=>$product_id);
+            $group = M('CrmGroup')->where($map)->field('id,name,price_group')->select();
             $oauth = & load_wechat('Oauth',$product_id,'1');
             // 执行接口操作
             $reg = $oauth->getOauthRedirect(U('Wechat/Index/reg',array('pid'=>$product_id,'type'=>8)), $state, 'snsapi_userinfo');
             $this->assign('group',$group)->assign('reg',$reg)->display();
         }
-    }
-    //新详情匹配
-    function new_param($value='')
-    {
-        # code...
     }
     //审核
     function audit(){
@@ -143,19 +139,24 @@ class FullController extends ManageBase{
     	if(empty($ginfo['id'])){
     		$this->erun("参数错误!");
     	}
-    	//生成二维码
-        $image_file = SITE_PATH."d/upload/".'u-'.$ginfo['id'];
-        //二维码是否已经生成
-        if(!file_exists($image_file)){
-            //构造链接
-            $url = U('Wechat/Index/show',array('u'=>$ginfo['id']));
-            // SDK实例对象
-            $oauth = & load_wechat('Oauth',$product_id,1);
-            // 执行接口操作
-            $urls = $oauth->getOauthRedirect($callback, $state, $scope);
-        }
-        $base64_image_content = qr_base64($urls,'u-'.$ginfo['id']);
+    	
+        $base64_image_content = get_up_fxqr($ginfo['id']);
     	$this->assign('qr',$base64_image_content)->assign('id',$ginfo['id'])->display();
+        /*
+        import('Libs.Util.FileToZip');//引入zip下载类文件FileToZip
+        // 打包下载
+        $handler = opendir($image_file); //$cur_file 文件所在目录
+        dump($handler);
+        $download_file = array();
+        $i = 0;
+        while( ($filename = readdir($handler)) !== false ) {
+         if($filename != '.' && $filename != '..') {
+            $download_file[$i++] = $filename;
+         }
+        }
+        closedir($handler);
+        $scandir    =   new traverseDir($cur_file,$save_path); //$save_path zip包文件目录
+        $scandir->tozip($download_file);*/
     }
     /**
      * 编辑
@@ -172,10 +173,11 @@ class FullController extends ManageBase{
                 'groupid'   =>  $pinfo['groupid'],
                 'remark'    =>  $pinfo['remark'],
                 'status'    =>  $pinfo['status'],
+                'type'      =>  $pinfo['type'],
                 'update_time' => time(),
             );
             $status = M('User')->where(array('id'=>$pinfo['id']))->save($data);
-            M('UserData')->where(array('user_id'=>$pinfo['id']))->setField('industry',$pinfo['industry']);
+            D('UserData')->where(array('user_id'=>$pinfo['id']))->setField('industry',$pinfo['industry']);
             if($status){
                 $this->srun('更新成功!',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
             }else{
@@ -183,7 +185,7 @@ class FullController extends ManageBase{
             }
         }else{
             $ginfo = I('get.');
-            $info = D('Crm/UserView')->where(array('id'=>$ginfo['id']))->field('id,nickname,groupid,phone,industry')->find();
+            $info = D('Crm/UserView')->where(array('id'=>$ginfo['id']))->field('id,nickname,groupid,type,phone,industry')->find();
             $group = M('CrmGroup')->where(array('status'=>1,'type'=>4))->field('id,name')->select();
             $this->assign('group',$group)->assign('data',$info)->display();
         }

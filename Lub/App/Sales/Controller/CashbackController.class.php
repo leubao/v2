@@ -10,6 +10,7 @@ namespace Sales\Controller;
 use Common\Controller\ManageBase;
 use Payment\Common\PayException;
 use Payment\Client\Transfer;
+use Payment\Client\Red;
 use Payment\Client\Query;
 class CashbackController extends ManageBase{
 	protected function _initialize() {
@@ -35,39 +36,45 @@ class CashbackController extends ManageBase{
             if(!empty($info)){
                 $db->where(array('id'=>$pinfo['id']))->save(array('win_remark'=>$pinfo['remark'],'userid'=>get_user_id()));
                 $product = get_product('info');
-                $data =  [
-                    'trans_no' => $info['sn'],
-                    'openid' => $info['openid'],
-                    'check_name' => 'NO_CHECK',// NO_CHECK：不校验真实姓名  FORCE_CHECK：强校验真实姓名   OPTION_CHECK：针对已实名认证的用户才校验真实姓名
-                    'payer_real_name' => '',
-                    'amount' => $info['money'],
-                    'desc' => $product['name'].'利润分享计划!',
-                    'spbill_create_ip' => get_client_ip(),
-                ];
-                //发起支付
-                $config = load_payment('wx_transfer',$product['id']);
-                try {
-                    $return = Transfer::run('wx_transfer', $config, $data);
-                } catch (PayException $e) {
-                    //load_redis('set','fkhs',$e->errorMessage());
-                    $this->erun("ERROR:".$e->errorMessage());
-                    exit;
+                $procofig = $this->procofig[$product['id']][8];
+                //微信企业付款
+                if($procofig['rebate_pay'] == '1'){
+                    $postData = $this->pay_red($info,$product);
+                    /*发起支付*/
+                    $config = load_payment('wx_transfer',$product['id']);
+                    try {
+                        $return = Transfer::run('wx_transfer', $config, $data);
+                    } catch (PayException $e) {
+                        load_redis('set','fkhs',serialize($e));
+                        $this->erun("ERROR:".$e->errorMessage().$return['err_code']);
+                        exit;
+                    }
+                }
+                //微信普通红包
+                if($procofig['rebate_pay'] == '2'){
+                    $postData = $this->pay_red($info,$product);//dump($postData);
+                    $config = load_payment('wx_red',$product['id']);
+                    try {
+                        return Red::run('wx_red', $config, $postData);
+                    } catch (PayException $e) {
+                        load_redis('set','fkhs',serialize($e));
+                        $this->erun("ERROR:".$e->errorMessage().$return['err_code']);
+                        exit;
+                    }
                 }
                 if($return['return_code'] == 'SUCCESS' && $return['result_code'] == 'SUCCESS'){
-                    //交易成功
-                    //写入支付日志改变订单状态
+                    //交易成功,写入支付日志改变订单状态
                     $this->pay_suess($return,$info['money']);
-                    /*发送模板消息和短信*/
                     $this->srun("支付成功...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
                 }else{
                     error_insert($return['err_code']);
                     $this->erun("ERROR:".$return['return_msg'].$return['err_code'].$return['err_code_des']);
-                }
+                }  
             }else{
                 $this->erun("交易状态不允许此项操作");
             }
         }else{
-            $ginfo = I('get.');load_redis('set','fkhs',$ginfo['id']);
+            $ginfo = I('get.');
             $info = $db->where(array('id'=>$ginfo['id']))->find();
             $this->assign('data',$info)->display();
         }
@@ -133,17 +140,51 @@ class CashbackController extends ManageBase{
         $info = M('Cash')->where(array('sn'=>$ginfo['sn']))->find();
         $this->assign('data',$info)->display();
     }
+    //微信企业付款
+    function pay_transfer($info,$product){
+        $postData = [
+            'trans_no' => $info['sn'],
+            'openid' => $info['openid'],
+            'check_name' => 'NO_CHECK',// NO_CHECK：不校验真实姓名  FORCE_CHECK：强校验真实姓名   OPTION_CHECK：针对已实名认证的用户才校验真实姓名
+            //'payer_real_name' => '',
+            'amount' => $info['money'],
+            'desc' => $product['name'].'利润分享计划!',
+            'spbill_create_ip' => get_client_ip(),
+            
+        ];
+        return $postData;
+    }
+    //微信红包返款
+    function pay_red($info,$product){
+        $postData = [
+            'mch_billno'    =>  $info['sn'],//商户订单号
+            'send_name'     =>  $product['name'],//商户名称
+            're_openid'     =>  $info['openid'],//用户openid
+            'payer_real_name'   => userName($info['user_id'],1,1),
+            'total_amount'  =>  $info['money'],//付款金额
+            'total_num'     =>  '1',//红包发放总人数
+            'wishing'       =>  '感谢参与'.$product['name'].'利润分享计划！',//红包祝福语
+            'client_ip'     =>  get_client_ip(),//Ip地址
+            'act_name'      =>  "利润分享计划",//活动名称
+            'remark'        =>  '感谢参与'.$product['name'].'利润分享计划！',//备注
+            'scene_id'      =>  'PRODUCT_6',//发放红包使用场景，红包金额大于200时必传PRODUCT_1:商品促销PRODUCT_2:抽奖PRODUCT_3:虚拟物品兑奖 PRODUCT_4:企业内部福利PRODUCT_5:渠道分润PRODUCT_6:保险回馈PRODUCT_7:彩票派奖PRODUCT_8:税务刮奖
+            'consume_mch_id'=>  '', //
+        ];
+        /*发起支付*/
+        return $postData;
+    }
+
     /*支付成功*/   
     /**
      * ["return_code"] => string(7) "SUCCESS"
         ["return_msg"] => array(0) {
-    }
-  ["nonce_str"] => string(32) "v5qcs3fshmsfwco8ycmcy7l7mp7y0ako"
-  ["result_code"] => string(7) "SUCCESS"
-  ["partner_trade_no"] => string(12) "703172665590"
-  ["payment_no"] => string(28) "1000018301201703196752314542"
-  ["payment_time"] => string(19) "2017-03-19 00:18:42"
-                 */     
+        }
+      ["nonce_str"] => string(32) "v5qcs3fshmsfwco8ycmcy7l7mp7y0ako"
+      ["result_code"] => string(7) "SUCCESS"
+      ["partner_trade_no"] => string(12) "703172665590"
+      ["payment_no"] => string(28) "1000018301201703196752314542"
+      ["payment_time"] => string(19) "2017-03-19 00:18:42"
+    */     
     function pay_suess($data,$money){
         //改变订单状态
         $s1 = M('Cash')->where(array('sn'=>$data["partner_trade_no"]))->setField('status',1);

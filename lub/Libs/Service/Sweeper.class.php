@@ -19,7 +19,11 @@ class Sweeper{
 	}
 	//处理提醒
 	function remind_del(){
-		
+		//读取当前有效的提醒
+		$list = D('')->where()->field('order_sn')->select();
+		foreach ($list as $k => $v) {
+			//读取订单当前状态  是否与提醒状态一至
+		}
 	}
 	//清理日志
 	function log_del(){

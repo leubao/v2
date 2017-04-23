@@ -90,7 +90,7 @@ function upload_key($args) {
  * 检查模块是否已经安装
  * @param type $moduleName 模块名称
  * @return boolean
- */
+ 
 function isModuleInstall($moduleName) {
     $appCache = cache('Module');
     if (isset($appCache[$moduleName])) {
@@ -98,7 +98,7 @@ function isModuleInstall($moduleName) {
     }
     return false;
 }
-
+*/
 /**
  * 产生一个指定长度的随机字符串,并返回给用户 
  * @param type $len 产生字符串的长度

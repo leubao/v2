@@ -1,7 +1,7 @@
 <include file="Index:header" />
 
 <style type="text/css">
-  .m-box-goods {
+.m-box-goods {
   position: relative;
   z-index:3;
 }
@@ -55,24 +55,12 @@
   padding: 15px 0 10px 80px;
   height: 53px;
 }
-.m-box .subitem ul li a:hover {
-  background-color: #f9f9f9;
-}
-.m-box .subitem ul li strong {
-  font-weight: normal;
-}
-.m-box .subitem ul li.s-ion1 a {
-  background: url(http://new.leubao.com/static/web/img/i-01.png) no-repeat scroll 15px 10px;
-}
-.m-box .subitem ul li.s-ion2 a {
-  background: url(http://new.leubao.com/static/web/img/i-01.png) no-repeat scroll 15px -78px;
-}
-.m-box .subitem ul li.s-ion3 {
-  border-bottom: 1px solid #e5e5e5;
-}
-.m-box .subitem ul li.s-ion3 a {
-  background: url(http://new.leubao.com/static/web/img/i-01.png) no-repeat scroll 15px -167px;
-}
+.m-box .subitem ul li a:hover {background-color: #f9f9f9;}
+.m-box .subitem ul li strong {font-weight: normal;}
+.m-box .subitem ul li.s-ion1 a {background: url(http://ticket.leubao.com/static/web/img/i-01.png) no-repeat scroll 15px 10px;}
+.m-box .subitem ul li.s-ion2 a {background: url(http://ticket.leubao.com/static/web/img/i-01.png) no-repeat scroll 15px -78px;}
+.m-box .subitem ul li.s-ion3 {border-bottom: 1px solid #e5e5e5;}
+.m-box .subitem ul li.s-ion3 a {background: url(http://ticket.leubao.com/static/web/img/i-01.png) no-repeat scroll 15px -167px;}
 .m-box .subitem ul li .s-t1 {
   font-family: "Microsoft YaHei";
   font-size: 16px;
@@ -80,11 +68,7 @@
   line-height: 22px;
   padding-bottom: 2px;
 }
-.m-box .subitem ul li .s-t2 {
-  font-size: 12px;
-  color: #999;
-  line-height: 16px;
-}
+.m-box .subitem ul li .s-t2 {font-size: 12px;color: #999;line-height: 16px;}
 .m-box .subitem ul li .s-ewm {
   position: absolute;
   left: -124px;
@@ -96,16 +80,10 @@
   font-family: "Microsoft YaHei";
   line-height: 18px;
   display: none;
-  background: url(http://new.leubao.com/static/web/img/i-02.png) no-repeat scroll 0 0;
+  background: url(http://ticket.leubao.com/static/web/img/i-02.png) no-repeat scroll 0 0;
 }
-.m-box .subitem ul li .s-ewm img {
-  display: block;
-  margin: 5px auto 10px;
-}
-.m-box .subitem ul li .f14 {
-  font-size: 14px;
-}
-
+.m-box .subitem ul li .s-ewm img {display: block;margin: 5px auto 10px;}
+.m-box .subitem ul li .f14 {font-size: 14px;}
 /* 项目模块 */
 .m-goods {
   float: left;
@@ -131,49 +109,25 @@
   margin-top: -15px;
   vertical-align: top;
 }
-.m-goods .stt .quotl,
-.m-goods .stt .quotr {
+.m-goods .stt .quotl,.m-goods .stt .quotr {
   display: inline-block;
   *display: inline;
   *zoom: 1;
   vertical-align: top;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 9999px 9999px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 9999px 9999px;
   width: 20px;
   height: 20px;
 }
-.m-goods .stt .quotl {
-  background-position: -94px -700px;
-  margin-right: 5px;
-}
-.m-goods .stt .quotr {
-  background-position: -126px -700px;
-  margin-left: 5px;
-}
+.m-goods .stt .quotl {background-position: -94px -700px;margin-right: 5px;}
+.m-goods .stt .quotr {background-position: -126px -700px;margin-left: 5px;}
 /* 产品模块 */
-.m-product {
-  position: relative;
-  z-index: 1;
-  height: 100%;
-  zoom: 1;
-}
-.m-product .m-choose {
-  padding: 14px 0 0 0;
-}
-.m-product .m-choose-date {
-  padding-top: 20px;
-}
-.m-product .m-choose-1 {
-  padding-top: 20px;
-}
-.m-product .m-cart {
-  padding-top: 15px;
-}
-.m-product .m-problem {
-  margin-top: 20px;
-}
-.m-product .m-soldout {
-  margin-top: -1px;
-}
+.m-product {position: relative;z-index: 1;height: 100%;zoom: 1;}
+.m-product .m-choose {padding: 14px 0 0 0;}
+.m-product .m-choose-date {padding-top: 20px;}
+.m-product .m-choose-1 {padding-top: 20px;}
+.m-product .m-cart {padding-top: 15px;}
+.m-product .m-problem {margin-top: 20px;}
+.m-product .m-soldout {margin-top: -1px;}
 .m-product .m-qrcode {
   position: absolute;
   z-index: 3;
@@ -181,32 +135,14 @@
   bottom: 0;
   zoom: 1;
 }
-.m-product-1 {
-  padding-bottom: 50px;
-}
-.m-product-1 .m-cart .tt {
-  display: none;
-}
-.m-product-1 .m-cart .tt,
-.m-product-1 .m-cart .ct {
-  height: 0;
-  overflow: hidden;
-  visibility: hidden;
-}
-.m-product-1 .m-qrcode {
-  bottom: 50px;
-}
-.m-product-2 {
-  padding-bottom: 50px;
-}
-.m-product-2 .m-qrcode {
-  bottom: 0;
-}
+.m-product-1 {padding-bottom: 50px;}
+.m-product-1 .m-cart .tt {display: none;}
+.m-product-1 .m-cart .tt,.m-product-1 .m-cart .ct {height: 0;overflow: hidden;visibility: hidden;}
+.m-product-1 .m-qrcode {bottom: 50px;}
+.m-product-2 {padding-bottom: 50px;}
+.m-product-2 .m-qrcode {bottom: 0;}
 /* 选择模块 */
-.m-choose {
-  zoom: 1;
-  /* 加载中 */
-}
+.m-choose {zoom: 1;}
 .m-choose:after {
   content: "";
   display: block;
@@ -228,19 +164,14 @@
 .m-choose .ct {
   width: 560px;
 }
-.m-choose .lst {
-  zoom: 1;
-  padding: 0;
-}
+.m-choose .lst {zoom: 1;padding: 0;}
 .m-choose .lst:after {
   content: "";
   display: block;
   clear: both;
 }
 .m-choose .lst,
-.m-choose .lst a {
-  color: #222;
-}
+.m-choose .lst a {color: #222;}
 .m-choose .lst .itm {
   float: left;
   margin: 0 0 5px 6px;
@@ -264,7 +195,7 @@
 }
 .m-choose .lst .itm-sel {
   border-color: #ff4a00;
-  background: #ffffff url(http://new.leubao.com/static/web/img/m-choose-sel.png) no-repeat right bottom;
+  background: #ffffff url(http://ticket.leubao.com/static/web/img/m-choose-sel.png) no-repeat right bottom;
 }
 .m-choose .lst .itm-sel a {
   border-color: #ff4a00;
@@ -279,7 +210,7 @@
 }
 .m-choose .lst .itm-mobile .price {
   padding-left: 16px;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -180px -62px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -180px -62px;
 }
 .m-choose .lst .itm-oos {
   background-color: #f6f6f6;
@@ -290,7 +221,7 @@
   cursor: default;
 }
 .m-choose .lst .itm-more {
-  background: #ffffff url(http://new.leubao.com/static/web/img/m-choose-more.png) no-repeat 82px 16px;
+  background: #ffffff url(http://ticket.leubao.com/static/web/img/m-choose-more.png) no-repeat 82px 16px;
 }
 .m-choose .lst .itm-more a {
   height: 24px;
@@ -354,7 +285,7 @@
   width: 10px;
   height: 6px;
   overflow: hidden;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -96px -64px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -96px -64px;
 }
 /* 数量模块 */
 .m-nums {
@@ -375,7 +306,7 @@
   height: 28px;
   line-height: 9999px;
   overflow: hidden;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 9999px 9999px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 9999px 9999px;
   background-color: #fafafa;
 }
 .m-nums .btn:active {
@@ -481,7 +412,7 @@
   top: 0;
   width: 60px;
   height: 100%;
-  background: url(http://new.leubao.com/static/web/img/tips-stock.png) repeat-y 0 0;
+  background: url(http://ticket.leubao.com/static/web/img/tips-stock.png) repeat-y 0 0;
 }
 .m-cart .tips-stock strong {
   position: absolute;
@@ -510,11 +441,9 @@
   width: 16px;
   height: 16px;
   margin: 0 5px 0 0;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -96px 0;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -96px 0;
 }
-.m-cart .ops {
-  padding: 0 0 0 66px;
-}
+.m-cart .ops {padding: 0 0 0 66px;}
 .m-cart .ops .u-btn {
   display: inline-block;
   *display: inline;
@@ -535,7 +464,7 @@
   height: 34px;
   line-height: 16px;
   color: #fff;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 0 -192px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 0 -192px;
   cursor: pointer;
   overflow: hidden;
 }
@@ -586,20 +515,10 @@
   *zoom: 1;
   vertical-align: middle;
 }
-.m-agent .tt {
-  margin-right: 0px;
-}
-.m-agent .tt a,
-.m-agent .tt a img {
-  display: block;
-}
-.m-agent .ct {
-  line-height: 20px;
-}
-.m-agent .ct .itm {
-  display: block;
-  color: #999;
-}
+.m-agent .tt {margin-right: 0px;}
+.m-agent .tt a,.m-agent .tt a img {display: block;}
+.m-agent .ct {line-height: 20px;}
+.m-agent .ct .itm {display: block;color: #999;}
 /* 侧栏容器 */
 .m-sdbox {
   border-top: 1px dotted #ccc;
@@ -661,7 +580,7 @@
   height: 16px;
   margin: 4px 4px 0 0;
   overflow: hidden;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 9999px 9999px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat 9999px 9999px;
 }
 .m-sdbox .u-btn-cal i {
   background-position: 0 -30px;
@@ -748,7 +667,7 @@
   /* 2015-04-07  GuoJinjin 今天玩什么入口*/
 }
 .m-box-col2 {
-  background-image: url(http://new.leubao.com/static/web/img/m-box-line.png);
+  background-image: url(http://ticket.leubao.com/static/web/img/m-box-line.png);
   background-repeat: repeat-y;
   background-position: 740px 0;
   zoom: 1;
@@ -825,7 +744,7 @@
   height: 10px;
   line-height: 9999px;
   overflow: hidden;
-  background: url(http://new.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -64px -704px;
+  background: url(http://ticket.leubao.com/static/web/img/ultimate-sprites.png) no-repeat -64px -704px;
 }
 .m-mantab .layer .hd .btn-close:hover {
   opacity: .8;
@@ -914,15 +833,10 @@
   </div>
   <div class="m-box m-box-col2 m-box-goods" id="projectInfo">
         <div class="mn">
-
-          
           <!-- 项目模块 begin -->
           <div class="m-goods">
-
             <!-- 产品模块 begin -->
             <div class="m-product m-product-2-m-product-1 j_goodsDetails">
-                        
-
               <!-- 选择日期模块 begin -->
               <div class="m-choose m-choose-date  " data-col="4">
                 <h3 class="tt">演出时间：</h3>
@@ -942,8 +856,8 @@
                 <div class="ct">
                   <ul class="lst" id="priceList">
                   </ul>
-          <div class="tips-warn z-hide" id="warnXiangou"><span class="txt"></span></div>
-          <div class="tips tips-oos" style="left: 90px; top: 346px;"><span class="ico"></span><span class="txt">暂时无货，登录试试运气~</span></div>
+                  <div class="tips-warn z-hide" id="warnXiangou"><span class="txt"></span></div>
+                  <div class="tips tips-oos" style="left: 90px; top: 346px;"><span class="ico"></span><span class="txt">暂时无货，登录试试运气~</span></div>
                 </div>
               </div>
               <!-- 选择票价模块 end -->
@@ -990,10 +904,7 @@
           </div>
           <div class="m_heighlight_tip"></div>
         </div>
-               
-      
         <!-- 侧栏 end -->
-        
       </div>
 
 </div>
@@ -1127,15 +1038,12 @@ $(document).ready(function($) {
           +"<span class='tips tips-stock'><strong></strong></span><a class='btn btn-del' href='#' onclick=delRow(this);><i></i>删除</a></li>";
         $('#cartList').append(content);
       }
-      
      // cartList
-
     }
     
     //删除选中状态
     function toggle(t){
       t.toggleClass("itm-sel");
-      
     }
     //选中
     function active(t){

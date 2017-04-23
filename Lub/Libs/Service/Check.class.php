@@ -80,5 +80,28 @@ class Check{
 			}
 		}
 	}
+	/**
+	 * 主要是红包返利
+     * 轮询红包记录,从微信服务器获取状态
+     */
+    function polling_red(){
+        //获取红包队列数据
+        $ln = load_redis('lsize','rebate_pay_red');
+        if($ln > 0){
+            //获取订单号
+            $sn = load_redis('rPop','rebate_pay_red');
+            //查询红包状态
+            
+            //获取微信配置,组织查询数据,分析返回状态
+        }
+        //循环查询红包状态
+        //判断状态 领取成功的标记成功，待领取的存入红包队列，稍后查询，单个订单号查询间隔5S钟
+    }
+    /**
+     * 轮询微信服务器支付状态,对于超时的订单进行关闭
+     */
+    function check_pay_state(){
+
+    }
 }
 	

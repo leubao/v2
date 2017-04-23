@@ -30,7 +30,7 @@ fieldset{border-color:#c3ced5;}
 .tab-content{border-color:#c3ced5;}
 .table > thead > tr > th{color:#222; background:#f9f9f9; border-bottom-color:#c3ced5;}
 .table-hover > tbody > tr:hover > td,
-.table-hover > tbody > tr:hover > th{background-color:#ecf1f5;}
+.table-hover > tbody > tr:hover > th{background-color:#c7e0f4;}
 .table > thead > tr > th.orderby a.order{color:#CCC;}
 .table > thead > tr > th.orderby.asc a.order.asc,
 .table > thead > tr > th.orderby.desc a.order.desc,

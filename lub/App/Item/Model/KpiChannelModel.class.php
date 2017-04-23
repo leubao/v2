@@ -32,7 +32,8 @@ class KpiChannelModel extends Model{
 	/**
 	 * 缓存
 	 */
-	function kpi_channel_cache(){	 	
+	function kpi_channel_cache(){
+		F('KpiChannel', null);	
 	 	$data = $this->where(array('status'=>1))->select();
         if (empty($data)) {
             return false;
@@ -43,19 +44,19 @@ class KpiChannelModel extends Model{
         	$cache[$rs['crm_id']] = $rs;
         }
         F('KpiChannel', $cache);
-        return true;
+        return $data;
 	 }
 	/**
      * 插入成功后的回调方法
      */
-    protected function _after_insert() {
+    protected function _after_insert(&$data) {
         $this->kpi_channel_cache();
     }
     /**
      *更新成功后的回调方法
      *
      */
-	protected function _after_update(){
+	protected function _after_update(&$data){
 		$this->kpi_channel_cache();
 	}
 }

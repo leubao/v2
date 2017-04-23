@@ -195,3 +195,79 @@ function format_money($money, $len=2, $sign='￥'){
     $format_money = strrev($format_money);
     return $sign.$negative.$format_money.$decimal;
 }
+/**
+ * 获取客户端IP地址
+ * @param integer $type 返回类型 0 返回IP地址 1 返回IPV4地址数字
+ * @param boolean $adv 是否进行高级模式获取（有可能被伪装）
+ * @return mixed
+ */
+function get_client_ip($type = 0, $adv = false) {
+    $type = $type ? 1 : 0;
+    static $ip = NULL;
+    if ($ip !== NULL)
+        return $ip[$type];
+    if ($adv) {
+        if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) {
+            $arr = explode(',', $_SERVER['HTTP_X_FORWARDED_FOR']);
+            $pos = array_search('unknown', $arr);
+            if (false !== $pos)
+                unset($arr[$pos]);
+            $ip = trim($arr[0]);
+        }elseif (isset($_SERVER['HTTP_CLIENT_IP'])) {
+            $ip = $_SERVER['HTTP_CLIENT_IP'];
+        } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+            $ip = $_SERVER['REMOTE_ADDR'];
+        }
+    } elseif (isset($_SERVER['REMOTE_ADDR'])) {
+        $ip = $_SERVER['REMOTE_ADDR'];
+    }
+    // IP地址合法验证
+    $long = sprintf("%u", ip2long($ip));
+    $ip = $long ? array($ip, $long) : array('0.0.0.0', 0);
+    return $ip[$type];
+}
+/**
+ * 获取支付操作配置信息
+ * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar 
+ * || wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap
+ * @param $product_id 产品ID
+ * @param $sub 是否开启子商户
+ * @param $define 是否采用默认配置
+ */
+function load_payment($pay = '',$product_id = ''){
+    static $payment = array();
+    //根据产品读取配置信息
+    if(empty($product_id)){
+        $proconf = cache('Config');
+        $options = array(
+            'app_id'  => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
+            'mch_id'  => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
+        );
+        return $options;
+    }
+    $proconf = cache('ProConfig');
+    $proconf = $proconf[$product_id][11];
+    $options = [
+        'use_sandbox'           => true,
+        'partner'               => $proconf['ali_partner_id'],
+        'app_id'                => $proconf['ali_app_id'],
+        'sign_type'             => 'RSA2',
+
+        'ali_public_key'        => $proconf['ali_public_key'],
+        'rsa_private_key'       => SITE_PATH.'pay/alipay/'.$product_id.'/rsa_private_key.pem',
+        'limit_pay'             => [
+            //'balance',
+            //'moneyFund',
+            // ... ...
+        ],
+
+        'notify_url'            => 'https://ticket.leubao.com/',
+        'return_url'            => 'https://ticket.leubao.com/',
+
+        'return_raw'            => false,
+
+    ]
+    $options = array_merge($basedata,$options);
+    //根据支付类型选择驱动
+    return $options;
+}

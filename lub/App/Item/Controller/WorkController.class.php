@@ -56,6 +56,7 @@ class WorkController extends ManageBase{
 	/*日期查场次漂流项目*/
 	function public_get_date_plan(){
 		$pinfo = json_decode($_POST['info'],true);
+		
 		$plantime = strtotime($pinfo['plantime']);
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$this->pid))->field('id,starttime,endtime,games,param,product_type')->select();
 		foreach ($plan as $k => $v) {

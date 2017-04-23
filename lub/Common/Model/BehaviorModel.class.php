@@ -497,10 +497,10 @@ class BehaviorModel extends Model {
                 //规则类型
                 $return[$key]['_type'] = 1;
             } elseif (substr($rule, 0, 6) == 'addon:') {//插件规则
-                //检查插件模块是否安装
+                /*检查插件模块是否安装
                 if (!isModuleInstall('Addons')) {
                     continue;
-                }
+                }*/
                 $rule = explode('|', $rule);
                 foreach ($rule as $k => $fields) {
                     $field = empty($fields) ? array() : explode(':', $fields);

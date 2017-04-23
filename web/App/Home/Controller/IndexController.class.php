@@ -59,16 +59,18 @@ class IndexController extends Controller
     //加载场次
     function plan(){
         $info = I('get.');
-        //读取可销售产品
+        /*读取可销售产品
         $p_url = $this->url.'api.php?m=trust&a=get_product';
         $product = getHttpContent($p_url,1);
         $products = json_decode($product,true);
+        dump($product);*/
         //读取
         //TODO 先写死  回头动态配置
-        $map = "&type=3&price=1&scene=3&product=".arr2string($products['info'],'id');
+       // $map = "&type=3&price=1&scene=3&product=".arr2string($products['info'],'id');
+        $map = "&type=3&price=1&scene=3&product=41";
         $url = $this->url.'api.php?m=trust&a=get_plan'.$map;
         $info = getHttpContent($url,1);
-        $plan = json_decode($info,true);//dump($plan);
+        $plan = json_decode($info,true);dump($plan);
         $this->assign('area',json_encode($plan['info']['area']));
         $this->assign('plan',$plan['info']['plan']);
         
@@ -120,6 +122,7 @@ class IndexController extends Controller
             //页面上通过表单选择在线支付类型，支付宝为alipay 财付通为tenpay
             $proconf = S('ProConfig');
             $oinfo = session('info');
+            /*
             $pay_conf = array(
                 // 收款账号邮箱
                 'email' => $proconf[$oinfo['pid']]['alipay'],
@@ -138,7 +141,30 @@ class IndexController extends Controller
                 ->setCallback("Home/Index/pays")
                 ->setUrl(U("Home/Index/pay_suess",array('sn' => $oinfo['sn'])))
                 ->setParam(array('sn' => $oinfo['sn']));
-            echo $pay->buildRequestForm($vo);
+            echo $pay->buildRequestForm($vo);*/
+            $payData = [
+                'body'    => 'test body',
+                'subject'    => 'test subject',
+                'order_no'    => $orderNo,
+                'timeout_express' => time() + 600,// 表示必须 600s 内付款
+                'amount'    => '0.01',// 单位为元 ,最小为0.01
+                'return_param' => '123',
+                // 支付宝公有
+                'goods_type' => 1,
+                'store_id' => '',
+                 // web支付
+                'qr_mod' => '',//0、1、2、3 几种方式
+                'paymethod' => 'creditPay',// creditPay  directPay
+
+                'client_ip' => get_client_ip(),
+                'product_id' => '123',
+            ];
+            try {
+                $ret = Charge::run($channel, $config, $payData);
+            } catch (PayException $e) {
+                echo $e->errorMessage();
+                exit;
+            }
         }else{
             //在此之前goods1的业务订单已经生成，状态为等待支付
             $this->assign('info',$info)->display();

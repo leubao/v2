@@ -20,7 +20,7 @@ class Sms extends \Libs\System\Service {
 		 $crminfo = $info['crminfo'];
 		 switch ($type) {
 		 	case '1':
-		 		$message = urlencode("您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票【".$info['product']."】");
+		 		$message = urlencode("您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票【阿里智游】");
 		 		break;
 		 	case '3':
 		 		$datetime = date('Y年m月d日H：i：s');
@@ -43,7 +43,7 @@ class Sms extends \Libs\System\Service {
 		 		break;
 		 	case '8':
 		 		//分销账号审核
-		 		$message = urlencode($title."您申请的《帝苑梦华》销售账号已经通过审核,请遵守相关销售协议【帝苑梦华】");
+		 		$message = urlencode($title."您申请的阿里智游旅游分销平台账号已经通过审核,请遵守相关销售协议【阿里智游】");
 		 		break;
 		 	case '9':
 		 		//微信企业支付
@@ -55,7 +55,7 @@ class Sms extends \Libs\System\Service {
 		 		$message = urlencode($title."共".$num."张，其中".$channel."。【".$info['product']."】");
 		 		break;
 		 	default:
-		 		$message = urlencode("您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票【".$info['product']."】");
+		 		$message = urlencode("您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票【阿里智游】");
 		 }
 		 $parameter = "mobile=".$info['phone']."&content=".$message;
 		 $status = Sms::SAEsendmsg($parameter);

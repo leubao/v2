@@ -877,32 +877,6 @@ function U($url = '', $vars = '', $suffix = true, $domain = true) {
     } elseif ($domain === true) {
         $siteurl = parse_url($config['siteurl']);
         $domain = $siteurl['host']? : $_SERVER['HTTP_HOST'];
-        // 开启子域名部署
-        if (isModuleInstall('Domains')) {
-            $path_list = explode('/', $url);
-            if (count($path_list) < 3) {
-                array_unshift($path_list, MODULE_NAME);
-            }
-            //模块对应绑定域名
-            $Module_Domains_list = cache('Module_Domains_list');
-            if ($Module_Domains_list[$path_list[0]]) {
-                $domain = explode('|', $Module_Domains_list[$path_list[0]]);
-                $domain = $domain[0];
-                $_domain = true;
-            }
-            // APP_SUB_DOMAIN_NO 表示使用网站地址，不使用其他绑定域名
-            if (defined('IN_MANAGE') && IN_MANAGE && !defined('APP_SUB_DOMAIN_NO') && $Module_Domains_list['Manage']) {
-                //当在后台，且后台绑定域名，直接以后台域名访问
-                $domain = $Module_Domains_list['Manage'];
-                $domain = explode('|', $domain);
-                $domain = $domain[0];
-                //标识这里是后台模块，且后台绑定域名，强制以后台绑定的域名访问其他分组
-                $admin_domain = true;
-                unset($_domain);
-            } elseif (!isset($_domain)) {
-                $domain = strtolower($siteurl['host']);
-            }
-        }
 
         //端口号处理
         if ($domain) {

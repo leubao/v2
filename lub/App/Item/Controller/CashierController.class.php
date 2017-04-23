@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 namespace Item\Controller;
 use Common\Controller\ManageBase;
-use Libs\Service\Operate;
 class CashierController extends ManageBase{
 	function _initialize(){
 	 	parent::_initialize();
@@ -18,7 +17,7 @@ class CashierController extends ManageBase{
 	{	
 		//加载当前商品计划
 		$today = strtotime(date('Y-m-d'))."-1";
-		$plan = Operate::do_read('Plan',1,array('product_id'=>get_product('id'),'status'=>2));
+		$plan = D('Plan')->where(['product_id'=>get_product('id'),'status'=>2])->select();
 		$type = '1';
 		//根据计划加载商品
 		$this->assign('plan',$plan)

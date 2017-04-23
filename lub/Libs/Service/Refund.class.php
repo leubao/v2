@@ -23,10 +23,14 @@ class Refund extends \Libs\System\Service {
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
 		$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
-		if(empty($sn) || empty($info)){error_insert('400410');return false;}
+		if(empty($sn) || empty($info)){
+			error_insert('400410');return false;
+		}
 		//获取所属计划
-		//$plan = F('Plan_'.$info['plan_id']);
-		$plan = M('Plan')->where(array('id'=>$info['plan_id']))->find();
+		$plan = F('Plan_'.$info['plan_id']);
+		if(empty($plan)){
+			$plan = M('Plan')->where(array('id'=>$info['plan_id']))->find();
+		}
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']][1];
 		//判断演出是否已过期 TODO 场次结束时间不允许退票  动态配置
@@ -125,7 +129,6 @@ class Refund extends \Libs\System\Service {
 		}
 		//重新设置订单金额
 		$new_money = $info['money'] - $unset_moeny;
-		
 		//删除主票型中的子票集合
 		foreach ($seas['data'] as $ke => $va) {
 			if($child_ticket_count == '1'){
@@ -443,23 +446,19 @@ class Refund extends \Libs\System\Service {
 				'balance'	=>  balance($cid),
 			);
 			$c_pay_return2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
-			//dump($money_back);dump($cid);dump($c_pay_return);dump($c_pay_return2);
 			if($c_pay_return == false || $c_pay_return2 == false || $in_team == false){
-				//dump($money_back);dump($cid);dump($c_pay_return);dump($c_pay_return2);
 				error_insert("400016");
 				$model->rollback();//事务回滚
 				return false;
 			}
-		}else{
-			//现金 TODO  微信或者支付宝退款
 		}
-		/*微信支付4支付宝5微信支付
+		/*微信支付4支付宝5微信支付*/
 		if($info['pay'] == '5'){
 			Refund::weixin_refund($sn,$info['product_id'],$money_back);
 		}
 		if($info['pay'] == '4'){
 			Refund::alipay_refund($sn,$info['product_id'],$money_back);
-		}*/
+		}
 		/*=============处理日志===============*/
 		if($info['status'] <> '7'){
 			$refund_data = array(
@@ -644,18 +643,7 @@ class Refund extends \Libs\System\Service {
 	* @param $type 渠道商类型 1个人 其它为企业 默认为企业
 	* return 1 票面价格结算  存在返利 2 底价结算不存在返利
 	*/
-	function pay_type($product_id,$channel_id,$type = 2){//dump($type);
-		/*if($type == 2){
-			$crmInfo = google_crm($product_id,$channel_id);dump($crmInfo);
-			//判断是否是底价结算['group']['settlement']
-			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['type'] == '2'){
-				$return = '1';
-			}else{
-				$return = '2';
-			}
-		}else{
-			$return = '1';
-		}*/
+	function pay_type($product_id,$channel_id,$type = 2){
 		
 		if($type == '1'){
 			//个人

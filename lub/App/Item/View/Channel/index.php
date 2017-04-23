@@ -1,6 +1,6 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <!--Page -->
-<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Activity/index',array('menuid'=>$menuid));}" method="post">
+<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Channel/index',array('menuid'=>$menuid));}" method="post">
   <input type="hidden" name="pageSize" value="{$numPerPage}">             
   <input type="hidden" name="pageCurrent" value="{$currentPage}"> 
 </form>

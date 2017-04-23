@@ -135,7 +135,7 @@
 </div>
 <script type="text/javascript" src="http://g.alicdn.com/sj/lib/jquery/dist/jquery.min.js"></script>
 <script type="text/javascript" src="http://g.alicdn.com/sj/dpl/1.5.1/js/sui.min.js"></script>
-<script src="http://new.leubao.com/static/js/layer.js" type="text/javascript" charset="utf-8"></script>
+<script src="http://ticket.leubao.com/static/js/layer.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
   $(document).ready(function($) {
     var sub_money = 0;
