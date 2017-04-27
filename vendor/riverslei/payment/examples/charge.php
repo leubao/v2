@@ -10,6 +10,7 @@ require_once __DIR__ . '/../autoload.php';
 use Payment\Common\PayException;
 use Payment\Client\Charge;
 
+// 微信支付，自己的应用必须设置时区
 date_default_timezone_set('Asia/Shanghai');
 
 $orderNo = time() . rand(1000, 9999);
@@ -39,7 +40,7 @@ $payData = [
 
     'client_ip' => '127.0.0.1',
 
-    'openid' => 'ohQeiwnNrAg5bD7EVvmGFIhba--k',
+    //'openid' => 'o-e_mwTXTaxEhBM8xDoj1ui1f950',
     'product_id' => '123',
 ];
 
@@ -66,6 +67,7 @@ try {
 if (is_array($ret)) {
     var_dump($ret);
 } else {
+    header('Location:' . $ret);
     echo htmlspecialchars($ret);
 }
 exit;

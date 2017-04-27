@@ -200,7 +200,7 @@ function format_money($money, $len=2, $sign='￥'){
  * @param integer $type 返回类型 0 返回IP地址 1 返回IPV4地址数字
  * @param boolean $adv 是否进行高级模式获取（有可能被伪装）
  * @return mixed
- */
+
 function get_client_ip($type = 0, $adv = false) {
     $type = $type ? 1 : 0;
     static $ip = NULL;
@@ -225,7 +225,7 @@ function get_client_ip($type = 0, $adv = false) {
     $long = sprintf("%u", ip2long($ip));
     $ip = $long ? array($ip, $long) : array('0.0.0.0', 0);
     return $ip[$type];
-}
+} */
 /**
  * 获取支付操作配置信息
  * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar 
@@ -266,7 +266,7 @@ function load_payment($pay = '',$product_id = ''){
 
         'return_raw'            => false,
 
-    ]
+    ];
     $options = array_merge($basedata,$options);
     //根据支付类型选择驱动
     return $options;
