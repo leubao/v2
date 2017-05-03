@@ -15,8 +15,11 @@
       <option value="3" <if condition="$work eq '3'">selected</if>>仅含工作票</option>
     </select>
     &nbsp;
-  	<input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
+    <input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
     <input type="radio" name="type" data-toggle="icheck" value="2" <if condition="$type eq '2'"> checked="checked"</if> data-label="汇总">
+    &nbsp;
+    <input type="hidden" name="ticket.id" value="{$ticket_id}">
+    <input type="text" name="ticket.name" readonly value="{$ticket_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">
@@ -39,6 +42,8 @@
         <th align="center">所属计划</th>
         <th align="center">订单(场景)类型</th>
         <th align="center">渠道商</th>
+        <th align="center">下单人</th>
+        <th align="center">取票人</th>
         <th align="center">区域</th>
         <th align="center">票型</th>
         <th align="center">票面单价</th>
@@ -47,7 +52,6 @@
         <th align="center">票面金额</th>
         <th align="center">结算金额</th>
         <th align="center">差额</th>
-        <th align="center">操作员</th>
       </tr>
     </thead>
     <tbody id="report-list">
@@ -57,6 +61,8 @@
         <td>{$vo.plan_id|planShow}</td>
         <td>{$vo.addsid|addsid}({$vo.type|channel_type})</td>
         <td><if condition="$vo['type'] eq 1">散客<else />{$vo.channel_id|crmName}</if></td>
+        <td align="center">{$vo.user_id|userName}</td>
+        <td align="center">{$vo.user_id|userName}</td>
         <td>{$vo.area|areaName}</td>
         <td>{$vo.price_id|ticketName}</td>
         <td align="right">{$vo.price}</td>
@@ -65,24 +71,23 @@
         <td align="right">{$vo.money}</td>
         <td align="right">{$vo.moneys}</td>
         <td align="right">{$vo.subsidy}</td>
-        <td align="center">{$vo.user_id|userName}</td>
        </tr>
     </volist>
      <tr>
       <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td></td>
-	    <td align="right">当前页合计:</td>
-	    <td id="sub-scenic-num" align="center">0</td>
-	    <td id="sub-scenic-money" align="right">0.00</td>
-	    <td id="sub-scenic-moneys" align="right">0.00</td>
-	    <td id="sub-scenic-subsidy" align="right">0.00</td>
-	    <td></td>
-	    
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td align="right">当前页合计:</td>
+      <td id="sub-scenic-num" align="center">0</td>
+      <td id="sub-scenic-money" align="right">0.00</td>
+      <td id="sub-scenic-moneys" align="right">0.00</td>
+      <td id="sub-scenic-subsidy" align="right">0.00</td>
      </tr>
     </tbody>
   </table>
@@ -92,71 +97,71 @@
     <span class="pull-left mb10">统计日期：{$starttime}</span>
     <span class="pull-right mb10">打印时间:<?php echo date('Y年m月d日 H:i:s');?></span>
   </div>
-	<volist name="data" id="vo" key="k">
+  <volist name="data" id="vo" key="k">
 
-	<table class="table table-bordered w900">
+  <table class="table table-bordered w900">
   <if condition="$k eq 1">
   
   </if>
-	<tbody>
-	  <tr>
-	    <td colspan="8">{$vo.plan|planshow}</td>
-	  </tr>
-	  <tr>
-	    <th align="center" width="160px">票型名称</th>
-	    <th align="center" width="70px">票面单价</th>
-	    <th align="center" width="70px">结算单价</th>
-	    <th align="center" width="50px">数量</th>
-	    <th align="center" width="100px">票面金额</th>
-	    <th align="center" width="100px">结算金额</th>
-	    <th align="center" width="100px">差额</th>
-	    <th align="center" width="100px">备注</th>
-	  </tr>
-	  <volist name="vo['price']" id="item">
-	  <tr>
-	    <td align="center">{$item.price_id|ticketName}</td>
-	    <td align="right">{$item.price}</td>
-	    <td align="right">{$item.discount}</td>
-	    <td align="center">{$item.number}</td>
-	    <td align="right">{$item.money|format_money}</td>
-	    <td align="right">{$item.moneys|format_money}</td>
-	    <td align="right">{$item.rebate|format_money}</td>
-	    <td></td>
-	  </tr>
-	  </volist>
-	  <tr class="subtotal" data-num="{$vo.number}" data-money="{$vo.money}" data-moneys="{$vo.moneys}" data-subsidy="{$vo.rebate}">
-	    <td></td>
-	    <td></td>
-	    <td align="right">小计:</td>
-	    <td align="center">{$vo.number}</td>
-	    <td align="right">{$vo.money|format_money}</td>
-	    <td align="right">{$vo.moneys|format_money}</td>
-	    <td align="right">{$vo.rebate|format_money}</td>
-	    <td></td>
-	  </tr>
-	  </tbody>
-	</table>
-	</volist>
-	<table class="table table-bordered w900">
-		<tr>
-	    <td width="160px"></td>
-	    <td width="70px"></td>
-	    <td align="right" width="70px"><strong>合计:</strong></td>
-	    <td align="center" width="50px" id="sub-scenic-num">0</td>
-	    <td width="100px" id="sub-scenic-money" align="right">0.00</td>
-	    <td width="100px" id="sub-scenic-moneys" align="right">0.00</td>
-	    <td width="100px" id="sub-scenic-subsidy" align="right">0.00</td>
-	    <td width="100px"></td>
-	  </tr>
-	</table>
+  <tbody>
+    <tr>
+      <td colspan="8">{$vo.plan|planshow}</td>
+    </tr>
+    <tr>
+      <th align="center" width="160px">票型名称</th>
+      <th align="center" width="70px">票面单价</th>
+      <th align="center" width="70px">结算单价</th>
+      <th align="center" width="50px">数量</th>
+      <th align="center" width="100px">票面金额</th>
+      <th align="center" width="100px">结算金额</th>
+      <th align="center" width="100px">差额</th>
+      <th align="center" width="100px">备注</th>
+    </tr>
+    <volist name="vo['price']" id="item">
+    <tr>
+      <td align="center">{$item.price_id|ticketName}</td>
+      <td align="right">{$item.price}</td>
+      <td align="right">{$item.discount}</td>
+      <td align="center">{$item.number}</td>
+      <td align="right">{$item.money|format_money}</td>
+      <td align="right">{$item.moneys|format_money}</td>
+      <td align="right">{$item.rebate|format_money}</td>
+      <td></td>
+    </tr>
+    </volist>
+    <tr class="subtotal" data-num="{$vo.number}" data-money="{$vo.money}" data-moneys="{$vo.moneys}" data-subsidy="{$vo.rebate}">
+      <td></td>
+      <td></td>
+      <td align="right">小计:</td>
+      <td align="center">{$vo.number}</td>
+      <td align="right">{$vo.money|format_money}</td>
+      <td align="right">{$vo.moneys|format_money}</td>
+      <td align="right">{$vo.rebate|format_money}</td>
+      <td></td>
+    </tr>
+    </tbody>
+  </table>
+  </volist>
+  <table class="table table-bordered w900">
+    <tr>
+      <td width="160px"></td>
+      <td width="70px"></td>
+      <td align="right" width="70px"><strong>合计:</strong></td>
+      <td align="center" width="50px" id="sub-scenic-num">0</td>
+      <td width="100px" id="sub-scenic-money" align="right">0.00</td>
+      <td width="100px" id="sub-scenic-moneys" align="right">0.00</td>
+      <td width="100px" id="sub-scenic-subsidy" align="right">0.00</td>
+      <td width="100px"></td>
+    </tr>
+  </table>
 </if>
 </div>
 <div class="bjui-pageFooter">
 <if condition="$type eq '1'">
-	  <div class="pages">
-	    <span>共 {$totalCount} 条</span>
-	  </div>
-	  <div class="pagination-box" data-toggle="pagination" data-total="{$totalCount}" data-page-size="{$numPerPage}" data-page-current="{$currentPage}"> </div>
+    <div class="pages">
+      <span>共 {$totalCount} 条</span>
+    </div>
+    <div class="pagination-box" data-toggle="pagination" data-total="{$totalCount}" data-page-size="{$numPerPage}" data-page-current="{$currentPage}"> </div>
 <else />
 <div class="bjui-pageFooter">
     <ul>
@@ -183,7 +188,7 @@ $(document).ready(function() {
   });
   <else />
   $("#w_scenic_print .subtotal").each(function(i) {
-  	if($(this).data('num') != null){
+    if($(this).data('num') != null){
       sub_num += parseInt($(this).data('num'));
       sub_money += parseFloat($(this).data('money'));
       sub_moneys += parseFloat($(this).data('moneys'));

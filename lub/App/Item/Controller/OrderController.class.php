@@ -100,7 +100,6 @@ class OrderController extends ManageBase{
 							$this->assign('user',$user)->display('to_print');
 						}else{
 							$this->display();
-							//session('author',null);
 						}
 					}else{
 						$this->display();
@@ -137,6 +136,9 @@ class OrderController extends ManageBase{
 		}
 		$plan = F('Plan_'.$ginfo['plan_id']);
 		if(empty($plan)){
+			$plan = D('Plan')->where(['id'=>$ginfo['plan_id']])->field('id,product_type,seat_table,encry,starttime,product_id')->find();
+		}
+		if(empty($plan)){
 			$return = array(
 				'status' => '0',
 				'message' => '订单读取失败!',
@@ -171,16 +173,14 @@ class OrderController extends ManageBase{
 			//读取订单信息  日期时间  人数  单价 10元/人
 			$map['order_sn'] = $ginfo['sn'];
 			$oinfo = D('Item/Order')->where($map)->relation(true)->find();
-			//$code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
-        	//$sn = $code."^#";
-			//$info[0] = ;
 			//打票员名称
 	        if($this->procof['print_user'] == '1'){
 	            $info_user = \Manage\Service\User::getInstance()->username; 
 	        }
 	        //入场时间
 	        if($this->procof['print_field'] == '1'){
-	            $end = date('H:i',$plan['starttime']);
+				$statrtime = $plan['starttime'];
+	            $end = date('H:i',strtotime("$statrtime -5 minute"));
 	            $start = date('H:i',strtotime("$end -30 minute"));
 	            $info_field = $start .'-'. $end;
 	        }
@@ -364,6 +364,7 @@ class OrderController extends ManageBase{
 				    "body"		=> $product."门票",//planShow($oinfo['plan_id'],1,1).$product."门票",
 				    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
 				    "extra_param"	=> '',
+				    "timeout_express"	=>	'10',//设置过期时间
 				];
 			}
 			if($info['pay_type'] == '4'){
@@ -407,21 +408,21 @@ class OrderController extends ManageBase{
 	}
 	//微信扫码支付
 	function weixin_code($product_id,$paykey,$payData)
-	{	/*
+	{	
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $payData['amount']*100;
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
 		if($result === FALSE){
 			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
-		}*/
-
+		}
+		/*
 		$config = load_payment('wx_bar',$product_id);
 		try {
 		    $ret = Charge::run('wx_bar', $config, $payData);
 		} catch (PayException $e) {
 		    echo $e->errorMessage();
 		    exit;
-		}
+		}*/
 
 		return $ret;
 	}
@@ -480,6 +481,8 @@ class OrderController extends ManageBase{
 			//政企窗口收款,判断是否已经收款
 			if(check_collection_pay($info['sn'])){
 				collection_log($oinfo,$info['pay_type']);
+				//更新订单支付方式
+				D('Order')->where(['order_sn'=>$info['sn']])->setField('pay',$info['pay_type']);
 			}
 			$run = true;
 		}else{

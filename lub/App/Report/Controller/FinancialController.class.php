@@ -19,9 +19,11 @@ class FinancialController extends ManageBase{
 		$starttime = I('starttime') ? I('starttime') : date('Y-m-d',time());
 		$type = I('type') ? I('type') : '2';
 		$work = I('work') ? I('work') : '1';
+		$priceid = I('ticket_id');
+		$price_name = I('ticket_name');
 		if(empty($starttime)){$this->erun('参数错误');}
 		//传递查询条件
-		$this->assign('starttime',$starttime);
+		$this->assign('starttime',$starttime)->assign('ticket_id',$priceid)->assign('ticket_name',$price_name);
 		//导出条件
 	    $export_map = array();
 		$where['datetime'] = date('Ymd',strtotime($starttime));
@@ -32,6 +34,9 @@ class FinancialController extends ManageBase{
 		}
 		$where['product_id'] = $this->pid;
 		$where['status'] = '1';
+		if(!empty($priceid)){
+			$where['price_id'] = ['in',$priceid];
+		}
 		$export_map = $where;
 		$export_map['report']	= 'today';
 		$export_map['type']	= $type;
@@ -43,7 +48,7 @@ class FinancialController extends ManageBase{
 			//根据计划汇总
 			//$plan_fold = Report::plan_fold($list);
 			//根据票型汇总
-			$ticket_fold = Report::day_fold($list);//dump($ticket_fold);
+			$ticket_fold = Report::day_fold($list);
 			//用于报表模板导出
 			S('Today'.get_user_id(),$ticket_fold);
 			//退票记录 TODO
@@ -105,7 +110,6 @@ class FinancialController extends ManageBase{
 		$export_map['type']	= $type;
 		S('ChannelReport'.get_user_id(),$list);
 		//加载当前产品配置 TODO
-		
 		$this->assign('data',$list)->assign('export_map',$export_map)->assign('type',$type)->assign('product_id',$map['product_id'])->display();
 	}
 	/**

@@ -10,7 +10,7 @@
         <div class="form-group">
           <label class="col-sm-2 control-label">姓名</label>
           <div class="col-sm-8">
-            <input type="text" class="form-control" name="nickname" value="{$data.phone}" placeholder="如：姓名" required>
+            <input type="text" class="form-control" name="nickname" value="{$data.nickname}" placeholder="如：姓名" required>
           </div>
         </div>
         <div class="form-group">

@@ -961,30 +961,37 @@ function crmName($param,$type=NULL){
     /**
      * 金额扣除条件
      * @param $param 渠道商ID
+     * @param $type 1渠道商户2个人渠道
      * @param $channel_id int 渠道商
      */
-    function money_map($param){
+    function money_map($param,$type = '1'){
         if(!empty($param)){
-            $param = M('Crm')->where(array('id'=>$param))->field('id,level,f_agents')->find();
-            /*
-             * 读取上级渠道商的ID
-             */
-            $Config = cache("Config");
-            switch ($param['level']){
-                case $Config['level_1'] :
-                    //一级渠道商
-                    return $param['id'];
-                    break;
-                case $Config['level_2'] :
-                    //二级级渠道商
-                    return $param['f_agents'];
-                    break;
-                case $Config['level_3'] :
-                    //三级渠道商  获取二级的上一级ID  
-                    $cid = Libs\Service\Operate::do_read('Crm',0,array('id'=>$param['f_agents']),'',array('f_agents'));
-                    
-                    return $cid['f_agents'];
-                    break;
+            if($type == '1'){
+                $param = D('Crm')->where(array('id'=>$param))->field('id,level,f_agents')->find();
+                /*
+                 * 读取上级渠道商的ID
+                 */
+                $Config = cache("Config");
+                switch ($param['level']){
+                    case $Config['level_1'] :
+                        //一级渠道商
+                        return $param['id'];
+                        break;
+                    case $Config['level_2'] :
+                        //二级级渠道商
+                        return $param['f_agents'];
+                        break;
+                    case $Config['level_3'] :
+                        //三级渠道商  获取二级的上一级ID  
+                        $cid = Libs\Service\Operate::do_read('Crm',0,array('id'=>$param['f_agents']),'',array('f_agents'));
+                        return $cid['f_agents'];
+                        break;
+                }
+            }
+            if($type == '2'){
+                $db = D('User');$field = 'id';
+                $param = D('User')->where(array('id'=>$param))->field('id')->find();
+                return $param['id'];
             }
         }else{
             return false;
@@ -1028,9 +1035,17 @@ function crmName($param,$type=NULL){
    /*获取渠道商余额
     *@param $param int 渠道商ID
    */
-   function balance($param){
+   function balance($param,$type = '1'){
         if(empty($param)){return '0.00';}
-        $return = M('Crm')->where(array('id'=>$param))->getField('cash');
+        if($type == '1'){
+            //渠道商客户
+            $db = M('Crm');
+        }
+        if($type == '2'){
+            //个人客户
+            $db = M('User');
+        }
+        $return = $db->where(array('id'=>$param))->getField('cash');
         //判断是否达到最低额
         $config = cache('Config');
         if(bccomp($return, $config['money_low']) > 0){
@@ -1520,7 +1535,8 @@ function crmName($param,$type=NULL){
         }
         //入场时间
         if($proconf['print_field'] == '1'){
-            $end = date('H:i',$plan['starttime']);
+            $statrtime = date('H:i',$plan['starttime']);
+            $end = date('H:i',strtotime("$statrtime -5 minute"));
             $start = date('H:i',strtotime("$end -30 minute"));
             $info['field'] = $start .'-'. $end;
         }

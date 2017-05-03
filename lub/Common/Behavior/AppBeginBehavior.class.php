@@ -37,7 +37,7 @@ class AppBeginBehavior {
             }
         }
         $config = cache('Config');
-        if (MODULE_NAME == 'Manage' && isModuleInstall('Domains') && $config['domainaccess']) {
+        if (MODULE_NAME == 'Manage' && $config['domainaccess']) {
             $Module_Domains_list = cache('Module_Domains_list');
             $http_host = strtolower($_SERVER['HTTP_HOST']);
             $domain = explode('|', $Module_Domains_list['Manage']);

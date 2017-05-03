@@ -357,7 +357,7 @@ class Order extends \Libs\System\Service {
 		$oinfo['info'] = unserialize($oinfo['info']);
 		$seat = $oinfo['info']['data'];
 		//判断支付提交场景，窗口自动排座，窗口选座
-		//选座售票
+		//选座售票 
 		if($info['order_type'] == '1'){
 			$status = Order::choose_seat($seat,$oinfo,'',1,$info['pay_type']);
 		}
@@ -396,7 +396,7 @@ class Order extends \Libs\System\Service {
 	function mobile_seat($info,$oinfo){
 		//获取座位区域信息
 		$param = unserialize($oinfo['info']);
-		$seat = $param['data'];//dump($info);
+		$seat = $param['data'];
 		//判断订单类型 pay_type seat_type
 		//是否是预订单  政府的单子可选择手动排座还是自动排座 其它预定的单子默认手动排座
 		if($param['param'][0]['pre'] == '1' && $param['param'][0]['gov'] == '1'){
@@ -563,6 +563,7 @@ class Order extends \Libs\System\Service {
 			$plan = F('Plan_'.$info['plan_id']);
 		}
 		$proconf = cache('ProConfig');
+		$proconf = $proconf[$plan['product_id']]['1'];
 		//扣除授信额度
 		if($channel == '1' && $info['pay'] == '2'){
 			//获取扣费条件
@@ -720,7 +721,7 @@ class Order extends \Libs\System\Service {
 					'uptime'		=> $createtime,
 				);
 				//窗口团队时判断是否是底价结算
-				if($info['type'] == '2' && $proconf[$plan['product_id']]['1']['settlement'] == '2'){
+				if($info['type'] == '2' && $proconf['settlement'] == '2'){
 					$in_team = true;
 				}else{
 					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
@@ -759,7 +760,7 @@ class Order extends \Libs\System\Service {
 	* @param $seat array 票型及座位数量
 	* @param $info string 客户端传递数据
 	* @param $sub_type int 0散客或不存在返佣 1返给导游 2返给旅行社
-	* @param $channel int 0 窗口自动排座 1渠道自动排座（进行相应的扣费操作）
+	* @param $channel int 0 窗口自动排座 1渠道自动排座 2个人渠道商扣费 （进行相应的扣费操作）
 	* @param $is_seat int 是否排座 1排座 2不排座
 	* @param $is_pay int 是否改变支付方式 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	*/
@@ -778,23 +779,41 @@ class Order extends \Libs\System\Service {
 		$money = 0;
 		$rebate	= 0;
 		/*==============================渠道版扣费 start===============================================*/
-		if($channel == '1' && $info['pay'] == '2'){
+		if(in_array($channel,'1,2') && $info['pay'] == '2'){
 			//获取扣费条件
-			$cid = money_map($info['channel_id']);
+			$cid = money_map($info['channel_id'],$channel);
+
+			if($channel == '1'){
+				//渠道商客户
+				$db = M('Crm');
+			}
+			if($channel == '2'){
+				//个人客户
+				$db = M('User');
+			}
 			//先消费后记录验证客户余额是否够用
-			$balance = M('Crm')->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
+			$balance = $db->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
 			if($balance){
 				$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
-				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+				if($channel == '1'){
+					//渠道商客户
+					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+				}
+				if($channel == '2'){
+					//个人客户
+					$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
+				}				
 				$data = array(
 					'cash'		=>	$info['money'],
 					'user_id'	=>	$info['user_id'],
+					'guide_id'	=>	$cid,//TODO  这个貌似没什么意义
 					'addsid'	=>	$info['addsid'],
 					'crm_id'	=>	$cid,
 					'createtime'=>	$createtime,
 					'type'		=>	'2',
 					'order_sn'	=>	$info['order_sn'],
-					'balance'	=>  balance($cid),
+					'balance'	=>  balance($cid,$channel),
+					'tyint'		=>	$channel,//客户类型1企业2个人
 				);
 				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
 				if($c_pay == false || $c_pay2 == false){
@@ -807,6 +826,11 @@ class Order extends \Libs\System\Service {
 				$model->rollback();//事务回滚
 				return false;
 			}
+			//个人授信额支付
+			/**
+			 * 1、判断当前用户是企业员工 还是个人客户
+			 * 2、调用支付
+			 */
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		/*==============================自动排座开始 start =============================================*/

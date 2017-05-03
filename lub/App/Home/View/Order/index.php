@@ -105,7 +105,7 @@
                 <td align="center" >{$vo.plan_id|planShow}</td>
                 <td align="center" >{$vo.number}</td>
                 <td align="center" >{$vo.money}</td>
-                <td align="center"  class="hidden-xs">{$vo.user_id|userName}</td>
+                <td align="center"  class="hidden-xs">{$vo.user_id|userName=$vo['addsid']}</td>
                 <td align="center" ><?php echo D('Home/Crm')->where(array('id'=>$vo['channel_id']))->getField('name');?></td>
                 <td align="center" >{$vo.createtime|date="m-d H:i",###}</td>
                 <td align="center" >{$vo['status']|order_status}</td>

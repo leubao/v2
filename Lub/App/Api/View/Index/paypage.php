@@ -31,7 +31,8 @@
     <script>
       $('#wxpay').click(function(){
           var sn = "{$sn}",
-            postData = 'data={"sn":'+sn+',"paytype":"wxpay"}';
+            pid = "{$pid}",
+            postData = 'data={"sn":'+sn+',"paytype":"wxpay","pid":"'+pid+'"}';
           $.ajax({
             type:'POST',
             url:'<?php echo U('Api/Index/api_payment');?>',
@@ -47,11 +48,13 @@
             },
             success:function(data){
               if(data.code == '200'){
-                $('.qr').css('display','block');
-                $('#paysn').html(data.info.prepay_id);
-                $('#qr_view').empty();
                 if(data.info.code_url){
+                  $('.qr').css('display','block');
+                  $('#paysn').html(data.info.prepay_id);
+                  $('#qr_view').empty();
                   qrView(data.info.code_url);
+                  setInterval(getPayNotify(postData),5000);
+                  
                 }else{
                   $.toast({
                     text: data.info,type: 'danger', position: 'center'
@@ -59,9 +62,7 @@
                 }
               }else{
                 $.toast({
-                  text: data.msg,
-                  type: 'danger',
-                  position: 'center',
+                  text: data.msg,type: 'danger',position: 'center'
                 });
               } 
             }
@@ -84,9 +85,20 @@
           correctLevel : QRCode.CorrectLevel.H 
         });
       }
-      function getPayNotify(){
-
-      }
+      function getPayNotify(qrsn){
+        $.ajax({
+          url: "{:U('Api/Index/query_pay_order')}",
+          type: "POST",
+          data: qrsn,
+          success: function(rdata) {
+              if (rdata.state == "1") {
+                 
+              } else {
+                
+              }
+          }
+      })
+    }
     </script>
   </body>
 </html>

@@ -792,7 +792,7 @@ function load_payment($pay = '',$product_id = ''){
     if (stripos($pay, 'ali') !== false) {
 
     }else{
-        $notify_url = U('Api/Index/paynotify');
+        $notify_url = U('Api/PayNotify/wxnotify');
         $options = array(
             'app_cert_pem'  => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
             'app_key_pem'   => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
