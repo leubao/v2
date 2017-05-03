@@ -211,7 +211,7 @@ class IndexController extends ManageBase {
             }
         }
         $ifadd = I('ifadd');
-        $this->basePage('TicketType',$map,array('id'=>'ASC'),10);
+        $this->basePage('TicketType',$map,array('id'=>'DESC','status'=>'DESC'),10);
         $this->assign("ifadd",$ifadd)
             ->display();
     }

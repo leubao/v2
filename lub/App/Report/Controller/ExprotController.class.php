@@ -63,6 +63,7 @@ class ExprotController extends ManageBase{
    				'plan'		=>	planShow($v['plan_id'],2,1),
    				'scena'		=>	addsid($v['addsid'],1).'('.channel_type($v['type'],1).')',
    				'channel'	=>	$v['type'] == '1' ? "散客" : crmName($v['channel_id'],1),
+   				'user'		=>	userName($v['user_id'],1,1),
    				'area'		=>	areaName($v['area'],1),
    				'ticket'	=>	ticketName($v['price_id'],1), 
    				'price'		=>	$v['price'], 
@@ -71,7 +72,7 @@ class ExprotController extends ManageBase{
 	   			'money'		=>	$v['money'],
 	   			'moneys'	=>	$v['moneys'],
 	   			'subsidy'	=>	$v['subsidy'],
-	   			'user'		=>	userName($v['user_id'],1,1),
+	   			
 	   		);
    		}
    		//景区日报表明细 表头
@@ -80,6 +81,7 @@ class ExprotController extends ManageBase{
    			'plan'		=>	'销售计划',
    			'scena'		=>	'场景(类型)',
    			'channel'	=>	'渠道商',
+   			'user'		=>	'下单人',
    			'area'		=>	'区域',
    			'ticket'	=>	'票型',
    			'price'		=>	'票面价',
@@ -88,7 +90,7 @@ class ExprotController extends ManageBase{
    			'money'		=>	'票面金额',
    			'moneys'	=>	'结算价',
    			'subsidy'	=>	'差额',
-   			'user'		=>	'操作员',
+   			
    		);
    		$filename = $info['datetime']."景区日报表明细";
    		if($info['type'] == '1'){

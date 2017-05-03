@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <!--让360浏览器自动进入急速模式-->
 <meta name="renderer" content="webkit">
-<title>{$Config.company}- 云鹿(剧院版)票务</title>
+<title>{$Config.company} - 云鹿(剧院版)票务</title>
 <link rel="apple-touch-icon" href="{$config_siteurl}static/images/favicon.ico">
 <link rel="icon" href="{$config_siteurl}static/images/favicon.ico">
 <Managetemplate file="Common/cssjs"/>
