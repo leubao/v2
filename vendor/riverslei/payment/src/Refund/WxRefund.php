@@ -21,7 +21,7 @@ use Payment\Utils\Curl;
  */
 class WxRefund extends WxBaseStrategy
 {
-    protected function getBuildDataClass()
+    public function getBuildDataClass()
     {
         return RefundData::class;
     }
@@ -57,6 +57,7 @@ class WxRefund extends WxBaseStrategy
     protected function retData(array $ret)
     {
         if ($this->config->returnRaw) {
+            $ret['channel'] = Config::WX_REFUND;
             return $ret;
         }
 

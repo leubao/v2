@@ -9,7 +9,16 @@
 - [Payment3.x 使用教程](https://helei112g.github.io/categories/payment-3/) (推荐的版本)
 - [Payment2.x 使用教程](https://helei112g.github.io/categories/payment/)
 
-**后期计划：招商一网通支付**
+----
+
+当前支持 `微信`、`支付宝`、`招商一网通` 三个渠道： 
+- **微信支付**：刷卡支付、公众号支付、扫码支付、APP支付、H5支付、小程序支付全部支持；
+
+- **支付宝支付**：手机网站支付、APP支付、扫码支付、条码支付、电脑网站支付（即时到账）全部支持；
+
+- **招商一网通**：app支付、手机网站支付（实际上是同一种支付，但是可用于该两种场景）。
+
+支持所有第三方的支付订单查询、退款操作、退款订单状态查询。同时支持支付宝与微信的转账操作。
 
 # 安装Payment #
 
@@ -28,14 +37,14 @@
 通过composer，这是推荐的方式，可以使用composer.json 声明依赖，或者直接运行下面的命令。
 
 ```php
-    composer require "riverslei/payment:~3.0"
+    composer require "riverslei/payment:~3.1"
 ```
 
 放入composer.json文件中
 
 ```php
     "require": {
-        "riverslei/payment": "~3.0"
+        "riverslei/payment": "~3.1"
     }
 ```
 
@@ -50,8 +59,7 @@ composer update
 直接下载放入自己的项目中，通过 `require` 的方式引用代码。极度不推荐
 
 # Change Log #
-- 即时到账支付宝异步通知自动识别处理，example演示demo优化 (from v3.0.3)
-- 支付宝密钥公钥自动设置对应头信息（fromv3.0.2）
+- 加入招商一网通支付，加入详细的demo(from v3.1.0)
 - 支付宝密钥支持字符串、文件两种方式配置，微信支持HMAC-SHA256加密（from v3.0.1）
 - 支持支付宝rsa2签名 加入支付宝当面付-条码支付(条码与声波两种模式)   微信加入刷卡支付、小程序支付、H5支付  提供客户端静态调用类 不再兼容支付宝老版本接口（from v3.0.0）
 - 支持支付宝新版本支付接口（from v2.7.0）

@@ -8,8 +8,6 @@
 
 namespace Payment\Charge\Wx;
 
-
-use Payment\Common\BaseData;
 use Payment\Common\Weixin\Data\Charge\WapChargeData;
 use Payment\Common\Weixin\WxBaseStrategy;
 
@@ -21,7 +19,7 @@ use Payment\Common\Weixin\WxBaseStrategy;
 class WxWapCharge extends WxBaseStrategy
 {
 
-    protected function getBuildDataClass()
+    public function getBuildDataClass()
     {
         $this->config->tradeType = 'MWEB';
         return WapChargeData::class;

@@ -55,13 +55,6 @@ abstract class WxBaseStrategy implements BaseStrategy
     }
 
     /**
-     * 获取支付对应的数据完成类
-     * @return BaseData
-     * @author helei
-     */
-    abstract protected function getBuildDataClass();
-
-    /**
      * 发送完了请求
      * @param string $xml
      * @return mixed
@@ -75,6 +68,12 @@ abstract class WxBaseStrategy implements BaseStrategy
             throw new PayException('目前不支持该接口。请联系开发者添加');
         }
 
+        if ($this->config->useSandbox) {
+            $url = str_ireplace('{debug}',WxConfig::SANDBOX_PRE, $url);
+        } else {
+            $url = str_ireplace('{debug}/', '', $url);
+        }
+
         $responseTxt = $this->curlPost($xml, $url);
         if ($responseTxt['error']) {
             throw new PayException('网络发生错误，请稍后再试curl返回码：' . $responseTxt['message']);
@@ -85,7 +84,8 @@ abstract class WxBaseStrategy implements BaseStrategy
             throw new PayException('微信返回错误提示:' . $retData['return_msg']);
         }
         if ($retData['result_code'] != 'SUCCESS') {
-            throw new PayException('微信返回错误提示:' . $retData['err_code_des']);
+            $msg = $retData['err_code_des'] ? $retData['err_code_des'] : $retData['err_msg'];
+            throw new PayException('微信返回错误提示:' . $msg);
         }
 
         return $retData;
@@ -138,7 +138,7 @@ abstract class WxBaseStrategy implements BaseStrategy
         $ret = $this->sendReq($xml);
 
         // 检查返回的数据是否被篡改
-        $flag = $this->signVerify($ret);
+        $flag = $this->verifySign($ret);
         if (!$flag) {
             throw new PayException('微信返回数据被篡改。请检查网络是否安全！');
         }
@@ -163,7 +163,7 @@ abstract class WxBaseStrategy implements BaseStrategy
      * @return boolean
      * @author helei
      */
-    protected function signVerify(array $retData)
+    protected function verifySign(array $retData)
     {
         $retSign = $retData['sign'];
         $values = ArrayUtil::removeKeys($retData, ['sign', 'sign_type']);

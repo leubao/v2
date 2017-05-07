@@ -15,7 +15,7 @@ use Payment\Config;
 
 class AliTransfer extends AliBaseStrategy
 {
-    protected function getBuildDataClass()
+    public function getBuildDataClass()
     {
         $this->config->method = AliConfig::TRANS_TOACCOUNT_METHOD;
         return TransData::class;
@@ -32,6 +32,7 @@ class AliTransfer extends AliBaseStrategy
         }
 
         if ($this->config->returnRaw) {
+            $data['channel'] = Config::ALI_TRANSFER;
             return $data;
         }
 
@@ -50,7 +51,8 @@ class AliTransfer extends AliBaseStrategy
         if ($data['code'] !== '10000') {
             return $retData = [
                 'is_success'    => 'F',
-                'error' => $data['sub_msg']
+                'error' => $data['sub_msg'],
+                'channel' => Config::ALI_TRANSFER,
             ];
         }
 

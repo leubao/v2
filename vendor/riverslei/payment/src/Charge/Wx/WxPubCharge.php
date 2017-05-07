@@ -23,7 +23,7 @@ use Payment\Common\Weixin\WxBaseStrategy;
  */
 class WxPubCharge extends WxBaseStrategy
 {
-    protected function getBuildDataClass()
+    public function getBuildDataClass()
     {
         $this->config->tradeType = 'JSAPI';
         return PubChargeData::class;
@@ -58,6 +58,7 @@ class WxPubCharge extends WxBaseStrategy
         // 移除sign
         unset($backData['sign']);
 
+        // TODO: 这里以后需要修改为返回数组
         return json_encode($backData, JSON_UNESCAPED_UNICODE);// 格式化为json数据
     }
 }

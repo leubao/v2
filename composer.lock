@@ -112,20 +112,20 @@
                 "psr",
                 "psr-3"
             ],
-            "time": "2016-10-10 12:19:37"
+            "time": "2016-10-10T12:19:37+00:00"
         },
         {
             "name": "riverslei/payment",
-            "version": "v3.0.6",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/helei112g/payment.git",
-                "reference": "cf80f5afad798d527c3caff5449502f377d88c8a"
+                "reference": "31dab9a45971eab4a48cafb9925dec36c8ed88cf"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://files.phpcomposer.com/files/helei112g/payment/cf80f5afad798d527c3caff5449502f377d88c8a.zip",
-                "reference": "cf80f5afad798d527c3caff5449502f377d88c8a",
+                "url": "https://files.phpcomposer.com/files/helei112g/payment/31dab9a45971eab4a48cafb9925dec36c8ed88cf.zip",
+                "reference": "31dab9a45971eab4a48cafb9925dec36c8ed88cf",
                 "shasum": ""
             },
             "require": {
@@ -150,32 +150,34 @@
                 {
                     "name": "helei",
                     "email": "dayugog@gmail.com",
-                    "homepage": "https://helei112g.github.io/"
+                    "homepage": "https://helei112g.github.io/categories/payment-3/"
                 }
             ],
-            "description": "支付宝支付、微信支付集成SDK。整合集成快速接入，支持支付宝最新接口",
-            "homepage": "https://helei112g.github.io/",
+            "description": "支付宝支付、微信支付、招商一网通支付php SDK。方便快速接入，最完整的开源支付 php sdk",
+            "homepage": "https://helei112g.github.io/categories/payment-3/",
             "keywords": [
                 "alipay",
                 "weixin",
+                "一网通",
                 "微信支付",
+                "招商一网通",
                 "支付宝支付",
                 "集成支付接口SDK"
             ],
-            "time": "2017-03-18T16:12:55+00:00"
+            "time": "2017-04-30T11:24:48+00:00"
         },
         {
             "name": "zoujingli/wechat-php-sdk",
-            "version": "v1.3.8",
+            "version": "v1.3.10",
             "source": {
                 "type": "git",
                 "url": "https://github.com/zoujingli/wechat-php-sdk.git",
-                "reference": "12759d48867aab14e6b66be81a5b5afe223a0476"
+                "reference": "38f86a42b1c0058d889a0969190540037629606a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://files.phpcomposer.com/files/zoujingli/wechat-php-sdk/12759d48867aab14e6b66be81a5b5afe223a0476.zip",
-                "reference": "12759d48867aab14e6b66be81a5b5afe223a0476",
+                "url": "https://files.phpcomposer.com/files/zoujingli/wechat-php-sdk/38f86a42b1c0058d889a0969190540037629606a.zip",
+                "reference": "38f86a42b1c0058d889a0969190540037629606a",
                 "shasum": ""
             },
             "require": {
@@ -196,7 +198,7 @@
             "keywords": [
                 "wechat-php-sdk"
             ],
-            "time": "2017-02-14T08:30:06+00:00"
+            "time": "2017-04-19T13:34:58+00:00"
         }
     ],
     "packages-dev": [],

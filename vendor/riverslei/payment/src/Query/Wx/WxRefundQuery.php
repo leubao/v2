@@ -10,6 +10,7 @@ namespace Payment\Query\Wx;
 use Payment\Common\Weixin\Data\Query\RefundQueryData;
 use Payment\Common\Weixin\WxBaseStrategy;
 use Payment\Common\WxConfig;
+use Payment\Config;
 
 /**
  *
@@ -20,7 +21,7 @@ use Payment\Common\WxConfig;
  */
 class WxRefundQuery extends WxBaseStrategy
 {
-    protected function getBuildDataClass()
+    public function getBuildDataClass()
     {
         return RefundQueryData::class;
     }
@@ -39,6 +40,7 @@ class WxRefundQuery extends WxBaseStrategy
     protected function retData(array $data)
     {
         if ($this->config->returnRaw) {
+            $data['channel'] = Config::WX_REFUND;
             return $data;
         }
 
@@ -46,7 +48,8 @@ class WxRefundQuery extends WxBaseStrategy
         if ($data['return_code'] != 'SUCCESS') {
             return $retData = [
                 'is_success'    => 'F',
-                'error' => $data['return_msg']
+                'error' => $data['return_msg'],
+                'channel' => Config::WX_REFUND,
             ];
         }
 
@@ -54,7 +57,8 @@ class WxRefundQuery extends WxBaseStrategy
         if ($data['result_code'] != 'SUCCESS') {
             return $retData = [
                 'is_success'    => 'F',
-                'error' => $data['err_code_des']
+                'error' => $data['err_code_des'],
+                'channel' => Config::WX_REFUND,
             ];
         }
 
@@ -87,7 +91,7 @@ class WxRefundQuery extends WxBaseStrategy
             $refund_status = 'refund_status_' . $i;// 退款状态
             $recv_accout = 'refund_recv_accout_' . $i;// 退款入账账户
 
-            $fee = bcdiv($data['refund_fee'], 100, 2);
+            $fee = bcdiv($refund_fee, 100, 2);
 
             // 一笔订单可能被分为多笔,进行退款
             $refundData[] = [
@@ -110,6 +114,7 @@ class WxRefundQuery extends WxBaseStrategy
                 'refund_count' => $data['refund_count'],// 退款总笔数
                 'refund_fee' => $refundFee,// 退款总金额
                 'refund_data'   => $refundData,// 退款信息
+                'channel' => Config::WX_REFUND,
             ],
         ];
 
