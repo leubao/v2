@@ -779,7 +779,7 @@ class Order extends \Libs\System\Service {
 		$money = 0;
 		$rebate	= 0;
 		/*==============================渠道版扣费 start===============================================*/
-		if(in_array($channel,'1,2') && $info['pay'] == '2'){
+		if(in_array($channel,'1,4') && $info['pay'] == '2'){
 			//获取扣费条件
 			$cid = money_map($info['channel_id'],$channel);
 
@@ -787,7 +787,7 @@ class Order extends \Libs\System\Service {
 				//渠道商客户
 				$db = M('Crm');
 			}
-			if($channel == '2'){
+			if($channel == '4'){
 				//个人客户
 				$db = M('User');
 			}
@@ -799,7 +799,7 @@ class Order extends \Libs\System\Service {
 					//渠道商客户
 					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
 				}
-				if($channel == '2'){
+				if($channel == '4'){
 					//个人客户
 					$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
 				}				
@@ -813,7 +813,7 @@ class Order extends \Libs\System\Service {
 					'type'		=>	'2',
 					'order_sn'	=>	$info['order_sn'],
 					'balance'	=>  balance($cid,$channel),
-					'tyint'		=>	$channel,//客户类型1企业2个人
+					'tyint'		=>	$channel,//客户类型1企业4个人
 				);
 				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
 				if($c_pay == false || $c_pay2 == false){

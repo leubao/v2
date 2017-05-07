@@ -1033,7 +1033,7 @@ function crmName($param,$type=NULL){
         } 
    }
    /*获取渠道商余额
-    *@param $param int 渠道商ID
+    *@param $param int 渠道商ID 1企业 4个人
    */
    function balance($param,$type = '1'){
         if(empty($param)){return '0.00';}
@@ -1041,7 +1041,7 @@ function crmName($param,$type=NULL){
             //渠道商客户
             $db = M('Crm');
         }
-        if($type == '2'){
+        if($type == '4'){
             //个人客户
             $db = M('User');
         }
@@ -1603,9 +1603,11 @@ function crmName($param,$type=NULL){
             $product = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
             if($type == 'info'){
                 $product = M('Product')->where(array('id'=>$product))->find();
+                $product['param'] = unserialize($product['param']);
             }
         }else{
             $product = M('Product')->where(array('id'=>$product_id))->find();
+            $product['param'] = unserialize($product['param']);
         }
         /* 默认读取缓存 TODO
         $product = F('Product')

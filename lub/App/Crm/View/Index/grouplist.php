@@ -1,26 +1,26 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageHeader">
-  <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Crm/Index/grouplist',array('menuid'=>$menuid,'id'=>$groupid,'type'=>$type));}" method="post">
+  <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Crm/Index/grouplist',array('menuid'=>$menuid,'id'=>$groupid,'channel'=>$type));}" method="post">
     <input type="hidden" name="pageCurrent" value="{$currentPage}" />
     <input type="hidden" name="pageSize" value="{$numPerPage}" />
   
     <div class="bjui-searchBar">
     <if condition="$type neq '4'">
       <div class="btn-group" role="group"> 
-        <a type="button" class="btn btn-success" href="{:U('Crm/Index/add',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type));}" data-toggle="dialog" data-width="800" data-height="480" data-id="新增" data-mask="true"><i class="fa fa-plus"></i> 新增</a> 
-        <a type="button" class="btn btn-info" href="{:U('Crm/Index/edit',array('groupid'=>$groupid,'type'=>$type));}&id={#bjui-selected}" data-toggle="dialog" data-width="800" data-height="430" data-id="编辑"><i class="fa fa-pencil"></i> 编辑</a> 
-        <a type="button" class="btn btn-warning" href="{:U('Crm/Index/start_us',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type));}&id={#bjui-selected}" data-toggle="doajax" data-confirm-msg="你确定要停用/启用吗？"><span><i class="fa fa-youtube-play"></i> 停用/启用</a>
-        <a type="button" class="btn btn-danger" href="{:U('Crm/Index/delete',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type));}&id={#bjui-selected}" data-toggle="doajax" data-confirm-msg="确定要删除选中项吗？"><i class="fa fa-trash-o"></i> 删除</a> 
-        <a type="button" class="btn btn-primary" href="{:U('Crm/Index/userslist',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type))}&cid={#bjui-selected}" data-toggle="dialog" data-width="800" data-height="400" data-id="员工管理" data-mask="true" data-id="crm_user"><i class="fa fa-users"></i> 员工</a> 
-        <a type="button" class="btn btn-default" href="{:U('Crm/Index/checkcash',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type))}&id={#bjui-selected}" data-toggle="dialog" data-mask="true" data-max="true" data-id="checkcash"><i class="fa fa-cc-visa"></i> 授信</a>
-         <a type="button" class="btn btn-default" href="{:U('Crm/Index/quota',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type))}&id={#bjui-selected}" data-mask="true" data-toggle="dialog" data-width="800" data-height="400" data-id="编辑"><i class="fa fa-life-ring"></i> 配额</a>
-         <a type="button" class="btn btn-default" href="{:U('Crm/Index/auth_product',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type))}&id={#bjui-selected}" data-mask="true" data-toggle="dialog" data-width="800" data-height="400" data-id="产品权限"><i class="fa fa-life-ring"></i> 产品权限</a>
+        <a type="button" class="btn btn-success" href="{:U('Crm/Index/add',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type));}" data-toggle="dialog" data-width="800" data-height="480" data-id="新增" data-mask="true"><i class="fa fa-plus"></i> 新增</a> 
+        <a type="button" class="btn btn-info" href="{:U('Crm/Index/edit',array('groupid'=>$groupid,'channel'=>$type));}&id={#bjui-selected}" data-toggle="dialog" data-width="800" data-height="430" data-id="编辑"><i class="fa fa-pencil"></i> 编辑</a> 
+        <a type="button" class="btn btn-warning" href="{:U('Crm/Index/start_us',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type));}&id={#bjui-selected}" data-toggle="doajax" data-confirm-msg="你确定要停用/启用吗？"><span><i class="fa fa-youtube-play"></i> 停用/启用</a>
+        <a type="button" class="btn btn-danger" href="{:U('Crm/Index/delete',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type));}&id={#bjui-selected}" data-toggle="doajax" data-confirm-msg="确定要删除选中项吗？"><i class="fa fa-trash-o"></i> 删除</a> 
+        <a type="button" class="btn btn-primary" href="{:U('Crm/Index/userslist',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type))}&cid={#bjui-selected}" data-toggle="dialog" data-width="800" data-height="400" data-id="员工管理" data-mask="true" data-id="crm_user"><i class="fa fa-users"></i> 员工</a> 
+        <a type="button" class="btn btn-default" href="{:U('Crm/Index/checkcash',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type))}&id={#bjui-selected}" data-toggle="dialog" data-mask="true" data-max="true" data-id="checkcash"><i class="fa fa-cc-visa"></i> 授信</a>
+         <a type="button" class="btn btn-default" href="{:U('Crm/Index/quota',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type))}&id={#bjui-selected}" data-mask="true" data-toggle="dialog" data-width="800" data-height="400" data-id="编辑"><i class="fa fa-life-ring"></i> 配额</a>
+         <a type="button" class="btn btn-default" href="{:U('Crm/Index/auth_product',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type))}&id={#bjui-selected}" data-mask="true" data-toggle="dialog" data-width="800" data-height="400" data-id="产品权限"><i class="fa fa-life-ring"></i> 产品权限</a>
 
       </div>
       <else />
         <div class="bjui-searchBar">
-          <div class="btn-group" role="group"> 
-          <a type="button" class="btn btn-success" href="{:U('Crm/Index/add_guide',array('menuid'=>$menuid,'groupid'=>$groupid,'type'=>$type));}" data-toggle="dialog" data-width="800" data-height="450" data-id="新增" data-mask="true"><i class="fa fa-plus"></i> 新增</a> 
+          <div class="btn-group" role="group">
+          <a type="button" class="btn btn-default" href="{:U('Crm/Index/checkcash',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type))}&id={#bjui-selected}" data-toggle="dialog" data-mask="true" data-max="true" data-id="checkcash"><i class="fa fa-cc-visa"></i> 授信</a>
           </div>
         </div>
      </if>
@@ -108,7 +108,7 @@
         <volist name="data" id="vo">
           <tr data-id="{$vo['id']}">
             <td>{$vo['id']}</td>
-            <td><a href="{:U('Crm/Index/detail',array('id'=>$vo['id'],'type'=>$type))}" data-toggle="dialog" data-width="800" data-height="450" data-id="detail" data-mask="true">{$vo['nickname']}</a></td>
+            <td><a href="{:U('Crm/Index/detail',array('id'=>$vo['id'],'channel'=>$type))}" data-toggle="dialog" data-width="800" data-height="450" data-id="detail" data-mask="true">{$vo['nickname']}</a></td>
             <td>{$vo['phone']}</td>
             <td align="center">{$vo.status|status}</td>
             <td>{$vo['create_time']|datetime}</td>

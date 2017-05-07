@@ -409,13 +409,15 @@ class IndexController extends ManageBase{
 	 */
 	function checkcash(){
 		$crm_id = I('id');//商户id
-		if(empty($crm_id)){$this->erun("参数错误!");}
+		$type = I('type') ? I('type') : '0';
+		$channel = I('channel');
+		if(empty($crm_id) || empty($channel)){$this->erun("参数错误!");}
 		/*查询条件START*/
 		$start_time = I("starttime");
 		$end_time   = I("endtime");
-		$type = I('type') ? I('type') : '0';
+		$groupid = I('get.groupid');
 		$this->assign("starttime",$start_time);
-		$this->assign("endtime",$end_time);
+		$this->assign("endtime",$end_time)->assign('groupid',$groupid)->assign('channel',$channel);
 		/*查询条件END*/
 		if (!empty($start_time) && !empty($end_time)) {
             $start_time = strtotime($start_time);
@@ -425,7 +427,12 @@ class IndexController extends ManageBase{
         if(!empty($type)){
         	$where['type'] = $type;
         }
-		$where["crm_id"] = array('in',agent_channel($crm_id));
+        if($channel == '4'){
+        	$where["crm_id"] = $crm_id;
+        }else{
+        	$where["crm_id"] = array('in',agent_channel($crm_id));
+        }
+		
 		$this->basePage('CrmRecharge',$where,'id DESC');
 		$this->assign("cid",$crm_id)
 			->assign("type",$type)
@@ -439,23 +446,34 @@ class IndexController extends ManageBase{
 		if(IS_POST){
 			$cash   = I("post.cash");   //当前充值金额
 			$id     = I("post.crmid");  //充值的客户id
+			$channel= I('post.channel');
+			$groupid= I('post.groupid');
 			$remark = I('post.remark'); //重置备注
 			$model = new \Think\Model();
 			$model->startTrans();
+			//判断是企业还是个人1企业4个人
 			$crmData = array('cash' => array('exp','cash+'.$cash),'uptime' => time());
-			$add = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
+			if($channel == '1'){
+				//渠道商客户
+				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
+			}
+			if($channel == '4'){
+				//个人客户
+				$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$id))->setField($crmData);
+			}
 			//充值成功后，添加一条充值记录
 			$data = array(
-					'type'	=> 1,
-					'cash'	=> $cash,
-					'user_id' => get_user_id(),
-					'crm_id'  => $id,//售出信息 票型  单价
-					'createtime' => time(),
-					'balance'	=>	balance($id),
-					'remark'=>$remark,
-			);			
+				'cash'		=>	$cash,
+				'user_id'	=>	get_user_id(),
+				'crm_id'	=>	$id,
+				'createtime'=>	time(),
+				'type'		=>	'1',
+				'balance'	=>  balance($id,$channel),
+				'tyint'		=>	$channel,//客户类型1企业4个人
+				'remark'	=>	$remark,
+			);		
 			$recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
-			if($add && $recharge){
+			if($c_pay && $recharge){
 				$model->commit();//成功则提交
 				$this->srun('充值成功!',array('dialogid'=>'checkcash','closeCurrent'=>true));
 			}else{
@@ -464,8 +482,11 @@ class IndexController extends ManageBase{
 			}
 		}else{
 			$crmid = I("id");  //客户的id
-			if(empty($crmid)){$this->erun("参数错误，请重新选择商户!");}
-			$this->assign("crmid",$crmid);
+			$groupid = I('get.groupid');
+			$channel = I('channel');
+			if(empty($crmid) || empty($channel)){$this->erun("参数错误，请重新选择商户!");}
+			//查询当前客户分组
+			$this->assign("crmid",$crmid)->assign('groupid',$groupid)->assign('channel',$channel);
 			$this->display();
 		}
 	}
@@ -474,6 +495,8 @@ class IndexController extends ManageBase{
 		if(IS_POST){
 			$cash   = I("post.cash");   //当前充值金额
 			$id     = I("post.crmid");  //充值的客户id
+			$channel= I('post.channel');
+			$groupid= I('post.groupid');
 			$remark = I('post.remark'); //重置备注
 			$model = new \Think\Model();
 			$model->startTrans();
@@ -499,8 +522,10 @@ class IndexController extends ManageBase{
 			}
 		}else{
 			$crmid = I("id");  //客户的id
+			$groupid = I('get.groupid');
+			$channel = I('channel');
 			if(empty($crmid)){$this->erun("参数错误，请重新选择商户!");}
-			$this->assign("crmid",$crmid)->display();
+			$this->assign("crmid",$crmid)->assign('groupid',$groupid)->assign('channel',$channel)->display();
 		}
 	}
 	/**

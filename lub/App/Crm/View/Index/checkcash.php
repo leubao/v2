@@ -3,8 +3,8 @@
 <!--工具条 s-->
 <div class="toolBar">
   <div class="btn-group" role="group"> 
-    <a type="button" class="btn btn-success" href="{:U('Crm/Index/recharge',array('id'=>$cid));}" data-toggle="dialog" data-id="crm_recharge" data-mask="true"><i class="fa fa-plus"></i> 充值</a> 
-    <a type="button" class="btn btn-danger" href="{:U('Crm/Index/refund',array('id'=>$cid));}}" data-toggle="dialog" data-id="crm_refund" data-mask="true"><i class="fa fa-pencil"></i> 退款</a>
+    <a type="button" class="btn btn-success" href="{:U('Crm/Index/recharge',array('id'=>$cid,'channel'=>$channel,'groupid'=>$groupid));}" data-toggle="dialog" data-id="crm_recharge" data-mask="true"><i class="fa fa-plus"></i> 充值</a> 
+    <a type="button" class="btn btn-danger" href="{:U('Crm/Index/refund',array('id'=>$cid,'channel'=>$channel,'groupid'=>$groupid));}}" data-toggle="dialog" data-id="crm_refund" data-mask="true"><i class="fa fa-pencil"></i> 退款</a>
     
     <a type="button" class="btn btn-primary" href="{:U('Crm/Index/export_credit');}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出订单信息吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
   </div>
@@ -15,7 +15,7 @@
 </div>
 <!--工具条 e--> 
 <!--查询条 s-->
-  <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Crm/Index/checkcash')}" method="post">
+  <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Crm/Index/checkcash',array('id'=>$cid,'channel'=>$channel,'groupid'=>$groupid))}" method="post">
     <input type="hidden" name="pageCurrent" value="{$currentPage}" />
     <input type="hidden" name="pageSize" value="{$numPerPage}" />
     <input name="id" type="hidden" value="{$cid}">
