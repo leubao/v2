@@ -50,8 +50,9 @@ class ExprotController extends ManageBase{
 		$db = D('ReportData');
 		//构造查询条件
 		$map['datetime'] = $info['datetime'];
-		if(!empty($info['priceid'])){
-			$map['price_id'] = $info['priceid'];
+		$map['product_id'] = $info['product_id'];
+		if(!empty($info['price_id'])){
+			$map['price_id'] = ['in',rawurldecode($info['price_id'])];
 		}
 		$map['status'] = '1';
 		//查询数据

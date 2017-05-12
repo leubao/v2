@@ -38,8 +38,10 @@ class FinancialController extends ManageBase{
 			$where['price_id'] = ['in',$priceid];
 		}
 		$export_map = $where;
+		$export_map['price_id']	= $priceid;
 		$export_map['report']	= 'today';
 		$export_map['type']	= $type;
+
 		if($type == '1'){
 			//明细
 			$this->basePage('ReportData',$where);

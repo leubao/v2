@@ -161,7 +161,7 @@ class IndexController extends ManageBase {
         switch($type){
             case '1':
                 //订单查询中查询下单人
-                $map['is_scene'] = array('in','1,2,3');
+                $map['is_scene'] = array('in','1,2,3,4');
                 break;
             case '2':
                 //管理员 员工
@@ -182,7 +182,7 @@ class IndexController extends ManageBase {
                 $map['is_scene'] = array('in','4');
                 break;
             default :
-                $map['is_scene'] = array('in','1,2,3');
+                $map['is_scene'] = array('in','1,2,3,4');
                 break;
         }
         //TODO 员工中分售票员和普通员工 动态配置

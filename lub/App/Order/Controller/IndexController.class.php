@@ -57,7 +57,7 @@ class IndexController extends ManageBase {
         			$export_map['endtime'] = $endtime;
 		            $starttime = strtotime($starttime);
 		            $endtime = strtotime($endtime) + 86399;
-		            $map['createtime'] = array(array('GT', $starttime), array('LT', $endtime), 'AND');
+		            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
 		        }else{
 		        	//默认显示当天的订单
 		        	$starttime = strtotime(date("Ymd"));
@@ -77,8 +77,9 @@ class IndexController extends ManageBase {
 	        if(!empty($status)){$export_map['status'] = $status;$map['status'] = array('in',$status);}
 	        if(!empty($type)){$map['type'] = $type;}
 	        if(!empty($pay)){$map['pay'] = $pay;}
-        }
-		$map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+        }//dump($map);
+		$map['product_id'] = get_product('id');
+		//dump($map);
 		$this->basePage('Order',$map,array('createtime'=>'DESC'));	
 		$this->assign('map',$map)->assign('export_map',$export_map)->display();
 	}
@@ -145,5 +146,26 @@ class IndexController extends ManageBase {
    		$filename = "订单记录";
    		return \Libs\Service\Exports::getExcel($filename,$headArr,$data);
    		exit;
+	}
+	//订单确认
+	function confirm_order(){
+		$ginfo = I('get.');
+		if(empty($ginfo['sn'])){
+			$this->erun("参数错误");
+		}
+		$map = [
+			'order_sn'	=>	$ginfo['sn'],
+			'status'	=>	'1'
+		];
+		$data = [
+			'status'	=>	'9',
+			'uptime'	=>	time()
+		];
+		$status = D('Item/Order')->where($map)->save($data);
+		if($status){
+			$this->srun('订单确认成功...',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+		}else{
+			$this->erun('订单确认失败...');
+		}
 	}
 }
