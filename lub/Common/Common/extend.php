@@ -961,7 +961,7 @@ function crmName($param,$type=NULL){
     /**
      * 金额扣除条件
      * @param $param 渠道商ID
-     * @param $type 1渠道商户2个人渠道
+     * @param $type 2公司客户8全员销售
      * @param $channel_id int 渠道商
      */
     function money_map($param,$type = '1'){
@@ -988,7 +988,7 @@ function crmName($param,$type=NULL){
                         break;
                 }
             }
-            if($type == '2'){
+            if($type == '4'){
                 $db = D('User');$field = 'id';
                 $param = D('User')->where(array('id'=>$param))->field('id')->find();
                 return $param['id'];

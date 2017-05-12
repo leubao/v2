@@ -392,8 +392,10 @@ class Order extends \Libs\System\Service {
 	/*微信/官网网页订单支付 
 	* @param $info array 客户端提交数据
 	* @param $oinfo array 订单数据
+	* @param $channel_type 2 企业/政府 客户 8个人客户全员分销
+	* @param 只有企业客户和全员销售的个人客户允许授信额支付
 	*/
-	function mobile_seat($info,$oinfo){
+	function mobile_seat($info,$oinfo,$channel_type = '2'){
 		//获取座位区域信息
 		$param = unserialize($oinfo['info']);
 		$seat = $param['data'];
@@ -404,7 +406,7 @@ class Order extends \Libs\System\Service {
 		}elseif($param['param'][0]['pre'] == '1'){
 			$info['seat_type'] = '2';
 		}
-		$status = Order::quickSeat($seat,$oinfo,'',1,$info['seat_type'],$info['pay_type']);
+		$status = Order::quickSeat($seat,$oinfo,'',$channel_type,$info['seat_type'],$info['pay_type']);
 		return $status;
 	}
 	/**************************************************渠道订单****************************************************/
@@ -760,7 +762,7 @@ class Order extends \Libs\System\Service {
 	* @param $seat array 票型及座位数量
 	* @param $info string 客户端传递数据
 	* @param $sub_type int 0散客或不存在返佣 1返给导游 2返给旅行社
-	* @param $channel int 0 窗口自动排座 1渠道自动排座 2个人渠道商扣费 （进行相应的扣费操作）
+	* @param $channel int 0 窗口自动排座 1渠道自动排座 4个人渠道商扣费 （进行相应的扣费操作）
 	* @param $is_seat int 是否排座 1排座 2不排座
 	* @param $is_pay int 是否改变支付方式 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	*/
@@ -779,17 +781,17 @@ class Order extends \Libs\System\Service {
 		$money = 0;
 		$rebate	= 0;
 		/*==============================渠道版扣费 start===============================================*/
-		if(in_array($channel,'1,4') && $info['pay'] == '2'){
-			//获取扣费条件
-			$cid = money_map($info['channel_id'],$channel);
-
+		if(in_array($channel,['1','4']) && $is_pay == '2'){
 			if($channel == '1'){
 				//渠道商客户
 				$db = M('Crm');
+				//获取扣费条件
+				$cid = money_map($info['channel_id'],$channel);
 			}
 			if($channel == '4'){
 				//个人客户
 				$db = M('User');
+				$cid = $info['guide_id'];
 			}
 			//先消费后记录验证客户余额是否够用
 			$balance = $db->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
@@ -826,6 +828,7 @@ class Order extends \Libs\System\Service {
 				$model->rollback();//事务回滚
 				return false;
 			}
+
 			//个人授信额支付
 			/**
 			 * 1、判断当前用户是企业员工 还是个人客户

@@ -24,7 +24,6 @@ class Quota extends \Libs\System\Service {
 			'channel_id'=>array('in',implode(',',array_column($channel, 'id'))),
 			'type'	=>	'1',
 		);
-		
 		$today_quota = D('QuotaUse')->where($map)->sum('number');
 		$today_quota = $today_quota+$number;
 		$plan = F('Plan_'.$plan_id);
@@ -39,7 +38,6 @@ class Quota extends \Libs\System\Service {
 				//Quota::get_quota($crm['id'],$plan_id,$product);
 			}else{
 				$crm = D('Item/Crm')->where(array('id'=>$crm_id))->field('id,f_agents,level')->relation(true)->find();
-				//$crm['quota'] = D('CrmQuota')->where(array('crm_id'=>$crm_id,'product_id'=>$product))->getField('quota');
 				//判断当前渠道商级别
 				switch ($crm['level']){
 					case $config['level_1'] :
@@ -273,6 +271,15 @@ class Quota extends \Libs\System\Service {
     		return false;
     	}
     }
+    /*销售类型
+	1、窗口散客
+	2、窗口团队
+	3、微信散客
+	4、微信团队、渠道版
+	5、政企单位
+	6、分销
+	7、活动
+    */
     /**
      * 活动配额更新
      * @param  int $number  数量

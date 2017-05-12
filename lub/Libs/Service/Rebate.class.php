@@ -18,11 +18,12 @@ class Rebate extends \Libs\System\Service {
 		//读取队列中未处理订单
 		//判断队列是否存在数据
 		$ln = load_redis('lsize','PreOrder');
-		load_redis('set','ajax_rebate_order_time',date('Y-m-d H:i:s'));
+		load_redis('set','ajax_rebate_order_time',date('Y-m-d H:i:s').'&&'.$ln);
 		if($ln > 0){
 			$fenrun = false;
 			//获取队列中最后一个元素，且移除
 			$sn = load_redis('rPop','PreOrder');
+
 			$map = array(
 				'order_sn' => $sn,
 	        	'status' => array('in','1,6,7,9'),
@@ -49,6 +50,7 @@ class Rebate extends \Libs\System\Service {
 			$info['info'] = unserialize($info['info']);
 			//个人允许底价结算,且有返佣
 			$crmInfo = google_crm($info['product_id'],$info['info']['crm'][0]['qditem'],$info['info']['crm'][0]['guide']);
+			//load_redis('set','crmifo',serialize($crmInfo).'1212');
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
 				error_insert('400018');
@@ -101,6 +103,7 @@ class Rebate extends \Libs\System\Service {
 				if($fenrun){
 					$get_user_list = Rebate::get_user_list($guide,$level1,$level2,$level3);
 				}
+				load_redis('set','get_user_list',serialize($get_user_list).'===21');
 				$count = count($get_user_list);
 				foreach ($get_user_list as $key => $value) {
 					//组装写入数据
@@ -133,8 +136,10 @@ class Rebate extends \Libs\System\Service {
 					if($changeData['money'] > 0){
 						$teamData[] = array_merge($baseData,$changeData);
 					}
-					
+					load_redis('set','Dadddata',serialize($changeData));
+					load_redis('set','adddata',serialize($teamData));
 				}
+				load_redis('set','adddata',serialize($teamData));
 				$status = $model->addAll($teamData);
 				if($status){
 					return $status;

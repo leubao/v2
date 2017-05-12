@@ -318,7 +318,6 @@ class Refund extends \Libs\System\Service {
 				}
 			}
 			$up = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
-			//echo $model->table(C('DB_PREFIX').$plan['seat_table'])->_sql();
 			if($up == false){
 				error_insert('400410');
 				$model->rollback();return false;}
@@ -408,7 +407,7 @@ class Refund extends \Libs\System\Service {
 			}
 		}else{
 			//不存在座位   或者整单退
-			$subtotal = $info['money'];//dump($info['money']);
+			$subtotal = $info['money'];
 		}
 		//返回金额
 		$money_back = $subtotal-$cost+$child_moeny;
@@ -432,7 +431,7 @@ class Refund extends \Libs\System\Service {
 		/*=============处理退款===============*/
 		//获取订单支付方式
 		if($info['pay'] == '2'){
-			//授信额  TODO 个人 退款
+			/*授信额  TODO 个人 退款
 			$cid = money_map($info['channel_id']);//获取扣费条件
 			$crmData = array('cash' => array('exp','cash+'.$money_back),'uptime' => time());
 			$c_pay_return = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
@@ -448,6 +447,51 @@ class Refund extends \Libs\System\Service {
 			$c_pay_return2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
 			if($c_pay_return == false || $c_pay_return2 == false || $in_team == false){
 				error_insert("400016");
+				$model->rollback();//事务回滚
+				return false;
+			}
+			*/
+			//区分是个人还是企业
+			if(in_array($info['type'],['8','9'])){
+				$channel = '4';
+			}else{
+				$channel = '1';
+			}
+			if($channel == '1'){
+				//渠道商客户
+				$db = M('Crm');
+				//获取扣费条件
+				$cid = money_map($info['channel_id'],$channel);
+			}
+			if($channel == '4'){
+				//个人客户
+				$db = M('User');
+				$cid = $info['guide_id'];
+			}
+			$crmData = array('cash' => array('exp','cash+'.$money_back),'uptime' => time());
+			if($channel == '1'){
+				//渠道商客户
+				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+			}
+			if($channel == '4'){
+				//个人客户
+				$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
+			}				
+			$data = array(
+				'cash'		=>	$money_back,
+				'user_id'	=>	$info['user_id'],
+				'guide_id'	=>	$cid,//TODO  这个貌似没什么意义
+				'addsid'	=>	$info['addsid'],
+				'crm_id'	=>	$cid,
+				'createtime'=>	$createtime,
+				'type'		=>	'4',
+				'order_sn'	=>	$info['order_sn'],
+				'balance'	=>  balance($cid,$channel),
+				'tyint'		=>	$channel,//客户类型1企业4个人
+			);
+			$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+			if($c_pay == false || $c_pay2 == false){
+				error_insert('400008');
 				$model->rollback();//事务回滚
 				return false;
 			}
@@ -644,7 +688,6 @@ class Refund extends \Libs\System\Service {
 	* return 1 票面价格结算  存在返利 2 底价结算不存在返利
 	*/
 	function pay_type($product_id,$channel_id,$type = 2){
-		
 		if($type == '1'){
 			//个人
 			$crmInfo = google_crm($product_id,'',$channel_id);
