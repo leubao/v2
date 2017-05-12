@@ -756,7 +756,15 @@ class ProductController extends ManageBase{
 			$this->erun('参数错误!');
 		}
 	}
-
+	/**
+	 * 销售控制,设置默认配置
+	 * 销控优先级 1销售类型2销售场景
+	 */
+	function pin_control()
+	{
+		//优先判断销售类型是否还有门票
+		//然后判断销售场景
+	}
 	/**
 	 * 座位销售记录 根据座位表加载销售记录 最多支持查询历史一个月的的数据
 	 */

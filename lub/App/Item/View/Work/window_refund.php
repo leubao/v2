@@ -70,7 +70,7 @@
     <tbody id="refund_seat">
       <volist name="data['info']['data']" id="vo">
         <tr data-id="{$vo['id']}">
-          <td><input type="checkbox" name="ids[]" data-toggle="icheck" data-title="{$vo['areaId']|areaName}{$vo['seatid']|seatShow}" data-area="{$vo['areaId']}" value="{$vo['seatid']}"></td>
+          <td><input type="checkbox" name="ids" data-toggle="icheck" data-title="{$vo['areaId']|areaName}{$vo['seatid']|seatShow}" data-area="{$vo['areaId']}" value="{$vo['seatid']}"></td>
           <td align="center">{$vo['areaId']|areaName}</td>
           <td align="center">{$vo['seatid']|seatShow}</td>
           <td align="center">{$vo['priceid']|ticketName}</td>
@@ -97,7 +97,7 @@
     <tbody id="refund_seat">
       <volist name="data['info']['data']" id="vo">
         <tr data-id="{$vo['id']}">
-          <td><input type="checkbox" name="ids[]" data-toggle="icheck" data-title="票号{$vo['ciphertext']}" data-area="{$vo['priceid']}" value="{$vo['id']}"></td>
+          <td><input type="checkbox" name="ids" data-toggle="icheck" data-title="票号{$vo['ciphertext']}" data-area="{$vo['priceid']}" value="{$vo['id']}"></td>
           <td align="center">{$vo['ciphertext']}</td>
           <td align="center">{$vo['priceid']|ticketName}</td>
           <td align="right">{$vo['price']}</td>
@@ -163,9 +163,11 @@
   });
   $('#recycle').click(function(){
       var ii = 0;
-      $("#refund_seat tr input[type=checkbox]").each(function(i){
+      var refund_seat_checked = $("#refund_seat tr input[type=checkbox]:checked");
+      if(refund_seat_checked.length > 0){
+        refund_seat_checked.each(function(i){
           if(this.checked){
-              /*提交退票请求 TODO   循环速度太快  提示信息不清楚*/
+            /*提交退票请求 TODO   循环速度太快  提示信息不清楚*/
               var area = $(this).data('area'),
                   seat = $(this).val(),
                   title = $(this).data('title'),
@@ -188,9 +190,13 @@
                     return false;
                   }
                 }
-              });
+              });  
           }
-      });
-      setTimeout(function (){$(this).navtab('refresh');}, 1000);
+        });
+        setTimeout(function (){$(this).navtab('refresh');}, 1000);
+      }else{
+        $(this).alertmsg('error',"请选择要退的门票");
+        return false;
+      }
   });
 </script>

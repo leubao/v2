@@ -36,14 +36,14 @@ class GoodsModel extends Model{
     /**
      * 插入成功后的回调方法
      */
-    protected function _after_insert() {
+    protected function _after_insert(&$data) {
         $this->goods_cache();
     }
     /**
      *更新成功后的回调方法
      *
      */
-    protected function _after_update(){
+    protected function _after_update(&$data){
      	$this->goods_cache();
     }
 }
