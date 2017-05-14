@@ -500,20 +500,28 @@ class IndexController extends ManageBase{
 			$remark = I('post.remark'); //重置备注
 			$model = new \Think\Model();
 			$model->startTrans();
+			//判断是企业还是个人1企业4个人
 			$crmData = array('cash' => array('exp','cash-'.$cash),'uptime' => time());
-			$add = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
-			//退款成功后，添加一条充值记录
+			if($channel == '1'){
+				//渠道商客户
+				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
+			}
+			if($channel == '4'){
+				//个人客户
+				$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$id))->setField($crmData);
+			}
 			$data = array(
-					'type'=> 5,
-					'cash'=> $cash,
-					'user_id'  => get_user_id(),
-					'crm_id'   => $id,//售出信息 票型  单价
-					'createtime' =>time(),
-					'balance'	=>	balance($id),
-					'remark'=>$remark,
-			);			
+				'cash'		=>	$cash,
+				'user_id'	=>	get_user_id(),
+				'crm_id'	=>	$id,
+				'createtime'=>	time(),
+				'type'		=>	'5',
+				'balance'	=>  balance($id,$channel),
+				'tyint'		=>	$channel,//客户类型1企业4个人
+				'remark'	=>	$remark,
+			);	
 			$recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
-			if($add && $recharge){
+			if($c_pay && $recharge){
 				$model->commit();//成功则提交
 				$this->srun('退款成功!',array('dialogid'=>'checkcash','closeCurrent'=>true));
 			}else{
@@ -524,8 +532,10 @@ class IndexController extends ManageBase{
 			$crmid = I("id");  //客户的id
 			$groupid = I('get.groupid');
 			$channel = I('channel');
-			if(empty($crmid)){$this->erun("参数错误，请重新选择商户!");}
-			$this->assign("crmid",$crmid)->assign('groupid',$groupid)->assign('channel',$channel)->display();
+			if(empty($crmid) || empty($channel)){$this->erun("参数错误，请重新选择商户!");}
+			//查询当前客户分组
+			$this->assign("crmid",$crmid)->assign('groupid',$groupid)->assign('channel',$channel);
+			$this->display();
 		}
 	}
 	/**
