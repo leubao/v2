@@ -85,7 +85,7 @@ class IndexController extends ManageBase{
 			$type = I('type');
 			if($type == '1'){
 				//企业
-				$level = Operate::do_read('Role',1,array('parentid'=>$this->config['channel_role_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
+				$level = Operate::do_read('Role',1,array('parentid'=>$this->config['channel_role_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));
 				$this->assign("level",$level);
 			}elseif ($type == '2' || $type == '3') {
 				//个人
@@ -410,7 +410,7 @@ class IndexController extends ManageBase{
 	function checkcash(){
 		$crm_id = I('id');//商户id
 		$type = I('type') ? I('type') : '0';
-		$channel = I('channel');
+		$channel = I('get.channel');
 		if(empty($crm_id) || empty($channel)){$this->erun("参数错误!");}
 		/*查询条件START*/
 		$start_time = I("starttime");
@@ -423,6 +423,11 @@ class IndexController extends ManageBase{
             $start_time = strtotime($start_time);
             $end_time = strtotime($end_time) + 86399;
             $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }elseif(empty($type)){
+        	//默认只查询3个月内的数据
+        	$start_time = strtotime("-1 month");
+            $end_time = time();
+            $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
         }
         if(!empty($type)){
         	$where['type'] = $type;
@@ -432,7 +437,6 @@ class IndexController extends ManageBase{
         }else{
         	$where["crm_id"] = array('in',agent_channel($crm_id));
         }
-		
 		$this->basePage('CrmRecharge',$where,'id DESC');
 		$this->assign("cid",$crm_id)
 			->assign("type",$type)
