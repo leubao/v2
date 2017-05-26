@@ -26,6 +26,37 @@
 			      </select></td>
 	      </tr>
 	      <tr>
+              <td width="120px">常规渠道:</td>
+              <td>
+             <input type="text" name="channel_often_quota" value="{$vo.channel_often_quota}" size="10"><span class="remark">常规旅行社、酒店渠道。0为不限制</span>
+              </td>
+            </tr>
+            <tr>
+              <td width="120px">政企渠道:</td>
+              <td>
+             <input type="text" name="channel_political_quota" value="{$vo.channel_political_quota}" size="10"><span class="remark">0为不限制</span>
+              </td>
+            </tr>
+            <tr>
+              <td width="120px">全员销售:</td>
+              <td>
+             <input type="text" name="channel_full_quota" value="{$vo.channel_full_quota}" size="10"><span class="remark">0为不限制</span>
+              </td>
+            </tr>
+            <tr>
+              <td width="120px">电商直营:</td>
+              <td>
+             <input type="text" name="channel_directly_quota" value="{$vo.channel_directly_quota}" size="10"><span class="remark">0为不限制</span>
+              </td>
+            </tr>
+            <tr>
+              <td width="120px">电商渠道:</td>
+              <td>
+             <input type="text" name="channel_electricity_quota" value="{$vo.channel_electricity_quota}" size="10"><span class="remark">0为不限制</span>
+              </td>
+            </tr>
+
+	      <tr>
 	        <td width="100px">说明</td>
 	        <td style="color: red;"><strong>设置相应场景可售数量,不限定数量默认值即可</strong></td>
 	      </tr>

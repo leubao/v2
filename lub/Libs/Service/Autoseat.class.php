@@ -21,7 +21,7 @@ class Autoseat extends \Libs\System\Service {
 	 * return array $nums 是否有足够的座椅数   $groups 条件 
 	 * 规定分组不超过五十 满足条件  立即结束循环
 	 */
-	function auto_group($group, $area = null, $num = null, $product_id = null, $table = null){
+	public function auto_group($group, $area = null, $num = null, $product_id = null, $table = null){
 		if(!empty($group)){
 			//判断当前分组数
 			$g_num = count($group);
@@ -86,7 +86,7 @@ class Autoseat extends \Libs\System\Service {
 	* @param $group_id array 分组id
 	* @param $product_id int 产品id
 	*/
-	function go_num($group_id = null, $table = null, $area = null){
+	public function go_num($group_id = null, $table = null, $area = null){
 		$map = array('group' => array('in',$group_id), 'area' =>$area, 'status' => '0');
 		$num = M(ucwords($table))->where($map)->count();
 		return $num;

@@ -17,7 +17,6 @@
         <th align="center">场次</th>
         <th align="center">时间</th>
         <th align="center">操作员</th>
-        <th align="center">配额</th>
         <th align="center">状态</th>
         <th align="center">添加时间</th>
         <th align="center">操作</th>
@@ -31,7 +30,6 @@
         <td align="center">{$vo.games}</td>
         <td align="center">{$vo.starttime|date="H:i",###} - {$vo.endtime|date="H:i",###} </td>
         <td align="center">{$vo.user_id|userName}</td>
-        <td align="center">{$vo.quota}</td>
         <td align="center">{$vo.status|plan_status}</td>
         <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>
         <td align="center"><if condition="$vo.status eq 4">计划已过期<else />[<a href="{:U('Item/Product/auth',array('menuid'=>$menuid,'id'=>$vo['id']));}" data-toggle="dialog" data-width="800" data-height="600" data-id="planauth" data-mask="true">销售权限</a>]</if></td>

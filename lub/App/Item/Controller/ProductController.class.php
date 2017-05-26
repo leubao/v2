@@ -439,36 +439,32 @@ class ProductController extends ManageBase{
 	function planquota(){
 		if(IS_POST){
 			$info = I('post.');
-			$plan = F('Plan_'.$info['id']);
-			if(empty($plan)){
-				$this->erun('计划获取失败...!');
-			}
-
-			if($plan['product_type'] <> '1'){
-				//获取表名称
-				$table = get_product_table($plan['product_type'],$plan['product_id']);
-				$count = $info['quotas'] - $plan['quotas'];
-				if($count > '0'){
-					
-				}elseif ($count < '0') {
-					
-				}else{
-					$this->erun('更新失败!');
-				}
-				
-				//判断是增加配额还是减少配额
-				
-			}
-
-			if(Operate::do_up("Plan")){
+			$updata = [
+				'number'		=>	$info['number'],//可售总量
+	    		'often'			=>	$info['often'],//常规渠道
+	    		'political'		=>	$info['political'],//政企渠道
+	    		'full'			=>	$info['full'],//全员销售
+	    		'directly'		=>	$info['directly'],//电商直营
+	    		'electricity'	=>	$info['electricity'],//电商渠道
+			];
+			$status = D('Item/PinSales')->where(['plan_id'=>$info['plan_id']])->save($updata);
+			if($status){
 				$this->srun("更新成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('更新失败!');
 			}
 		}else {
 			$id  = I("get.id");
-			$map = array("id"=>$id);
-			$info = Operate::do_read("Plan",0,$map);
+			$plan = D('Plan')->where(['id'=>$id])->field('status')->find();
+			if($plan['status'] == '4'){
+				$this->erun('销售计划已过期，不允许此项操作...');
+			}
+			//读取类型销控
+			$info = D('Item/PinSales')->where(['plan_id'=>$id])->find();
+			if(!$info){
+				D('Item/Plan')->pin_sales_type($id,get_product('id'));
+				$info = D('Item/PinSales')->where(['plan_id'=>$id])->find();
+			}
 			$this->assign('data',$info)
 				->display();
 		}	
@@ -542,6 +538,9 @@ class ProductController extends ManageBase{
 			$id = I('get.id',0,intval);
 			if(!empty($id)){
 				$info = Operate::do_read('Plan',0,array('id'=>$id));
+				if(in_array($info['status'],['2','3','4'])){
+					$this->erun('销售计划已完成授权,请勿重复操作...');
+				}
 				$param = unserialize($info['param']);
 				//剧院类
 				if($info['product_type'] == 1){
@@ -640,7 +639,7 @@ class ProductController extends ManageBase{
 				$status = '3';
 				F('Plan_'.$id,null);
 			}else{
-				$this->erun('操作失败!');
+				$this->erun('计划状态不允许此项操作!');
 			}
 			if($db->where(array('id'=>$id))->setField('status',$status)){
 				$db->plan_cache();

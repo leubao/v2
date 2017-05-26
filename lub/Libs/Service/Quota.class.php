@@ -109,20 +109,55 @@ class Quota extends \Libs\System\Service {
 			}
 		}
 	}
+	//根据销售类型查询配额
+	function query_sales_quota($plan_id,$product,$type){
+		//读取类型剩余数据
+		$quota = load_redis('get','pin_'.$product_id.'_'.$planid.'_'.$type);
+		return $quota;
+	}
+	//更新销售类型销控
+	function up_sales_quota($plan_id,$product,$type,$num,$param = '1'){
+		if($param == '2'){
+			//减少
+			$quota = load_redis('decrby','pin_'.$product_id.'_'.$planid.'_'.$type,$num);
+		}
+		if($param == '1'){
+			//增加
+			$quota = load_redis('incrby','pin_'.$product_id.'_'.$planid.'_'.$type,$num);
+		}
+		return $quota;
+	}
+	//删除销售类型销控
+	function del_sales_quota($plan_id,$product,$type){
+		//读取类型剩余数据
+		$quota = load_redis('get','pin_'.$product_id.'_'.$planid.'_'.$type);
+		return $quota;
+	}
+	//同步销售类型销控
+	function FunctionName($value='')
+	{
+		# code...
+	}
 	/**
 	 * 更新配额 TODO 核减、退票还回配额
+	 * 先更新销售类型的配额
 	 * @param $number 数量
 	 * @param $crm_id 渠道商ID
 	 * @param $plan_id 计划id
+	 * @param $type 销售类型 2常规渠道 4政企渠道 8全员销售 
 	 */
-	function update_quota($number, $crm_id, $plan_id){
+	//更新配额，先校验，后更新
+	function update_quota($number, $crm_id, $plan_id, $type){
 		$plan = F('Plan_'.$plan_id);
 		$today = date('Ymd',time());
 		$plan_day = date('Ymd',$plan['plantime']);
 		if($today == $plan_day && date("H") > 11){
 			return '200';
 		}
+		//销售类型	
+		
 		Quota::check_quota($plan_id,$plan['product_id'],$crm_id);
+
 		$config = cache("Config");
     	//判断渠道商级别,写入消耗配额
 		$cinfo = M('Crm')->where(array('id'=>$crm_id))->field('id,level,f_agents')->find();
@@ -153,6 +188,34 @@ class Quota extends \Libs\System\Service {
 			return '400';
 		}
 	}
+	/**
+	 * 判断销售的配额是否允许单项操作
+	 * @param  int $salse 销售类型
+	 * @param  int $type  1查询2更新
+	 * @return true false
+	 */
+	function pin_salse($salse, $type){
+		//查询
+		if($type == '1'){
+			switch ($salse) {
+				case '2':
+					
+					break;
+				case '4':
+
+					break;
+				case '8':
+					
+					break;
+			}
+		}
+		//更新
+		if($type == '2'){
+
+		}
+
+	}
+	//更新
 	/**
 	 * 拉取当前渠道商配额
 	 */

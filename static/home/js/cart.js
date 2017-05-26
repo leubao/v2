@@ -132,7 +132,7 @@ $(function(){
 	}
 	/*客源地判断*/
 	var tour = $("#tourists").val();
-	if(!tour){ rstr += "请选择客源地!";}
+	if(!tour){ tour = '1';}
 	if(!remark){ remark = "空.."; }
     if(rstr !=""){
       layer.msg(rstr);
@@ -246,9 +246,7 @@ $(function(){
 	}
 	/*客源地判断*/
 	var tour = $("#tourists").val();
-	if(!tour){
-		rstr += "请选择客源地!";
-	}
+	if(!tour){tour = '1';}
 	if(!remark){
 		remark = "空..";
 	}
@@ -348,7 +346,7 @@ $(function(){
 	}
 	/*客源地判断*/
 	var tour = $("#tourists").val();
-	if(!tour){rstr += "请选择客源地!";}
+	if(!tour){tour = '1';}
 	if(!remark){remark = "空";}
     if(rstr != ""){
       layer.msg(rstr);

@@ -15,8 +15,7 @@ class Order extends \Libs\System\Service {
     //数据
     protected $data = array();
     /** 执行错误消息及代码 */
-    public $errMsg;
-    public $errCode;
+    public $error = '';
 	/**************************************************选座订单****************************************************/
 	/**
 	 * 选座订单
@@ -24,11 +23,13 @@ class Order extends \Libs\System\Service {
 	 * @param $scena int 场景 1窗口2渠道版3网站4微信5api
 	 * @param $uinfo array 当前用户信息
 	 */
-	function rowSeat($pinfo,$scena,$uinfo = null){
+	public function rowSeat($pinfo,$scena,$uinfo = null){
 		$info = json_decode($pinfo,true);
 		$plan = F('Plan_'.$info['plan_id']);
-
-		if(empty($plan)){error_insert('400005');return false;}
+		if(empty($plan)){
+			$this->error = "400005 : 销售计划已暂停销售...";
+			return false;
+		}
 		$areaId = $info['areaId'];
 		$count = count($info['data']);//统计座椅个数
 		//获取订单号 1代表检票方式1人一票 一团一票
@@ -96,9 +97,7 @@ class Order extends \Libs\System\Service {
 				);
 				$num = $num++;
 				if($status[$k] == false){
-					//$this->errCode = '400009';
-					//$this->errMsg = '座椅信息更新失败';
-					//error_insert('400009');
+					$this->error = '400009 : 座椅信息更新失败';
 					return false;
 					break;
 				}
@@ -111,7 +110,7 @@ class Order extends \Libs\System\Service {
 					$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem'],$info['crm'][0]['guide']);
 					//严格验证渠道订单写入返利状态
 					if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-						error_insert('400018');
+						$this->error = '400019 : 结算方式不明确';
 						$model->rollback();
 						return false;
 					}
@@ -126,10 +125,8 @@ class Order extends \Libs\System\Service {
 			if($money == $info['subtotal']){
 				$info['subtotal'] = $money;
 			}else{
-				//error_insert('400018');
 				$model->rollback();//事务回滚
-				//$this->errCode = '400018';
-				//$this->errMsg = '金额校验失败';
+				$this->error = '400018 : 金额校验失败';
 				return false;
 			}
 			$status = '1';
@@ -147,10 +144,8 @@ class Order extends \Libs\System\Service {
 			$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem']);
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-				//error_insert('400018');
 				$model->rollback();
-				//$this->errCode = '400021';
-				//$this->errMsg = '渠道商信息获取失败';
+				$this->error = '渠道商信息获取失败';
 				return false;
 			}
 			//判断是否是底价结算['group']['settlement']
@@ -189,21 +184,19 @@ class Order extends \Libs\System\Service {
 			$sn = array('sn' => $sn,'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
 			return $sn;
 		}else{
-			//error_insert('400006');
 			$model->rollback();//事务回滚
-			//$this->errCode = '400006';
-			//$this->errMsg = '订单写入失败';
+			$this->error = '订单写入失败';
 			return false;
 		}	
 	}
 	/**
 	 * 选座排座
 	 */
-	function choose_seat($seat, $info, $sub_type = '2', $channel = '0', $is_pay = null){
+	public function choose_seat($seat, $info, $sub_type = '2', $channel = '0', $is_pay = null){
 		$plan = F('Plan_'.$info['plan_id']);
-		if(empty($plan)){error_insert('400005');return false;}
+		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
 		if(empty($info['order_sn'])){
-			$errMsg = '未找到有效订单';
+			$this->error = '未找到有效订单';
 			return false;
 		}
 		$oinfo = $info['info'];
@@ -270,9 +263,7 @@ class Order extends \Libs\System\Service {
 			);
 			$num = $num++;
 			if($status[$k] == false){
-				//$this->errCode = '400009';
-				//$this->errMsg = '座椅信息更新失败';
-				//error_insert('400009');
+				$this->error = '400009 : 座椅信息更新失败';
 				return false;
 				break;
 			}
@@ -285,8 +276,7 @@ class Order extends \Libs\System\Service {
 			$oinfo['subtotal'] = $money;
 		}else{
 			$model->rollback();//事务回滚
-			//$this->errCode = '400018';
-			//$this->errMsg = '金额校验失败';
+			$this->error = '400018 : 金额校验失败';
 			return false;
 		}
 		/*写入订单信息*/
@@ -300,7 +290,7 @@ class Order extends \Libs\System\Service {
 			$crmInfo = google_crm($plan['product_id'],$info['crm'][0]['qditem'],$info['crm'][0]['guide']);
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-				error_insert('400018');
+				$this->error = '400019 : 结算方式不明确';				
 				$model->rollback();
 				return false;
 			}
@@ -320,10 +310,9 @@ class Order extends \Libs\System\Service {
 			$model->commit();//提交事务
 			return $info['order_sn'];
 		}else{
-			//error_insert('400006');
 			$model->rollback();//事务回滚
 			//$this->errCode = '400006';
-			//$this->errMsg = '订单写入失败';
+			$this->error = '400006 : 订单写入失败';
 			return false;
 		}
 	}
@@ -334,10 +323,13 @@ class Order extends \Libs\System\Service {
 	*@param $scena int 场景 1窗口2渠道版3网站4微信5api
 	*@param $uinfo array 当前用户信息
 	*/
-	function quick($pinfo,$scena,$uinfo = null){
-		if(empty($pinfo) || empty($scena)){error_insert('400001');return false;}
+	public function quick($pinfo,$scena,$uinfo = null){
+		if(empty($pinfo) || empty($scena)){
+			$this->error = '400001 : 数据传递失败,请重试...';
+			return false;
+		}
 		$info = json_decode($pinfo,true);
-		if(empty($info)){error_insert('400002');return false;}
+		if(empty($info)){$this->error = '400002 : 部分数据丢失,解析失败...';return false;}
 		//获取订单初始数据
 		$scena = Order::is_scena($scena,$info['param'][0]['is_pay']);
 		//判断是否选择的是微信或支付宝刷卡支付
@@ -374,9 +366,9 @@ class Order extends \Libs\System\Service {
 	* 用户表中默认新增 微信 官网 自助机
 	*/
 	function mobile($pinfo,$scena = null,$uinfo = null){//dump($pinfo);
-		if(empty($pinfo) || empty($scena)){error_insert('400001');return false;}
+		if(empty($pinfo) || empty($scena)){$this->error = '400001 : 数据传递失败,请重试...';return false;}
 		$info = json_decode($pinfo,true);
-		if(empty($info)){error_insert('400002');return false;}
+		if(empty($info)){$this->error = '400002 : 部分数据丢失,解析失败...';return false;}
 		/*$seat = Order::area_group($info['data']);//dump($seat);
 		//TODO   临时写法
         $proconf = cache('ProConfig');
@@ -411,9 +403,12 @@ class Order extends \Libs\System\Service {
 	}
 	/**************************************************渠道订单****************************************************/
 	function channel($pinfo,$scena,$uinfo = null){
-		if(empty($pinfo) || empty($scena)){error_insert('400001');return false;}
+		if(empty($pinfo) || empty($scena)){$this->error = '400001 : 数据传递失败,请重试...';return false;}
 		$info = json_decode($pinfo,true);
-		if(empty($info) || if_plan($info['plan_id']) == false){error_insert('400002');return false;}
+		if(empty($info) || if_plan($info['plan_id']) == false){
+			$this->error = '400002 : 部分数据丢失,解析失败或该渠道已停止销售...';
+			return false;
+		}
 		//获取订单初始数据
 		$scena = Order::is_scena($scena);
 		return Order::quick_order($info,$scena,$uinfo,2); 
@@ -466,33 +461,33 @@ class Order extends \Libs\System\Service {
 	* @param $is_seat 是否立即排座 1 立即排座 2不排做 只返回订单号
 	* @param $channel 是否是团队使用授信额支付 后期窗口出票也可以使用授信额度
 	*/
-	function quick_order($info, $scena, $uinfo, $is_seat = '1',$channel = null){
+	private function quick_order($info, $scena, $uinfo, $is_seat = '1',$channel = null){
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
-		if(empty($plan)){error_insert('400005');return false;}
+		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
 		
 		$seat = Order::area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket']);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if(Order::check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
-				error_insert('400031');
+				//error_insert('400031');
+				$this->error = '400031 : 门票库存不足...';
 				return false;
 			}
 		}
 		if($seat == false){
-			error_insert('400003');
+			//error_insert('400003');
 			return false;
 		}
 		//订单金额校验
 		if(bccomp((float)$info['subtotal'],(float)$seat['money'],2) <> 0){
-          	error_insert('418'.$seat['money']);
+          	$this->error = '400018 : 金额校验失败';
 			return false;
         }
 		
 		//获取订单号 1代表检票方式1人一票2 一团一票
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
 		$sn = get_order_sn($plan['id'],$printtype);
-
 		$model = new Model();
 		$model->startTrans();
 		//写入订单 窗口订单直接写入并完成排座   微信等其它场景只写入订单  支付完成后排座
@@ -545,7 +540,8 @@ class Order extends \Libs\System\Service {
 				return $sn;
 			}
 		}else{
-			error_insert('400006');
+			$this->error = '400006 : 订单创建失败';
+			//error_insert('400006');
 			$model->rollback();//事务回滚
 			return false;
 		}
@@ -645,6 +641,9 @@ class Order extends \Libs\System\Service {
 			}
 			//计算补贴
 			$rebate += $ticketType[$value['priceid']]['rebate']*$value['num'];
+			/*
+			//旧的模式
+			
 			$printList = array(
 				'order_sn' => $info['order_sn'],
 				'price_id'   =>	$value['priceid'],
@@ -653,12 +652,29 @@ class Order extends \Libs\System\Service {
 				'createtime' => $createtime,
 			);
 			$state = $model->table(C('DB_PREFIX').$table)->where($map)->limit($value['num'])->lock(true)->save($printList);
+			*/
+			//改变景区售票入库模式
+			//构造数据
+			$i = 0;
+			for ($i=0; $i < (int)$value['num']; $i++) { 
+				$printList[] = array(
+					'order_sn' => $info['order_sn'],
+					'plan_id'=>	$info['plan_id'],
+					'ciphertext' => genRandomString(),
+					'price_id'   =>	$value['priceid'],
+					'sale' => serialize($param),
+					'status' => '2',
+					'createtime' => $createtime,
+				);
+			}
 			if($proconf['ticket_sms'] == '1'){
 				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num']."张";
 			}else{
 				$msg = $info['number']."张";
 			}
 		}
+		//批量新增数据
+		$state = $model->table(C('DB_PREFIX').$table)->where($map)->limit($value['num'])->lock(true)->addAll($printList);
 		//获取售票信息
 		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id')->select();
 		foreach ($saleList as $ks => $vs) {
@@ -766,7 +782,7 @@ class Order extends \Libs\System\Service {
 	* @param $is_seat int 是否排座 1排座 2不排座
 	* @param $is_pay int 是否改变支付方式 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	*/
-	function quickSeat($seat, $info, $sub_type = '2', $channel = '0', $is_seat = '1', $is_pay = null){
+	private function quickSeat($seat, $info, $sub_type = '2', $channel = '0', $is_seat = '1', $is_pay = null){
 		$plan = F('Plan_'.$info['plan_id']);
 		$plan_param = unserialize($plan['param']);
 		$createtime = time();
@@ -958,6 +974,21 @@ class Order extends \Libs\System\Service {
 						//TODO  全员营销的配额
 						//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
 					}
+					/*
+					switch ($info['type']) {
+						case '2':
+							//常规渠道
+							$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
+							break;
+						case '4':
+							//政企渠道
+							$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
+							break;
+						case '8':
+							//全员销售
+							$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
+							break;
+					}*/
 					if($up_quota == '400'){
 						error_insert('400012');
 						$model->rollback();
@@ -1060,35 +1091,7 @@ class Order extends \Libs\System\Service {
 			);
 		return $dataList;
 	}
-	/**
-	 * 校验景区门票可售数量
-	 * @param  int $plan_id  计划id
-	 * @param  int $plan_num 峰值
-	 * @param  int $num      
-	 * @return [type]        
-	 */
-	function check_salse_num($plan_id,$plan_num,$table,$num){
-		//计算已售数量
-		$map = array(
-			'plan_id' => $plan_id,
-			'status'  => array('in','2,99,66'),
-			);
-		$sale_num = D(ucwords($table))->where($map)->count()+$num;
-		if((int)$plan_num >= (int)$sale_num){
-			return 200;
-		}else{
-			return 400;
-		}
-	}
-	/**
-	 * 生成检票密码 景区漂流使用
-	 * @param  string $ciphertext 明文密码
-	 * @param  string $encry      场次密钥
-	 * @return [type]             [description]
-	 */
-	function create_ticket_pwd($ciphertext,$encry){
-		return md5($ciphertext . md5($encry));
-	}
+	
 	
 	/*渠道预定单排座
 	* @param $oinfo  订单信息
@@ -1424,82 +1427,7 @@ class Order extends \Libs\System\Service {
 			return false;
 		}
 	}
-	/*订单场景初始值 
-	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
-	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
-	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
-	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售9三级分销 3小商品 5 物品租聘
-	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
-	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
-	*/
-	function is_scena($param = null,$is_pay = null){
-		switch ($param) {
-			case '11':
-				//窗口选座散客
-				$return = array('type'=>1,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
-				break;
-			case '12':
-				//窗口选座团队
-				$return = array('type'=>2,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
-				break;
-			case '13':
-				//小商品订单
-				$return = array('type'=>3,'addsid'=>1,'pay'=>0,'status'=>2,'createtime'=>time());
-				break;
-			case '15':
-				//物品租聘
-				$return = array('type'=>5,'addsid'=>1,'pay'=>0,'status'=>2,'createtime'=>time());
-				break;
-			case '61':
-				//窗口快捷散客
-				$return = array('type'=>1,'addsid'=>6,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
-				break;
-			case '62':
-				//窗口快捷团队
-				$return = array('type'=>2,'addsid'=>6,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
-				break;
-			case '22':
-				//渠道版普通团队
-				$return = array('type'=>4,'addsid'=>2,'pay'=>2,'status'=>2,'createtime'=>time());
-				break;
-			case '26':
-				//渠道版政企
-				$return = array('type'=>6,'addsid'=>2,'pay'=>3,'status'=>6,'createtime'=>time());
-				break;
-			case '31':
-				//网站散客
-				$return = array('type'=>1,'addsid'=>3,'pay'=>0,'status'=>2,'createtime'=>time());
-			case '41':
-				//微信散客
-				$return = array('type'=>1,'addsid'=>4,'pay'=>5,'status'=>11,'createtime'=>time());
-				break;
-			case '42':
-				//微信团队
-				$return = array('type'=>2,'addsid'=>4,'pay'=>2,'status'=>2,'createtime'=>time());
-				break;
-			case '46':
-				//微信政企 默认支付方式为未知因为存在微信支付和窗口支付两种方式
-				$return = array('type'=>6,'addsid'=>4,'pay'=>0,'status'=>2,'createtime'=>time());
-				break;
-			case '48':
-				//全员销售
-				$return = array('type'=>8,'addsid'=>4,'pay'=>5,'status'=>2,'createtime'=>time());
-				break;
-			case '49':
-				//三级分销
-				$return = array('type'=>9,'addsid'=>4,'pay'=>5,'status'=>2,'createtime'=>time());
-				break;
-			case '51':
-				//API散客
-				$return = array('type'=>1,'addsid'=>5,'pay'=>1,'status'=>2,'createtime'=>time());
-				break;
-			case '52':
-				//API团队
-				$return = array('type'=>2,'addsid'=>5,'pay'=>2,'status'=>2,'createtime'=>time());
-				break;
-		}
-		return $return;
-	}
+	
 	/*返回客户信息
 	*@param $product_id int 产品ID
 	* $crm_id 渠道商id
@@ -1563,95 +1491,7 @@ class Order extends \Libs\System\Service {
 		}
 	}
 	
-	/**区域组合
-	*@param $area 订单区域数据
-	*@param $settlement int 结算方式
-	*@param $product_id int 产品id
-	*@param $produc_type int 产品类型
-	*@param $child_ticket array 联票子票型
-	*return $seat 包含座椅区域信息 及座椅数量 
-	*/
-	function area_group($area,$product_id,$settlement,$product_type,$child_ticket){
-		if(empty($area)){error_insert('400004');return false;}
-		if(!empty($child_ticket)){
-			foreach ($child_ticket as $key => $value) {
-				$price += $value['price'];
-			}	
-		}
-		/*重新组合区域*/
-		foreach($area as $k=>$v){
-			if($product_type == '1'){
-				$seat['area'][$v['areaId']]['seat'][$k]=array(
-					'priceid'=>$v['priceid'],
-					'price'=>$v['price'],
-					'num'=>$v['num'],
-				);
-				$seat['area'][$v['areaId']]['num'] += $v['num'];
-				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];
-				$seat['area'][$v['areaId']]['price'] = $v['price'];
-				$seat['num'] += $seat['area'][$v['areaId']]['num'];
-			}else{
-				//景区、漂流
-				$seat['area'][$v['priceid']] = array(
-					'priceid'=>$v['priceid'],
-					'price'=>$v['price'],
-					'num'=>$v['num'],
-				);
-				$seat['num'] += $seat['area'][$v['priceid']]['num'];
-			}
-			//计算订单金额
-			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement);
-			if($price != '0'){
-				$child_moeny = $price*$v['num'];
-			}else{
-				$child_moeny = 0;
-			}
-			if($money != '404'){
-				$seat['moneys'] += $money['moneys']+$child_moeny;
-				$seat['poor'] += $money['poor']+$child_moeny;
-				$seat['money'] += $money['money']+$child_moeny;
-			}else{
-				return false;
-			}
-		}
-		return $seat;
-	}
-	/**
-	 * 计算订单金额  不相信客户端的计算程序 2016-2-16
-	 * @param  int $priceid    价格id
-	 * @param  int $number     数量
-	 * @param  int $area       区域id 校验区域与价格id是否匹配
-	 * @param  int $product_id 产品id
-	 * @param  int $type 	   1票面价金额2结算价金额
-	 * @return  订单金额
-	 */
-	function amount($priceid,$number,$area,$product_id,$type = '1'){
-		//获取价格缓存
-		$ticket = F('TicketType'.$product_id);
-		if(empty($ticket)){
-			return false;
-		}
-		$price = $ticket[$priceid]['price'];/*票面价格*/
-		$discount = $ticket[$priceid]['discount'];/*结算价格*/
-		//计算金额
-		if($type == '1'){
-			//票面价计算
-			$money = $price*$number;
-			$poor = 0;//优惠金额
-			$moneys = $money;//票面金额
-		}else{
-			//结算价计算
-			$money = $discount*$number;
-			$poor = $price - $discount;//优惠金额
-			$moneys = $price*$number;//票面金额
-		}
-		$data = array(
-			'money'	=>	$money,
-			'moneys'=>	$moneys,
-			'poor'	=>	$poor*$number,
-			);
-		return $data;
-	}
+	
 	/*判断是不是新的游客
 	*@param $phone 电话
 	*@param $cid 渠道商id
@@ -1838,5 +1678,201 @@ class Order extends \Libs\System\Service {
 	function goods_order(){
 		//商品名称、价格、数量、总价、单号
 		//
+	}
+	/**区域组合
+	*@param $area 订单区域数据
+	*@param $settlement int 结算方式
+	*@param $product_id int 产品id
+	*@param $produc_type int 产品类型
+	*@param $child_ticket array 联票子票型
+	*return $seat 包含座椅区域信息 及座椅数量 
+	*/
+	private function area_group($area,$product_id,$settlement,$product_type,$child_ticket = ''){
+		if(empty($area)){$this->error = "座椅区域为空";return false;}
+		$this->error = "座椅区域为空";return false;
+		if(!empty($child_ticket)){
+			foreach ($child_ticket as $key => $value) {
+				$price += $value['price'];
+			}	
+		}
+		/*重新组合区域*/
+		foreach($area as $k=>$v){
+			if($product_type == '1'){
+				$seat['area'][$v['areaId']]['seat'][$k]=array(
+					'priceid'=>$v['priceid'],
+					'price'=>$v['price'],
+					'num'=>$v['num'],
+				);
+				$seat['area'][$v['areaId']]['num'] += $v['num'];
+				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];
+				$seat['area'][$v['areaId']]['price'] = $v['price'];
+				$seat['num'] += $seat['area'][$v['areaId']]['num'];
+			}else{
+				//景区、漂流
+				$seat['area'][$v['priceid']] = array(
+					'priceid'=>$v['priceid'],
+					'price'=>$v['price'],
+					'num'=>$v['num'],
+				);
+				$seat['num'] += $seat['area'][$v['priceid']]['num'];
+			}
+			//计算订单金额
+			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement);
+			if($price != '0'){
+				$child_moeny = $price*$v['num'];
+			}else{
+				$child_moeny = 0;
+			}
+			if($money){
+				$seat['moneys'] += $money['moneys']+$child_moeny;
+				$seat['poor'] += $money['poor']+$child_moeny;
+				$seat['money'] += $money['money']+$child_moeny;
+			}else{
+				return false;
+			}
+		}
+		return $seat;
+	}
+	/**
+	 * 计算订单金额  不相信客户端的计算程序 2016-2-16
+	 * @param  int $priceid    价格id
+	 * @param  int $number     数量
+	 * @param  int $area       区域id 校验区域与价格id是否匹配
+	 * @param  int $product_id 产品id
+	 * @param  int $type 	   1票面价金额2结算价金额
+	 * @return  订单金额
+	 */
+	private function amount($priceid,$number,$area,$product_id,$type = '1'){
+		//获取价格缓存
+		$ticket = F('TicketType'.$product_id);
+		if(empty($ticket)){
+			$this->error = "票型获取失败";
+			return false;
+		}
+		$price = $ticket[$priceid]['price'];/*票面价格*/
+		$discount = $ticket[$priceid]['discount'];/*结算价格*/
+		//计算金额
+		if($type == '1'){
+			//票面价计算
+			$money = $price*$number;
+			$poor = 0;//优惠金额
+			$moneys = $money;//票面金额
+		}else{
+			//结算价计算
+			$money = $discount*$number;
+			$poor = $price - $discount;//优惠金额
+			$moneys = $price*$number;//票面金额
+		}
+		$data = array(
+			'money'	=>	$money,
+			'moneys'=>	$moneys,
+			'poor'	=>	$poor*$number,
+			);
+		return $data;
+	}
+	/*订单场景初始值 
+	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
+	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
+	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
+	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售9三级分销 3小商品 5 物品租聘
+	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
+	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
+	*/
+	private function is_scena($param = null,$is_pay = null){
+		switch ($param) {
+			case '11':
+				//窗口选座散客
+				$return = array('type'=>1,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '12':
+				//窗口选座团队
+				$return = array('type'=>2,'addsid'=>1,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '13':
+				//小商品订单
+				$return = array('type'=>3,'addsid'=>1,'pay'=>0,'status'=>2,'createtime'=>time());
+				break;
+			case '15':
+				//物品租聘
+				$return = array('type'=>5,'addsid'=>1,'pay'=>0,'status'=>2,'createtime'=>time());
+				break;
+			case '61':
+				//窗口快捷散客
+				$return = array('type'=>1,'addsid'=>6,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '62':
+				//窗口快捷团队
+				$return = array('type'=>2,'addsid'=>6,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
+				break;
+			case '22':
+				//渠道版普通团队
+				$return = array('type'=>4,'addsid'=>2,'pay'=>2,'status'=>2,'createtime'=>time());
+				break;
+			case '26':
+				//渠道版政企
+				$return = array('type'=>6,'addsid'=>2,'pay'=>3,'status'=>6,'createtime'=>time());
+				break;
+			case '31':
+				//网站散客
+				$return = array('type'=>1,'addsid'=>3,'pay'=>0,'status'=>2,'createtime'=>time());
+			case '41':
+				//微信散客
+				$return = array('type'=>1,'addsid'=>4,'pay'=>5,'status'=>11,'createtime'=>time());
+				break;
+			case '42':
+				//微信团队
+				$return = array('type'=>2,'addsid'=>4,'pay'=>2,'status'=>2,'createtime'=>time());
+				break;
+			case '46':
+				//微信政企 默认支付方式为未知因为存在微信支付和窗口支付两种方式
+				$return = array('type'=>6,'addsid'=>4,'pay'=>0,'status'=>2,'createtime'=>time());
+				break;
+			case '48':
+				//全员销售
+				$return = array('type'=>8,'addsid'=>4,'pay'=>5,'status'=>2,'createtime'=>time());
+				break;
+			case '49':
+				//三级分销
+				$return = array('type'=>9,'addsid'=>4,'pay'=>5,'status'=>2,'createtime'=>time());
+				break;
+			case '51':
+				//API散客
+				$return = array('type'=>1,'addsid'=>5,'pay'=>1,'status'=>2,'createtime'=>time());
+				break;
+			case '52':
+				//API团队
+				$return = array('type'=>2,'addsid'=>5,'pay'=>2,'status'=>2,'createtime'=>time());
+				break;
+		}
+		return $return;
+	}
+	/**
+	 * 校验景区门票可售数量
+	 * @param  int $plan_id  计划id
+	 * @param  int $plan_num 峰值
+	 * @param  int $num      
+	 * @return [type]        
+	 */
+	private function check_salse_num($plan_id,$plan_num,$table,$num){
+		//计算已售数量
+		$map = array(
+			'plan_id' => $plan_id,
+			'status'  => array('in','2,99,66'),
+			);
+		$sale_num = D(ucwords($table))->where($map)->count()+$num;
+		if((int)$plan_num >= (int)$sale_num){
+			return 200;
+		}else{
+			return 400;
+		}
+	}
+	/**
+	 * 生成检票密码 景区漂流使用
+	 * @param  string $ciphertext 明文密码
+	 * @param  string $encry      场次密钥
+	 * @return [type]             [description]
+	 */
+	private function create_ticket_pwd($ciphertext,$encry){
+		return md5($ciphertext . md5($encry));
 	}
 }

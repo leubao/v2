@@ -461,6 +461,7 @@ class ReportController extends ManageBase{
 	        }
 	        $map['plan_id'] = $plan_id;
 	        $map['channel_id'] = array('in',channel_level($level));
+	        $map['type'] = '1';
 	        $db = D('QuotaUse');
 	        $list = $db->where($map)->select();
 		}else{

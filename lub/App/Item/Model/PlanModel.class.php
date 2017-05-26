@@ -45,13 +45,28 @@ class PlanModel extends Model{
 	function structure_data($data,$plantime,$starttime,$endtime)
 	{
 		if($data['product_type'] == '1'){
+			//引入销控默认数据
+			//读取配置
+			$proconf = $this->procof;
+			if($proconf['quota']){
+				$quotaBase = [
+					'channel_often_quota'		=>	$proconf['channel_often_quota'],
+					'channel_political_quota'	=>	$proconf['channel_political_quota'],
+					'channel_full_quota'		=>	$proconf['channel_full_quota'],
+					'channel_directly_quota'	=>	$proconf['channel_directly_quota'],
+					'channel_electricity_quota'	=>	$proconf['channel_electricity_quota'],
+				];
+			}else{
+				$quotaBase = [];
+			}
 			//剧院
 			$infos = array(
 				'games' => (int)$data['games']  ? (int)$data['games'] : 1,
 				'seat_table' => 'seat_'.$data['product_id'].'_'.substr(date('Ymd',$plantime),2).'_'.$data['games'],
 				'template_id'=>$data['template_id'],
-				'quota'	=> $data['quota'],
+				'quota'	=> serialize($quotaBase),
 			);
+			
 			$param = $this->plan_param($data['product_id'],$data['seat'],$data['ticket'],$data['goods'],$data['product_type']);
 			$infoAll = array(
 				'plantime' => $plantime,
@@ -294,6 +309,8 @@ class PlanModel extends Model{
 					        if($proconf[$info['product_id']][1]['quota'] == '1'){
 					        	\Libs\Service\Quota::reg_quota($planid,$info['product_id']);
 					        }
+					        //注册销售类型
+					        $this->pin_sales_type($planid,$info['product_id']);
 			        		return true;
 			        	}else{
 			        		$this->rollback();//事务回滚
@@ -319,6 +336,7 @@ class PlanModel extends Model{
         			$table = 'drifting';
         			break;
         	}
+        	/*
         	for ($i=0; $i < $info['quotas']; $i++) {
 				$ciphertext = genRandomString();
 				$dataList[] = array(
@@ -333,6 +351,7 @@ class PlanModel extends Model{
 				);
 			}
 			$status = D(ucwords($table))->addAll($dataList);
+			*/
         	//景区产品
         	$up = $this->where(array('id'=>$planid))->setField('status',3);
 			if($up && $status){
@@ -489,7 +508,6 @@ sql;
 			'id'=>array('in',$seat),
 		);
 		$area = M('Area')->where($map)->field('id,seatid')->select();
-		//dump($area);
 		 //循环区域
 		foreach ($area as $k=>$v){
 			$area_seat[$k] = unserialize($v['seatid']);
@@ -583,8 +601,56 @@ sql;
         F('planlist',implode(',',$plan));
         //S('planlist',json_encode($plan));
         return $data;
-	 }
+	}
 
+	/**
+	 * 更新类型销控
+	 * 1、检测当前配额读取缓存配额、同步配额、更新配额
+	 */
+	function update_pin($type, $plan_id, $product_id){
+		//1、读取配额
+		$quota = load_redis('get','pin_'.$product_id.'_'.$planid.'_'.$type);
+		//2、同步配额
+		
+		//3、更新配额
+		
+	}
+	//注册销售类型的整体销控
+    //pin_sales 销售控制表
+    function pin_sales_type($planid,$product){
+    	$procof = cache('ProConfig');
+    	$procof = $procof[$product]['1'];
+	    $baseData = [
+	    	'plan_id'		=>	$planid,
+	    	'product_id'	=>	$product,
+    		'number'		=>	'',//可售总量
+    		'often'			=>	$procof['channel_often_quota'],//常规渠道
+    		'political'		=>	$procof['channel_political_quota'],//政企渠道
+    		'full'			=>	$procof['channel_full_quota'],//全员销售
+    		'directly'		=>	$procof['channel_directly_quota'],//电商直营
+    		'electricity'	=>	$procof['channel_electricity_quota'],//电商渠道
+    	];
+    	$satus = D('Item/PinSales')->add($baseData);
+    	if(!$satus){
+    		$err = [
+    			'location'	=>	'Item/Model/PlanModel',
+    			'action'	=>	'pin_sales_type',
+    			'data'		=>	$baseData,
+    			'msg'		=>	'按销售类型注册销控数据失败',
+    			'datetime'	=>	time(),
+    		];
+    		load_redis('lpush','LUBERR',json_encode($err));
+    	}else{
+    		//在内存数据库存储
+    		load_redis('set','pin_'.$product.'_'.$planid.'_often',$baseData['often']);
+    		load_redis('set','pin_'.$product.'_'.$planid.'_political',$baseData['political']);
+    		load_redis('set','pin_'.$product.'_'.$planid.'_full',$baseData['full']);
+    		load_redis('set','pin_'.$product.'_'.$planid.'_directly',$baseData['directly']);
+    		load_redis('set','pin_'.$product.'_'.$planid.'_electricity',$baseData['electricity']);
+    	}
+
+    	return true;
+   	}
 	/**
      * 插入成功后的回调方法
      */

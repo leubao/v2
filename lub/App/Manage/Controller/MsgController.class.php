@@ -46,7 +46,7 @@ class MsgController extends ManageBase {
 				'titp'=> 'info',
 			);
 		}
-		//查询新订单
+		/*查询新订单
 		$newOrder = M('Order')->where(['status'=>1])->count();
 		if($newOrder <> '0'){
 			$info[] = array(
@@ -57,7 +57,7 @@ class MsgController extends ManageBase {
 				'title'=>'订单列表',
 				'titp'=> 'info',
 			);
-		}
+		}*/
 		//开演前30分钟未取票的订单检测
 		//下午三点后每隔半个小时检测一次未政企订单排座但未付款的
 		//系统异常记录

@@ -25,11 +25,12 @@ class OrderController extends ManageBase{
 	function seatPost(){
 		if(IS_POST){
 			$pinfo = $_POST['info'];
-			$plan = I('get.plan',0,intval);
-			$type = I('get.type',1,intval);
+			$plan = I('get.plan',0,'intval');
+			$type = I('get.type',1,'intval');
 			$uInfo = \Manage\Service\User::getInstance()->getInfo();//读取当前登录用户信息
 			$type = '1'.$type;
-			$run = Order::rowSeat($pinfo,$type,$uInfo);
+			$order = new Order();
+			$run = $order->rowSeat($pinfo,$type,$uInfo);
 			//判断支付方式，微信支付和支付宝支付中断执行
 			if($run != false){
 				//支付方式影响返回结果
@@ -62,7 +63,7 @@ class OrderController extends ManageBase{
 				$return = array(
 					'statusCode' => '300',
 					'forwardUrl' => '',
-					'message' => $sn->errMsg
+					'message' => $order->error
 				);
 				$message = "下单失败!";
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
@@ -293,11 +294,12 @@ class OrderController extends ManageBase{
 	/*快捷售票*/
 	function quickPost(){
 		$pinfo = $_POST['info'];
-		$plan = I('get.plan',0,intval);
-		$type = I('get.type',1,intval);
+		$plan = I('get.plan',0,'intval');
+		$type = I('get.type',1,'intval');
 		$uInfo = \Manage\Service\User::getInstance()->getInfo();//读取当前登录用户信息
 		$type = '6'.$type;
-		$run = Order::quick($pinfo,$type,$uInfo);
+		$order = new Order();
+		$run = $order->quick($pinfo,$type,$uInfo);
 		if($run != false){
 			//支付方式影响返回结果
 			if(in_array($run['is_pay'],array('4','5'))){
@@ -329,6 +331,7 @@ class OrderController extends ManageBase{
 			$return = array(
 				'statusCode' => '300',
 				'forwardUrl' => '',
+				'message' => $order->error
 			);
 			$message = "下单失败!";
 			D('Item/Operationlog')->record($message, 300);//记录售票员日报表
@@ -706,9 +709,9 @@ class OrderController extends ManageBase{
 	 * 散客售票 type 1 团队售票 2
 	 */
 	function seatsee(){
-		$area = I('get.area',0,intval);
-		$planid = I('get.plan',0,intval);
-		$type = I('get.type',1,intval);
+		$area = I('get.area',0,'intval');
+		$planid = I('get.plan',0,'intval');
+		$type = I('get.type',1,'intval');
 		$plan = session('plan');
 		if(empty($plan) || $plan['id'] <> $planid){
 			$this->erun("参数错误!");

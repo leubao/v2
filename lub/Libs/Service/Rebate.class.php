@@ -14,7 +14,7 @@ class Rebate extends \Libs\System\Service {
 	 * 异步构造订单返利
 	 * 计划任务  每隔5分钟同步异步构造一次
 	 */
-	function ajax_rebate_order(){
+	public static function ajax_rebate_order(){
 		//读取队列中未处理订单
 		//判断队列是否存在数据
 		$ln = load_redis('lsize','PreOrder');
