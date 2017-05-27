@@ -1335,9 +1335,9 @@ function crmName($param,$type=NULL){
             $data = explode('|',$remark);
             foreach ($data as $k => $v) {
                 if($k == 0){
-                    $return['remark_type'] = $v;
+                    $return['remark_type'] = $v ? $v : '';
                 }else{
-                    $return['remark'][] = $v;
+                    $return['remark'][] = $v ? $v : '';
                 }
             }
         }else{$return = '0';}
@@ -1350,7 +1350,7 @@ function crmName($param,$type=NULL){
         //获取系统日期
         $datetime = date('Ymd');
         //获取要检测的场次
-        $list = M('Plan')->where(array('status'=>array('in','2,3'),'plantime'=>array('elt',strtotime($datetime))))->select();
+        $list = M('Plan')->where(array('status'=>array('in','2,3'),'plantime'=>array('elt',strtotime($datetime))))->cache('todayplan',3600)->select();
         foreach ($list as $k => $v) {
             //计划日期
             $plantime = date('Ymd',$v['plantime']);
@@ -1360,6 +1360,7 @@ function crmName($param,$type=NULL){
                 //停用已过期场次
                 $status = M('Plan')->where(array('id'=>$v['id']))->setField('status',4);
                 send_sms($v['id']);
+                //TODO   写入重要提醒队列 如未取票
                 return $status;
             }else{
                 //判断时间
@@ -1375,6 +1376,7 @@ function crmName($param,$type=NULL){
                     F('Plan_'.$v['id'],NULL);
                     $status = M('Plan')->where(array('id'=>$v['id']))->setField('status',4);
                     send_sms($v['id']);
+
                     return $status;
                 }
             }
@@ -1392,8 +1394,16 @@ function crmName($param,$type=NULL){
         $proconf = $proconf[$plan['product_id']][1];
         if(!empty($proconf['channel_time'])){
             $time = date('Hi',strtotime($proconf['channel_time']." minute"));
+            if(date('H') == '00'){
+                $time = '01'.date('i');
+            }
         }else{
-            $time = date('Hi');  
+            $time = date('H');
+            if($time == '00'){
+                $time = '24'.date('i');
+            }else{
+                $time = date('Hi');
+            }
         }
         $plantime = date('Ymd',$plan['plantime']);
         if($plantime == $datetime){
