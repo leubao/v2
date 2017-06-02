@@ -445,9 +445,11 @@ class Order extends \Libs\System\Service {
 	*/
 	function orderApi($info,$scena,$uinfo){
 		//获取订单初始数据
-		$scena = Order::is_scena($scena);
+		$scena = $this->is_scena($scena);
 		$channel = $uinfo['is_pay'] == 2 ? 1 : 2;
-		$return = Order::quick_order($info,$scena,$uinfo,1,$channel); 
+		$return = $this->quick_order($info,$scena,$uinfo,1,$channel);
+		//dump($this->error);
+		//dump($return);
 		if($return != false){
 			M('ApiOrder')->add(array('app_sn'=>$info['app_sn'],'order_sn'=>$return));
 		}
@@ -465,12 +467,10 @@ class Order extends \Libs\System\Service {
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
-		
-		$seat = Order::area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket']);
+		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket']);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
-			if(Order::check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
-				//error_insert('400031');
+			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
 				$this->error = '400031 : 门票库存不足...';
 				return false;
 			}
@@ -503,7 +503,7 @@ class Order extends \Libs\System\Service {
 		);
 		//添加联系人信息 TODO
 		if($info['crm'][0]['phone']){
-			Order::is_tourists($info['crm'][0]['contact'],$info['crm'][0]['phone'],$info['crm'][0]['qditem'],$plan['product_id'],$plan['id']);
+			$this->is_tourists($info['crm'][0]['contact'],$info['crm'][0]['phone'],$info['crm'][0]['qditem'],$plan['product_id'],$plan['id']);
 		}
 		/*写入订单信息*/
 		$orderData = array(
@@ -531,17 +531,16 @@ class Order extends \Libs\System\Service {
 				//窗口订单 开始排座 剧场
 				$order_info = D('Item/Order')->where(array('order_sn'=>$sn))->relation(true)->find();
 				if($plan['product_type'] == '1'){
-					$status = Order::quickSeat($seat,$order_info,$info['sub_type'],$channel,'1',$scena['pay']);
+					$status = $this->quickSeat($seat,$order_info,$info['sub_type'],$channel,'1',$scena['pay']);
 				}else{
-					$status = Order::quickScenic($order_info,$plan);
-				}
+					$status = $this->quickScenic($order_info,$plan);
+				}//dump($status);
 				return $status;
 			}else{
 				return $sn;
 			}
 		}else{
 			$this->error = '400006 : 订单创建失败';
-			//error_insert('400006');
 			$model->rollback();//事务回滚
 			return false;
 		}
@@ -643,7 +642,6 @@ class Order extends \Libs\System\Service {
 			$rebate += $ticketType[$value['priceid']]['rebate']*$value['num'];
 			/*
 			//旧的模式
-			
 			$printList = array(
 				'order_sn' => $info['order_sn'],
 				'price_id'   =>	$value['priceid'],
@@ -709,8 +707,8 @@ class Order extends \Libs\System\Service {
 			$crmInfo = google_crm($plan['product_id'],$info['info']['crm'][0]['qditem'],$info['info']['crm'][0]['guide']);
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-				error_insert('400018');
 				$model->rollback();
+				$this->error = '400018 : 客户信息查询失败';
 				return false;
 			}
 			//判断是否是底价结算
@@ -789,7 +787,7 @@ class Order extends \Libs\System\Service {
 		$ticketType = F("TicketType".$plan['product_id']);
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
-		if(empty($ticketType) || empty($seat)){error_insert('4000076');return false;}
+		if(empty($ticketType) || empty($seat)){$this->error = '4000076 : 票型获取失败';return false;}
 		/*多表事务*/
 		$model = new Model();
 		$model->startTrans();
@@ -835,21 +833,16 @@ class Order extends \Libs\System\Service {
 				);
 				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
 				if($c_pay == false || $c_pay2 == false){
-					error_insert('400008');
 					$model->rollback();//事务回滚
+					$this->error = '400008 : 扣费失败';
 					return false;
 				}
 			}else{
-				error_insert('400008');
+				//error_insert('400008');
 				$model->rollback();//事务回滚
+				$this->error = '400008 : 客户余额不足';
 				return false;
 			}
-
-			//个人授信额支付
-			/**
-			 * 1、判断当前用户是企业员工 还是个人客户
-			 * 2、调用支付
-			 */
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		/*==============================自动排座开始 start =============================================*/
@@ -885,8 +878,9 @@ class Order extends \Libs\System\Service {
 					/*以下代码用于校验*/
 					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
 					if(empty($status[$ke])){
-						error_insert('400009');
+						//error_insert('400009');
 						$model->rollback();//事务回滚
+						$this->error = '400009 : 排座失败';
 						return false;
 						break;
 					}
@@ -906,8 +900,9 @@ class Order extends \Libs\System\Service {
 			$counts = count($seatInfo);//统计座椅个数
 			//校验已排座位数与实际座位数是否相符合 不相符合直接返回false
 			if($number <> $counts){
-				error_insert('400010');
+				//error_insert('400010');
 				$model->rollback();//事务回滚
+				$this->error = '400010 : 排座失败';
 				return false;
 			}
 			foreach ($seatInfo as $ks => $vs){
@@ -940,8 +935,9 @@ class Order extends \Libs\System\Service {
 				);
 				$up[$ks] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($maps)->lock(true)->save($datas);
 				if(empty($up[$ks])){
-					error_insert('400011');
+					//error_insert('400011');
 					$model->rollback();//事务回滚
+					$this->error = '400011 : 更新座椅状态失败';
 					return false;
 					break;
 				}
@@ -968,6 +964,8 @@ class Order extends \Libs\System\Service {
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
 				if($proconf['quota'] == '1'){
+					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$info['type']);
+					/*判断销售类型?.
 					if(in_array($info['type'],array('2','4'))){
 						$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
 					}else{
@@ -990,8 +988,9 @@ class Order extends \Libs\System\Service {
 							break;
 					}*/
 					if($up_quota == '400'){
-						error_insert('400012');
+						//error_insert('400012');
 						$model->rollback();
+						$this->error = '400012 : 销售配额不足';
 						return false;
 					}
 				}
@@ -999,8 +998,9 @@ class Order extends \Libs\System\Service {
 				$crmInfo = google_crm($plan['product_id'],$oInfo['crm'][0]['qditem'],$oInfo['crm'][0]['guide']);
 				//严格验证渠道订单写入返利状态
 				if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-					error_insert('400018');
+					//error_insert('400018');
 					$model->rollback();
+					$this->error = '400018 : 客户信息获取失败';
 					return false;
 				}
 				//判断是否是底价结算
@@ -1042,8 +1042,9 @@ class Order extends \Libs\System\Service {
 			return $info['order_sn'];
 		}else{
 			//dump($flag);dump($flags);dump($state);dump($in_team);dump($up_quota);dump($pre);
-			error_insert('400013');
+			//error_insert('400013');
 			$model->rollback();//事务回滚
+			$this->error = '400013 : 排座失败';
 			return false;
 		}	
 	}
@@ -1138,8 +1139,9 @@ class Order extends \Libs\System\Service {
 				$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
 				/*以下代码用于校验*/
 				$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
-				if(empty($status[$ke])){echo "12";
+				if(empty($status[$ke])){
 					$model->rollback();//事务回滚
+					$this->error = '400009 : 排座失败';
 					return false;
 					break;
 				}
@@ -1168,6 +1170,7 @@ class Order extends \Libs\System\Service {
 		//校验已排座位数与实际座位数是否相符合 不相符合直接返回false
 		if($number <> $counts){
 			$model->rollback();//事务回滚
+			$this->error = '400009 : 座椅数量错误';
 			return false;
 		}
 		foreach ($seatInfo as $ks => $vs){
@@ -1199,6 +1202,7 @@ class Order extends \Libs\System\Service {
 			$up[$ks] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($maps)->lock(true)->save($datas);
 			if(empty($up[$ks])){
 				$model->rollback();//事务回滚
+				$this->error = '400011 : 更新座椅状态失败';
 				return false;
 				break;
 			}
@@ -1216,34 +1220,13 @@ class Order extends \Libs\System\Service {
 		$crmInfo = google_crm($plan['product_id'],$param['crm'][0]['qditem']);
 		//严格验证渠道订单写入返利状态
 		if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-			error_insert('400018');
+			$this->error = '400018 : 客户信息获取失败';
 			$model->rollback();
 			return false;
 		}
 		//判断是否是底价结算['group']['settlement']
 		if($crmInfo['group']['settlement'] == '1'){
 			load_redis('lpush','PreOrder',$info['order_sn']);
-			/*
-			$teamData = array(
-				'order_sn' 		=> $oinfo['order_sn'],
-				'plan_id' 		=> $oinfo['plan_id'],
-				'subtype'		=> '0',
-				'product_type'	=> $oinfo['product_type'],//产品类型
-				'product_id' 	=> $plan['product_id'],
-				'user_id' 		=> $oinfo['user_id'],
-				'money'			=> $rebate,
-				'number'		=> $counts,
-				'guide_id'		=> $param['crm'][0]['guide'],
-				'qd_id'			=> $param['crm'][0]['qditem'],
-				'status'		=> '1',
-				'type'			=> '2',//TODO  先写死
-				'userid'		=> '0',
-				'createtime'	=> $createtime,
-				'uptime'		=> $createtime,
-			);
-			$in_team = $model->table(C('DB_PREFIX'). 'team_order')->add($teamData);
-			if(!$in_team){error_insert('400017');$model->rollback();return false;}
-			*/
 		}
 		//dump($flag);dump($flags);dump($state);dump($in_team);dump($oinfo);
 		if($state && $flag && $flags && $ostate){
@@ -1259,6 +1242,7 @@ class Order extends \Libs\System\Service {
 			return $oinfo;
 		}else{
 			$model->rollback();//事务回滚
+			$this->error = '400013 : 排座失败';
 			return false;
 		}	
 	}
@@ -1427,117 +1411,13 @@ class Order extends \Libs\System\Service {
 			return false;
 		}
 	}
-	
-	/*返回客户信息
-	*@param $product_id int 产品ID
-	* $crm_id 渠道商id
-	*/
-	function crminfo($product_id,$crm_id){
-		$crm = F('Crm'.$product_id);
-		$info = $crm[$crm_id];
-		$return = "电话".$info['phone'];
-		return $return;
-	}
-	/**
-	 * 格式化座位号
-	 * @param  string $seat        座位号
-	 * @param  int $product_id  产品id
-	 * @param  int $ticket_type 票型特殊打印标记
-	 * @param  int $custom      自定义票面
-	 * @return [type]              [description]
-	 */
-	function print_seat($seat,$product_id,$ticket_type = null,$custom = null){
-		$seats = explode('-', $seat);
-		if($ticket_type == '1'){
-			//定义座位号方式
-			$proconf = cache('ProConfig');
-			$proconf = $proconf[$product_id]['1'];
-			switch ($proconf['print_seat']) {
-				case '1':
-					$seat = $seats[0].'排'.$seats[1].'号';
-					break;
-				case '2':
-					$seat = $seats[0].'排';
-					break;
-				case '3':
-					$seat = $custom;
-					break;
-				default :
-					$seat = $seats[0].'排'.$seats[1].'号';
-					break;
-			}
-		}else{
-			$seat = $seats[0].'排'.$seats[1].'号';
-		}
-		if($proconf['print_mouth'] == '1'){
-			return Order::print_mouth($seats[0]).$seat;
-		}else{
-			return $seat;
-		}
-	}
-	/**
-	 * 自定义入场口
-	 * @param  int $row 座位排号
-	 * @return [type]      [description]
-	 */
-	function print_mouth($row){
-		//$map = "<=10|10<$row<=17|18<=$row<21";
-		if($row <= '10'){
-			return "一楼";
-		}elseif('10'<$row && $row<='17'){
-			return "二楼";
-		}elseif('17'<$row && $row<='21'){
-			return "三楼";
-		}
-	}
-	
-	
-	/*判断是不是新的游客
-	*@param $phone 电话
-	*@param $cid 渠道商id
-	*@param $name 渠道商名称
-	*@param $product_id 产品id
-	*@param $plan_id 计划id
-	*return true
-	*/
-	function is_tourists($name,$phone,$cid,$product_id,$plan_id){
-		//判断联系人是否是新增联系人 根据手机号码判断 @印象大红袍
-		$db = M('CommonContact');
-		if($cid){
-			$map = array('phone'=>$phone,'cid'=>$cid);
-		}else{
-			$map = array('phone'=>$phone);
-		}
-		$judge = $db->where($map)->find();
-		if($judge == false){
-			//TODO 设置联系人  不直接成为常用联系人  需要在添加常用联系人时判断是否存在
-			$db->add(array('name'=>$name,'phone'=>$phone,'cid'=>$cid,'product_id'=>$product_id,'plan_id'=>$plan_id,'createtime'=>time(),'status'=>0));
-		}
-		return true;
-	}
-	/*根据订单号重发短信
-    *@param $sn  订单号
-    *return 出票员以及出票时间
-    */
-    function repeat_sms($sn = null){
-        if(empty($sn)){return false;}else{
-            $info = M('SmsLog')->where(array('order_sn'=>$sn))->find();
-            if(empty($info)){
-                echo "未找到订单";
-            }else{
-            	$msgs = array('phone'=>$info['phone'],'content'=>$info['content']);
-                Sms::order_msg($msgs,8);
-                return true;
-            }
-        }
-    }
 
     /**
 	 * 政府手动排座
 	 */
 	function govSeat($pinfo){
-		$info = json_decode($pinfo,true);//dump($info);	
-		if(empty($info)){error_insert('400002');return false;}
+		$info = json_decode($pinfo,true);	
+		if(empty($info)){$this->error = '400002 : 数据解析失败';return false;}
 		$model = new Model();
 		$model->startTrans();
 		$flag=false;
@@ -1548,15 +1428,16 @@ class Order extends \Libs\System\Service {
 		//读取订单
 		$oinfo = D('Order')->where(array('order_sn'=>$info['sn']))->relation(true)->find();
 		if($oinfo['status'] == '9' || $oinfo['status'] == '1'){
-			error_insert('400014');
+			//error_insert('400014');
 			$model->rollback();//事务回滚
+			$this->error = '400014 : 订单状态不允许此项操作';
 			return false;
 		}
 		//读取订单对应计划
 		$plan = F('Plan_'.$oinfo['plan_id']);
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
-		if(empty($plan)){error_insert('400005');$model->rollback();return false;}
+		if(empty($plan)){$this->error = '400005 : 销售计划获取失败';$model->rollback();return false;}
 		$ticketType = F("TicketType".$plan['product_id']);
 		$count = count($info['data']);//统计座椅个数
 		foreach ($info['data'] as $k=>$v){
@@ -1592,7 +1473,7 @@ class Order extends \Libs\System\Service {
 			$status[$k]=$model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
 			/*以下代码用于校验*/
 			if($status[$k] == false){
-				error_insert('400009');
+				$this->error = '400009 : 排座失败';
 				break;
 			}
 			if($count == $k+1){
@@ -1607,14 +1488,7 @@ class Order extends \Libs\System\Service {
 		foreach($hdata['data']['area'] as $ke=>$va){
 			//删除原有的区域数据
 			if($va['areaId'] ==  $info['aid']){
-				//unset($hdata['data']['area'][$ke]);
 				unset($hdata['data']);
-				/*政企排座特殊，以排区域ID
-				if($hdata['param'][0]['area']){
-					$hdata['param'][0]['area'] = $hdata['param'][0]['area'].','.$info['aid'];
-				}else{
-					$hdata['param'][0]['area'] = $info['aid'];
-				}*/
 			}
 		}
 		//检测该订单是否有补贴
@@ -1622,8 +1496,9 @@ class Order extends \Libs\System\Service {
 			$crmInfo = google_crm($plan['product_id'],$hdata['crm'][0]['qditem']);
 			//严格验证渠道订单写入返利状态
 			if(empty($crmInfo['group']['settlement']) || empty($crmInfo['group']['type'])){
-				error_insert('400018');
+				//error_insert('400018');
 				$model->rollback();
+				$this->error = '400018 : 客户信息获取失败';
 				return false;
 			}
 			//判断是否是底价结算['group']['settlement']
@@ -1666,8 +1541,8 @@ class Order extends \Libs\System\Service {
 			}
 			return true;
 		}else{
-			error_insert('400006');
 			$model->rollback();//事务回滚
+			$this->error = '400006 : 排座失败';
 			return false;
 		}
 	}
@@ -1688,8 +1563,8 @@ class Order extends \Libs\System\Service {
 	*return $seat 包含座椅区域信息 及座椅数量 
 	*/
 	private function area_group($area,$product_id,$settlement,$product_type,$child_ticket = ''){
-		if(empty($area)){$this->error = "座椅区域为空";return false;}
-		$this->error = "座椅区域为空";return false;
+		if(empty($area)){$this->error = "门票类型为空,操作终端...";return false;}
+		//$this->error = "门票类型为空,操作终端...";return false;
 		if(!empty($child_ticket)){
 			foreach ($child_ticket as $key => $value) {
 				$price += $value['price'];
@@ -1770,7 +1645,8 @@ class Order extends \Libs\System\Service {
 			);
 		return $data;
 	}
-	/*订单场景初始值 
+	/**
+	* 订单场景初始值 
 	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
 	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
 	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
@@ -1866,6 +1742,110 @@ class Order extends \Libs\System\Service {
 			return 400;
 		}
 	}
+	/**
+	 * 返回客户信息
+	 * @param $product_id int 产品ID
+	 * $crm_id 渠道商id
+	*/
+	function crminfo($product_id,$crm_id){
+		$crm = F('Crm'.$product_id);
+		$info = $crm[$crm_id];
+		$return = "电话".$info['phone'];
+		return $return;
+	}
+	/**
+	 * 格式化座位号
+	 * @param  string $seat        座位号
+	 * @param  int $product_id  产品id
+	 * @param  int $ticket_type 票型特殊打印标记
+	 * @param  int $custom      自定义票面
+	 * @return [type]              [description]
+	 */
+	function print_seat($seat,$product_id,$ticket_type = null,$custom = null){
+		$seats = explode('-', $seat);
+		if($ticket_type == '1'){
+			//定义座位号方式
+			$proconf = cache('ProConfig');
+			$proconf = $proconf[$product_id]['1'];
+			switch ($proconf['print_seat']) {
+				case '1':
+					$seat = $seats[0].'排'.$seats[1].'号';
+					break;
+				case '2':
+					$seat = $seats[0].'排';
+					break;
+				case '3':
+					$seat = $custom;
+					break;
+				default :
+					$seat = $seats[0].'排'.$seats[1].'号';
+					break;
+			}
+		}else{
+			$seat = $seats[0].'排'.$seats[1].'号';
+		}
+		if($proconf['print_mouth'] == '1'){
+			return Order::print_mouth($seats[0]).$seat;
+		}else{
+			return $seat;
+		}
+	}
+	/**
+	 * 自定义入场口
+	 * @param  int $row 座位排号
+	 * @return [type]      [description]
+	 */
+	function print_mouth($row){
+		//$map = "<=10|10<$row<=17|18<=$row<21";
+		if($row <= '10'){
+			return "一楼";
+		}elseif('10'<$row && $row<='17'){
+			return "二楼";
+		}elseif('17'<$row && $row<='21'){
+			return "三楼";
+		}
+	}
+	/**
+	 * 判断是不是新的游客
+	 *@param $phone 电话
+	 *@param $cid 渠道商id
+	 *@param $name 渠道商名称
+	 *@param $product_id 产品id
+	 *@param $plan_id 计划id
+	 *return true
+	*/
+	function is_tourists($name,$phone,$cid,$product_id,$plan_id){
+		//判断联系人是否是新增联系人 根据手机号码判断 @印象大红袍
+		$db = M('CommonContact');
+		if($cid){
+			$map = array('phone'=>$phone,'cid'=>$cid);
+		}else{
+			$map = array('phone'=>$phone);
+		}
+		$judge = $db->where($map)->find();
+		if($judge == false){
+			//TODO 设置联系人  不直接成为常用联系人  需要在添加常用联系人时判断是否存在
+			$db->add(array('name'=>$name,'phone'=>$phone,'cid'=>$cid,'product_id'=>$product_id,'plan_id'=>$plan_id,'createtime'=>time(),'status'=>0));
+		}
+		return true;
+	}
+	/**
+	 * 根据订单号重发短信
+     * @param $sn  订单号
+     * return 出票员以及出票时间
+    */
+    function repeat_sms($sn = null){
+        if(empty($sn)){return false;}else{
+            $info = M('SmsLog')->where(array('order_sn'=>$sn))->find();
+            if(empty($info)){
+                echo "未找到订单";
+            }else{
+            	$msgs = array('phone'=>$info['phone'],'content'=>$info['content']);
+                Sms::order_msg($msgs,8);
+                return true;
+            }
+        }
+    }
 	/**
 	 * 生成检票密码 景区漂流使用
 	 * @param  string $ciphertext 明文密码

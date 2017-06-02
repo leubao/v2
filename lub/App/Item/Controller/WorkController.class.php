@@ -642,8 +642,8 @@ class WorkController extends ManageBase{
 		switch ($ginfo['type']) {
 			case '1':
 				//只能退当天的场次
-				$today = strtotime(date('Y-m-d'));
-				$plan = M('Plan')->where(array('plantime'=>$today,'status'=>'2'))->select();
+				$today = strtotime(date('Ymd'));
+				$plan = M('Plan')->where(array('plantime'=>$today,'status'=>['in',['2','3']]))->select();
 				break;
 			case '2':
 				//显示当前要退的场次

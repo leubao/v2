@@ -651,6 +651,19 @@ sql;
 
     	return true;
    	}
+   	/**
+   	 * 销毁过期内存存储
+   	 * @param  int $product 产品ID
+   	 * @param  int $planid  计划ID
+   	 * @return int          [description]
+   	 */
+   	function destroyed($product,$planid){
+   		load_redis('delete','pin_'.$product.'_'.$planid.'_often');
+    	load_redis('delete','pin_'.$product.'_'.$planid.'_political');
+    	load_redis('delete','pin_'.$product.'_'.$planid.'_full');
+    	load_redis('delete','pin_'.$product.'_'.$planid.'_directly');
+    	load_redis('delete','pin_'.$product.'_'.$planid.'_electricity');
+   	}
 	/**
      * 插入成功后的回调方法
      */
