@@ -5,6 +5,7 @@
       <div class="tabs-left">
           <ul class="nav nav-tabs nav-stacked">
               <li class="active"><a data-toggle="tab" href="#tab-1" aria-expanded="true"><i class="fa fa-codepen"></i> 运营设置</a></li>
+              <li class=""><a data-toggle="tab" href="#tab-3" aria-expanded="true"><i class="fa fa-codepen"></i> 销控设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-2" aria-expanded="false"><i class="fa fa-print"></i> 打印设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-6" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  官网设置</a></li>
           </ul>
@@ -29,13 +30,7 @@
                               <input type="radio" name="agent" data-toggle="icheck" value="0" <eq name="vo['agent']" value="0"> checked</eq> data-label="关闭">
                                 </td>
                               </tr>
-                              <tr>
-                                <td width="120px">销售配额:</td>
-                                <td>
-                                <input type="radio" name="quota" data-toggle="icheck" value="1" <eq name="vo['quota']" value="1"> checked</eq> data-label="开启&nbsp;">
-                                <input type="radio" name="quota" data-toggle="icheck" value="0" <eq name="vo['quota']" value="0"> checked</eq> data-label="关闭">
-                                </td>
-                              </tr>
+                              
                                 
                               <tr>
                                 <td width="120px">全员销售:</td>
@@ -84,9 +79,11 @@
                                 </td>
                               </tr>
                               <tr>
-                                <td width="120px">渠道账户最低余额:</td>
+                                <td width="120px">个人授信支付:</td>
                                 <td>
-                               <input type="text" name="money_low" value="{$vo.money_low}" size="10"><span class="remark">渠道账户最低余额报警阀值,短信通知渠道商联系人</span>
+                                <input type="radio" name="credit" data-toggle="icheck" value="0" <eq name="vo['credit']" value="0"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="credit" data-toggle="icheck" value="1" <eq name="vo['credit']" value="1"> checked</eq> data-label="关闭">
+                               <span class="remark">个人是否允许使用授信额支付</span>
                                 </td>
                               </tr>
                               <tr>
@@ -117,13 +114,7 @@
                               <input type="radio" name="report" data-toggle="icheck" value="0" <eq name="vo['report']" value="0"> checked</eq> data-label="按场次日期">
                                 </td>
                               </tr>
-                               <tr>
-                                <td width="120px">全员销售:</td>
-                                <td>
-                                <input type="radio" name="full_sales" data-toggle="icheck" value="1" <eq name="vo['full_sales']" value="1"> checked</eq> data-label="开启&nbsp;">
-                              <input type="radio" name="full_sales" data-toggle="icheck" value="0" <eq name="vo['full_sales']" value="0"> checked</eq> data-label="关闭">
-                                </td>
-                              </tr>
+                             
                               <tr>
                                 <td width="120px">渠道停止售票时间:</td>
                                 <td>
@@ -175,6 +166,12 @@
                           <table class="table  table-bordered">
                             <tbody>
                               <tr>
+                                <td width="120px">打印过期门票:</td>
+                                <td><input type="radio" name="print_overdue" data-toggle="icheck" value="1" <eq name="vo['print_overdue']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="print_overdue" data-toggle="icheck" value="0" <eq name="vo['print_overdue']" value="0"> checked</eq> data-label="关闭">
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">打印票型备注:</td>
                                 <td><input type="radio" name="print_remark" data-toggle="icheck" value="1" <eq name="vo['print_remark']" value="1"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="print_remark" data-toggle="icheck" value="0" <eq name="vo['print_remark']" value="0"> checked</eq> data-label="关闭">
@@ -215,10 +212,65 @@
                                 </td>
                               </tr>
                           </table>
-                      
                         </div>
                       </fieldset>
                   </div>
+              </div>
+              <div id="tab-3" class="tab-pane">
+                <div class="panel-body">
+                 <fieldset style="height:100%;">
+                  <legend>销控设置</legend>
+                  <div style="height:94%; overflow:hidden;">
+                    <table class="table  table-bordered">
+                      <tbody>
+                        <tr>
+                          <td width="120px">销售控制:</td>
+                          <td>
+                          <input type="radio" name="quota" data-toggle="icheck" value="1" <eq name="vo['quota']" value="1"> checked</eq> data-label="开启&nbsp;">
+                          <input type="radio" name="quota" data-toggle="icheck" value="0" <eq name="vo['quota']" value="0"> checked</eq> data-label="关闭">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">销控模式:</td>
+                          <td><input type="radio" name="pin_control" data-toggle="icheck" value="1" <eq name="vo['pin_control']" value="1"> checked</eq> data-label="类型模式&nbsp;">
+                          <input type="radio" name="pin_control" data-toggle="icheck" disabled value="2" <eq name="vo['pin_control']" value="2"> checked</eq> data-label="场景模式">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">常规渠道:</td>
+                          <td>
+                         <input type="text" name="channel_often_quota" value="{$vo.channel_often_quota}" size="10"><span class="remark">常规旅行社、酒店渠道。0为不限制</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">政企渠道:</td>
+                          <td>
+                         <input type="text" name="channel_political_quota" value="{$vo.channel_political_quota}" size="10"><span class="remark">0为不限制</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">全员销售:</td>
+                          <td>
+                         <input type="text" name="channel_full_quota" value="{$vo.channel_full_quota}" size="10"><span class="remark">0为不限制</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">电商直营:</td>
+                          <td>
+                         <input type="text" name="channel_directly_quota" value="{$vo.channel_directly_quota}" size="10"><span class="remark">0为不限制</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">电商渠道:</td>
+                          <td>
+                         <input type="text" name="channel_electricity_quota" value="{$vo.channel_electricity_quota}" size="10"><span class="remark">0为不限制</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </fieldset>
+                </div>
               </div>
               <div id="tab-6" class="tab-pane">
               <script>KindEditor.create('textarea[name="agreement"]',{

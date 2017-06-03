@@ -87,7 +87,7 @@ class OrderController extends ManageBase{
 				$this->erun('参数错误!');
 			}
 			// 检测订单是否过期
-			if(check_sn($ginfo['sn'])){
+			if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
 				$order_type = order_type($ginfo['sn']);
 				//判断订单状态是否可执行此项操作
 				if(in_array($order_type['status'], array('0','2','3','7','8','11'))){

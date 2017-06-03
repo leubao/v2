@@ -759,6 +759,7 @@ function load_payment($pay = '',$product_id = ''){
     $collection = array();
     //付款
     $payment = array('wx_transfer','wx_red','wx_refund','ali_transfer','ali_red','ali_refund');
+    /*
     if(in_array($pay,$b)){
         //付款
         if (stripos($pay, 'ali') !== false) {
@@ -787,6 +788,21 @@ function load_payment($pay = '',$product_id = ''){
                 'md5_key'       => $proconf['wx_sub_mchkey'],// md5 秘钥
             ];
         }
+    }*/
+    if($proconf['wx_submch'] == '1'){
+        $basedata = [
+            'app_id'        => $proconf['wx_fw_appid'],  // 公众账号ID
+            'mch_id'        => $proconf['wx_fw_mchid'],// 商户id
+            'sub_appid'     => $proconf['wx_sub_appid'], //子APPiD
+            'sub_mch_id'    => $proconf['wx_sub_mchid'],
+            'md5_key'       => $proconf['wx_sub_mchkey'],// md5 秘钥
+        ];
+    }else{
+        $basedata = [
+            'app_id'        => $proconf['wx_sub_appid'], //子APPiD
+            'mch_id'        => $proconf['wx_sub_mchid'],
+            'md5_key'       => $proconf['wx_sub_mchkey'],// md5 秘钥
+        ];
     }
     //判断是否是企业付款
     if (stripos($pay, 'ali') !== false) {
@@ -855,6 +871,14 @@ function load_redis($apiport,$key,$value = '',$time = ''){
         case 'lrange':
             //返回list 中的元素 返回名称为key的list中start至end之间的元素（end为 -1 ，返回所有） value 为开始位置 $time 为结束位置
             $return = $redis->lrange($key,$value,$time);
+            break;
+        case 'incrby':
+            //计数器+
+            $return = $redis->incrBy($key,$value);
+            break;
+        case 'decrby':
+            //计数器-
+            $return = $redis->decrBy($key,$value);
             break;
         case 'delete':
             //删除指定key

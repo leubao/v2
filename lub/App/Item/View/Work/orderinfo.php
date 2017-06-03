@@ -99,7 +99,7 @@
             <td>{$vo.discount}</td>
             <td>{$vo.areaId|areaName}</td>
             <td>{$vo.seatid|seatShow}</td>
-            <td>{$vo.seatid|seatOrder=$data['plan_id']}</td>
+            <td>{$vo.seatid|seatOrder=$data['plan_id'],$vo['areaId']}</td>
           </tr>
         </volist>
   </tbody>
@@ -126,7 +126,11 @@
     <li>
       <button type="button" class="btn-info" data-icon="print" data-url="{$prshow.url}" data-width="{$prshow.width}" data-height="{$prshow.height}" data-title="{$prshow.title}" data-pageid="{$prshow.pageId}" id="print_window">打印</button>
     </li>
+    <li>
+      <a type="button" data-toggle="doajax" data-confirm-msg=确定要确认订单吗？ href="{:U('Order/index/confirm_order',array('sn'=>$data['order_sn'],'menuid'=>$menuid))}" class="btn btn-warning" data-icon="save">确认</a>
+    </li>
     </if>
+    
     <li>
       <button type="submit" class="btn-default" data-icon="save">提交</button>
     </li>

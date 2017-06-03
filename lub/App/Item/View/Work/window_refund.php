@@ -76,7 +76,7 @@
           <td align="center">{$vo['priceid']|ticketName}</td>
           <td align="right">{$vo['price']}</td>
           <td align="right">{$vo['discount']}</td>
-          <td align="center">{$vo.seatid|seatOrder=$data['plan_id']}</td>
+          <td align="center">{$vo.seatid|seatOrder=$data['plan_id'],$vo['areaId']}</td>
         </tr>
       </volist>
     </tbody>

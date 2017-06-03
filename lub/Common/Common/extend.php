@@ -277,8 +277,9 @@ function seatShow($param,$type=NULL){
 /*查询座椅所属的订单
 * @param $param 座椅iD
 * @param $plan_id 计划id
+* @param $areaid 区域ID
 */
-function seatOrder($param,$plan_id,$type=NULL){
+function seatOrder($param,$plan_id,$area_id,$type = NULL){
     if(!empty($param) && !empty($plan_id)){
         $plan = F('Plan_'.$plan_id);
         if(empty($plan)){
@@ -290,7 +291,7 @@ function seatOrder($param,$plan_id,$type=NULL){
         }else{
             switch ($plan['product_type']) {
                 case '1':
-                    $map = array('seat'=>$param);
+                    $map = array('seat'=>$param,'area_id'=>$area_id);
                     $table = $plan['seat_table'];
                     break;
                 case '2':
@@ -774,7 +775,7 @@ function crmName($param,$type=NULL){
      * 根据订单号判断订单有效性
      * @param $sn char 订单号
      */
-    function check_sn($sn){
+    function check_sn($sn,$plan_id){
         if(empty($sn)){
             return false;
         }
@@ -784,11 +785,17 @@ function crmName($param,$type=NULL){
         }else{
             //获取场次id
             $planid =  substr($sn,6,-5);
-           // $aa = substr(date('Ymd'),3).'1234'. str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
-           // dump($planid);
             //验证场次状态
-            $status = M('Plan')->where(array('id'=>$planid))->getField('status');
-            if(in_array($status,array('2','3'))){
+            $plan = M('Plan')->where(array('id'=>$plan_id))->field('product_id,status')->find();
+            $proconf = cache('ProConfig');
+            $proconf = $proconf[$plan['product_id']]['1'];
+            if($proconf['print_overdue'] == '1'){
+                $map = ['2','3','4'];
+            }else{
+                $map = ['2','3'];
+            }
+            
+            if(in_array($plan['status'],$map)){
                 return true;
             }else{
                 return false;
@@ -1349,8 +1356,9 @@ function crmName($param,$type=NULL){
     function check_plan(){
         //获取系统日期
         $datetime = date('Ymd');
+        $model = D('Item/Plan');
         //获取要检测的场次
-        $list = M('Plan')->where(array('status'=>array('in','2,3'),'plantime'=>array('elt',strtotime($datetime))))->cache('todayplan',3600)->select();
+        $list = $model->where(array('status'=>array('in','2,3'),'plantime'=>array('elt',strtotime($datetime))))->cache('todayplan',60)->select();
         foreach ($list as $k => $v) {
             //计划日期
             $plantime = date('Ymd',$v['plantime']);
@@ -1358,8 +1366,10 @@ function crmName($param,$type=NULL){
                 //发送演出销售信息
                 F('Plan_'.$v['id'],NULL);
                 //停用已过期场次
-                $status = M('Plan')->where(array('id'=>$v['id']))->setField('status',4);
+                $status = $model->where(array('id'=>$v['id']))->setField('status',4);
                 send_sms($v['id']);
+                //销毁过期的数据
+                $model->destroyed($v['product_id'],$v['id']);
                 //TODO   写入重要提醒队列 如未取票
                 return $status;
             }else{
@@ -1374,9 +1384,10 @@ function crmName($param,$type=NULL){
                 if($etime > $endtime){
                     //停用已过期场次
                     F('Plan_'.$v['id'],NULL);
-                    $status = M('Plan')->where(array('id'=>$v['id']))->setField('status',4);
+                    $status = $model->where(array('id'=>$v['id']))->setField('status',4);
                     send_sms($v['id']);
-
+                    //销毁过期的数据
+                    $model->destroyed($v['product_id'],$v['id']);
                     return $status;
                 }
             }

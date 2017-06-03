@@ -142,21 +142,22 @@ class OrderController extends Base{
 	function channelPost(){
 		$info = $_POST['info'];
 		$uInfo = \Home\Service\Partner::getInstance()->getInfo();
+		$order = new Order();
 		//根据当前用户所属分组类型进行区分是政企还是企业或个人
 		if($uInfo['group']['type'] == '3'){
 			//政企
-			$sn = Order::channel($info,26,$uInfo);
+			$sn = $order->channel($info,26,$uInfo);
 		}else{
 			//个人或企业
-			$sn = Order::channel($info,22,$uInfo);
+			$sn = $order->channel($info,22,$uInfo);
 		}
 		if($sn != false){
 			$return = array('statusCode' => '200','sn'=>$sn);
 		}else{
-			$return = array('statusCode' => '300','sn'=>$sn);
+			$return = array('statusCode' => '300','sn'=>$sn,'msg'=>$order->error);
 		}
 		//记录售票员日报表
-		echo json_encode($return);
+		die(json_encode($return));
 		return true;
 	}
 	/*
@@ -177,15 +178,16 @@ class OrderController extends Base{
 			}else{
 				$status = Order::channel_seat($info,$oinfo);
 			}*/
-			$status = Order::channel_seat($info,$oinfo);
+			$order = new Order();
+			$status = $order->channel_seat($info,$oinfo);
 			//返回结果
 			if($status != false){
 				$return = array('statusCode' => '200','sn'=>$info['sn'],);
 			}else{
-				$return = array('statusCode' => '300','sn'=>$info['sn'],);
+				$return = array('statusCode' => '300','sn'=>$info['sn'],'msg'=>$order->error);
 			}
 			//记录售票员日报表
-			echo json_encode($return);
+			die(json_encode($return));
 			return true;
 		}
 	}
@@ -195,10 +197,11 @@ class OrderController extends Base{
 	public function web_pay($info){
 		$oinfo = Operate::do_read('Order',0,array('order_sn'=>$info['sn']),'','',true);
 		if(empty($info) || empty($oinfo)){return false;}
+		$order = new Order();
 		if($oinfo['status'] == '5'){
-			$status = Order::pay_no_seat($info,$oinfo);
+			$status = $order->pay_no_seat($info,$oinfo);
 		}else{
-			$status = Order::channel_seat($info,$oinfo,'4');
+			$status = $order->channel_seat($info,$oinfo,'4');
 		}
 		//返回结果
 		if($status != false){
@@ -462,7 +465,7 @@ class OrderController extends Base{
 			if(empty($ginfo)){
 				$this->erun('参数错误!');
 			}// 检测订单是否过期
-			if(check_sn($ginfo['sn'])){
+			if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
 				$this->assign('data',$ginfo);//传递参数
 				$this->display();
 			}else{

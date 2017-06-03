@@ -59,7 +59,7 @@ function getprice(event, treeId, treeNode){
       </table>
     </div>
 
-    <div style="margin-left:14px; width:400px; height:93.5%; float: left; overflow:hidden;">
+    <div style="margin-left:14px; width:400px;  height: auto; float: left; overflow:hidden;">
         <table class="table table-bordered">
             <thead>
             <tr>
@@ -77,8 +77,6 @@ function getprice(event, treeId, treeNode){
                 <td colspan='3'><strong style='color:red;font-size:18px;' id="quick-total">0.00</strong></td>
             </tr>
         </table>
-
-  
         <table class="table table-bordered mt20">
             <tbody id='quick-crm'>
             <if condition="$type eq '2'">

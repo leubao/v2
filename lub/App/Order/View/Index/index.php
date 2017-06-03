@@ -27,7 +27,7 @@
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">
         <a type="button" class="btn btn-default" onclick="$(this).navtab('refresh');" data-placement="left" data-toggle="tooltip" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>
-        <a type="button" class="btn btn-primary" href="{:U('Order/Index/export_order',$export_map);}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出订单信息吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
+        <a type="button" class="btn btn-primary" href="{:U('Order/Index/public_export_order',$export_map);}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出订单信息吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
     </div>
   </div>
   <div class="bjui-moreSearch">
@@ -75,7 +75,7 @@
     <tbody id="order-list">
     <volist name="data" id="vo">
       <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" data-money="{$vo.money}">
-        <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
+        <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
         <td align="center">{$vo.addsid|addsid}（{$vo.type|channel_type}）</td>
         <td align="center">{$vo.number}</td>
         <td align="right">{$vo.money}</td>

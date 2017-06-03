@@ -112,7 +112,7 @@
                   <td>{$vo.discount}</td>
                   <td>{$vo.areaId|areaName}</td>
                   <td>{$vo.seatid|seatShow}</td>
-                  <td>{$vo.seatid|seatOrder=$data['plan_id']}</td>
+                  <td>{$vo.seatid|seatOrder=$data['plan_id'],$vo['areaId']}</td>
                 </tr>
               </volist>
         </tbody>
