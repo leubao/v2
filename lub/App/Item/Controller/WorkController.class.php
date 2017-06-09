@@ -328,10 +328,17 @@ class WorkController extends ManageBase{
 			$info['info']=unserialize($info['info']);
 			//当前产品类型
 			if($info['product_type'] == '1'){
-				//区域分类
-				foreach ($info['info']['data'] as $key => $value) {
-					$area[$value['areaId']]['area'] = $value['areaId'];
-					$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
+				//判断订单状态
+				if(in_array($info['status'],['6','5'])){
+					foreach ($info['info']['data']['area'] as $key => $value) {
+						$area[$value['areaId']]['area'] = $value['areaId'];
+						$area[$value['areaId']]['num'] = $value['num'];
+					}
+				}else{
+					foreach ($info['info']['data'] as $key => $value) {
+						$area[$value['areaId']]['area'] = $value['areaId'];
+						$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
+					}
 				}
 			}else{
 				//区域分类
