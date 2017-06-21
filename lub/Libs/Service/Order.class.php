@@ -442,12 +442,13 @@ class Order extends \Libs\System\Service {
 	*API订单处理
 	*@param $info array 接口提交数据
 	*@param $uinfo array 接口APP数据
+	*@param $is_seat int 是否立即排座 1 立即排座 2不排做 只返回订单号
 	*/
-	function orderApi($info,$scena,$uinfo){
+	function orderApi($info,$scena,$uinfo,$is_seat = '1'){
 		//获取订单初始数据
 		$scena = $this->is_scena($scena);
 		$channel = $uinfo['is_pay'] == 2 ? 1 : 2;
-		$return = $this->quick_order($info,$scena,$uinfo,1,$channel);
+		$return = $this->quick_order($info,$scena,$uinfo,$is_seat,$channel);
 		//dump($this->error);
 		//dump($return);
 		if($return != false){
@@ -531,7 +532,7 @@ class Order extends \Libs\System\Service {
 				//窗口订单 开始排座 剧场
 				$order_info = D('Item/Order')->where(array('order_sn'=>$sn))->relation(true)->find();
 				if($plan['product_type'] == '1'){
-					$status = $this->quickSeat($seat,$order_info,$info['sub_type'],$channel,'1',$scena['pay']);
+					$status = $this->quickSeat($seat,$order_info,$info['sub_type'],$channel,$is_seat,$scena['pay']);
 				}else{
 					$status = $this->quickScenic($order_info,$plan);
 				}//dump($status);

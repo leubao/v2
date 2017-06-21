@@ -212,16 +212,22 @@ class Api extends \Libs\System\Service {
     
     //验证APP 信息
     function check_app($appid,$appkey){
-        $info = D('Api/App')->where(array('appid'=>$appid))->relation(true)->field('id,appid,appkey,product,crm_id,is_pay')->find();
+        $info = D('Api/App')->where(array('appid'=>$appid,'status'=>1))->relation(true)->field('id,appid,appkey,product,crm_id,is_pay')->find();
         $str = $info['appid'].$info['id'].$info['appkey'];
         $md5_key = md5($str);
         if($md5_key == $appkey){
             //查询所属分组的相关信息
             $crm = F('Crm');
             $info['groupid'] = $crm[$info['crm_id']]['groupid'];
-            $info['group'] = M('CrmGroup')->where(array('id'=>$info['groupid']))->field('id,price_group,type,product_id,settlement')->find();
-            $info['scene'] = '5';
-            return $info;
+            if(empty($info['groupid']) || empty($info['crm_id'])){
+                return false;
+            }else{
+                $info['group'] = M('CrmGroup')->where(array('id'=>$info['groupid']))->field('id,price_group,type,product_id,settlement')->find();
+                $info['scene'] = '5';
+                //dump($info);
+                return $info; 
+            }
+            
         }else{
             return false;
         }
