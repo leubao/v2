@@ -118,11 +118,13 @@ class FigureController extends Controller{
 			'type'	  	  => ['in','2,4,6']
 		];
 		$list = D('Api/OrderView')->where($map)->field('name,phone,number,channel_id')->select();
+	
 		$headArr = array(
-			'channel_id'		=>	'单号ID',
-   			'name'		=>	'渠道商',
-   			'phone'		=>	'电话',
-   			'number'	=>	'数量',
+			
+			'phone'		=>	'电话',
+			'number'	=>	'数量',
+			'channel_id'=>	'渠道ID',
+			'name'		=>	'渠道商',
    		);
    		$filename = "订单记录";
    		return \Libs\Service\Exports::getExcel($filename,$headArr,$list);

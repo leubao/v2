@@ -57,7 +57,7 @@ class IndexController extends ManageBase {
         			$export_map['endtime'] = $endtime;
 		            $starttime = strtotime($starttime);
 		            $endtime = strtotime($endtime) + 86399;
-		            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+		            $map['createtime'] = array(array('GT', $starttime), array('LT', $endtime), 'AND');
 		        }else{
 		        	//默认显示当天的订单
 		        	$starttime = strtotime(date("Ymd"));
@@ -77,11 +77,66 @@ class IndexController extends ManageBase {
 	        if(!empty($status)){$export_map['status'] = $status;$map['status'] = array('in',$status);}
 	        if(!empty($type)){$map['type'] = $type;}
 	        if(!empty($pay)){$map['pay'] = $pay;}
-        }//dump($map);
+        }
 		$map['product_id'] = get_product('id');
-		//dump($map);
 		$this->basePage('Order',$map,array('createtime'=>'DESC'));	
 		$this->assign('map',$map)->assign('export_map',$export_map)->display();
+	}
+	/**
+	 * 预售查询,查询未来日期的订单
+	 */
+	public function pre_sales()
+	{
+		$sn = I('sn');
+	    $status = I('status');
+	    $channel_id = I('channel_id');
+	    $channel_name = I('channel_name');
+	    $user_id = I('user_id');
+	    $user_name = I('user_name');
+	    $plan_id = I('plan_id');
+	    $plan_name = I('plan_name');
+	    $type = I('type');
+	    $phone = I('phone');
+	    $pay = I('pay');
+	    //传递条件
+        $this->assign('channel_id',$channel_id)
+	        ->assign('channel_name',$channel_name)
+	        ->assign('user_id',$user_id)
+	        ->assign('endtime',$endtime)
+	        ->assign('plan_id',$plan_id)
+	        ->assign('plan_name',$plan_name)
+	        ->assign('status',$status)
+	        ->assign('pay',$pay);
+		if(!empty($sn)){
+        	$map['order_sn'] = array('like','%'.$sn.'%');
+        }elseif(!empty($phone)){
+        	$map['phone'] = $phone;
+        }else{
+        	if(!empty($plan_id)){
+				$map['plan_id'] = $plan_id;
+        	}else{
+        		//查询未来可用的销售场次
+				$where = [
+					'plantime' => ['GT',strtotime(date('Y-m-d'))],
+					'status'   => ['in','2,3']
+				];
+				$plan = M('Plan')->where($where)->field('id')->select();
+				$map['plan_id'] = ['in',arr2string($plan,'id',',')];
+        	}
+	        if(!empty($channel_id)){
+	        	$map['channel_id'] = array('in',agent_channel($channel_id,2));
+
+	        }
+	        if(!empty($user_id)){
+	        	$map['user_id'] = $user_id;
+	        }
+	        if(!empty($status)){$map['status'] = array('in',$status);}
+	        if(!empty($type)){$map['type'] = $type;}
+	        if(!empty($pay)){$map['pay'] = $pay;}
+        }
+		$map['product_id'] = get_product('id');
+		$this->basePage('Order',$map,array('createtime'=>'DESC'));
+		$this->display();
 	}
 	/*订单导出*/
 	function public_export_order(){
@@ -146,26 +201,5 @@ class IndexController extends ManageBase {
    		$filename = "订单记录";
    		return \Libs\Service\Exports::getExcel($filename,$headArr,$data);
    		exit;
-	}
-	//订单确认
-	function confirm_order(){
-		$ginfo = I('get.');
-		if(empty($ginfo['sn'])){
-			$this->erun("参数错误");
-		}
-		$map = [
-			'order_sn'	=>	$ginfo['sn'],
-			'status'	=>	'1'
-		];
-		$data = [
-			'status'	=>	'9',
-			'uptime'	=>	time()
-		];
-		$status = D('Item/Order')->where($map)->save($data);
-		if($status){
-			$this->srun('订单确认成功...',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-		}else{
-			$this->erun('订单确认失败...');
-		}
 	}
 }
