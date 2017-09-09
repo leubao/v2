@@ -13,6 +13,7 @@ use Item\Service\Partner;
 use Libs\Service\Operate;
 use Libs\Service\Refund;
 use Libs\Service\Sms;
+use Libs\Service\CheckStatus;
 class WorkController extends ManageBase{
 	protected function _initialize() {
 		parent::_initialize();
@@ -328,17 +329,10 @@ class WorkController extends ManageBase{
 			$info['info']=unserialize($info['info']);
 			//当前产品类型
 			if($info['product_type'] == '1'){
-				//判断订单状态
-				if(in_array($info['status'],['6','5'])){
-					foreach ($info['info']['data']['area'] as $key => $value) {
-						$area[$value['areaId']]['area'] = $value['areaId'];
-						$area[$value['areaId']]['num'] = $value['num'];
-					}
-				}else{
-					foreach ($info['info']['data'] as $key => $value) {
-						$area[$value['areaId']]['area'] = $value['areaId'];
-						$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
-					}
+				//区域分类
+				foreach ($info['info']['data'] as $key => $value) {
+					$area[$value['areaId']]['area'] = $value['areaId'];
+					$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
 				}
 			}else{
 				//区域分类
@@ -503,48 +497,56 @@ class WorkController extends ManageBase{
 		if(empty($pinfo['sn'])){
 			$this->erun("参数有误!");
 		}
-		if($pinfo['type'] == '1'){
-			//同意申请
-			if(M('Order')->where(array('order_sn'=>$pinfo['sn']))->getField('status') <> '9'){
-				if(Refund::refund($pinfo,1,'','',$pinfo['poundage'],1)){
+		/** 订单状态校验 */
+		$checkOrder = new CheckStatus();
+		if(!$checkOrder->OrderCheckStatus($pinfo['sn'],2103)){
+			$this->erun($checkOrder->error,array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+		}
+		// 判断当前订单状态
+		if(M('Order')->where(array('order_sn'=>$pinfo['sn']))->getField('status') <> '9'){
+			if($pinfo['type'] == '1'){
+				//同意申请
+				$status = Refund::refund($pinfo,1,'','',$pinfo['poundage'],1);
+				$checkOrder->delMarking($pinfo['sn']);
+				if($status){
 					$this->srun('退款成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 				}else{
 					$this->erun("退票失败!");
 				}
 			}else{
-				$this->erun("订单已打印，不能完成此项操作!");
+				//驳回申请
+				$data = array(
+					"id" => $pinfo["id"],
+					"against_reason" => $pinfo["against_reason"],
+					"status" => 2,
+					"user_id" => get_user_id(),
+				);
+				//改变订单状态 事务处理
+				$model = new \Common\Model\Model();
+				$model->startTrans();
+				$order_up = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$pinfo['sn'],'status'=>7))->setField('status',1);
+				$up = $model->table(C('DB_PREFIX').'ticket_refund')->save($data);
+				if($up && $order_up){
+					$model->commit();
+					$checkOrder->delMarking($pinfo['sn']);
+					$this->srun('退款申请驳回成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				}else{
+					$model->rollback();
+					$checkOrder->delMarking($pinfo['sn']);
+					$this->erun("退款申请驳回失败!");
+				}
 			}
 		}else{
-			//驳回申请
 			$data = array(
 				"id" => $pinfo["id"],
-				"against_reason" => $pinfo["against_reason"],
-				"status" => 2,
+				"against_reason" => '',
+				"status" => 0,
 				"user_id" => get_user_id(),
 			);
-			//改变订单状态 事务处理
-			$model = new \Common\Model\Model();
-			$model->startTrans();
-			$order_up = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$pinfo['sn'],'status'=>7))->setField('status',1);
-			$up = $model->table(C('DB_PREFIX').'ticket_refund')->save($data);
-			if($up && $order_up){
-				$model->commit();
-				$this->srun('退款申请驳回成功',array('tabid'=>$this->Denuid.MODULE_NAME,'closeCurrent'=>true));
-			}else{
-				$model->rollback();
-				$this->erun("退款申请驳回失败!");
-			}
-		}
-	}
-	/**
-	 * 订单详情
-	 */
-	function detail(){
-		$id   = I("get.id");
-		$map  = array("id"=>$id);
-		$data = Operate::do_read('TicketRefund',0,$map);
-		$this->assign("data",$data);
-		$this->display();
+			$model->table(C('DB_PREFIX').'ticket_refund')->save($data);
+			$checkOrder->delMarking($pinfo['sn']);
+			$this->srun('当前订单已完结,退票申请将作废',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+		}	
 	}
 	/**
 	 * @印象大红袍
@@ -578,6 +580,11 @@ class WorkController extends ManageBase{
 			if(empty($plan)){
 				$this->erun("场次已停止，不能进行此项操作!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
+				/** 订单状态校验 */
+				$checkOrder = new CheckStatus();
+				if(!$checkOrder->OrderCheckStatus($pinfo['sn'],2103)){
+					$this->erun($checkOrder->error,array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				}
 				//按区域核减
 				foreach ($area as $ka=>$ve){
 					if($plan['product_type'] == '1'){
@@ -594,13 +601,13 @@ class WorkController extends ManageBase{
 						}else{
 							$status[$k] = Refund::refund($pinfo,3,$ve['area'],$v['id'],1,1);
 						}
-						
 						if($status[$k] == false){
+							$checkOrder->delMarking($pinfo['sn']);
 							$this->erun("核减失败!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 						}
 					}
 				}
-				
+				$checkOrder->delMarking($pinfo['sn']);
 				$this->srun("核减成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}
 		}else{
@@ -649,8 +656,8 @@ class WorkController extends ManageBase{
 		switch ($ginfo['type']) {
 			case '1':
 				//只能退当天的场次
-				$today = strtotime(date('Ymd'));
-				$plan = M('Plan')->where(array('plantime'=>$today,'status'=>['in',['2','3']]))->select();
+				$today = strtotime(date('Y-m-d'));
+				$plan = M('Plan')->where(array('plantime'=>$today,'status'=>'2'))->select();
 				break;
 			case '2':
 				//显示当前要退的场次
@@ -753,8 +760,7 @@ class WorkController extends ManageBase{
 			$this->assign('plan',$plan)
 			     ->assign('today',$todaya)
 			     ->display();
-		}
-		
+		}	
 	}
 	//座位号反查订单 二维码反查订单
 	function check_oreder(){
@@ -793,6 +799,16 @@ class WorkController extends ManageBase{
 			->assign('area',$area)
 			->assign('pinfo',$pinfo)
 			->display();
+	}
+	/**
+	 * 订单详情
+	 */
+	function detail(){
+		$id   = I("get.id");
+		$map  = array("id"=>$id);
+		$data = Operate::do_read('TicketRefund',0,$map);
+		$this->assign("data",$data);
+		$this->display();
 	}
 	//查看座位详情
 	function seat_info(){

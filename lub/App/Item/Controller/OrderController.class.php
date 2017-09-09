@@ -14,6 +14,7 @@ use Common\Model\Model;
 use Payment\Common\PayException;
 use Payment\Client\Charge;
 use Payment\Client\Query;
+use Libs\Service\CheckStatus;
 class OrderController extends ManageBase{	
 	function _initialize(){
 	 	parent::_initialize();
@@ -125,7 +126,6 @@ class OrderController extends ManageBase{
 			);
 			die(json_encode($return));
 		}
-		
 		//判断是否是二次打印
 		if($order_type['status'] == '9' && empty($user)){
 			$return = array(
@@ -146,6 +146,11 @@ class OrderController extends ManageBase{
 				'info'	=>  0,
 			);
 			die(json_encode($return));
+		}
+		/** 订单状态校验 */
+		$checkOrder = new CheckStatus();
+		if(!$checkOrder->OrderCheckStatus($pinfo['sn'],2103)){
+			$this->erun($checkOrder->error,array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 		}
 		//更新门票打印状态
 		$model = new Model();
@@ -228,6 +233,7 @@ class OrderController extends ManageBase{
 			//记录打印日志
 			print_log($ginfo['sn'],$user,$type,$order_type['channel_id'],'',count($list),1);
 			$model->commit();//提交事务
+			$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '1',
 				'message' => '订单读取成功!',
@@ -235,6 +241,7 @@ class OrderController extends ManageBase{
 			);
 		}else{
 			$model->rollback();//事务回滚
+			$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '0',
 				'message' => '订单读取失败!',
