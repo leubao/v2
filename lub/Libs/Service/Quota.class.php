@@ -9,9 +9,22 @@
 namespace Libs\Service;
 use Common\Model\Model;
 class Quota extends \Libs\System\Service {
-
-	//查询配额
-	function quota($plan_id,$product,$crm_id,$number){
+	/** 执行错误消息及代码 */
+	public $error = '';
+	/**
+	 * 查询配额
+	 * @param  int $plan_id    销售计划ID
+	 * @param  int $product_id 产品ID
+	 * @param  int $crm_id     客户ID
+	 * @param  int $number     数量
+	 * @param  int $salse      销售类型
+	 * @return true|false
+	 */
+	function quota($plan_id, $product_id, $crm_id, $number, $salse = '1')
+	{
+		//新增销售计划注册销售类型的库存
+		//查询销售类型的库存
+		//查询l
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$product][1];
 		$config = cache("Config");
@@ -144,44 +157,59 @@ class Quota extends \Libs\System\Service {
 	 * @param $number 数量
 	 * @param $crm_id 渠道商ID
 	 * @param $plan_id 计划id
-	 * @param $type 销售类型 2常规渠道 4政企渠道 8全员销售 
+	 * @param $product_id 产品ID
+	 * @param $sale 销售类型 2常规渠道 4政企渠道 8全员销售 9 三级分销
 	 */
-	//更新配额，先校验，后更新
-	function update_quota($number, $crm_id, $plan_id, $type){
+	public function update_quota($number, $crm_id, $plan_id, $product_id, $salse)
+	{
 		$plan = F('Plan_'.$plan_id);
 		$today = date('Ymd',time());
 		$plan_day = date('Ymd',$plan['plantime']);
 		if($today == $plan_day && date("H") > 11){
 			return '200';
 		}
-		//销售类型	
-		
-		Quota::check_quota($plan_id,$plan['product_id'],$crm_id);
-
-		$config = cache("Config");
-    	//判断渠道商级别,写入消耗配额
-		$cinfo = M('Crm')->where(array('id'=>$crm_id))->field('id,level,f_agents')->find();
-		$map = array();
-		switch ($cinfo['level']){
-			case $config['level_1'] :
-				//一级渠道商
-				$map['channel_id'] = $crm_id;
-				break;
-			case $config['level_2'] :
-				//二级级渠道商
-				$ids = $crm_id.','.$cinfo['f_agents'];
-				$map['channel_id'] = array('in',$ids);
-				break;
-			case $config['level_3']:
-				//三级级渠道商
-				$ids = $crm_id.','.$cinfo['f_agents'].','.$level1;
-				$map['channel_id'] = array('in',$ids);
-				break;
+		//判断销售类型是否存在余量
+		$salse = $this->pin_sales_link($salse);
+		(int)$salse_num = load_redis('decrby','pin_'.$product_id.'_'.$plan_id.'_'.$salse,$number);
+		if($salse_num < 0){
+			$this->error = "销售类型余量不足...";
+			return false;
 		}
-		$map['plan_id'] = $plan_id;
-		$map['type']	= '1';
-		$data = array('number' => array('exp','number+'.$number));
-		$up_quota = D('QuotaUse')->where($map)->save($data);
+		//判断是否设置单体限额，目前只有常规渠道和政企渠道需要设置
+		if(in_array($salse,['2','4'])){
+			$this->check_quota($plan_id,$plan['product_id'],$crm_id);
+			$config = cache("Config");
+			//判断渠道商级别,写入消耗配额
+			$cinfo = M('Crm')->where(array('id'=>$crm_id))->field('id,level,f_agents')->find();
+			$map = array();
+			switch ($cinfo['level']){
+				case $config['level_1'] :
+					//一级渠道商
+					$map['channel_id'] = $crm_id;
+					break;
+				case $config['level_2'] :
+					//二级级渠道商
+					$ids = $crm_id.','.$cinfo['f_agents'];
+					$map['channel_id'] = array('in',$ids);
+					break;
+				case $config['level_3']:
+					//三级级渠道商
+					$ids = $crm_id.','.$cinfo['f_agents'].','.$level1;
+					$map['channel_id'] = array('in',$ids);
+					break;
+			}
+			$map['plan_id'] = $plan_id;
+			$map['type']	= '1';
+			$data = array('number' => array('exp','number+'.$number));
+			$up_quota = D('QuotaUse')->where($map)->save($data);
+		}else{
+			$up_quota = true;
+		}
+
+		//Quota::check_quota($plan_id,$plan['product_id'],$crm_id);
+
+
+
 		if($up_quota){
 			return '200';
 		}else{
@@ -199,13 +227,13 @@ class Quota extends \Libs\System\Service {
 		if($type == '1'){
 			switch ($salse) {
 				case '2':
-					
+
 					break;
 				case '4':
 
 					break;
 				case '8':
-					
+
 					break;
 			}
 		}
@@ -255,7 +283,7 @@ class Quota extends \Libs\System\Service {
      * @param  int $crm_id 渠道商ID
      * @return return true|false
      */
-    function check_quota($plan_id,$product,$crm_id,$type = 1){
+    public function check_quota($plan_id,$product,$crm_id,$type = 1){
         $map = array(
             'plan_id'=> $plan_id,
             'product_id'=>$product,
@@ -273,7 +301,7 @@ class Quota extends \Libs\System\Service {
      * @param  int $planid  销售计划
      * @param  int $product 产品id
      */
-    function reg_quota($planid,$product){
+    public function reg_quota($planid,$product){
     	//读取所有渠道商
     	$list = M('Crm')->where(array('status'=>'1'))->field('id')->select();
     	foreach ($list as $key => $value) {
@@ -349,7 +377,7 @@ class Quota extends \Libs\System\Service {
      * @param  int $crm_id  活动ID
      * @param  int $plan_id 销售计划
      * @param  int $area    区域id
-     * @return true|False  
+     * @return true|False
      */
     function up_activity_quota($number, $crm_id, $plan_id, $area){
     	$map =  array(
@@ -370,7 +398,7 @@ class Quota extends \Libs\System\Service {
      * @param  int 1 全员销售指定id wei
      * @param  int $plan_id 销售计划
      * @param  int $area    区域id
-     * @return true|False  
+     * @return true|False
      */
     function up_full_quota($number, $crm_id, $plan_id, $area){
 		$map =  array(
@@ -384,5 +412,34 @@ class Quota extends \Libs\System\Service {
     	}else{
 			return false;
     	}
-    } 
+    }
+    /**
+   	 * 销售类型操作符号与操作量转换关系
+   	 * @param  string  $param 参数
+   	 * @return [type]        [description]
+   	 */
+   	function pin_sales_link($param){
+   		switch ($param) {
+   			case 'often':
+   				//常规渠道
+   				return '4';
+   				break;
+   			case 'political':
+   				//
+   				return '6';
+   				break;
+   			case 'full':
+   				return '8';
+   				break;
+   			case 'directly':
+   				return '';
+   				break;
+   			case 'electricity':
+   				return '';
+   				break;
+   			default:
+   				return '4';
+   				break;
+   		}
+   	}
 }

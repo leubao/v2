@@ -181,6 +181,8 @@ class Order extends \Libs\System\Service {
 		/*记录售票员操作日志*/
 		if($flag && $state && $oinfo){
 			$model->commit();//提交事务
+			//写入第三方系统
+			//\Api\Controller\ZhiyoubaoControlle::orderhandler($sn);
 			$sn = array('sn' => $sn,'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
 			return $sn;
 		}else{
@@ -448,6 +450,12 @@ class Order extends \Libs\System\Service {
 		//获取订单初始数据
 		$scena = $this->is_scena($scena);
 		$channel = $uinfo['is_pay'] == 2 ? 1 : 2;
+		//判断是否还允许销售
+		if(if_plan($info['plan_id']) == false){
+			//场次已停止销售
+			$this->error = '400005 : 销售计划已暂停销售...';
+			return false;
+		}
 		$return = $this->quick_order($info,$scena,$uinfo,$is_seat,$channel);
 		//dump($this->error);
 		//dump($return);
@@ -467,7 +475,7 @@ class Order extends \Libs\System\Service {
 	private function quick_order($info, $scena, $uinfo, $is_seat = '1',$channel = null){
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
-		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
+		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}//dump($info);
 		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket']);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
@@ -480,6 +488,7 @@ class Order extends \Libs\System\Service {
 			//error_insert('400003');
 			return false;
 		}
+		//dump($info);//dump($seat);
 		//订单金额校验
 		if(bccomp((float)$info['subtotal'],(float)$seat['money'],2) <> 0){
           	$this->error = '400018 : 金额校验失败';

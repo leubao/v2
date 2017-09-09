@@ -1076,4 +1076,131 @@ class Report{
  		}
  		return $return;
  	}
+ 	/**
+ 	 * 汇总月度报表
+ 	 * 数据源来自Report_data
+ 	 * 只考虑时间  不考虑场次等信息  且只考虑
+ 	 */
+ 	public function months($datetime)
+ 	{
+ 		//dump($datetime);
+ 		if(empty($datetime)){
+ 			return false;
+ 		}
+ 		$months = substr($datetime, 0,6);
+ 		$day = 'day_'.(int)substr($datetime, 6);
+ 		$model = D('ReportSum');
+ 		/**
+ 		 * 检测是否已经生成
+ 		 * TODO   多产品下分产品删除
+ 		 */
+ 		
+ 		if($model->where(['plantime'=>$datetime])->count() != 0){
+ 			//已生成的全部删除
+ 			$model->where(['plantime'=>$datetime])->delete();
+ 		}
+ 		//dump();
+ 		$map =[
+ 			'plantime'	=>	$datetime,
+ 			'type'		=>	['in','2,4'],
+ 		];
+ 		//要处理数据 根据日期获取数据
+ 		$list = D('ReportData')->where($map)->select();
+ 		echo D('ReportData')->_sql();
+ 		echo '合并前'.count($list);
+ 		//dump($map);
+ 		//根据销售计划归类
+ 		foreach ($list as $ky => $vae) {
+ 			$plan[$vae['plan_id']][$vae['channel_id']][$vae['price_id']] = [
+	 			'plantime'	 => $vae['plantime'],
+	 			'product_id' => $vae['product_id'],
+	 			'plan_id' 	 => $vae['plan_id'],
+	 			'type'		 => $vae['type'],
+	 			'channel_id' => $vae['channel_id'],
+	 			'number'     => $vae['number'] + $plan[$vae['plan_id']][$vae['channel_id']][$vae['price_id']]['number'],
+	 			'price_id'   => $vae['price_id'],
+	 			'price'		 => $vae['price'],
+			    'discount'	 => $vae['discount'],
+			    'money'		 => $vae['money'] + $plan[$vae['plan_id']][$vae['channel_id']][$vae['price_id']]['money'],
+			    'moneys'	 => $vae['moneys'] + $plan[$vae['plan_id']][$vae['channel_id']][$vae['price_id']]['moneys'],
+			    'subsidy'	 => $vae['subsidy'] + $plan[$vae['plan_id']][$vae['channel_id']][$vae['price_id']]['subsidy'],
+	 		];
+ 		}
+ 		//降维处理
+ 		foreach($plan as $value){    
+	        foreach($value as $v){
+	        	foreach ($v as $val) {
+	        		$arr2[]=$val;
+	        	}    
+	        }    
+	    }
+	    echo '合并后'.count($arr2);
+ 		return $model->addAll($arr2);
+ 	}
+ 	//分按月 分渠道商 分票型汇总
+ 	public function months2($datetime='')
+ 	{
+ 		//dump($datetime);
+ 		if(empty($datetime)){
+ 			return false;
+ 		}
+ 		$months = substr($datetime, 0,6);
+ 		$day = (int)substr($datetime, 6);
+ 		$model = D('ReportMonths');
+ 		//判断产品
+ 		$product = M('Product')->where(['status'=>1])->field('id')->select();
+ 		foreach ($product as $i => $ve) {
+ 			//检测是否重新生成
+ 			$total = $model->where(['months'=>$months,'product_id'=>$vae['product_id']])->getField('day_'.$day);
+ 		}
+ 		
+
+ 		$map =[
+ 			'plantime'	=>	$datetime,
+ 			'type'		=>	['in','2,4'],
+ 		];
+ 		//要处理数据 根据日期获取数据
+ 		$list = D('ReportData')->where($map)->select();
+ 		//if($this->procof['agent'] == '1'){
+			//开启代理商制度，时执行
+			
+		//}
+		$lists = Report::level_fold($list);
+ 		foreach ($lists as $ky => $vae) {
+ 			$plan[$vae['channel_id']][$vae['price_id']] = [
+ 				'months'	 => $months,
+ 				'day_'.$day	 => $vae['number'] + $plan[$vae['channel_id']][$vae['price_id']]['number'],
+	 			'product_id' => $vae['product_id'],
+	 			'channel_id' => $vae['channel_id'],
+	 			'number'     => $vae['number'] + $plan[$vae['channel_id']][$vae['price_id']]['number'],
+	 			'price_id'   => $vae['price_id'],
+	 			'price'		 => $vae['price'],
+			    'discount'	 => $vae['discount'],
+			    'money'		 => $vae['money'] + $plan[$vae['channel_id']][$vae['price_id']]['money'],
+			    'moneys'	 => $vae['moneys'] + $plan[$vae['channel_id']][$vae['price_id']]['moneys'],
+			    'subsidy'	 => $vae['subsidy'] + $plan[$vae['channel_id']][$vae['price_id']]['subsidy'],
+	 		];
+ 		}
+ 		foreach($plan as $value){    
+	        foreach($value as $vs){
+	        	$arr2[]=$vs;		 
+	        }    
+	    }
+	    foreach ($arr2 as $k => $v) {
+	    	//判断该渠道商在当月是否已注册
+    		if($model->where(['channel_id'=>$v['channel_id'],'months'=>$v['months'],'price_id'=>$v['price_id']])->find()){
+    			$up = [
+    				'day_'.$day  => $v['number'],
+    				'number'	 => ['exp','number+'.$v['number']],
+    				'money'		 => ['exp','money+'.$v['money']],
+    				'moneys'	 => ['exp','moneys+'.$v['moneys']],
+    				'subsidy'    => ['exp','subsidy+'.$v['subsidy']],
+    			];//dump($up);
+    			$status = $model->where(['months' => $v['months'],'product_id' => $v['product_id'],'channel_id' => $v['channel_id'],'price_id'=>$v['price_id']])->save($up);
+    			//dump($status);
+    		}else{
+    			$model->add($v);
+    		}
+	    }
+ 	}
 }

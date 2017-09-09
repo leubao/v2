@@ -201,7 +201,6 @@ class Api extends \Libs\System\Service {
             if($start <= $totime && $totime <= $end){
                 //判断时间
                 return true;
-
             }else{
                 return false;
             }
