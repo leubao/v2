@@ -58,7 +58,7 @@
         <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>
         <td align="center">{$vo['userid']|userName}</td>
         <td align="center">{$vo['remark']}</td>
-        <td align="center">{$vo['status']|status}</td>
+        <td align="center">{$vo['status']|pay_cash_back_status}</td>
        </tr>
     </volist>
      <tr>

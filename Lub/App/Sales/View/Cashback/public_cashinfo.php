@@ -36,17 +36,41 @@
     </tr>
   </tbody>
 </table>
+<table class="table table-bordered table-hover mb25">
+  <thead>
+    <tr>
+      <th>编号</th>
+      <th>金额</th>
+      <th>状态</th>
+      <th>创建时间</th>
+      <th>更新时间</th>
+    </tr>
+  </thead>
+  <tbody>
+    <volist name="data['info']['data']" id="vo">
+        <tr>
+          <td>{$i}</td>
+          <td>{$vo.priceid|ticketName}</td>
+          <td>{$vo.price}</td>
+          <td>{$vo.discount}</td>
+          <td>{$vo.areaId|areaName}</td>
+        </tr>
+      </volist>
+  </tbody>
+  </table>
 </div>
 <div class="bjui-pageFooter">
   <ul>
     <li>
       <button type="button" class="btn-close" data-icon="close">关闭</button>
     </li>
+    <!--
     <if condition="$data['status'] eq '1' ">
     <li>
       <button type="button" class="btn-info" data-icon="print" id="print_window">打印</button>
     </li>
     </if>
+    -->
   </ul>
 </div>
 <script>

@@ -66,7 +66,7 @@ return array(
     'DB_SQL_BUILD_CACHE' => false, // 数据库查询的SQL创建缓存
     'DB_SQL_BUILD_QUEUE' => 'file', // SQL缓存队列的缓存方式 支持 file xcache和apc
     'DB_SQL_BUILD_LENGTH' => 20, // SQL缓存的队列长度
-    'DB_SQL_LOG' => true, // SQL执行日志记录
+    'DB_SQL_LOG' => false, // SQL执行日志记录
     'DB_BIND_PARAM' => false, // 数据库写入数据自动参数绑定
 
     /* 数据缓存设置 */
@@ -88,7 +88,7 @@ return array(
     /* 日志设置 */
     'LOG_RECORD' => true, // 默认不记录日志
     'LOG_TYPE' => 'File', // 日志记录类型 默认为文件方式
-    'LOG_LEVEL' => 'EMERG,ALERT,CRIT,ERR,WARN,NOTICE,INFO,DEBUG,SQL', // 允许记录的日志级别
+    'LOG_LEVEL' => 'ERR', // 允许记录的日志级别EMERG,ALERT,CRIT,
     'LOG_FILE_SIZE' => 2097152, // 日志文件大小限制
     'LOG_EXCEPTION_RECORD' => true, // 是否记录异常信息日志
 
@@ -166,7 +166,7 @@ return array(
     /* 命名空间 */
     'AUTOLOAD_NAMESPACE' => array(
         'Common' => COMMON_PATH,
-        'Libs' => PROJECT_PATH . 'Libs',
+        'Libs' => PROJECT_PATH . 'Libs'
     ),
     /* 上传路径配置 */
     "UPLOADFILEPATH" => SITE_PATH . 'd/file/', //上传附件路径

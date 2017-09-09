@@ -21,11 +21,6 @@
           <td><label for="j_dialog_operation" class="control-label x90">结束时间:</label>
             <input type="text" data-toggle="datepicker" data-pattern='HH:mm:ss' name="endtime" value="{$proconf.plan_end_time}"></td>
         </tr>
-        <tr>
-          <td><label for="j_dialog_name" class="control-label x90">渠道销售配额：</label>
-            <input type="text" name="quota" id="quota" value="{$proconf.channel_quota}" data-rule="required" size="20"></td>
-          <td></td>
-        </tr>
       </tbody>
     </table>
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">

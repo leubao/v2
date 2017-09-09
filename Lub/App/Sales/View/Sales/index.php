@@ -40,10 +40,11 @@
 </form>
 <!--Page end-->
 </div>
-<div class="bjui-pageContent tableContent">
+<div class="bjui-pageContent tableContent"><?php //dump($data);?>
   <table data-toggle="tablefixed" data-width="100%" data-nowrap="true">
     <thead>
       <tr>
+        <th>编号</th>
         <th>姓名</th>
         <th>分销类型</th>
         <th>分组</th>
@@ -57,6 +58,7 @@
     <tbody>
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
+        <td>{$vo.id|user_coding}</td>
         <td><a href="{:U('Sales/Sales/public_uinfo',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="700" data-height="500" data-id="uinfo">{$vo.nickname}</a></td>
         <td>{$vo.type|sales_type}</td>
         <td>{$vo.groupid|crmgroupName}</td>
@@ -65,8 +67,7 @@
         <td align="right">{$vo.cash}</td>
         <td>{$vo.create_time|date="Y-m-d H:i:s",###}</td>
         <td>
-          <a href="{:U('Sales/Full/qrcode',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="fullqr">二维码</a>
-          
+          <a href="{:U('Sales/Full/qrcode',array('id'=>$vo['openid']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="fullqr">二维码</a>
           <a href="{:U('Sales/Full/edit',array('id'=>$vo['id']));}" data-toggle="dialog" data-width="600" data-height="500" data-id="full_edit">编辑</a>
           <a href="{:U('Sales/Sales/unbundling',array('id'=>$vo['id']));}" data-toggle="doajax" data-id="unbundling" data-confirm-msg=确定要执行此操作吗？>解绑</a>
         </td>

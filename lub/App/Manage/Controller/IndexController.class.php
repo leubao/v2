@@ -236,7 +236,8 @@ class IndexController extends ManageBase {
                 'name'  =>  $v['name'],
                 'price' =>  $v['price'],
                 'full'  =>  $param['full'],
-                'level3'=>  $param['level3']
+                'level3'=>  $param['level3'],
+                'zyb'   =>  $param['zyb_price_code'],
             );
         }
         $return = array('statusCode'=>'200','data'=>$list);

@@ -1222,9 +1222,17 @@ function crmName($param,$type=NULL){
    /*获取二次打印授权人
    * @param 
     */
-    function pwd_name($param){
-        $name = M('Pwd')->where(array('id'=>$param))->getField('name');
-        echo $name;
+    function pwd_name($param,$type = ''){
+        if(!empty($param)){
+            $name = M('Pwd')->where(array('id'=>$param))->getField('name');
+            if($type){
+                return $name;
+            }else{
+                echo $name;
+            }
+        }else{
+            echo "未知";
+        }
     }
     //价格政策
     function price_group($param,$type = null){
@@ -1489,14 +1497,21 @@ function crmName($param,$type=NULL){
     */
     function print_ticket_user($sn = null){
         if(empty($sn)){echo "未找到订单";}else{
-            $info = M('PrintLog')->where(array('order_sn'=>$sn))->field('uid,user_id,type')->find();
+            $info = M('PrintLog')->where(array('order_sn'=>$sn))->field('uid,user_id,type')->order('createtime DESC')->find();
             if(empty($info)){
                 echo "未找到订单";
             }else{
-                if($info['type'] == '1'){
-                    echo userName($info['uid']);
-                }else{
-                    echo userName($info['uid'])." || 授权用户:".userName($info['user_id']);
+                switch ($info['type']) {
+                    case '1':
+                        echo userName($info['uid'],1,1);
+                        break;
+                    case '2':
+                        echo userName($info['uid'],1,1)." || 授权用户:".pwd_name($info['user_id'],1);
+                        break;
+                    case '3':
+                    //TODO  自助设备编号
+                        echo '自助设备';
+                        break;
                 }
             }
         }

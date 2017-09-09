@@ -18,4 +18,8 @@ class CommonController extends Controller {
 	    );
 	    echo json_encode($return);
     }
+    //票量查询
+    function google(){
+    	
+    }
 }

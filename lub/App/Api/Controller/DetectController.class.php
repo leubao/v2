@@ -11,20 +11,18 @@ use Code\Service\Codeapi;
 use Libs\Service\Operate;
 use Libs\Service\Checkin;
 class DetectController extends Controller{
-	function _initialize(){
-
-		
-		
-	}
 
 	
 	function index(){
+		$info = D('Item/Order')->where(array('order_sn'=>'70314158721843'))->find();
+		$info['info'] = unserialize($info['info']);
+		dump($info);
+		/*
 		if(!empty($jp_id)){
-			
 			$this->redirect('index.php?g=Api&m=Detect&a=j_p');
 		}else {
 			$this->display();
-		}
+		}*/
 	}
 	function j_p(){
 		$this->display();

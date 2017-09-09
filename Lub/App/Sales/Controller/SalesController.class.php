@@ -126,14 +126,25 @@ class SalesController extends ManageBase{
      */
     function unbundling(){
         $ginfo = I('get.');
-        if($ginfo['id']){
+        if(!$ginfo['id']){
             $this->erun("参数错误");
         }
         $user = D('User')->where(array('user_id'=>$ginfo['id']))->find();
         if($user['type'] == '9'){
-            
+            //三级分销如果有下级  不能直接解绑
         }
-        $status = D('WxMember')->where(array('user_id'=>$ginfo['id']))->getField('');
+        $state = D('User')->where(['id'=>$user['id']])->setField('status',0);
+        $updata = [
+            'user_id'  => 0,
+            'channel'  => 0
+        ];
+        $status = D('WxMember')->where(array('user_id'=>$ginfo['id']))->save($updata);
+        if($state && $status){
+            $this->srun('更新成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+        }else{
+            $this->erun('解绑失败');
+        }
+
     }
     /**
      * 重置密码

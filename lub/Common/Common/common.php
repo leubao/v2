@@ -90,7 +90,7 @@ function upload_key($args) {
  * 检查模块是否已经安装
  * @param type $moduleName 模块名称
  * @return boolean
- 
+
 function isModuleInstall($moduleName) {
     $appCache = cache('Module');
     if (isset($appCache[$moduleName])) {
@@ -100,7 +100,7 @@ function isModuleInstall($moduleName) {
 }
 */
 /**
- * 产生一个指定长度的随机字符串,并返回给用户 
+ * 产生一个指定长度的随机字符串,并返回给用户
  * @param type $len 产生字符串的长度
  * @param $type int 生成类型
  * @return string 随机字符串
@@ -117,9 +117,9 @@ function genRandomString($len = 6,$type = null) {
             "S", "T", "U", "V", "W", "X", "Y", "Z", "0", "1", "2",
             "3", "4", "5", "6", "7", "8", "9"
         );
-    }  
+    }
     $charsLen = count($chars) - 1;
-    // 将数组打乱 
+    // 将数组打乱
     shuffle($chars);
     $output = "";
     for ($i = 0; $i < $len; $i++) {
@@ -164,7 +164,7 @@ function getModel($modelid, $field = '') {
  * 检测一个数据长度是否超过最小值
  * @param type $value 数据
  * @param type $length 最小长度
- * @return type 
+ * @return type
  */
 function isMin($value, $length) {
     return mb_strlen($value, 'utf-8') >= (int) $length ? true : false;
@@ -174,7 +174,7 @@ function isMin($value, $length) {
  * 检测一个数据长度是否超过最大值
  * @param type $value 数据
  * @param type $length 最大长度
- * @return type 
+ * @return type
  */
 function isMax($value, $length) {
     return mb_strlen($value, 'utf-8') <= (int) $length ? true : false;
@@ -192,7 +192,7 @@ function fileext($filename) {
 
 /**
  * 对 javascript escape 解码
- * @param type $str 
+ * @param type $str
  * @return type
  */
 function unescape($str) {
@@ -229,16 +229,16 @@ function str_cut($sourcestr, $length, $dot = '...') {
     $returnstr = '';
     $i = 0;
     $n = 0;
-    $str_length = strlen($sourcestr); //字符串的字节数 
+    $str_length = strlen($sourcestr); //字符串的字节数
     while (($n < $length) && ($i <= $str_length)) {
         $temp_str = substr($sourcestr, $i, 1);
-        $ascnum = Ord($temp_str); //得到字符串中第$i位字符的ascii码 
+        $ascnum = Ord($temp_str); //得到字符串中第$i位字符的ascii码
         if ($ascnum >= 224) {//如果ASCII位高与224，
-            $returnstr = $returnstr . substr($sourcestr, $i, 3); //根据UTF-8编码规范，将3个连续的字符计为单个字符         
+            $returnstr = $returnstr . substr($sourcestr, $i, 3); //根据UTF-8编码规范，将3个连续的字符计为单个字符
             $i = $i + 3; //实际Byte计为3
             $n++; //字串长度计1
         } elseif ($ascnum >= 192) { //如果ASCII位高与192，
-            $returnstr = $returnstr . substr($sourcestr, $i, 2); //根据UTF-8编码规范，将2个连续的字符计为单个字符 
+            $returnstr = $returnstr . substr($sourcestr, $i, 2); //根据UTF-8编码规范，将2个连续的字符计为单个字符
             $i = $i + 2; //实际Byte计为2
             $n++; //字串长度计1
         } elseif ($ascnum >= 65 && $ascnum <= 90) { //如果是大写字母，
@@ -259,7 +259,7 @@ function str_cut($sourcestr, $length, $dot = '...') {
 
 /**
  * 取得URL地址中域名部分
- * @param type $url 
+ * @param type $url
  * @return \url 返回域名
  */
 function urlDomain($url) {
@@ -361,7 +361,7 @@ function SendMail($address, $title, $message) {
         return $mail->Send();
     } catch (phpmailerException $e) {
         return $e->errorMessage();
-    } 
+    }
 }
 // +----------------------------------------------------------------------
 // | LubTMP 汉字转拼音
@@ -449,46 +449,46 @@ if (!function_exists('array_column')) {
         return $result;
     }
 }
- /*计算时间差并返回差多少天、时、分、秒 
+ /*计算时间差并返回差多少天、时、分、秒
   * @param string $begin_time
   * @param string $end_time
   * @return string
   */
 function timediff($begin_time,$end_time,$type = 'all') {
     $begin_time = strtotime($begin_time);
-    $end_time = strtotime($end_time);  
-    if($begin_time < $end_time){ 
-        $starttime = $begin_time; 
-        $endtime = $end_time; 
-    }else{ 
-        $starttime = $end_time; 
-        $endtime = $begin_time; 
+    $end_time = strtotime($end_time);
+    if($begin_time < $end_time){
+        $starttime = $begin_time;
+        $endtime = $end_time;
+    }else{
+        $starttime = $end_time;
+        $endtime = $begin_time;
     }
     $timediff = $endtime - $starttime;
     switch ($type) {
         case 'day':
             $days = intval($timediff/86400);
-            $res = array("day" => $days); 
+            $res = array("day" => $days);
             break;
         case 'hour':
             $hours = intval($timediff/3600);
-            $res = array("hour" => $hours); 
+            $res = array("hour" => $hours);
             break;
         case 'min':
             $mins = intval($timediff/60);
-            $res = array("min" => $mins); 
+            $res = array("min" => $mins);
             break;
         case 'all':
-            $days = intval($timediff/86400); 
-            $remain = $timediff%86400; 
-            $hours = intval($remain/3600); 
-            $remain = $remain%3600; 
-            $mins = intval($remain/60); 
+            $days = intval($timediff/86400);
+            $remain = $timediff%86400;
+            $hours = intval($remain/3600);
+            $remain = $remain%3600;
+            $mins = intval($remain/60);
             $secs = $remain%60;
-            $res = array("day" => $days,"hour" => $hours,"min" => $mins,"sec" => $secs); 
+            $res = array("day" => $days,"hour" => $hours,"min" => $mins,"sec" => $secs);
             break;
     }
-    return $res; 
+    return $res;
 }
 /*二维数组转字符串
 * @param array $arr 待处理的数组
@@ -541,7 +541,7 @@ function senuInfo($uinfo){
         'last_login_time'=>'',
         'last_login_ip'=>'',
         'verify'=>'',
-        'email'=>'', 
+        'email'=>'',
         'remark'=>'',
         'create_time'=>'',
         'update_time'=>'',
@@ -553,7 +553,7 @@ function senuInfo($uinfo){
         );
     $return = array_diff_key($uinfo,$unset);
     return $return;
-} 
+}
 /**
  * 格式化金额
  *
@@ -581,32 +581,32 @@ function format_money($money, $len=2, $sign='￥'){
     return $sign.$negative.$format_money.$decimal;
 }
 /*判断终端访问类型*/
-function is_mobile() { 
-    $user_agent = $_SERVER['HTTP_USER_AGENT']; 
-    $mobile_agents = array("240x320","acer","acoon","acs-","abacho","ahong","airness","alcatel","amoi", 
-    "android","anywhereyougo.com","applewebkit/525","applewebkit/532","asus","audio", 
-    "au-mic","avantogo","becker","benq","bilbo","bird","blackberry","blazer","bleu", 
-    "cdm-","compal","coolpad","danger","dbtel","dopod","elaine","eric","etouch","fly ", 
-    "fly_","fly-","go.web","goodaccess","gradiente","grundig","haier","hedy","hitachi", 
-    "htc","huawei","hutchison","inno","ipad","ipaq","iphone","ipod","jbrowser","kddi", 
-    "kgt","kwc","lenovo","lg ","lg2","lg3","lg4","lg5","lg7","lg8","lg9","lg-","lge-","lge9","longcos","maemo", 
-    "mercator","meridian","micromax","midp","mini","mitsu","mmm","mmp","mobi","mot-", 
-    "moto","nec-","netfront","newgen","nexian","nf-browser","nintendo","nitro","nokia", 
-    "nook","novarra","obigo","palm","panasonic","pantech","philips","phone","pg-", 
-    "playstation","pocket","pt-","qc-","qtek","rover","sagem","sama","samu","sanyo", 
-    "samsung","sch-","scooter","sec-","sendo","sgh-","sharp","siemens","sie-","softbank", 
-    "sony","spice","sprint","spv","symbian","tablet","talkabout","tcl-","teleca","telit", 
-    "tianyu","tim-","toshiba","tsm","up.browser","utec","utstar","verykool","virgin", 
-    "vk-","voda","voxtel","vx","wap","wellco","wig browser","wii","windows ce", 
-    "wireless","xda","xde","zte"); 
-    $is_mobile = false; 
-    foreach ($mobile_agents as $device) { 
-        if (stristr($user_agent, $device)) { 
-            $is_mobile = true; 
-            break; 
-        } 
-    } 
-    return $is_mobile; 
+function is_mobile() {
+    $user_agent = $_SERVER['HTTP_USER_AGENT'];
+    $mobile_agents = array("240x320","acer","acoon","acs-","abacho","ahong","airness","alcatel","amoi",
+    "android","anywhereyougo.com","applewebkit/525","applewebkit/532","asus","audio",
+    "au-mic","avantogo","becker","benq","bilbo","bird","blackberry","blazer","bleu",
+    "cdm-","compal","coolpad","danger","dbtel","dopod","elaine","eric","etouch","fly ",
+    "fly_","fly-","go.web","goodaccess","gradiente","grundig","haier","hedy","hitachi",
+    "htc","huawei","hutchison","inno","ipad","ipaq","iphone","ipod","jbrowser","kddi",
+    "kgt","kwc","lenovo","lg ","lg2","lg3","lg4","lg5","lg7","lg8","lg9","lg-","lge-","lge9","longcos","maemo",
+    "mercator","meridian","micromax","midp","mini","mitsu","mmm","mmp","mobi","mot-",
+    "moto","nec-","netfront","newgen","nexian","nf-browser","nintendo","nitro","nokia",
+    "nook","novarra","obigo","palm","panasonic","pantech","philips","phone","pg-",
+    "playstation","pocket","pt-","qc-","qtek","rover","sagem","sama","samu","sanyo",
+    "samsung","sch-","scooter","sec-","sendo","sgh-","sharp","siemens","sie-","softbank",
+    "sony","spice","sprint","spv","symbian","tablet","talkabout","tcl-","teleca","telit",
+    "tianyu","tim-","toshiba","tsm","up.browser","utec","utstar","verykool","virgin",
+    "vk-","voda","voxtel","vx","wap","wellco","wig browser","wii","windows ce",
+    "wireless","xda","xde","zte");
+    $is_mobile = false;
+    foreach ($mobile_agents as $device) {
+        if (stristr($user_agent, $device)) {
+            $is_mobile = true;
+            break;
+        }
+    }
+    return $is_mobile;
 }
 /**
 *数字金额转换成中文大写金额的函数
@@ -618,12 +618,12 @@ function num_to_rmb($num){
     $c1 = "零壹贰叁肆伍陆柒捌玖";
     $c2 = "分角元拾佰仟万拾佰仟亿";
     //精确到分后面就不要了，所以只留两个小数位
-    $num = round($num, 2); 
+    $num = round($num, 2);
     //将数字转化为整数
     $num = $num * 100;
     if (strlen($num) > 10) {
             return "金额太大，请检查";
-    } 
+    }
     $i = 0;
     $c = "";
     while (1) {
@@ -648,7 +648,7 @@ function num_to_rmb($num){
         //结束循环
         if ($num == 0) {
                 break;
-        } 
+        }
     }
     $j = 0;
     $slen = strlen($c);
@@ -662,9 +662,9 @@ function num_to_rmb($num){
                 $c = $left . $right;
                 $j = $j-3;
                 $slen = $slen-3;
-        } 
+        }
         $j = $j + 3;
-    } 
+    }
     //这个是为了去掉类似23.0中最后一个“零”字
     if (substr($c, strlen($c)-3, 3) == '零') {
             $c = substr($c, 0, strlen($c)-3);
@@ -685,13 +685,14 @@ function num_to_rmb($num){
  * @return WechatReceive
  */
 function & load_wechat($type = '',$product_id = '',$submch = '') {
-    !class_exists('Wechat\Loader', FALSE) && Vendor('Wechat.Loader'); 
+    !class_exists('Wechat\Loader', FALSE) && Vendor('Wechat.Loader');
     static $wechat = array();
     $index = md5(strtolower($type));
     if (!isset($wechat[$index])) {
         if(!empty($product_id)){
             $proconf = cache('ProConfig');
             $proconf = $proconf[$product_id][2];
+            //Think\Log::record(serialize($proconf),'WARN');
             //定义微信公众号配置参数（这里是可以从数据库读取的哦）
             $options = array(
                 'token'           => $proconf['wx_token'], // 填写你设定的key
@@ -713,7 +714,7 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
                     'mch_id'          => $proconf['wx_sub_mch_id'], // 微信支付，商户ID（可选）
                     'token'           => $proconf['wx_token'], // 填写你设定的key
                     'appsecret'       => $proconf['wx_appsecret'], // 填写高级调用功能的密钥
-                    'encodingaeskey'  => $proconf['wx_encoding'], // 
+                    'encodingaeskey'  => $proconf['wx_encoding'], //
                     'partnerkey'      => $proconf['wx_sub_mchkey'], // 微信支付，密钥（可选）
                 );
             }
@@ -733,7 +734,7 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
 }
 /**
  * 获取支付操作配置信息
- * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar 
+ * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar
  * || wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap
  * @param $product_id 产品ID
  * @param $sub 是否开启子商户
@@ -817,8 +818,8 @@ function load_payment($pay = '',$product_id = ''){
                 //'no_credit',
             ],// 指定不能使用信用卡支付   不传入，则均可使用
             'fee_type'          => 'CNY',// 货币类型  当前仅支持该字段
-            'notify_url'        => 'https://ticket.leuao.com/api.php/PayNotify/wxnotify',
-            'redirect_url'      => 'http://ticket.leuao.com',// 如果是h5支付，可以设置该值，返回到指定页面
+            'notify_url'        => 'http://www.yx513.net/api.php/PayNotify/wxnotify',
+            'redirect_url'      => 'http://www.yx513.net',// 如果是h5支付，可以设置该值，返回到指定页面
             'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true
         );
     }
@@ -832,12 +833,12 @@ function load_payment($pay = '',$product_id = ''){
  * @param  string $key     键名
  * @param  string $value   键值
  * @param  string $time    有效时间
- * @return true|false  
+ * @return true|false
  */
 function load_redis($apiport,$key,$value = '',$time = ''){
     $redis = new \Redis();
     $redis->connect(C('REDIS_HOST'),C('REDIS_PORT'));
-    //$redis->auth(C('REDIS_AUTH'));
+    $redis->auth(C('REDIS_AUTH'));
     $redis->select(C('REDIS_DATABASE'));
     switch ($apiport) {
         case 'lsize':
@@ -877,7 +878,7 @@ function load_redis($apiport,$key,$value = '',$time = ''){
             $return = $redis->incrBy($key,$value);
             break;
         case 'decrby':
-            //计数器-
+            //计数器- 返回操作后的值
             $return = $redis->decrBy($key,$value);
             break;
         case 'delete':

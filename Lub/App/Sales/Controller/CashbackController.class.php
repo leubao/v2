@@ -1,6 +1,8 @@
 <?php
 // +----------------------------------------------------------------------
 // | LubTMP 全员/三级销售  佣金管理
+// | 商户支付方式1打卡2支付宝转账3财务取现4微信企业转账5微信红包
+// |状态1提现成功3待审核4驳回5微信红包待领取
 // +----------------------------------------------------------------------
 // | Copyright (c) 2017 http://www.leubao.com, All rights reserved.
 // +----------------------------------------------------------------------
@@ -49,27 +51,46 @@ class CashbackController extends ManageBase{
                         $this->erun("ERROR:".$e->errorMessage().$return['err_code']);
                         exit;
                     }
+                    if($return['return_code'] == 'SUCCESS' && $return['result_code'] == 'SUCCESS'){
+                        //交易成功,写入支付日志改变订单状态
+                        $this->pay_suess($return,$info['money']);
+                        $this->srun("支付成功...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+                    }else{
+                        error_insert($return['err_code']);
+                        $this->erun("ERROR:".$return['return_msg'].$return['err_code'].$return['err_code_des']);
+                    }
                 }
                 //微信普通红包
                 if($procofig['rebate_pay'] == '2'){
-                    $postData = $this->pay_red($info,$product);//dump($postData);
-                    $config = load_payment('wx_red',$product['id']);
-                    try {
-                        return Red::run('wx_red', $config, $postData);
-                    } catch (PayException $e) {
-                        load_redis('set','fkhs',serialize($e));
-                        $this->erun("ERROR:".$e->errorMessage().$return['err_code']);
-                        exit;
+                    //注意200的限额
+                    if($info['money'] > '200'){
+                        //大于200拆分多个红包
+                        $redNum = 1;
+                        $redInfo[] = [
+                            'money' => $info['money']%200,
+                            'sn'    => $info['sn'],
+                            'openid'=> $info['openid'],
+                        ];
+                        $num = (int)floor($info['money']/200);
+                        for ($i = $num; $i <> 0; $i--) {
+                            $redInfo[] = [
+                                'money' => '200',
+                                'sn'    => $info['sn'].'-'.$redNum,
+                                'openid'=> $info['openid'],
+                            ];
+                            $redNum += 1;
+                        }
+                        //构建红包基础数据,并发送红包
+                        foreach ($redInfo as $k => $v) {
+                            $postData = $this->pay_red($v,$product);
+                        }
+                    }else{
+                        $postData = $this->pay_red($info,$product);
                     }
+                    $this->pay_red_susess($info);
+                    $this->srun("红包创建成功,等待领取...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
                 }
-                if($return['return_code'] == 'SUCCESS' && $return['result_code'] == 'SUCCESS'){
-                    //交易成功,写入支付日志改变订单状态
-                    $this->pay_suess($return,$info['money']);
-                    $this->srun("支付成功...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-                }else{
-                    error_insert($return['err_code']);
-                    $this->erun("ERROR:".$return['return_msg'].$return['err_code'].$return['err_code_des']);
-                }  
+                  
             }else{
                 $this->erun("交易状态不允许此项操作");
             }
@@ -138,6 +159,7 @@ class CashbackController extends ManageBase{
             $this->erun("参数错误...");
         }
         $info = M('Cash')->where(array('sn'=>$ginfo['sn']))->find();
+        //若红包存在子订单则列出所有子订单
         $this->assign('data',$info)->display();
     }
     //微信企业付款
@@ -156,25 +178,40 @@ class CashbackController extends ManageBase{
     }
     //微信红包返款
     function pay_red($info,$product){
+        /*
         $postData = [
-            'mch_billno'    =>  $info['sn'],//商户订单号
-            'send_name'     =>  $product['name'],//商户名称
-            're_openid'     =>  $info['openid'],//用户openid
+            'mch_billno'        =>  $info['sn'],//商户订单号
+            'send_name'         =>  $product['name'],//商户名称
+            're_openid'         =>  $info['openid'],//用户openid
             'payer_real_name'   => userName($info['user_id'],1,1),
-            'total_amount'  =>  $info['money'],//付款金额
-            'total_num'     =>  '1',//红包发放总人数
-            'wishing'       =>  '感谢参与'.$product['name'].'利润分享计划！',//红包祝福语
-            'client_ip'     =>  get_client_ip(),//Ip地址
-            'act_name'      =>  "利润分享计划",//活动名称
-            'remark'        =>  '感谢参与'.$product['name'].'利润分享计划！',//备注
-            'scene_id'      =>  'PRODUCT_6',//发放红包使用场景，红包金额大于200时必传PRODUCT_1:商品促销PRODUCT_2:抽奖PRODUCT_3:虚拟物品兑奖 PRODUCT_4:企业内部福利PRODUCT_5:渠道分润PRODUCT_6:保险回馈PRODUCT_7:彩票派奖PRODUCT_8:税务刮奖
+            'total_amount'      =>  $info['money'],//付款金额
+            'total_num'         =>  '1',//红包发放总人数
+            'wishing'           =>  '感谢参与'.$product['name'].'利润分享计划！',//红包祝福语
+            'client_ip'         =>  get_client_ip(),//Ip地址
+            'act_name'          =>  "利润分享计划",//活动名称
+            'remark'            =>  '感谢参与'.$product['name'].'利润分享计划！',//备注
+            'scene_id'          =>  'PRODUCT_6',//发放红包使用场景，红包金额大于200时必传PRODUCT_1:商品促销PRODUCT_2:抽奖PRODUCT_3:虚拟物品兑奖 PRODUCT_4:企业内部福利PRODUCT_5:渠道分润PRODUCT_6:保险回馈PRODUCT_7:彩票派奖PRODUCT_8:税务刮奖
             'consume_mch_id'=>  '', //
-        ];
+        ];*/
         /*发起支付*/
-        return $postData;
+        
+        $wishing = '感谢参与'.$product['name'].'利润分享计划！';
+        $actname = "利润分享计划";
+        $remark = '感谢参与'.$product['name'].'利润分享计划！';
+        $scene_id = 'PRODUCT_6';
+        $pay = & load_wechat('Pay',$this->pid,1);
+        // 调用方法
+        $result = $pay->sendRedPack($info['openid'], $info['money'], $info['sn'], $product['name'], $wishing, $actname, $remark,'1',$scene_id);
+        if($result['return_code'] == 'SUCCESS' && $result['result_code'] == 'SUCCESS'){
+            return true;
+        }else{
+            $pay->errMsg;
+            return false;
+        }
+        //return $postData;
     }
 
-    /*支付成功*/   
+    /*企业付款模式支付成功*/   
     /**
      * ["return_code"] => string(7) "SUCCESS"
         ["return_msg"] => array(0) {
@@ -205,5 +242,40 @@ class CashbackController extends ManageBase{
             error_insert('400026');
         }
         return true;
+    }
+    /*红包的发送成功
+    * 红包的状态
+    */
+    function pay_red_susess($data)
+    {
+        //改变订单状态 微信红包默认待领取
+        $s1 = M('Cash')->where(array('sn'=>$data["sn"]))->setField('status',5);
+        //写入查询队列  支付日志
+        payLog();
+        //轮询支付日志红包部分
+    }
+    /**
+     * 红包领取超时 重发
+     * 更换订单号 作废原有记录 并关联关系和备注
+     * @return [type] [description]
+     */
+    function resetred(){
+        $ginfo = I('get');
+        //判断记录状态，读取记录内容
+        $map = [
+            'id'      =>    $ginfo['id'],
+            'status'  =>    '',
+        ];
+        $model = D('Manage/Pay');
+        $info = $model->where($map)->find();
+        if(!empty($info)){
+            $param = unserialize($info['param']);
+            //组装红包数据
+            
+            //发送红包申请
+            //记录红包日志
+        }else{
+            $this->erun("记录查询失败");
+        }
     }
 }

@@ -99,11 +99,12 @@ class FigureController extends Controller{
 		$info = $model->where(array('order_sn'=>$sn,'status'=>1))->find();
 		if(!empty($info)){
 			$status = \Libs\Service\Rebate::rebate($info);
-			echo $status;
+			dump($status);
 		}else{
 			echo "未找到订单";
 		}
 	}
+	//
 	/**
 	 * 导出订单的下单商户  电话  数量
 	 * http://www.yx513.net/api.php?m=Figure&a=exp_order&starttime=20170101&endtime=2010331
@@ -208,6 +209,7 @@ class FigureController extends Controller{
 		//更新报表中对应订单支付方式
 	}
 	//检查未返利的订单
+	//http://pw.yjwts.com/api.php?m=Figure&a=get_up_no_rebate&starttime=20170701&endtime=20170812
 	function get_up_no_rebate($starttime,$endtime){
         if(!empty($starttime)){
         	$start_time = strtotime($starttime);

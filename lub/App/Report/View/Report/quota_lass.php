@@ -1,7 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-
 <div class="bjui-pageHeader">
-
 <!--Page -->
 <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Report/Report/quota_lass',array('menuid'=>$menuid));}" method="post">
   <!--条件检索 s--> 
@@ -49,7 +47,7 @@
       <volist name="data" id="vo">
             <tr>
               <td>{$i}</td>
-              <td>{$vo.channel_id|crmName}</td>
+              <td>{$vo.channel_id|crmName} </td>
               <td>{$vo.channel_id|crmQuota}</td>
               <td>{$vo.number}</td>
             </tr>

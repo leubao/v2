@@ -43,7 +43,6 @@
         <th align="center">订单(场景)类型</th>
         <th align="center">渠道商</th>
         <th align="center">下单人</th>
-        <th align="center">取票人</th>
         <th align="center">区域</th>
         <th align="center">票型</th>
         <th align="center">票面单价</th>
@@ -62,7 +61,6 @@
         <td>{$vo.addsid|addsid}({$vo.type|channel_type})</td>
         <td><if condition="$vo['type'] eq 1">散客<else />{$vo.channel_id|crmName}</if></td>
         <td align="center">{$vo.user_id|userName}</td>
-        <td align="center">{$vo.user_id|userName}</td>
         <td>{$vo.area|areaName}</td>
         <td>{$vo.price_id|ticketName}</td>
         <td align="right">{$vo.price}</td>
@@ -74,7 +72,6 @@
        </tr>
     </volist>
      <tr>
-      <td></td>
       <td></td>
       <td></td>
       <td></td>

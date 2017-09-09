@@ -35,4 +35,27 @@ function user_coding($param = ''){
 	
 	echo 'M'.sprintf("%05d",$param);
 }
+/**
+ * 返回提现状态
+ * 1提现成功3待审核4驳回
+ */
+function pay_cash_back_status($param = ''){
+	switch ($param) {
+        case 0:
+            echo "<span class='label label-danger'>已作废</span>";
+            break;
+        case 4:
+            echo "<span class='label label-danger'>驳回</span>";
+            break;
+        case 3:
+            echo "<span class='label label-success'>待审核</span>";
+            break;
+        case 5:
+            echo "<span class='label label-warning'>审核中</span>";
+            break;
+        case 1:
+            echo "<span class='label label-default'>完结</span>";
+            break;
+    }
+}
 ?>

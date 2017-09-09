@@ -98,6 +98,7 @@ class FinancialController extends ManageBase{
 			//开启代理商制度，时执行
 			$list = Report::level_fold($list);
 		}
+		//echo count($list);
 		if($type == '1'){
 			//根据计划汇总
 		//	$plan_fold = Report::plan_fold($list);
@@ -494,5 +495,137 @@ class FinancialController extends ManageBase{
 		}
 		$this->assign('type',$type)->assign('work',$work)->assign('export_map',$export_map)
 			->display();
+	}
+	/**
+	 * 渠道商月度销售汇总
+	 * @Author   zhoujing   <zhoujing@leubao.com>
+	 * @DateTime 2017-08-28
+	 * @return   array
+	 
+	public function months_report()
+	{
+		$start_time = I('starttime');
+	    $end_time = I('endtime') ? I('endtime') : date('Y-m',time());
+	    $type = I('type') ? I('type') : '2';
+	    $priceid = I('ticket_type');
+	    $channel = I('channel_id');
+	    $channelname = I('channel_name');
+	    //传递条件
+	    $this->assign('starttime',$start_time);
+        $this->assign('endtime',$end_time);
+        $export_map['datetime'] = $start_time.'至'.$end_time;
+        $this->assign('channel_id',$channel)->assign('channel_name',$channelname);
+		if (!empty($start_time) && !empty($end_time)) {
+            $start_time = date("Ymd",strtotime($start_time));
+            $end_time = date("Ymd",strtotime($end_time));
+            $map['plantime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }else{
+        	//默认显示当天的订单
+        	$start_time = date("Ymd");
+            $end_time = $start_time;
+        	$map['plantime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }
+        if(!empty($channel)){
+        	$map['channel_id'] = array('in',agent_channel($channel,2));
+        }
+        //设置订单类型为团队或渠道
+        //按照客户分组来统计报表 TODO 政企订单不计算在内
+        $map['type'] = array('in','2,4,7');
+        $db = M('ReportSum');
+		$map['product_id'] = $this->pid;
+		$list = $db->where($map)->select();
+		if($this->procof['agent'] == '1'){
+			//开启代理商制度，时执行
+			$list = Report::level_fold($list);
+		}
+		//dump($list);
+		$channel = [];
+		foreach ($list as $key => $value) {
+			$channel[$value['channel_id']]['price'][$value['price_id']] = [
+				'channel_id' => $value['channel_id'],
+				'number'     => $value['number'] + $channel[$value['channel_id']][$value['price_id']]['number'],
+	 			'price_id'   => $value['price_id'],
+	 			'price'		 => $value['price'],
+			    'discount'	 => $value['discount'],
+			    'money'		 => $value['money'] + $channel[$value['channel_id']][$value['price_id']]['money'],
+			    'moneys'	 => $value['moneys'] + $channel[$value['channel_id']][$value['price_id']]['moneys'],
+			    'subsidy'	 => $value['subsidy'] + $channel[$value['channel_id']][$value['price_id']]['subsidy'],
+			];
+			//sort($channel[$value['channel_id']]['price']);
+			$channel[$value['channel_id']]['number'] = $value['number'] + $channel[$value['channel_id']]['number'];
+			$channel[$value['channel_id']]['money'] = $value['money'] + $channel[$value['channel_id']]['money'];
+			$channel[$value['channel_id']]['moneys'] = $value['moneys'] + $channel[$value['channel_id']]['moneys'];
+			$channel[$value['channel_id']]['subsidy'] = $value['subsidy'] + $channel[$value['channel_id']]['subsidy'];
+			$channel[$value['channel_id']]['tic_num'] = count($channel[$value['channel_id']]['price']);
+			
+		}
+		ksort($channel);
+		//dump($channel);
+		if($type == '1'){
+			//根据计划汇总
+		//	$plan_fold = Report::plan_fold($list);
+			//根据票型汇总
+			//$list = Report::channel_ticket_fold($plan_fold,$map['datetime'],$channel);
+			//$list = Report::channel_plan_fold($list);
+		}else{
+			//$list = Report::channel_fold($list);
+			
+		}
+		$export_map['report'] = 'channel';
+		$export_map['type']	= $type;
+		S('ChannelReport'.get_user_id(),$list);
+		//加载当前产品配置 TODO
+		$this->assign('data',$channel)->assign('export_map',$export_map)->assign('type',$type)->assign('product_id',$map['product_id'])->display();
+	}*/
+	public function months_report()
+	{
+		$start_time = I('starttime');
+	    $end_time = I('endtime') ? I('endtime') : date('Y-m',time());
+	    $type = I('type') ? I('type') : '2';
+	    $priceid = I('ticket_type');
+	    $channel = I('channel_id');
+	    $channelname = I('channel_name');
+	    //传递条件
+	    $this->assign('starttime',$start_time);
+        $this->assign('endtime',$end_time);
+        $export_map['datetime'] = $start_time.'至'.$end_time;
+        $this->assign('channel_id',$channel)->assign('channel_name',$channelname);
+		if (!empty($start_time) && !empty($end_time)) {
+            $start_time = date("Ym",strtotime($start_time));
+            $end_time = date("Ym",strtotime($end_time));
+            $map['months'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }else{
+        	//默认显示当天的订单
+        	$start_time = date("Ym");
+            $end_time = $start_time;
+        	$map['months'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }
+        if(!empty($channel)){
+        	$map['channel_id'] = array('in',agent_channel($channel,2));
+        }
+        $db = M('ReportMonths');
+		$map['product_id'] = $this->pid;
+		$list = $db->where($map)->field('id,product_id,channel_id,months,price_id,price,discount,number,money,moneys,subsidy')->select();
+		$channel = [];
+		foreach ($list as $key => $value) {
+			$channel[$value['channel_id']]['price'][$value['price_id']] = [
+				'channel_id' => $value['channel_id'],
+				'number'     => $value['number'] + $channel[$value['channel_id']]['price'][$value['price_id']]['number'],
+	 			'price_id'   => $value['price_id'],
+	 			'price'		 => $value['price'],
+			    'discount'	 => $value['discount'],
+			    'money'		 => $value['money'] + $channel[$value['channel_id']]['price'][$value['price_id']]['money'],
+			    'moneys'	 => $value['moneys'] + $channel[$value['channel_id']]['price'][$value['price_id']]['moneys'],
+			    'subsidy'	 => $value['subsidy'] + $channel[$value['channel_id']]['price'][$value['price_id']]['subsidy'],
+			];
+			// sort($channel[$value['channel_id']]['price']);
+			$channel[$value['channel_id']]['number'] = $value['number'] + $channel[$value['channel_id']]['number'];
+			$channel[$value['channel_id']]['money'] = $value['money'] + $channel[$value['channel_id']]['money'];
+			$channel[$value['channel_id']]['moneys'] = $value['moneys'] + $channel[$value['channel_id']]['moneys'];
+			$channel[$value['channel_id']]['subsidy'] = $value['subsidy'] + $channel[$value['channel_id']]['subsidy'];
+			$channel[$value['channel_id']]['tic_num'] = count($channel[$value['channel_id']]['price']);
+		}
+		ksort($channel);
+		$this->assign('data',$channel)->assign('export_map',$export_map)->assign('type',$type)->assign('product_id',$map['product_id'])->display();
 	}
 }

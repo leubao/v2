@@ -30,8 +30,6 @@
                               <input type="radio" name="agent" data-toggle="icheck" value="0" <eq name="vo['agent']" value="0"> checked</eq> data-label="关闭">
                                 </td>
                               </tr>
-                              
-                                
                               <tr>
                                 <td width="120px">全员销售:</td>
                                 <td>
@@ -58,12 +56,6 @@
                                 <td>
                                 <input type="radio" name="black" data-toggle="icheck" value="1" <eq name="vo['black']" value="1"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="black" data-toggle="icheck" value="0" <eq name="vo['black']" value="0"> checked</eq> data-label="关闭">
-                                </td>
-                              </tr>
-                              <tr>
-                                <td width="120px">渠道销售配额:</td>
-                                <td>
-                               <input type="text" name="channel_quota" value="{$vo.channel_quota}" size="10"><span class="remark">开启销售配额后，单计划默认配额</span>
                                 </td>
                               </tr>
                               <tr>
@@ -239,7 +231,7 @@
                         <tr>
                           <td width="120px">常规渠道:</td>
                           <td>
-                         <input type="text" name="channel_often_quota" value="{$vo.channel_often_quota}" size="10"><span class="remark">常规旅行社、酒店渠道。0为不限制</span>
+                         <input type="text" name="channel_often_quota" value="{$vo.channel_often_quota}" size="10"><span class="remark">常规旅行社、酒店渠道。0为不限制,开启销售配额后，单计划默认配额</span>
                           </td>
                         </tr>
                         <tr>
