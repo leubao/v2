@@ -108,7 +108,35 @@
                         <div style="height:94%; overflow:hidden;">
                           <table class="table  table-bordered">
                           <tbody>
-                            
+                            <tr>
+                              <td width="120px">partner_id:</td>
+                              <td><input type="text" name="ali_partner_id" class="form-control" value="{$vo.ali_partner_id}" size="20" placeholder="partner">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">APPID:</td>
+                              <td><input type="text" name="ali_app_id" class="form-control" value="{$vo.ali_app_id}" size="20" placeholder="appid">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">公共Key:</td>
+                              <td><input type="text" name="ali_public_key" class="form-control" value="{$vo.ali_public_key}" size="40" placeholder="公共Key">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">rsa_private_key:</td>
+                              <td>
+                              <span style="float: left;">{$path.rsa_private_key|if_file}</span>
+                                  <div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
+                                            data-file-size-limit="1024000000"
+                                            data-file-type-exts="*.pem"
+                                            data-multi="true"
+                                            data-auto="true"
+                                            data-on-upload-success="doc_upload_success"
+                                            data-icon="cloud-upload"></div>
+                                  
+                              </td>
+                            </tr>
                           </tbody>
                           </table>
                         </div>

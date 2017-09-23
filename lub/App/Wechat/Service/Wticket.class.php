@@ -43,6 +43,36 @@ class Wticket {
         $urls = $oauth->getOauthRedirect($callback, $state, $scope);
         return $urls;
     }
+    /**
+     * 印象大红袍厦门活动
+     */
+    function xm_tologin($ginfo,$reg = '')
+    {
+        session('user',null);
+        $oauth = & load_wechat('Oauth',$ginfo['pid'],1);//dump($ginfo);
+        $wxauth = $oauth->getOauthAccessToken($ginfo['code']);//dump($wxauth);
+        //新用户写入
+        Wticket::add_wx_user($wxauth,$promote,$ginfo['pid']);
+        $openid = $ginfo['openid'] ? $ginfo['openid'] : $wxauth['openid'];
+        //保存openid
+        session('openid',$openid);
+        //写入必要的当前用户信息
+        $uinfo = Wticket::get_auto_auth($openid,$promote);
+        $user['user'] = array(
+            'id' => 2,
+            'openid' => $openid,
+            'maxnum' => '3',
+            'guide'  => '0',
+            'qditem' => '0',
+            'scene'  => '41',
+            'epay'   => '2',//结算方式1 票面价结算2 底价结算
+            'channel'=> '0',
+            'pricegroup'=>'9',
+            'wxid'   => $uinfo['wechat']['user_id'],
+        );
+        session('user',$user);
+        return true;
+    }
         /**
      * 系统登录接口
      */
@@ -281,10 +311,10 @@ class Wticket {
         }elseif (!empty($promote) && empty($winfo['channel'])) {
             
             $uInfo = $db->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
-            load_redis('set','uoo',serialize($uInfo));
+            //load_redis('set','uoo',serialize($uInfo));
             //$uInfo['promote'] = $promote;//推广标记
         }
-        load_redis('set','222',$promote.serialize($uInfo));
+        //load_redis('set','222',$promote.serialize($uInfo));
         if(!empty($uInfo)){
             //查询所属分组信息
             $uInfo['group'] = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement')->find();
@@ -298,11 +328,11 @@ class Wticket {
                 }
             }
             $uInfo['wechat'] = $winfo;
-            load_redis('set','sql',$db->_sql());
-            load_redis('set','uinfo',serialize($uInfo));
+            //load_redis('set','sql',$db->_sql());
+            //load_redis('set','uinfo',serialize($uInfo));
             return $uInfo;
         }else{
-            load_redis('set','2','221');
+            //load_redis('set','2','221');
             //当微信为散客时，默认用户为微信售票
             return '0';
         }

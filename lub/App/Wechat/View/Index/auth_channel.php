@@ -63,7 +63,7 @@
 <if condition="$type neq '2'">
 <script type="text/javascript">
   $(function() {
-    var openid = '{$data.openid}',
+    var openid = '{$openid}',
         name = '',
         pwd = '',
         msg = '';

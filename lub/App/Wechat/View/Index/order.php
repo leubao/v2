@@ -20,7 +20,7 @@
             </ul>
           </div>
         </div>
-        <div class="card-footer price"> <span>优惠金额</span><span>{$data['info']['data']['poor']|format_money}</span></div>
+        <div class="card-footer price"> {$error}<span>优惠金额</span><span>{$data['info']['data']['poor']|format_money}</span></div>
         <div class="card-footer price"> <span>实付金额</span><span> ￥ {$data['money']}</span></div>
     </div>
     
@@ -51,13 +51,13 @@
   <!--支付方式-->
   <if condition="$data.status neq '1' || $data.status neq '9' ">
   <div class="content-block">
-    <if condition="$data.type eq '2'">
+    <if condition="$data.type eq '2' || $data.type eq '8'">
     <p><a href="#" class="button button-big button-fill button-warning" id="credit">授信额支付 </a></p>
     </if>
     <if condition="$data.type eq '1' || $data.type eq '8' || $data.type eq '6'">
     <p><a href="#" class="button button-big button-fill button-success" id="wxpay">微信支付</a></p>
     <p><a href="{:U('Wechat/Index/dfpay',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));}" class="button button-big button-fill wxpay button-warning" id="dfpay">请人代付</a></p>
-    </if><p><a href="#" id="window_pay" class="button button-big button-fill">窗口现金支付 </a></p>
+    </if>
     <if condition="$data.type eq '6'">
     <p><a href="#" id="window_pay" class="button button-big button-fill">窗口现金支付 </a></p>
     </if>
@@ -130,7 +130,7 @@
     });
     </if>
     /*授信额支付*/
-    <if condition="$data.type eq '2' ">
+    <if condition="$data.type eq '2' || $data.type eq '8'">
     $(document).on('click', '#credit',function () {
       $.confirm('订单金额:'+money, 
         function () {
@@ -155,10 +155,7 @@
       );
     });
     </if>
-
-    
   });
-  
 </script>
 </body>
 </html>

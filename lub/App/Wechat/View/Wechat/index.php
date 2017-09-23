@@ -43,7 +43,7 @@
                           </td>
                         </tr>
                         
-
+                        
                         <tr>
                           <td width="120px">订单模板消息:</td>
                           <td><input type="text" name="wx_tplmsg_order_id" class="form-control" value="{$vo.wx_tplmsg_order_id}" size="60" placeholder="订单模板消息id">
@@ -167,7 +167,14 @@
                             </tr>
                             <tr>
                               <td width="100px">背景图片:</td>
-                              <td><div class="col-sm-6 col-md-3">
+                              <td>
+                                <div class="input-group input-group-sm">
+                                <input type="text" class="form-control" name="pic" value="{$cache.pic}" id="App-pic">
+                                <span class="input-group-btn">
+                                <button class="btn btn-default shiny" type="button" onclick="appImgviewer('App-pic')"><i class="fa fa-camera-retro"></i>预览</button><button class="btn btn-default shiny" type="button" onclick="appImguploader('App-pic',false)"><i class="glyphicon glyphicon-picture"></i>上传</button>
+                            </span>
+                            </div>
+                              <div class="col-sm-6 col-md-3">
                                 <div class="thumbnail"> <img data-src="holder.js/100%x200" alt="分享图标" src="{$config_siteurl}static/images/wsbj_1_{$pid}.jpg" data-holder-rendered="true" style="height: 150px; width: 100%; display: block;">
                                   <div class="caption">
                                     <div style="display: inline-block; vertical-align: middle;">
@@ -240,7 +247,7 @@
               </div>
               <div id="wtab-7" class="tab-pane">
                 <div class="panel-body">
-                <!--
+                
                     <fieldset style="height:100%;">
                       <legend>微信支付 -- 收款</legend>
                       <div style="height:94%; overflow:hidden;">
@@ -259,61 +266,8 @@
                       </tbody>
                       </table>
                     </div>
-                    </fieldset>-->
-                    <fieldset style="height:100%;">
-                      <legend>微信支付 -- 企业收款</legend>
-                      <div style="height:94%; overflow:hidden;">
-                      <table class="table  table-bordered">
-                      <tbody>
-                        <tr>
-                          <td width="120px">商户id:</td>
-                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">商户支付密钥Key:</td>
-                          <td><input type="text" name="wx_sub_mchkey" class="form-control" value="{$vo.wx_sub_mchkey}" size="40" placeholder="商户支付密钥Key">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">apiclient_cert.pem:</td>
-                          <td>
-                              <div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
-                                        data-file-size-limit="1024000000"
-                                        data-file-type-exts="*.pem"
-                                        data-multi="true"
-                                        data-auto="true"
-                                        data-on-upload-success="doc_upload_success"
-                                        data-icon="cloud-upload"></div>
-
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">apiclient_key.pem:</td>
-                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
-                                        data-file-size-limit="1024000000"
-                                        data-file-type-exts="*.pem"
-                                        data-multi="true"
-                                        data-auto="true"
-                                        data-on-upload-success="doc_upload_success"
-                                        data-icon="cloud-upload"></div>
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">rootca.pem:</td>
-                          <td><div id="doc_pic_up" data-toggle="upload" data-uploader="{:U('Wechat/Wechat/public_upload');}"
-                                        data-file-size-limit="1024000000"
-                                        data-file-type-exts="rootca.pem"
-                                        data-multi="true"
-                                        data-auto="true"
-                                        data-on-upload-success="doc_upload_success"
-                                        data-icon="cloud-upload"></div>
-                          </td>
-                        </tr>
-                      </tbody>
-                      </table>
-                    </div>
                     </fieldset>
+                    
                 </div>
               </div>
           </div>
@@ -332,3 +286,94 @@
     </ul>
   </div>
 </form>
+<script>
+      //App默认图片上传管理器
+function appImguploader(fbid, isall) {
+  //fbid 查找带回的文本框ID,全局唯一
+  //isall 多图,单图模式
+  $.ajax({
+      type: "post",
+      url: "{:U('Multi/Upload/indeximg')}",
+      data: {
+          'fbid': fbid,
+          'isall': isall
+      },
+      dataType: "json",
+      //beforeSend:$.App.loading(),
+      success: function(mb) {
+          //$.App.loading();
+          bootbox.dialog({
+              message: mb,
+              title: "图片上传管理器",
+              className: "modal-darkorange",
+              buttons: {
+                  "追加": {
+                      className: "btn-success",
+                      callback: function() {
+                          if (isall == 'false') {
+                              $('#' + fbid).val($('#App-uploader-findback').val());
+                          } else {
+                              $('#' + fbid).val($('#' + fbid).val() + $('#App-uploader-findback').val());
+                          }
+                      }
+                  },
+                  "替换": {
+                      className: "btn-blue",
+                      callback: function() {
+                          $('#' + fbid).val($('#App-uploader-findback').val());
+                      }
+                  },
+                  "取消": {
+                      className: "btn-danger",
+                      callback: function() {}
+                  }
+              }
+          });
+      },
+      error: function(xhr) {
+          $.App.alert('danger', '通讯失败！请重试！');
+      }
+  });
+  return false;
+}
+//App默认图片预览器
+function appImgviewer(fbid) {
+  //fbid 查找带回的文本框ID,全局唯一
+  //isall 多图,单图模式
+  var ids = $('#' + fbid).val();
+  if (!ids) {
+      $.App.alert('danger', '您还没有图片可以预览！');
+      return false;
+  }
+  $.ajax({
+      type: "post",
+      url: "{:U('Multi/Index/appImgviewer')}",
+      data: {
+          'ids': ids
+      },
+      dataType: "json",
+      success: function(mb) {
+          bootbox.dialog({
+              message: mb,
+              title: "图片预览器",
+              className: "modal-darkorange",
+              buttons: {
+                  success: {
+                      label: "确定",
+                      className: "btn-blue",
+                      callback: function() {}
+                  },
+                  "取消": {
+                      className: "btn-danger",
+                      callback: function() {}
+                  }
+              }
+          });
+      },
+      error: function(xhr) {
+          $.App.alert('danger', '通讯失败！请重试！');
+      }
+  });
+  return false;
+}
+</script>

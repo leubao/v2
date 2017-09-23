@@ -18,16 +18,18 @@
     <!-- 下面是正文 -->
     <div class="card-container">
       <volist name="data" id="vo">
+        <a href="{:U('Wechat/Index/order_info',array('sn'=>$vo['order_sn']));}" class="item-link item-content">
         <div class="card">
-            <div class="card-header">单号:{$vo.order_sn}<span class="pull-right">{$vo.status|status}</span></div>
+            <div class="card-header">单号:{$vo.order_sn}<span class="pull-right"><if condition="$vo['status'] eq '9'">预订成功<else />等待确认</if></span></div>
             <div class="card-content">
                 <div class="card-content-inner">
                     <b>日期场次:{$vo.plan_id|planShow}</b>
-                    <p>金额:{$vo.money}</p>
+                    <p>金额:{$vo.money} 数量:{$vo.number}</p>
                     <p>备注:{$vo.remark}</p>
                 </div>
             </div>
         </div>
+        </a>
       </volist>
     </div>
   </div>

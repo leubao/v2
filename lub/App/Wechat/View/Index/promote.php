@@ -6,7 +6,7 @@
   			<img src="{$qr}">
   		</div>
   		<div class="content-block">
-	      <p><a href="{$urls}" class="button button-big button-fill button-success external">立即购买</a></p>
+	      <p><a href="{$urls}" class="button button-big button-fill button-warning external">立即购票</a></p>
 	    </div>
 	    <p class="remark">点击右上角按钮分享给朋友</p>
   	</div>

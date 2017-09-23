@@ -39,7 +39,12 @@
           <div class="item-media"><i class="icon icon-emoji"></i></div>
           <div class="item-inner">
             <div class="item-title">账户余额:{$data.cash}元</div>
-            <div class="item-after"><span class="pull-right"><a href="{:U('Wechat/Index/mention');}" class="external">提现</a>|<a href="{:U('Wechat/Index/mention_list');}" class="external">提现记录</a></span></div>
+          </div>
+        </li>
+        <li class="item-content">
+          <div class="item-media"><i class="icon icon-emoji"></i></div>
+          <div class="item-inner">
+            <div class="item-title">有效售出:{$ocount}张</div>
           </div>
         </li>
        </if>
@@ -69,7 +74,7 @@
               </div>
             </a>
           </li>
-          
+           <!--
           <li>
             <a href="{:U('Wechat/Index/remove');}" class="item-link item-content external">
               <div class="item-media"><i class="icon icon-remove"></i></div>
@@ -78,7 +83,7 @@
               </div>
             </a>
           </li>
-          <!--
+         
           <li>
             <a href="{:U('Wechat/Index/reg_code');}" class="item-link item-content external">
               <div class="item-media"><i class="icon icon-share"></i></div>

@@ -163,15 +163,7 @@
             }
         });
     });
-    $(".swiper-container").swiper({
-      pagination: '.swiper-pagination',
-      direction: 'vertical',
-      slidesPerView: 1,
-      paginationClickable: true,
-      spaceBetween: 30,
-      mousewheelControl: true,
-      autoHeight:true
-    });
+
     var getPlantpl = document.getElementById('plantpl').innerHTML;
     var getPricetpl = document.getElementById('pricetpl').innerHTML;
     laytpl(getPlantpl).render(global, function(html){
@@ -302,10 +294,11 @@
       phone = $("#phone").val(),
       card = $("#card").val().replace(/ /g,''),
       msg = '';
+      //alert(price.length);
       if(plan.length == 0){
         msg = "请选择销售日期!";
       }
-      if(price.length == 0 || num == 0){
+      if(price == 0 || num == 0){
         msg = "请选择票型并选择要购买的数量!";
       }
       if(name.length == 0){
@@ -315,22 +308,7 @@
         msg = "手机号码格式不正确!";
       }
       if(msg != ''){$.toast(msg);return false;}
-      if(card.length == 0){
-        $.prompt('亲，您确定不用身份证取票这一高逼格的功能吗?', 
-          function (value) {
-            post_server(1,value);
-          },
-          function (value) {
-            post_server(2);
-          }
-        );
-      }else{
-        if(/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/.test(card) == false){
-          msg = "身份证号码输入有误!";
-        }else{
-          post_server(2,card);
-        }
-      }
+      post_server(2);
     });
     /*验证身份证取票 type  1验证 2 不验证  */
     function post_server(type,card){

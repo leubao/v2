@@ -24,10 +24,10 @@
 </div>
 </div>
 <script>
-var LODOP; //声明为全局变量  
+var LODOP; //声明为全局变量
 $("#print_ticket").click(function() {
 	var sn = '{$data.sn}',planid = '{$data.plan_id}';
-	$("#print_ticket").attr("disabled", true).val('打印中..');
+	$(this).attr("disabled", true).val('打印中..');
 	var type = $('#print_type:checked').val();
 	$.ajax({
 		type:'get',
@@ -64,9 +64,10 @@ $("#print_ticket").click(function() {
 		}
 	});
 });
+
 /*打印页面控制*/
 function CreateFullBill(data) {
-		LODOP=getLodop();
+			LODOP=getLodop();
 		LODOP.ADD_PRINT_TEXT(91,220,140,30,"时间/TIME");
 		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
@@ -114,6 +115,7 @@ function CreateFullBill(data) {
 		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
 		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
 }
 </script>
 </body>

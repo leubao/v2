@@ -140,6 +140,12 @@ class ActivityController extends LubTMP {
             echo json_encode($return);
         }
     }
-    
+
+
+    public function xm()
+    {
+        //获取场次
+        $this->display();
+    }
     
 }

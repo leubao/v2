@@ -12,7 +12,7 @@
     </div>
   	</div>
   	<div class="shareit">
-      <img class="arrow" src="http://new.leubao.com/static/images/guide.png">
+      <img class="arrow" src="http://ticket.leubao.com/static/images/guide.png">
     </div>
 </div>
 <Managetemplate file="Wechat/Public/footer"/>

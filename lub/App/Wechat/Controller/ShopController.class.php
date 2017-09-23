@@ -8,38 +8,43 @@
 // +----------------------------------------------------------------------
 namespace Wechat\Controller;
 use Common\Controller\LubTMP;
-use Wechat\Service\Wechat;
-use WeChat\Service\Wxpay;
-use Wechat\Service\Api;
-
-
-//微信支付
-use Wechat\Service\Wxpay\WxPayApi;
-use Wechat\Service\Wxpay\JsApiPay;
-use Wechat\Service\Wxpay\WxPayConfig;
-use Wechat\Service\Wxpay\WxPayUnifiedOrder;
-use Wechat\Service\Wxpay\WxPayOrderQuery;
-use Wechat\Service\Wxpay\WxPayException;
-use Wechat\Service\Wxpay\WxPayNotify;
-use Wechat\Controller\PayNotifyCallBackController;
-
+use Wechat\Service\Wticket;
+use \Wechat\WechatReceive;
 class ShopController extends LubTMP {
     protected function _initialize() {
     	parent::_initialize();
+        $this->ginfo = I('get.');
+        $this->pid = $this->ginfo['pid'];
+        if(empty($this->pid) && empty(session('pid'))){
+            $this->error("参数错误");
+        }
+        if(empty($this->pid)){
+            $this->pid = session('pid');
+        }else{
+            session('pid',$this->pid);
+        }
+        //暂存访问的URL
+        $url = 'http://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        session('oaurl',$url);
     }
     //微商城首页
     function index(){
     	$this->display();
     }
-    //商品详情页面
-    function view(){
-    	$this->display();
+    //判断是否已经授权
+    public function getOauth($value='')
+    {
+        $oauth = session('oauth');
+        if(!$oauth['open_id']){
+            //正常处理完成，返回原链接
+            $rurl = session('oaurl');
+            header("Location:" . $rurl);
+        }
     }
-    //价格日历
-    function calendar(){
-        $ginfo = I('get.');
-        //产品id
-        
+
+    //产品单页
+    public function show()
+    {
         $this->display();
     }
 

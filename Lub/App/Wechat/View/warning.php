@@ -3,12 +3,12 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
-        <title>操作失败</title>
+        <title>系统警告</title>
         <link rel="stylesheet" href="/static/web/css/weui.min.css"/>
     </head>
     <body>
         <div class="weui_msg">
-            <div class="weui_icon_area"><i class="weui_icon_msg weui_icon_warn"></i></div>
+            <div class="weui_icon_area"><i class="weui_icon_msg weui_icon_waiting"></i></div>
             <div class="weui_text_area">
                 <h2 class="weui_msg_title"><?php echo($error); ?></h2>
                 <p class="weui_msg_desc"><?php echo($error); ?></p>

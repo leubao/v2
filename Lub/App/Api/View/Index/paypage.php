@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-cn">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -11,18 +11,22 @@
     </style>
   </head>
   <body>
-    
     <div class="row">
-      <div class="col-md-6 col-md-offset-3">
-      <h1>请选择支付方式</h1>
+      <div class="col-md-6 col-md-offset-4">
+      <if condition="$status eq '1'">
+        <h1>订单已支付完成</h1>
+        <a href="javascript:window.opener=null;window.open('','_self');window.close();" class="btn btn-primary btn-xl">关闭支付窗口</a>
+      <else />
+        <h1>请选择支付方式</h1>
         <button type="button" class="btn btn-primary btn-xl" id="wxpay">微信支付</button>
+        <!--
         <button type="button" class="btn btn-default btn-xl" id="alipay">支付宝支付</button>
+        -->
+      </if>
       </div>
-
       <div class="col-md-6 col-md-offset-3 qr">
-        
         <div id="qr_view"></div>
-        <p><strong>支付单号:</strong><span id="paysn"></span></p>
+        <p><strong>状态:</strong><span id="paymsg"></span></p>
       </div>
     </div>
     <script type="text/javascript" src="//g.alicdn.com/sj/lib/jquery/dist/jquery.min.js"></script>
@@ -48,16 +52,16 @@
             },
             success:function(data){
               if(data.code == '200'){
-                if(data.info.code_url){
+                if(data.info){
                   $('.qr').css('display','block');
-                  $('#paysn').html(data.info.prepay_id);
+                  $('#paymsg').html(data.msg);
                   $('#qr_view').empty();
-                  qrView(data.info.code_url);
-                  setInterval(getPayNotify(postData),5000);
-                  
+                  qrView(data.info);
+                  //setInterval("getPayNotify("+postData+")",3000);
+                  getPayNotify(sn,'wxpay',pid);
                 }else{
                   $.toast({
-                    text: data.info,type: 'danger', position: 'center'
+                    text: data.msg,type: 'danger', position: 'center'
                   });
                 }
               }else{
@@ -85,20 +89,50 @@
           correctLevel : QRCode.CorrectLevel.H 
         });
       }
-      function getPayNotify(qrsn){
-        $.ajax({
-          url: "{:U('Api/Index/query_pay_order')}",
-          type: "POST",
-          data: qrsn,
-          success: function(rdata) {
-              if (rdata.state == "1") {
-                 
-              } else {
-                
+      function getPayNotify(sn,type,pid){
+        $postData = '{"sn":'+sn+',"paytype":"wxpay","pid":"'+pid+'"}';
+        // 建立websocket链接
+        ws = new WebSocket("ws://www.yx513.net:7272");
+        // 当websocket连接建立成功时
+        ws.onopen = function() {
+            ws.send($postData);
+            console.log('链接成功'); 
+        };
+        // 当收到服务端的消息时
+        ws.onmessage = function(e) {
+            // e.data 是服务端发来的数据
+            $('#paymsg').html(e.data);
+            console.log('收到来自服务器消息'+e.data); 
+            //页面跳转
+            //console.log(e.data);
+        };
+        // 当websocket关闭时
+        ws.onclose = function(e) {
+            $('#paymsg').html(e.data);
+            console.log('收到来自服务器关闭'+e.data); 
+            $.ajax({
+              type:'POST',
+              url:'<?php echo U('Api/Index/query_pay_order',['type'=>'query']);?>',
+              data:'data='+$postData,
+              dataType:'json',
+              timeout: 3500,
+              success:function(data){
+                if(data.code == '200'){
+                    $('#qr_view').empty();
+                }else{
+                  $('#qr_view').empty();
+                  
+                } 
               }
-          }
-      })
-    }
+           });
+           console.log(e.data);
+        };
+        /* 当出现错误时
+        ws.onerror = function() {
+            alert("出现错误");
+        };*/
+      }
     </script>
+
   </body>
 </html>

@@ -19,6 +19,15 @@ use Wechat\Service\Utils\SHA1;
 class CashbackController extends ManageBase{
 	protected function _initialize() {
         parent::_initialize();
+        /*
+        $proconf = cache('ProConfig');
+       // $proconf = $proconfs['41'];
+        // 开发者中心-配置项-AppID(应用ID)
+        $this->appId = $proconf['appid'];
+        //受理商ID，身份标识
+        $this->mchid = $proconf['mchid'];
+        //商户支付密钥Key。审核通过后，在微信发送的邮件中查看
+        $this->mchkey = $proconf['mchkey'];*/
     }
     //提现列表
     function index(){
@@ -140,7 +149,7 @@ class CashbackController extends ManageBase{
         $cp->setMchAppid($this->appId);//这些都写死在class里面
         $cp->setApiKey($this->mchkey);
         $cp->setTotalAmount($money);
-        $cp->setRemark('《印象普陀》利润分享计划!');
+        $cp->setRemark('《梦里老家》利润分享计划!');
         //$cp->setActName('活动名称');
         $cp->setCheckName('NO_CHECK');
         $cp->setPartnerTradeNo($info['sn']);

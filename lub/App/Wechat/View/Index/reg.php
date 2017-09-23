@@ -10,7 +10,6 @@
     <h1 class="title">注册账号</h1>
   </header>
   <div class="content">
-    <if condition="$data['user']['channel'] neq '1'">
     <form action="{:U('Wechat/Index/reg');}" method="post">
     <div class="list-block">
       <ul>
@@ -72,17 +71,6 @@
       </div>
     </div>
     </form>
-    <else />
-    <div class="col-50 no"></div>
-    <div class="content-padded">
-    <p><strong>亲，你已经是注册过了!</strong></p>
-    </div>
-    <div class="content-block">
-      <div class="row">
-        <div class="col-100"><a href="{$url}" class="button button-big button-fill button-success external">立即购买</a></div>
-      </div>
-    </div>
-    </if>
   </div>
 </div>
 
