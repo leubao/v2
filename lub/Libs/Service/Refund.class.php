@@ -7,7 +7,6 @@
 // | Author: zhoujing <admin@leubao.com>2014-12-19 
 // +----------------------------------------------------------------------
 namespace Libs\Service;
-use Libs\Service\Operate;
 use Common\Model\Model;
 class Refund extends \Libs\System\Service {
 	
@@ -22,7 +21,8 @@ class Refund extends \Libs\System\Service {
 	 * */
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
-		$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
+		//$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
+		$info = D('Common/Order')->where(['order_sn'=>$sn])->relation(true)->find();
 		if(empty($sn) || empty($info)){
 			error_insert('400410');return false;
 		}

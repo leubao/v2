@@ -360,8 +360,9 @@ class FinancialController extends ManageBase{
 		    $data['info']['rebate'] += $v['subsidy'];
         }
         sort($data['price']);
-        //场次汇总 TODO
-        $data['info']['games'] = M('Plan')->where(array('plantime'=>array(array('EGT', strtotime($starttime)), array('ELT', strtotime($endtime)), 'AND')))->count();
+        //场次汇总 排除销售为0的场次
+        $where = array('plantime'=>array(array('EGT', strtotime($starttime)), array('ELT', strtotime($endtime)), 'AND'),'status'=>['EGT','1']);
+        $data['info']['games'] = M('Plan')->where($where)->count();
         
         $export_map['report'] = 'tickets';
         //缓存用于导出

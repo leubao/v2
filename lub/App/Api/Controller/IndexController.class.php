@@ -10,6 +10,7 @@ namespace Api\Controller;
 use Common\Controller\ApiBase;
 use Libs\Service\Api;
 use Libs\Service\Order;
+use Libs\Service\Refund;
 use Common\Model\Model;
 
 use Payment\Common\PayException;
@@ -244,7 +245,6 @@ class IndexController extends ApiBase {
      * API接口退票 
      * @param $type int 1 整单退 2退其中几张
      * @param $sn  订单号
-     * @param $sns 客户端订单号
      * @param $seat string 多个用‘,’分开 
      * @return true|false
      */
@@ -260,16 +260,15 @@ class IndexController extends ApiBase {
               $status = $this->refund($pinfo['sn'],$appInfo);
               break;
             case '2':
-              
               break;
           }
           if($status){
-            $return = array('code' => 401,'info' => '','msg' => '认证失败');
+            $return = array('code' => 200,'info' => ['sn'=>$pinfo['sn']],'msg' => '退票成功');
           }else{
-            $return = array('code' => 401,'info' => '','msg' => '认证失败');
+            $return = array('code' => 401,'info' => '','msg' => '认证失败1');
           }
         }else{
-          $return = array('code' => 401,'info' => '','msg' => '认证失败');
+          $return = array('code' => 401,'info' => '','msg' => '认证失败0');
         }
       }else{
           $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
@@ -283,11 +282,11 @@ class IndexController extends ApiBase {
      */
     private function refund($sn,$uinfo){
       //查询订单状态
-      $info = M('Order')->where(array('order_sn'=>$sn,'user_id'=>$uinfo['id']))->field('order_sn,plan_id,status')->find();
+      $info = M('Order')->where(array('order_sn'=>$sn,'user_id'=>$uinfo['id']))->field('order_sn as sn,plan_id,status')->find();
       if($info['status'] == '1'){
         //判断手续费的事
         $poundage = $this->cost_rules($info['plan_id']);
-        return \Libs\Service\Refund($info,1,'','',$poundage,5);
+        return \Libs\Service\Refund::refund($info,1,'','',$poundage,5);
       }
       //执行退票操作
     }
@@ -881,6 +880,8 @@ class IndexController extends ApiBase {
     }
     /**
      * 自助机获取付款二维码
+     * 解决微信支付商户号重复的情况
+     * 判断先前是否有提交订单，如果有则读取先前提交的信息，若没有则重新创建
      */
     function api_pay_qr(){
       if(IS_POST){

@@ -103,5 +103,24 @@ class Check{
     function check_pay_state(){
 
     }
+    /**
+     * 检查已过期的场次，是否有过正常销售，未有正常销售的场次将直接删除(将状态标记为-1)
+     */
+    function check_plan(){
+    	//查询当日所有场次
+    	$time = date('H');
+    	if($time > '22'){
+    		$plan = M('Plan')->where(['plantime'=>strtotime(date('Y-m-d')),'status'=>4])->field('id')->select();
+	    	$model = D('Order');
+	    	foreach ($plan as $k => $v) {
+	    		(int)$count = $model->where(['status'=>['in','1,9'],'plan_id'=>$v['id']])->count();
+	    		if($count === (int)0){
+	    			//执行删除操作
+	    			M('Plan')->where(['id'=>$v['id']])->setField('status','-1');
+	    		}
+	    	}
+    	}
+    	return true;
+    }
 }
 	

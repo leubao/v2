@@ -3,11 +3,10 @@
 function ZtreeClick(event, treeId, treeNode) {
     event.preventDefault();
     var $detail = $('#ztree-detail-{$scene}');
-  //  alert(treeNode.id);
     if ($detail.attr('tid') == treeNode.tId) return
 	if (treeNode.name) $('#j_menu_name_{$scene}').val(treeNode.name)
     treeNode.id ? $('#j_menu_id_{$scene}').val(treeNode.id) : $('#j_menu_id_{$scene}').val('');
-    treeNode.pid ? $('#j_menu_pid_{$scene}').val(treeNode.pid) : $('#j_menu_pid_{$scene}').val('');
+    treeNode.pId ? $('#j_menu_pid_{$scene}').val(treeNode.pId) : $('#j_menu_pid_{$scene}').val('');
     treeNode.app ? $('#j_menu_app_{$scene}').val(treeNode.app) : $('#j_menu_app_{$scene}').val('');
     treeNode.model ? $('#j_menu_model_{$scene}').val(treeNode.model) : $('#j_menu_model_{$scene}').val('');
     treeNode.action ? $('#j_menu_action_{$scene}').val(treeNode.action) : $('#j_menu_action_{$scene}').val('');
