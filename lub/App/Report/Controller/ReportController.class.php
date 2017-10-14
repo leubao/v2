@@ -131,41 +131,67 @@ class ReportController extends ManageBase{
 		if(IS_POST){
 			$plan_id = I('plan_id');
 			$ticket_id = I('ticket_id');
+			$map = [];
 			if(empty($plan_id)){$this->erun("参数错误");}
 			$plan = F('Plan_'.$plan_id);
 			if(empty($plan)){
-				$plan = M('Plan')->where(array('id'=>$plan_id))->find();
+				$plan = M('Plan')->where(array('id'=>$plan_id))->field('id,plantime,seat_table')->find();
 			}
-			//TODO 超过一个月的直接从历史报表中读取
-			$product_id = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+			$plantime = date('Y-m-d',$plan['plantime']);
+			$timediff = timediff(date('Y-m-d'),$plantime,'day');
+			$product_id = get_product('id');
 			if(!empty($ticket_id)){
 				$ticket_id = explode(',',$ticket_id);
 				$this->assign('ticket_id',$ticket_id);
 			}else{
-				$ticket_id = M('TicketType')->where(array('status'=>1))->field('id')->select();
+				$ticket_id = M('TicketType')->where(array('product_id'=>$product_id))->field('id')->select();
 				$ticket_id = array_column($ticket_id,'id');
 			}
-			if(date('Ymd',$plan['plantime']) <= '20150602'){$this->erun("亲，非常抱歉，该场次不支持此功能!");}
 			$price = F('TicketType'.$product_id);
-			$db = M(ucwords($plan['seat_table']));
-	        foreach ($price as $v) {
-	        	if(in_array($v['id'],$ticket_id)){
-	        		$map['price_id'] = $v['id'];
-	        		$number = $db->where($map)->count();
-		        	if($number <> '0'){
-		        		$list[$v['id']] = $v;
-			        	$list[$v['id']]['number'] = $number;
-			        	$list[$v['id']]['money']  = $v['price']*$number;
-			        	$list[$v['id']]['moneys'] = $v['discount']*$number;
-			        	$list[$v['id']]['rebate'] = $v['rebate']*$number;
-			        	$info['number'] += $number;
-			        	$info['money']  += $list[$v['id']]['money'];
-			        	$info['moneys']	+= $list[$v['id']]['moneys'];
-			        	$info['rebate']	+= $list[$v['id']]['rebate'];
+			$map['plan_id'] = $plan_id;
+			$map['product_id'] = $product_id;
+			//判断演出日期是否超过30天
+			if($timediff['day'] < '30'){
+				$db = M(ucwords($plan['seat_table']));
+				foreach ($price as $v) {
+		        	if(in_array($v['id'],$ticket_id)){
+		        		$map['price_id'] = $v['id'];
+		        		(int)$number = $db->where($map)->count();
+			        	if($number <> (int)0){
+			        		$list[$v['id']] = $v;
+				        	$list[$v['id']]['number'] = $number;
+				        	$list[$v['id']]['money']  = $v['price']*$number;
+				        	$list[$v['id']]['moneys'] = $v['discount']*$number;
+				        	$list[$v['id']]['rebate'] = $v['rebate']*$number;
+				        	$info['number'] += $number;
+				        	$info['money']  += $list[$v['id']]['money'];
+				        	$info['moneys']	+= $list[$v['id']]['moneys'];
+				        	$info['rebate']	+= $list[$v['id']]['rebate'];
+			        	}
 		        	}
-	        	}
-	        }
+		        }
+			}else{
+				$db = M('ReportData');
+				foreach ($price as $v) {
+		        	if(in_array($v['id'],$ticket_id)){
+		        		$map['price_id'] = $v['id'];
+		        		(int)$number = $db->where($map)->sum('number');
+			        	if($number <> (int)0){
+			        		$list[$v['id']] = $v;
+				        	$list[$v['id']]['number'] = $number;
+				        	$list[$v['id']]['money']  = $v['price']*$number;
+				        	$list[$v['id']]['moneys'] = $v['discount']*$number;
+				        	$list[$v['id']]['rebate'] = $v['rebate']*$number;
+				        	$info['number'] += $number;
+				        	$info['money']  += $list[$v['id']]['money'];
+				        	$info['moneys']	+= $list[$v['id']]['moneys'];
+				        	$info['rebate']	+= $list[$v['id']]['rebate'];
+			        	}
+		        	}
+		        }
+			}
 		}
+
         $this->assign('data',$list)
         	->assign('plan_id',$plan_id)
 			->assign('ticket_name',I('ticket_name'))
