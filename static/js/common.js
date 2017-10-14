@@ -112,13 +112,13 @@ function isNull(data){
 * @param  {string} type        分销类型
 * @return {[type]}                  [description]
 */
-function auto_fenix(price_group,status,vmodel,type){
+function auto_fenix(price_group,status,vmodel,type,scene = '4'){
     console.log(type);
     var l1 = '',l2 = '', l3 = '';
     if(price_group != '' || null || undefined && status == '1'){
       var content = '';
         $.ajax({
-          url: "index.php?g=manage&m=index&a=public_get_group_ticket&group_id="+price_group+"&scene=4",
+          url: "index.php?g=manage&m=index&a=public_get_group_ticket&group_id="+price_group+"&scene"+scene,
           type: 'GET',
           dataType: 'JSON',
           timeout: 1500,
@@ -148,6 +148,17 @@ function auto_fenix(price_group,status,vmodel,type){
                   "<td><input type='text' name='tic["+vo.id+"][]' class='form-control' size='8' value='"+l2+"'/></td>"+
                   "<td><input type='text' name='tic["+vo.id+"][]' class='form-control' size='8' value='"+l3+"'/></td></tr>";                
                 });
+              }
+              /*智游宝*/
+              if(type == 'zyb'){
+                  content = "<table class='table  table-bordered'><tr><td>票型名称</td><td>票面价格</td><td>智游宝编码</td></tr>";
+                  $(rdata.data).each(function(idx,vo){
+                    if(vo.zyb != null){
+                        l1 = vo.zyb;
+                    }
+                    content += "<tr><td align='center'>"+vo.name+"</td><td>"+vo.price+"</td>"+
+                    "<td><input type='text' name='tic["+vo.id+"]' class='form-control' size='8' value='"+l1+"'/></td></tr>";                
+                  });
               }
               content += "</table>";
             }

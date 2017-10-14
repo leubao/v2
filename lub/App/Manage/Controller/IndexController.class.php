@@ -243,46 +243,12 @@ class IndexController extends ManageBase {
         $return = array('statusCode'=>'200','data'=>$list);
         die(json_encode($return));
     }
-    /*/*获取导游
-    function guide(){
-        if(IS_POST){
-            if($_POST["name"] != ""){
-                $map["nickname"] = array('like','%'.$_POST["name"].'%');
-                $this->assign("name",$_POST["name"]);
-            }   
-        }
-        if(I('type') == '1'){
-            //订单查询中查询下单人
-            $map['is_scene'] = array('in','2,3');
-        }else{
-            $map['groupid'] = '2';
-        }
-        C('VAR_PAGE','pageNum');
-        $db = M('User');
-        $count = $db->where($map)->count();// 查询满足要求的总记录数
-        $num = 10;
-        $p = new \Item\Service\Page($count,$num);
-        $currentPage = !empty($_REQUEST[C('VAR_PAGE')])?$_REQUEST[C('VAR_PAGE')]:1;
-        $firstRow = ($currentPage - 1) * $num;
-        $listRows = $currentPage * $num;
-        $data = $db->where($map)->order("id ASC")->limit($firstRow . ',' . $p->listRows)->select();
-        $this->assign ( 'totalCount', $count);
-        $this->assign ( 'numPerPage', $p->listRows);
-        $this->assign ( 'currentPage', !empty($_REQUEST[C('VAR_PAGE')])?$_REQUEST[C('VAR_PAGE')]:1);
-        $this->assign('type',I('type'));
-        $this->assign("list",$data)
-            ->display();
-    }*/
     //获取未出票的订单
     function index_order(){
         $this->display();
     }
     //待处理的订单
     function index_pending_order(){
-        $this->display();
-    }
-    //授权证书
-    function auth(){
         $this->display();
     }
     //查询操作日志当前一小时内的所有操作

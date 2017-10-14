@@ -6,7 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <!--让360浏览器自动进入急速模式-->
 <meta name="renderer" content="webkit">
-<title>{$Config.company} - 云鹿(剧院版)票务</title>
+<title>{$Config.company} - 云鹿票券</title>
 <link rel="apple-touch-icon" href="{$config_siteurl}static/images/favicon.ico">
 <link rel="icon" href="{$config_siteurl}static/images/favicon.ico">
 <Managetemplate file="Common/cssjs"/>
@@ -96,7 +96,7 @@ function MainMenuClick(event, treeId, treeNode) {
 <div id="bjui-window">
   <header id="bjui-header">
     <nav id="bjui-hnav-navbar-box" class='navbar navbar-inverse navbar-fixed-top'>
-      <div class='navbar-header'> <a class='navbar-brand' href=''>  <i class="fa fa-ticket"></i>云鹿票务[剧院]</a> </div>
+      <div class='navbar-header'> <a class='navbar-brand' href=''>  <i class="fa fa-ticket"></i>云鹿票券[剧院]</a> </div>
       <div class='collapse navbar-collapse'>
         <ul id="bjui-hnav-navbar" class='nav navbar-nav'>
           <volist name="SUBMENU_CONFIG" id="menu" key='k'>
@@ -108,13 +108,11 @@ function MainMenuClick(event, treeId, treeNode) {
                 <li><a href="{$item.url}" data-tabid="{$item.id}" data-options="{id:'{$item.id}', faicon:'caret-right'}">{$item.name}</a></li>
                  </volist>               
               </ul>
-              
               </volist></div> 
             </li>
           </volist>
         </ul>
         <ul class='nav navbar-nav navbar-right'>
-          <!--<li><a href="#">消息 <span class="badge">4</span></a></li>-->
           <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" title="切换产品"><i class="fa fa-cubes"></i>&nbsp;&nbsp;{$pid|product_name}(切换产品)</a>
             <ul class="dropdown-menu" role="menu">
               <volist name="userInfo['ITEM']['Product']" id="pro">
@@ -176,7 +174,7 @@ function MainMenuClick(event, treeId, treeNode) {
       </div>
     </div>
   </div>
-  <footer id="bjui-footer">Copyright &copy; <?php echo date('Y');?>  <a href="http://www.leubao.com/" target="_blank">leubao.com</a> <!--<a href="{:U('Manage/Index/auth');}" title="授权证书" data-toggle="dialog" data-width="655" data-height="495" data-id="auth" data-resizable="false" data-drawable="false" data-maxable="false" data-mask="true">授权证书</a> --><span class="f-right" >Powered by 云鹿 2.1.3 Pro 601414</span></footer>
+  <footer id="bjui-footer">Copyright &copy; 2015 - <?php echo date('Y');?>  <a href="http://www.leubao.com/" target="_blank">leubao.com</a>  <span class="f-right" > Powered by 云鹿票券 2.1.3 Pro 601414</span></footer>
 </div>
 </body>
 <script>

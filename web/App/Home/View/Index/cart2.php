@@ -55,6 +55,10 @@
       </table>
     </div>
   </div> 
+  <div class="pull-right">
+      <a type="button" href="{:U('Home/Index/pay',['sn'=>$data['sn']]);}" target="_blank" class="sui-btn google_btn btn-primary mt10 paybtn"><span>支付宝支付</span></a>
+      <a type="button" href="{:U('Home/Index/pay',['sn'=>$data['sn']]);}" target="_blank" class="sui-btn google_btn btn-success mt10 paybtn"><span>微信支付</span></a>
+  </div>
   <!--支付方式 s-->
   <form method="post" action="{:U('Home/Index/pay')}" id="form" target="_blank">
     <ul class="sui-nav nav-tabs nav-xlarge" style="clear: both;">
@@ -64,7 +68,8 @@
       <div id="aliPay" class="tab-pane active">
         <span></span>   
       </div>
-      <button type="submit" id="pay" class="sui-btn google_btn btn-danger mt10 paybtn"><span>去支付吧</span></button>
+      <button type="submit" id="pay" class="sui-btn google_btn btn-primary mt10 paybtn"><span>支付宝支付</span></button>
+      <button type="submit" id="pay" class="sui-btn google_btn btn-success mt10 paybtn"><span>微信支付</span></button>
     </div>
   </form>
   
@@ -75,8 +80,7 @@
 <script src="http://ticket.leubao.com/static/js/layer.js" type="text/javascript" charset="utf-8"></script>
 <script type="text/javascript">
   $(document).ready(function($) {
-      $("#pay").click(function(){
-         $('#form').submit();
+      $(".paybtn").click(function(){
         //禁用支付按钮
         $(this).attr({"disabled":"disabled"});
         //弹出支付窗口

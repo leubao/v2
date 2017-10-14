@@ -209,7 +209,6 @@ class WechatPay {
             empty($openid) || $postdata['openid'] = $openid;
         }
         $result = $this->getArrayResult($postdata, self::MCH_BASE_URL . '/pay/unifiedorder');
-       // dump($result);
         if (false === $this->_parseResult($result)) {
             return false;
         }
@@ -287,7 +286,7 @@ class WechatPay {
         );
         empty($goods_tag) || $postdata['goods_tag'] = $goods_tag;
         $result = $this->postXml($postdata, self::MCH_BASE_URL . '/pay/micropay');
-        $json = Tools::xml2arr($result);
+        $json = Tools::xml2arr($result);//dump($this->_parseResult($json));
         if (!empty($json) && false === $this->_parseResult($json)) {
             return false;
         }

@@ -1053,7 +1053,7 @@ function U($url = '', $vars = '', $suffix = true, $domain = true) {
         $url .= '#' . $anchor;
     }
     if ($domain) {
-        $url = (is_ssl() ? 'https://' : 'http://') . $domain . $url;
+        $url = (is_ssl() ? 'https://' : 'http://') . $domain . strtolower($url);
     }
     return $url;
 }

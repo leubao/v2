@@ -12,11 +12,7 @@ namespace Libs\System;
 
 class Components {
 
-    static private $_components = array(
-        'Url' => array(
-            'class' => '\\Libs\\System\\Url',
-            'path' => 'Libs.System.Url',
-        ),/*
+    static private $_components = array(/*
         'Cloud' => array(
             'class' => '\\Libs\\System\\Cloud',
             'path' => 'Libs.System.Cloud',
@@ -25,21 +21,13 @@ class Components {
             'class' => '\\Libs\\System\\CloudDownload',
             'path' => 'Libs.System.CloudDownload',
         ),*/
-        'Html' => array(
-            'class' => '\\Libs\\System\\Html',
-            'path' => 'Libs.System.Html',
-        ),
         'UploadFile' => array(
             'class' => '\\UploadFile',
         ),
         'Dir' => array(
             'class' => '\\Dir',
             'path' => 'Libs.Util.Dir',
-        ),
-        'PHPExcel'	=>	array(
-        	'class' => '\\PHPExcel',
-            'path' => 'Libs.Util.PHPExcel.PHPExcel',
-        ),
+        )
     );
 
     public function __construct($_components = array()) {

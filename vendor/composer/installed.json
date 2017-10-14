@@ -50,17 +50,17 @@
     },
     {
         "name": "filp/whoops",
-        "version": "2.1.8",
-        "version_normalized": "2.1.8.0",
+        "version": "2.1.9",
+        "version_normalized": "2.1.9.0",
         "source": {
             "type": "git",
             "url": "https://github.com/filp/whoops.git",
-            "reference": "f2950be7da8b8d6c4e77821b6c9d486e36cdc4f3"
+            "reference": "b238974e1c7cc1859b0c16ddc1c02ecb70ecc07f"
         },
         "dist": {
             "type": "zip",
-            "url": "https://files.phpcomposer.com/files/filp/whoops/f2950be7da8b8d6c4e77821b6c9d486e36cdc4f3.zip",
-            "reference": "f2950be7da8b8d6c4e77821b6c9d486e36cdc4f3",
+            "url": "https://files.phpcomposer.com/files/filp/whoops/b238974e1c7cc1859b0c16ddc1c02ecb70ecc07f.zip",
+            "reference": "b238974e1c7cc1859b0c16ddc1c02ecb70ecc07f",
             "shasum": ""
         },
         "require": {
@@ -76,7 +76,7 @@
             "symfony/var-dumper": "Pretty print complex values better with var-dumper available",
             "whoops/soap": "Formats errors as SOAP responses"
         },
-        "time": "2017-03-07T09:04:45+00:00",
+        "time": "2017-06-03T18:33:07+00:00",
         "type": "library",
         "extra": {
             "branch-alias": {
@@ -113,23 +113,23 @@
     },
     {
         "name": "zoujingli/wechat-php-sdk",
-        "version": "v1.3.10",
-        "version_normalized": "1.3.10.0",
+        "version": "v1.3.11",
+        "version_normalized": "1.3.11.0",
         "source": {
             "type": "git",
             "url": "https://github.com/zoujingli/wechat-php-sdk.git",
-            "reference": "38f86a42b1c0058d889a0969190540037629606a"
+            "reference": "c0c55fe440418267ae97cc45809e4064c95744d0"
         },
         "dist": {
             "type": "zip",
-            "url": "https://files.phpcomposer.com/files/zoujingli/wechat-php-sdk/38f86a42b1c0058d889a0969190540037629606a.zip",
-            "reference": "38f86a42b1c0058d889a0969190540037629606a",
+            "url": "https://files.phpcomposer.com/files/zoujingli/wechat-php-sdk/c0c55fe440418267ae97cc45809e4064c95744d0.zip",
+            "reference": "c0c55fe440418267ae97cc45809e4064c95744d0",
             "shasum": ""
         },
         "require": {
             "php": ">=5.3.3"
         },
-        "time": "2017-04-19T13:34:58+00:00",
+        "time": "2017-07-18T12:00:27+00:00",
         "type": "project",
         "installation-source": "dist",
         "autoload": {
@@ -149,17 +149,17 @@
     },
     {
         "name": "riverslei/payment",
-        "version": "v3.1.0",
-        "version_normalized": "3.1.0.0",
+        "version": "v4.0.1",
+        "version_normalized": "4.0.1.0",
         "source": {
             "type": "git",
             "url": "https://github.com/helei112g/payment.git",
-            "reference": "31dab9a45971eab4a48cafb9925dec36c8ed88cf"
+            "reference": "e8b0fdd2566d75c82686737fd14856c1e3006b75"
         },
         "dist": {
             "type": "zip",
-            "url": "https://files.phpcomposer.com/files/helei112g/payment/31dab9a45971eab4a48cafb9925dec36c8ed88cf.zip",
-            "reference": "31dab9a45971eab4a48cafb9925dec36c8ed88cf",
+            "url": "https://files.phpcomposer.com/files/helei112g/payment/e8b0fdd2566d75c82686737fd14856c1e3006b75.zip",
+            "reference": "e8b0fdd2566d75c82686737fd14856c1e3006b75",
             "shasum": ""
         },
         "require": {
@@ -170,7 +170,7 @@
         "require-dev": {
             "endroid/qrcode": "~1.9"
         },
-        "time": "2017-04-30T11:24:48+00:00",
+        "time": "2017-07-05T15:13:35+00:00",
         "type": "library",
         "installation-source": "dist",
         "autoload": {

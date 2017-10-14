@@ -80,7 +80,6 @@ define('IS_CLI', PHP_SAPI == 'cli' ? 1 : 0);
 
 if (!IS_CLI) {
     // 当前文件名
-     
     if (!defined('_PHP_FILE_')) {
         if (IS_CGI) {
             //CGI/FASTCGI模式下

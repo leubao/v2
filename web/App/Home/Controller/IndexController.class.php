@@ -2,7 +2,9 @@
 namespace Home\Controller;
 
 use Think\Controller;
-
+use Payment\Common\PayException;
+use Payment\Client\Charge;
+use Payment\Client\Query;
 class IndexController extends Controller
 {
     protected function _initialize() {
@@ -155,7 +157,6 @@ class IndexController extends Controller
                  // web支付
                 'qr_mod' => '',//0、1、2、3 几种方式
                 'paymethod' => 'creditPay',// creditPay  directPay
-
                 'client_ip' => get_client_ip(),
                 'product_id' => '123',
             ];
@@ -166,6 +167,35 @@ class IndexController extends Controller
                 exit;
             }
         }else{
+            $payData = [
+                'body'    => 'test body',
+                'subject'    => 'test subject',
+                'order_no'    => $orderNo,
+                'timeout_express' => time() + 600,// 表示必须 600s 内付款
+                'amount'    => '0.01',// 单位为元 ,最小为0.01
+                'return_param' => '123',
+                // 支付宝公有
+                'goods_type' => 1,
+                'store_id' => '',
+                 // web支付
+                'qr_mod' => '',//0、1、2、3 几种方式
+                'paymethod' => 'creditPay',// creditPay  directPay
+                'client_ip' => get_client_ip(),
+                'product_id' => '123',
+            ];
+            $ginfo = I('get.');
+            if($ginfo['type'] == 'wxpay'){
+                $channel = 'wx_qr';
+            }
+            if($ginfo['type'] == 'alipay'){
+                $channel = 'ali_web';
+            }
+            try {
+                $ret = Charge::run($channel, $config, $payData);
+            } catch (PayException $e) {
+                echo $e->errorMessage();
+                exit;
+            }
             //在此之前goods1的业务订单已经生成，状态为等待支付
             $this->assign('info',$info)->display();
         }
