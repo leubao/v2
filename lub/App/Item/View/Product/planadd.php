@@ -71,27 +71,24 @@
       </div>
     </div>
   <elseif condition="$pinfo['type'] eq '2'" />
-    <table class="table table-condensed table-hover">
-      <tbody>
-        <tr>
-          <td><label for="j_dialog_operation" class="control-label x90">销售日期:</label>
-            <input type="text" data-toggle="datepicker" name="plantime"></td>
-          <td></td>
-        </tr>
-        <tr>
-          <td><label for="j_dialog_operation" class="control-label x90">开始时间:</label>
-            <input type="text" data-toggle="datepicker" data-pattern='HH:mm:ss' name="starttime" value="{$proconf.plan_start_time}"></td>
-          <td><label for="j_dialog_operation" class="control-label x90">结束时间:</label>
-            <input type="text" data-toggle="datepicker" data-pattern='HH:mm:ss' name="endtime" value="{$proconf.plan_end_time}"></td>
-        </tr>
-        <tr>
-          <td><label for="j_dialog_name" class="control-label x90">销售配额：</label>
-            <input type="text" name="quotas" id="quota" value="{$proconf.quota}" data-rule="required" size="20"></td>
-          <td><label for="j_dialog_name" class="control-label x90">渠道销售配额：</label>
-            <input type="text" name="quota" id="quota" value="{$proconf.channel_quota}" data-rule="required" size="20"></td>
-        </tr>
-      </tbody>
-    </table>
+    <table id="tabledit2" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
+            <thead>
+                <tr data-idname="plan[#index#][id]">
+                    <th title="No."><input type="text" name="plan[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
+                    <th title="销售日期" align="center"><input type="text" name="plan[#index#][plantime]" data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="2017-10-21" size="10"></th>
+                    <th title="开园时间" align="center"><input type="text" name="plan[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
+                    <th title="闭园时间" align="center"><input type="text" name="plan[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
+                    <th title="销售配额" align="center"><input type="text" name="plan[#index#][quotas]" data-rule="required" value="{$proconf.quotas}" size="5"></th>
+                    <th title="渠道配额" align="center"><input type="text" name="plan[#index#][quota]" data-rule="required" value="{$proconf.quota}" size="5"></th>
+                    <th title="" data-addtool="true" width="100">
+                        <a href="javascript:;" class="btn btn-red row-del" data-confirm-msg="确定要删除该行信息吗？">删</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+        </table>
 
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">

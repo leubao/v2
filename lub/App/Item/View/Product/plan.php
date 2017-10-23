@@ -14,7 +14,6 @@
       <tr>
         <th width="50">编号</th>
         <th align="center">销售日期</th>
-        <th align="center">场次</th>
         <th align="center">时间</th>
         <th align="center">操作员</th>
         <th align="center">状态</th>
@@ -27,8 +26,7 @@
       <tr data-id="{$vo.id}">
         <td>{$i}</td>
         <td align="center"><a href="{:U('Item/Product/planinfo',array('menuid'=>$menuid,'id'=>$vo['id']));}" data-toggle="dialog" data-width="800" data-height="400" data-id="planinfo" data-mask="true">{$vo.plantime|date="Y-m-d",###}</a></td>
-        <td align="center">{$vo.games}</td>
-        <td align="center">{$vo.starttime|date="H:i",###} - {$vo.endtime|date="H:i",###} </td>
+        <td align="center">{$vo.starttime|date="H:i",###} - {$vo.endtime|date="H:i",###} <if condition="$vo.product_type eq 3">[第{$vo.games}趟]</if><if condition="$vo.product_type eq 1">[第{$vo.games}场]</if></td>
         <td align="center">{$vo.user_id|userName}</td>
         <td align="center">{$vo.status|plan_status}</td>
         <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>

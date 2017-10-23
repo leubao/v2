@@ -321,7 +321,7 @@ class ProductController extends ManageBase{
 	function plan(){
 		$product_id = (int) $this->pid;
 		if(!empty($product_id)){
-			$map = array("product_id"=>$product_id);
+			$map = ["product_id"=>$product_id];
 			$this->basePage('Plan',$map,'plantime DESC');
 			$this->display();
 		}else{

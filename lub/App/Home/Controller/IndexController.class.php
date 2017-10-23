@@ -104,16 +104,18 @@ class IndexController extends Base{
 		$proArr = explode(',', $pro['product']);
 		//TODO 判断产品是否都可用
 		foreach ($proArr as $k=>$v){
-			$list[$k] = Operate::do_read('Product',0,array('id'=>$v,'status'=>1));
-			$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'prodct_id'=>$v))->getField('quota');
-			if($list[$k] != false){
-				$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
-				$list[$k]['plan'] = Operate::do_read('Plan',1,array('product_id'=>$v,'status'=>2),"plantime ASC",array('id,product_id,plantime,games,seat_table'));
+			$product = M('Product')->where(['id'=>$v,'status'=>1])->find();
+			if(!empty($product)){
+				$list[$k] = $product;
+				$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'prodct_id'=>$v))->getField('quota');
+				if($list[$k] != false){
+					$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
+					$list[$k]['plan'] = Operate::do_read('Plan',1,array('product_id'=>$v,'status'=>2),"plantime ASC",array('id,product_id,plantime,games,seat_table'));
+				}
 			}
 		}
 		$list = array_filter($list);
 		$this->assign('uinfo',$uInfo);
-		//dump($list);
 		return $list;
 	}
 }

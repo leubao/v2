@@ -21,7 +21,6 @@ class PlanModel extends Model{
 	function add_plan($data = null){
 		if (empty($data)) {return false;}
         $plantime = strtotime($data['plantime']);
-		
 		//判断场次是否已存在
 		if($data['product_type'] == '1'){
 			$starttime = strtotime($data['starttime']);
@@ -32,7 +31,6 @@ class PlanModel extends Model{
 			$starttime = strtotime($data['starttime']);
 			$endtime = strtotime($data['endtime']);
 		}
-		
 		$info = $this->structure_data($data,$plantime,$starttime,$endtime);
 		if(count($info) == 1){
 			$planid = $this->add($info['0']);
@@ -98,7 +96,7 @@ class PlanModel extends Model{
 				'starttime'	=> $starttime,
 				'endtime'	=> $endtime,
 				'product_type' => $data['product_type'],
-				'status'=>'1',
+				'status'=>'3',
 				'is_sales' => 1,
 				'user_id' => get_user_id(),
 				'createtime' => time(),
@@ -123,7 +121,7 @@ class PlanModel extends Model{
 				$param = $this->plan_param($data['product_id'],$value['tooltype'],$data['ticket'],$data['goods'],$data['product_type']);
 				$infoAll = array(
 					'plantime' => $plantime,
-					'status'=>'1',
+					'status'=>'3',
 					'is_sales' => 1,
 					'user_id' => get_user_id(),
 					'createtime' => time(),
@@ -561,7 +559,7 @@ sql;
 	 * @param $param string || array 表名
 	 */
 
-	function roll_back($param){
+	function roll_back($param = ''){
 		//表前缀
         $dbPrefix = C("DB_PREFIX");
 		if(is_array($param)){

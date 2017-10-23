@@ -459,7 +459,7 @@ class WorkController extends ManageBase{
 	 */
 	function sale_card()
 	{
-		
+		$this->display();
 	}
 	/**
 	 * 退票

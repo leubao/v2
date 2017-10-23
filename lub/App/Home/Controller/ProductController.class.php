@@ -204,7 +204,7 @@ class ProductController extends Base{
 	 * @param  int $productid 产品id
 	 * @return [type]            [description]
 	 */
-	function public_info_conf($plan_id,$productid){
+	function public_info_conf($plan_id = '',$productid = ''){
 		$uinfo = Partner::getInstance()->getInfo();
 		//获得常用联系人
 		$map = array(
