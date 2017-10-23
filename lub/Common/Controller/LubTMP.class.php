@@ -131,6 +131,7 @@ class LubTMP extends \Think\Controller {
         if(empty($province)){D('Item/Province')->province_cache();}
         $kpimoney = F('KpiMoney');
         if(empty($kpimoney)){D('Item/KpiChannel')->kpi_channel_cache();}
+        //统计历史累计场次和历史累计人数
         //停用已过期的场次
         check_plan();
     }

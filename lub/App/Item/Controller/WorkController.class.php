@@ -455,6 +455,13 @@ class WorkController extends ManageBase{
 		$this->assign('sn',$sn)->display();
 	}
 	/**
+	 * 一卡通 售卡
+	 */
+	function sale_card()
+	{
+		
+	}
+	/**
 	 * 退票
 	 */
 	function refunds(){

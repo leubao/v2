@@ -369,12 +369,14 @@ class OrderController extends ManageBase{
 				$payData = [
 				    "order_no"	=> $info['sn'],
 				    "amount"	=> $oinfo['money'],// 单位为元 ,最小为0.01
+				    "timeout_express" => time() + 600,// 表示必须 600s 内付款
 				    "client_ip"	=> get_client_ip(),
 				    "subject"	=> $product."门票",
 				    "body"		=> $product."门票",//planShow($oinfo['plan_id'],1,1).$product."门票",
 				    "show_url"  => 'http://www.leubao.com/',// 支付宝手机网站支付接口 该参数必须上传 。其他接口忽略
 				    "extra_param"	=> '',
-				    "timeout_express"	=>	'10',//设置过期时间
+				    "terminal_id" => "web",// 终端设备号(门店号或收银设备ID) 默认值 web
+				    "auth_code"	=> "",//s授权码
 				];
 			}
 			if($info['pay_type'] == '4'){
@@ -418,22 +420,26 @@ class OrderController extends ManageBase{
 	}
 	//微信扫码支付
 	function weixin_code($product_id,$paykey,$payData)
-	{	
+	{	/*
 		$pay = & load_wechat('Pay',$product_id);
 		$money = $payData['amount']*100;
 		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
 		if($result === FALSE){
 			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
 		}
-		/*
+		*/
 		$config = load_payment('wx_bar',$product_id);
+		//记录支付日志
+		payLog();
 		try {
+			$payData['auth_code'] = $paykey;
 		    $ret = Charge::run('wx_bar', $config, $payData);
 		} catch (PayException $e) {
+			dump($e);
 		    echo $e->errorMessage();
 		    exit;
-		}*/
-
+		}
+		
 		return $ret;
 	}
 	/*轮询支付日志查询支付结果*/

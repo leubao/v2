@@ -792,7 +792,6 @@ class IndexController extends LubTMP {
                     $product_name = product_name($this->pid,1);
                     $pay = & load_wechat('Pay',$this->pid);
 					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
-                    //存储微信支付日志
                     if($prepayid){
                         $options = $pay->createMchPay($prepayid);
                     }else{

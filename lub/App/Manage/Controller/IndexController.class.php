@@ -28,16 +28,18 @@ class IndexController extends ManageBase {
                     if (empty($stop)) {
                         try {
                             //已经清除过的目录
-                            $dirList = explode(',', I('get.dir', ''));
+                            if(!empty(I('get.dir', ''))){
+                                $dirList = explode(',', I('get.dir', ''));
+                            }
                             //删除缓存目录下的文件
                             $Dir->del(RUNTIME_PATH);
                             //获取子目录
                             $subdir = glob(RUNTIME_PATH . '*', GLOB_ONLYDIR | GLOB_NOSORT);
                             if (is_array($subdir)) {
                                 foreach ($subdir as $path) {
-                                    $dirName = str_replace(RUNTIME_PATH, '', $path);
+                                    $dirName = strtolower(str_replace(RUNTIME_PATH, '', $path));
                                     //忽略目录
-                                    if (in_array($dirName, array('Cache', 'Logs','Wechat'))) {
+                                    if (in_array($dirName, array('cache', 'logs','wechat'))) {
                                         continue;
                                     }
                                     if (in_array($dirName, $dirList)) {
@@ -46,9 +48,6 @@ class IndexController extends ManageBase {
                                     $dirList[] = $dirName;
                                     //删除目录
                                     $Dir->delDir($path);
-                                    //防止超时，清理一个从新跳转一次
-                                   // $this->assign("waitSecond", 200);
-                                    //$this->success("清理缓存目录[{$dirName}]成功！", );
                                     $this->srun("清理缓存目录[{$dirName}]成功！",array('urls'=>U('Index/cache', array('type' => 'site', 'dir' => implode(',', $dirList))),'stop'=>'999'));
                                     exit;
                                 }
