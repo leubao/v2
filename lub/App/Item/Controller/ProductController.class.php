@@ -355,17 +355,24 @@ class ProductController extends ManageBase{
 					break;
 				case '3':
 					//漂流
-					$tooltype = D('ToolType')->where(array('product_id'=>$pinfo['id'],'status'=>1))->field('id,title')->select();
+					$tooltype = D('ToolType')->where(array('product_id'=>$pinfo['id'],'status'=>1))->field('id,title')->order('id DESC')->select();
 					$this->assign('tooltype',$tooltype);
 					break;
+			}
+			$plantime = D('Item/Plan')->where(['product_id'=>$pinfo['id']])->max('plantime');
+			$today = strtotime(date('Ymd'));
+			if($plantime < $today){
+				$plantime = $today;
+			}else{
+				$plantime = $plantime + 86400;
 			}
 			//票型价格信息
 			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
 			//商品
 			$goods = D('Goods')->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->field('id,title')->select();
-			dump($goods);
 			$this->assign('group',$ticket)
 			     ->assign('pinfo',$pinfo)
+			     ->assign('plantime',date('Y-m-d',$plantime))
 			     ->assign('goods',$goods)
 				 ->display();
 		}

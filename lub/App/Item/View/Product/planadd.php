@@ -5,7 +5,7 @@
       <tbody>
         <tr>
           <td><label for="j_dialog_operation" class="control-label x90">销售日期:</label>
-            <input type="text" data-toggle="datepicker" name="plantime" class="required" data-rule="required"></td>
+            <input type="text" data-toggle="datepicker" name="plantime" class="required" value="{$plantime}" data-rule="required"></td>
           <td><label for="j_dialog_code" class="control-label x85">场次：</label>
             <select name="games" id="games" data-toggle="selectpicker">
               <option value="1" selected>第一场</option>
@@ -75,7 +75,7 @@
             <thead>
                 <tr data-idname="plan[#index#][id]">
                     <th title="No."><input type="text" name="plan[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
-                    <th title="销售日期" align="center"><input type="text" name="plan[#index#][plantime]" data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="2017-10-21" size="10"></th>
+                    <th title="销售日期" align="center"><input type="text" name="plan[#index#][plantime]" data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$plantime}" size="10"></th>
                     <th title="开园时间" align="center"><input type="text" name="plan[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
                     <th title="闭园时间" align="center"><input type="text" name="plan[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
                     <th title="销售配额" align="center"><input type="text" name="plan[#index#][quotas]" data-rule="required" value="{$proconf.quotas}" size="5"></th>
@@ -129,7 +129,7 @@
       <tbody>
         <tr>
           <td width="80px">销售日期:</td>
-          <td><input type="text" data-toggle="datepicker" name="plantime"></td>
+          <td><input type="text" data-toggle="datepicker" value="{$plantime}" name="plantime"></td>
           <td width="80px"></td>
           <td></td>
         </tr>
@@ -146,15 +146,11 @@
                     <th title="销售配额"><input type="text" name="plan[#index#][quotas]" data-rule="required" value="{$proconf.quotas}" size="5"></th>
                     <th title="渠道配额"><input type="text" name="plan[#index#][quota]" data-rule="required" value="{$proconf.quota}" size="5"></th>
                     <th title="工具类型"><select name="plan[#index#][tooltype]" data-toggle="selectpicker">
-                      <option value="0">===请选择===</option>
                       <volist name="tooltype" id="vo">
                         <option value="{$vo.id}">{$vo.title}</option>
                       </volist>
                     </select>
                     </th>
-                    
-                    
-                    
                     <th title="" data-addtool="true" width="100">
                         <a href="javascript:;" class="btn btn-red row-del" data-confirm-msg="确定要删除该行信息吗？">删</a>
                     </th>

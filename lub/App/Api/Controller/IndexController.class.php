@@ -130,7 +130,7 @@ class IndexController extends ApiBase {
               //订单查询 不存在返回false  存在返回订单详细信息
               $sn = $this->query_order(array('sn'=>$pinfo['sn'],'type'=>$pinfo['type']));
               if($sn != false){
-                $return = array('code' => 200,'info' => $sn,'seat'=>sn_seat($sn),'state'=>$this->query_state($pinfo['sn']),'msg' => 'OK');
+                $return = array('code' => 200,'info' => $sn,'seat'=>sn_seat($sn),'state'=>$this->query_state($sn),'msg' => 'OK');
               }else{
                 $return = array('code' => 407,'info' => '','msg' => '查询失败');
               }
@@ -810,6 +810,36 @@ class IndexController extends ApiBase {
         'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'],'id_card'=>$pinfo['crm']['id_card'])),
       );
       return $info;
+    }
+    /**
+     * 下预订订单
+     * 类似渠道版的超量申请
+     */
+    public function api_pre_order()
+    {
+      if(IS_POST){
+        $pinfo = $_POST['data'];
+        $pinfo = json_decode($pinfo,true);
+        $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+        if($appInfo != false && $pinfo['type'] != false){
+          switch ($pinfo['type']) {
+            case '2':
+              $order_list = $this->order_list($pinfo['card']);
+              if($order_list != false){
+                $return = array('code' => 200,'info' => $order_list,'msg' => '订单列表获取成功');
+              }else{
+                $return = array('code' => 411,'info' => '','msg' => '订单列表获取失败');
+              }
+              break;
+          }
+        }else{
+          $return = array('code' => 401,'info' => '','msg' => '认证失败');
+        }
+      }else{
+          $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+      }
+      $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
+      echo json_encode($return);      
     }
     /**
      * 判断配额

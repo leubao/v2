@@ -116,7 +116,7 @@
         </table>
         
         <!--提交-->
-        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="post_server();">立即出票</a></div>
+        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="quick_server();">立即出票</a></div>
     </div>
 </div>
 <input type="hidden" id="planID" value="">
@@ -270,7 +270,8 @@ function post_server(){
         qditem = '0',
         settlement = {$proconf.settlement},
         is_pay = $('input[name="pay"]:checked').val(),
-        length =  $("#quick-price-select tr").length;
+        length =  $("#quick-price-select tr").length,
+        url:'<?php echo U('Item/Order/quickpost',array('type'=>$type));?>'+'&plan='+plan;
     if(length <= 0){
         $(this).alertmsg('error','请选择要售出的票型!');
         return false;
@@ -292,25 +293,6 @@ function post_server(){
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
     postData = 'info={"subtotal":'+parseFloat($('#quick-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-    /*提交到服务器*/
-    $.ajax({
-        type:'POST',
-        url:'<?php echo U('Item/Order/quickpost',array('type'=>$type));?>'+'&plan='+plan,
-        data:postData,
-        dataType:'json',
-        timeout: 3500,
-        error: function(){
-          layer.msg('服务器请求超时，请检查网络...');
-        },
-        success:function(data){
-            if(data.statusCode == "200"){
-                //刷新
-                $(this).dialog('refresh', 'work_quick');
-                $(this).dialog({id:'print', url:''+data.forwardUrl+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
-            }else{
-                $(this).alertmsg('error','出票失败!');
-            }
-        }
-    });
+    post_server(postData,url,'work_quick');
 }
 </script>
