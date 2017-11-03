@@ -738,6 +738,7 @@ class IndexController extends LubTMP {
                         // 创建JSAPI签名参数包，这里返回的是数组
                         $this->assign('error',$pay->errMsg.$pay->errCode);
                     }
+                    
                     $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                 }
             }

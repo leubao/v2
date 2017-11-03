@@ -1,12 +1,13 @@
+<script src="{$config_siteurl}static/bjui/plugins/echarts/echarts.js"></script>
 <div class="bjui-pageHeader" style="background:#FFF;">
-
-        
+ 
 </div>
 <div class="bjui-pageContent">
   <div class="col-md-8">
-    <div class="alert" role="alert" style="margin:0 0 5px; padding:5px 15px;">
-      <iframe width="800" scrolling="no" height="120" frameborder="0" allowtransparency="true" src="http://i.tianqi.com/index.php?c=code&id=19&color=%23&bgc=%23&icon=1&temp=1&num=5"></iframe>
-    </div> 
+    <h4 style="margin-bottom:20px;">
+      当前用户:{$userInfo.nickname}  <small>{$role_name}</small>  当前产品:{$pid|product_name}
+    </h4>
+    <!-- 
     <div class="widget-box widget-gray-box">
       <div class="widget-box-content widget-store-overview">
         <ul class="store-overview--column">
@@ -38,6 +39,7 @@
         </ul>
       </div>
     </div>
+  -->
     <div class="widget-box widget-gray-box">
       <div class="widget-box-content widget-store-overview">
         <ul>
@@ -64,6 +66,8 @@
         </ul>
       </div>
     </div>
+    <!--折线图-->
+    <div style="mini-width:400px;height:350px" data-toggle="echarts" data-type="line,bar" data-url="http://ticket.leubao.com/bar.json"></div>
     <div class="widget-box recommended-apps">
       <div class="widget-box-header">
           <h3 class="widget-box-title">
@@ -97,7 +101,7 @@
   </div>
   <div class="col-md-4">
     <div class="service-hotline">
-      电话协助：0314 - 2157 042
+      电话协助：0314 - 2157 - 042
     </div>
     <div class="ui-box widget-box widget-cms-list">
       <div class="widget-box-header">
@@ -112,7 +116,8 @@
             </li>
             <li class="">
               <a href="#" target="_blank">
-                    已经订购了微商城的店铺，怎么使用有赞零售？                            </a>
+                    已经订购了微商城的店铺，怎么使用有赞零售？
+              </a>
             </li>
         </ul>
       </div>
@@ -143,3 +148,6 @@
   -->
   </div>
 </div>
+<script>
+
+</script>

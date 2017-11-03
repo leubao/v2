@@ -5,14 +5,38 @@ use Common\Controller\ManageBase;
 use Manage\Service\User;
 class IndexController extends ManageBase {
     public function index() {
-        if (IS_AJAX) {
-            return true;
-        }
-        $pid = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+        if (IS_AJAX) {return true;}
+        $this->inits();
         $this->assign("SUBMENU_CONFIG", D("Manage/Menu")->getMenuList());
+        $this->display();
+    }
+    public function public_index_info(){
+        //今日可售场次
+        //今日余票
+        //待取票订单
+        //历史累计场次
+        //历史累计人数
+        //折线图
+        /**
+         * 7日内接待人数
+         * 渠道出票数
+         * 旅行社
+         * 酒店
+         * OTA
+         * 全员分销
+         * 散客
+         */
+        $this->inits();
+        $this->display();
+    }
+    function inits()
+    {
+        $pid = get_product('id');
+        $this->assign('pid',$pid);
         $this->assign('userInfo', User::getInstance()->getInfo());
         $this->assign('role_name', D('Manage/Role')->getRoleIdName(User::getInstance()->role_id));
-        $this->assign('pid',$pid)->display();
+        $seale = U('Api/figure/index',array('pid'=>\Libs\Util\Encrypt::authcode($pid,'ENCODE'),'type'=>$this->product['type']));
+        $this->assign('seale',$seale);
     }
     //缓存更新
     public function cache() {
@@ -98,11 +122,6 @@ class IndexController extends ManageBase {
         } else {
             $this->display();
         }
-    }
-    public function public_index_info(){
-        $pid = \Libs\Util\Encrypt::authcode(get_product('id'),'ENCODE');
-        $seale = U('Api/figure/index',array('pid'=>$pid,'type'=>$this->product['type']));
-    	$this->assign('seale',$seale)->display();
     }
     //登录超时
     function login_time()

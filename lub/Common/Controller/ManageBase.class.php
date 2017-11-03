@@ -8,7 +8,6 @@
 // +----------------------------------------------------------------------
 
 namespace Common\Controller;
-
 use Manage\Service\User;
 use Manage\Service\RBAC;
 use Libs\Util\Page;

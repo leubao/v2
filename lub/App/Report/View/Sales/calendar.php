@@ -1,13 +1,14 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
+<!-- 日历-->
 <div class="bjui-pageHeader"> 
   <!--工具条 s-->
-  
 </div>
 <div class="bjui-pageContent">
 	<div id='calendar'></div>
 </div>
 <div class="bjui-pageFooter">
 </div>
+
 <script>
     $(document).ready(function() {
         $('#calendar').fullCalendar({

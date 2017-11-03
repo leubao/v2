@@ -10,7 +10,7 @@ namespace Item\Controller;
 use Common\Controller\ManageBase;
 use Item\Service\Partner;
 class CheckController extends ManageBase{
-	protected function _initialize() {//dump($_SESSION);
+	protected function _initialize() {
 	 	parent::_initialize();
 	 }
 	/**

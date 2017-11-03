@@ -28,7 +28,6 @@
 <!-- BJUI.all 分模块压缩版 -->
 <script src="{$config_siteurl}static/bjui/js/bjui-all.js"></script>
 <script src="{$config_siteurl}static/js/common.js"></script>
-<!-- 以下是B-JUI的分模块未压缩版，建议开发调试阶段使用下面的版本 -->
 <!-- plugins -->
 <!-- swfupload for uploadify && kindeditor -->
 <script src="{$config_siteurl}static/bjui/plugins/swfupload/swfupload.js"></script>
@@ -42,10 +41,6 @@
 <!-- nice validate -->
 <script src="{$config_siteurl}static/bjui/plugins/niceValidator/jquery.validator.js"></script>
 <script src="{$config_siteurl}static/bjui/plugins/niceValidator/jquery.validator.themes.js"></script>
-
-
-<!-- dragsort -->
-<script src="{$config_siteurl}static/bjui/plugins/dragsort/jquery.dragsort-0.5.1.min.js"></script>
 <!-- other plugins -->
 <script src="{$config_siteurl}static/bjui/plugins/other/jquery.autosize.js"></script>
 <!-- bootstrap plugins -->
@@ -56,11 +51,9 @@
 <script src="{$config_siteurl}static/bjui/plugins/icheck/icheck.min.js"></script>
 <script src="{$config_siteurl}static/bjui/plugins/download/jquery.fileDownload.js"></script>
 <!--Seat s-->
-
 <script src="{$config_siteurl}static/js/jquery-seat.js"></script>
 <script src="{$config_siteurl}static/js/layer.js"></script>
 <!--seat e-->
-<!-- 日历-->
 <script src="{$config_siteurl}static/calendar/lib/moment.min.js"></script>
 <script src="{$config_siteurl}static/calendar/fullcalendar.min.js"></script>
 <script src="{$config_siteurl}static/calendar/lang/zh-cn.js"></script>

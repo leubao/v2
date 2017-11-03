@@ -197,6 +197,38 @@ class ConfigController extends ManageBase {
         
     }
     //对接第三方平台  
+    //微信公众平台
+    function wechat()
+    {
+        if(IS_POST){
+
+        }else{
+            $action = I('get.action');
+            $db = M('ConfigField');
+            if ($action) {
+                if ($action == 'delete') {
+                    $fid = I('get.fid', 0, 'intval');
+                    if ($this->Config->extendDel($fid)) {
+                        cache('Config', NULL);
+                        $this->success("扩展配置项删除成功！");
+                        return true;
+                    } else {
+                        $error = $this->Config->getError();
+                        $this->error($error ? $error : "扩展配置项删除失败！");
+                    }
+                }
+            }
+            $extendList = $db->order(array('fid' => 'DESC'))->select();
+            $this->assign('extendList', $extendList);
+            C('TOKEN_ON',false);
+            $this->display();
+        }
+    }
+    //第三方支付
+    function pays()
+    {
+        # code...
+    }
     //云鹿作为销售终端
     function third_sales(){
         //获取当前产品
