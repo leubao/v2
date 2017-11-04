@@ -1,0 +1,229 @@
+<!--年卡申请页面-->
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>年卡办理</title>
+    <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport" />
+    <meta content="yes" name="apple-mobile-web-app-capable" />
+    <meta content="black" name="apple-mobile-web-app-status-bar-style" />
+    <meta content="telephone=no" name="format-detection" />
+    <!-- 引入YDUI样式 -->
+    <link rel="stylesheet" href="static/css/ydui.css" />
+    <!-- 引入YDUI自适应解决方案类库 -->
+    <script src="static/js/ydui.flexible.js"></script>
+    <style type="text/css" media="screen">
+     .action{margin-top: 4rem;}
+     .action .cell-left{ width: 1.3rem;}
+    </style>
+</head>
+<body>
+
+<div class="g-view">
+    <div class="action">
+        <div class="m-cell">
+            <div class="cell-item">
+                <div class="cell-left">姓  名：</div>
+                <div class="cell-right"><input type="text" id="name" class="cell-input" placeholder="请输入姓名" autocomplete="off" /></div>
+            </div>
+            <div class="cell-item">
+                <div class="cell-left">身份证：</div>
+                <div class="cell-right"><input type="text" id="card" class="cell-input" placeholder="请输入身份证号码" autocomplete="off" /></div>
+            </div>
+            <div class="cell-item">
+                <div class="cell-left">手机号：</div>
+                <div class="cell-right"><input type="text" id="phone" class="cell-input" placeholder="请输入手机号" autocomplete="off" /></div>
+            </div>
+            <div class="cell-item">
+                <div class="cell-left">验证码：</div>
+                <div class="cell-right">
+                    <input type="text" id="code" class="cell-input" placeholder="请输入验证码" autocomplete="off" />
+                    <a href="javascript:;" class="btn btn-warning" id="J_GetCode">获取短信验证码</a>
+                </div>
+            </div>
+            <a class="cell-item" href="tel:400-888-8888">
+                <div class="cell-left"><i class="cell-icon demo-icons-tel"></i>联系客服</div>
+                <div class="cell-right cell-arrow">400-888-8888</div>
+            </a>
+        </div>
+        <div class="m-button">
+            <a href="javascript:;" class="btn-block btn-primary" id="applySubmit">立即办理</a>
+            <a href="/card/confirm.html" class="btn-block btn-primary">立即确认</a>
+            <a href="/card/renewal.html" class="btn-block btn-primary"立即续费</a>
+            <a href="/card/succeed.html" class="btn-block btn-primary">成功</a>
+        </div>
+    </div>
+</div>
+<!-- 引入jQuery 2.0+ -->
+<script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+<!-- 引入YDUI脚本 -->
+<script src="static/js/ydui.js"></script>
+<script>
+    !function ($) {
+        var name = '', card = '', phone = '', code = '', err = '', openid = '';
+        //判断会话ID是否存在，取得会话ID
+        get_token();
+        if(!is_weixn()){
+            YDUI.dialog.alert('亲,为获得更好的用户体验,请在微信中打开!');
+        }else{
+            //判断是否存在openID
+            openid = sessionStorage.getItem('openid');
+            console.log(openid.replace(/(^s*)|(s*$)/g, "").length);
+            if(openid.replace(/(^s*)|(s*$)/g, "").length == 0){console.log(openid);
+                var reset = GetPostHttp('http://ticket.leubao.com/api.php?m=apply&a=oauth','{"url":"'+window.location.href+'"}');
+                console.log(reset);
+                if(reset.code == '10001'){
+                    //一个微信多张年卡
+                    window.location.href = reset.data.auth;
+                }
+            }
+        }
+        
+        $('#applySubmit').on('click', function () {
+            name = $('#name').val();
+            card = $('#card').val();
+            code = $('#code').val();
+            /*验证身份证*/
+            if(!name){ err = "姓名";}
+            if(!card || is_card(card)){err = "身份证号";}
+            if(!code){err = "验证码";}
+            if(!phone){err = "手机号";}
+            if(err){
+               YDUI.dialog.toast(err+'不能为空', 'error', 1500);
+               return false; 
+            }
+            //提交成功后判断是否
+            YDUI.dialog.alert('我有一个小毛驴我从来也不骑！');
+        });
+        var $getCode = $('#J_GetCode');
+        /* 定义参数 */
+        $getCode.sendCode({
+            disClass: 'btn-disabled',
+            secs: 60,
+            run: false,
+            runStr: '{%s}秒后重新获取',
+            resetStr: '重新获取验证码'
+        });
+        $getCode.on('click', function () {
+            phone = $('#phone').val();
+            //验证手机号是否正确，是否已经注册过
+            if(!is_mobile(phone)){
+                YDUI.dialog.toast('手机号码不正确', 'error', 1500);
+                return false;
+            }
+            $getCode.sendCode('start');
+        });
+        function is_card(str) {
+            //身份证号码为15位或者18位，15位时全为数字，18位前17位为数字，最后一位是校验位，可能为数字或字符X
+            var reg = /(^\d{15}$)|(^\d{17}(\d|X)$)/;
+            if(reg.test(str) === false){
+                return false;
+            }else{
+                //发送请求至服务器，验证是否可用
+                $.ajax({
+                    url: '/获取数据方法',
+                    dataType: 'json',
+                    success: function (ret) {
+                        if(ret.code == '10001'){
+                            return true;
+                        }else{
+                            YDUI.dialog.alert(ret.msg);
+                            return false;
+                        }
+                    },
+                    error: function (ret) {
+                        YDUI.dialog.toast('服务器请求超时...', 'error', 1500);
+                    }
+                });
+            }
+        }
+        function is_mobile(str) {
+            var re = /^1\d{10}$/;
+            if (re.test(str)) {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        /**
+         * 封装会话token 的ajax请求包
+         * @Author   zhoujing   <zhoujing@leubao.com>
+         * @DateTime 2017-11-02
+         * @param    {string}   urls                  请求url
+         * @param    {json}     data                  请求数据
+         * @param    {string}   method                请求方式
+         */
+        function GetPostHttp(urls,pdata,method = 'POST') {
+            var reset = '';
+            $.ajax({
+                url: urls,
+                dataType: 'json',
+                type: method,
+                async: false,
+                data: pdata,
+                timeout: 1500,
+                beforeSend: function(request) {
+                    request.setRequestHeader('authorization', get_token());
+                },
+                success: function (ret) {
+                    //console.log(ret);//console.log(ret.data);
+                    if(ret.status){
+                        $reset = ret;
+                    }else{
+                        YDUI.dialog.toast('服务器响应异常...', 'error', 1500);
+                        $reset = false;
+                    }
+                },
+                error: function (ret) {
+                    YDUI.dialog.toast('服务器请求超时...', 'error', 1500);
+                    $reset = false;
+                }
+            });
+            return $reset;
+        }
+        /**
+         * 判断是否在微信浏览器中打开
+         * @Author   zhoujing   <zhoujing@leubao.com>
+         * @DateTime 2017-11-02
+         * @return   {Boolean}  [description]
+         */
+        function is_weixn(){
+            var ua = navigator.userAgent.toLowerCase();
+            if(ua.match(/MicroMessenger/i)=="micromessenger") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+        /**
+         * 获取会话token
+         * @Author   zhoujing   <zhoujing@leubao.com>
+         * @DateTime 2017-11-02
+         * @return   {string}   会话token
+         */
+        function get_token() {
+            sessionStorage.clear();
+            var token = sessionStorage.getItem('token');
+            console.log(token);
+            if(!token){
+                $.ajax({
+                    url: 'http://ticket.leubao.com/api.php?m=apply',
+                    dataType: 'json',
+                    async: true,
+                    success: function(ret) {
+                        if(ret.status){
+                            sessionStorage.setItem('token', ret.data.token);
+                            sessionStorage.setItem('openid', ret.data.openid);
+                            return ret.data.token;
+                        }
+                    }
+                });
+            }else{
+                return token;
+            }
+        }
+    }(jQuery);
+</script>
+</body>
+</html>
