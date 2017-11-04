@@ -2,7 +2,7 @@
     <!--第一个图表-->
     <div id="main1" style="height:350px;width:500px;border:1px dashed #ccc;float:left;margin:10px 0 0 10px"></div>
     <script type="text/javascript">
-    						// 路径配置
+    		// 路径配置
             require.config({
                 paths:{ 
                     'echarts' : '{$config_siteurl}statics/chart/echarts',

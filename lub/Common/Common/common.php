@@ -717,7 +717,7 @@ function get_wechat($product_id = ''){
                 //'verify' => false, // 关掉 SSL 认证（强烈不建议！！！）
             ]
         ];
-    
+        return $options;
     }
 
 }

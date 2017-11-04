@@ -149,8 +149,7 @@ class IndexController extends ApiBase {
      * 0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
      * @return 订单状态信息 100预订成功 200已取票 300取消中 400作废订单[不可用订单] 500 等待景区确认
      */
-    function query_state($order_sn = '')
-    {
+    function query_state($order_sn = ''){
       $state = D('Order')->where(['order_sn'=>$order_sn])->getField('status');
       switch ($state) {
         case '1':

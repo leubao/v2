@@ -12,7 +12,7 @@
       <td>联系人</td>
       <td>{$data.contacts}</td>
       <td>电话</td>
-      <td>{$data.phone}<span class="glyphicon glyphicon-phone-alt call"></span></td>
+      <td>{$data.phone}</td>
     </tr>
     <tr>
       <td>分组</td>
