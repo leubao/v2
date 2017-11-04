@@ -122,12 +122,23 @@ class ApplyController extends TrustController{
     public function check_wechat_card($param = '', $type = 'openid')
     {	
     	if(empty($param)){return false;}
+        $model = D('Crm/Member');
     	if($type == 'openid'){
-
+            $map = [
+                'openid' => $param
+            ];
     	}
     	if($type == 'idcard'){
-
+            $map = [
+                'idcard' => $param
+            ];
     	}
+        $count = $model->where($map)->count();
+        if($conut <> 0){
+            return $count;
+        }else{
+            return true;
+        }
     }
     /**
      * 云鹿票务分销平台
