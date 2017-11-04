@@ -16,12 +16,13 @@ define('SITE_PATH', getcwd() . '/');
 //项目路径
 define('PROJECT_PATH', SITE_PATH . 'web/');
 // 开启调试模式 建议开发阶段开启 部署阶段注释或者设为false
-define('APP_DEBUG', false);
+define('APP_DEBUG', true);
 // 应用公共目录
 define('COMMON_PATH', PROJECT_PATH . 'Common/');
 // 定义应用目录
 define('APP_PATH', PROJECT_PATH . 'App/');
 //应用运行缓存目录
-define("RUNTIME_PATH", SITE_PATH . "#runtime/");
+define("RUNTIME_PATH", PROJECT_PATH . "#runtime/");
+require './vendor/autoload.php';
 // 引入ThinkPHP入口文件
 require './ThinkPHP/ThinkPHP.php';
