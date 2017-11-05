@@ -44,12 +44,11 @@
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
         <td>{$vo.id}</td>
-        <td>{$vo.cron_id}</td>
-        <td><if condition="$vo.status eq '1'">成功<else />失败</if></td>
+        <td>{$vo.cron_id|cronName}</td>
+        <td>{$vo.status|status }</td>
         <td>{$vo.performtime|datetime}</td>
        </tr>
     </volist>
-     
     </tbody>
   </table>
 </div>

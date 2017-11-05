@@ -53,7 +53,20 @@ class Sms extends \Libs\System\Service {
 		 $arr = json_decode($json,true);
 		 Sms::local_sms($info['phone'],$sn, urldecode($message),$arr['result'],$type);
 		 return $arr['result'];
-	}	/*系统错误报警短息*/
+	}
+	/**
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2017-11-05
+	 * @param    int        $tplId   模板ID
+	 * @param    array      $data    发送数据 phone 手机号 
+	 * @return   [type]                              [description]
+	 */
+	function toSms($tplId, $data)
+	{
+		
+	}
+	/*系统错误报警短息*/
 	function err_msg($info){
 		 $title=$info['title'];//产品名称
 		 $ream = $info['rema'];//错误说明

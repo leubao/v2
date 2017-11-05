@@ -30,4 +30,17 @@ class Lublogs extends \Libs\System\Service {
 			));
 		return true;
 	}
+	/**
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2017-11-05
+	 * @param    int        $cronId               计划ID
+	 * @param    int        $status               状态
+	 * @return   [type]                              [description]
+	 */
+	function cronLog($cronId, $status = '')
+	{
+		$db = D('Manage/Cronlog');
+		
+	}
 }

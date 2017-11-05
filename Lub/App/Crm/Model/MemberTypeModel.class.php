@@ -10,7 +10,6 @@ class MemberTypeModel extends Model{
 	);
 	function insert($pinfo = [])
 	{
-		$data = $this->create();
 		$rule = [
 			'year' => [],
 			'datetime' => [
@@ -19,10 +18,16 @@ class MemberTypeModel extends Model{
 			],
 			'number'	=> $pinfo['number'],
 		];
-		$data->title = $pinfo['title'];
-		$data->type  = $pinfo['type'];
-		$data->rule  = json_encode($rule);
-		$data->money = $pinfo['money'];
+		$data = [
+			'title'	=>	$pinfo['title'],
+			'type'	=>	$pinfo['type'],
+			'rule'	=>	json_encode($rule),
+			'money'	=>	$pinfo['money'],
+			'status'=>	'1',
+			'create_time'=>time(),
+			'update_time'=>time(),
+			'user_id'	=>	get_user_id(),
+		];
 		return $this->add($data);
 	}
 }

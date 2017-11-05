@@ -14,10 +14,10 @@ use Libs\Service\Operate;
 class TrustController extends LubTMP {
 	//信任地址验证
 	function _initialize(){
-		/*获取请求的url */
+		/*获取请求的url 
 		$get_url = get_url();
 		//不成功返回错误
-		
+		dump($get_url);
 		//获取已经配置的url
 		if($get_url){
 			$return = array(
@@ -25,7 +25,7 @@ class TrustController extends LubTMP {
 				'msg'	=>	'不合法请求',
 			);
 			$this->ajaxReturn($return);
-		}
+		}*/
 	}
 	function index(){}
 	//信任计划获取
@@ -166,15 +166,7 @@ class TrustController extends LubTMP {
     }
     //年卡办理
     
-    /**
-     * 年卡校验
-     */
-    public function check($value='')
-    {
-    	//手机号校验
-    	//身份号码校验
-    	
-    }
+
 	/*自助机*/
 	/*处理对接数据*/
 	function dealpre(){

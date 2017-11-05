@@ -9,6 +9,7 @@
 namespace Api\Controller;
 use \Api\Controller\TrustController;
 use EasyWeChat\Foundation\Application;
+use Libs\Service\YearCard;
 class ApplyController extends TrustController{
 	/**
 	 * 首次会话取得会话ID
@@ -19,13 +20,13 @@ class ApplyController extends TrustController{
 	{
 		$ginfo = I('get.');
 		if(empty($ginfo['token'])){
-			$token = session_create_id(genRandomString(8).'-');
+			$token = \Libs\Service\LubToken::createToken();
 			//存储至Redis中
 			load_redis('setex',$token,json_encode(['token'=>$token]),3600);
 		}else{
 			$session = json_decode(load_redis('get',$ginfo['token']),true);
 			$token = $session['token'];
-			$openid = $session['openid'];
+			$openid = $session['openid'] ? $session['openid'] : 0;
 		}
 		$return = ['status'=>true, 'code'=>10001, 'data'=>[ 'token'=>$token, 'openid'=> $openid], 'msg'=>'ok'];
 		die(json_encode($return));
@@ -40,24 +41,43 @@ class ApplyController extends TrustController{
 		if(IS_POST){
 			$pinfo = I('post.');
     		if(empty($pinfo['card'])){
-    			$return = ['status' => false, 'code'  => 10003, 'msg' => 'error' ];
+    			$return = ['status' => false, 'code'  => 10003, 'msg' => '身份证号不能为空' ];
     			die(json_encode($return));
     		}
-    		$model = D('Crm/Member');
-    		$map = [
-    			'cardid' => $pinfo['card']
-    		];
-    		$count = $model->where($map)->count();
-    		if($count == 0){
-    			$return = ['status' => true, 'code'  => 10001, 'msg' => 'error' ];
-    		}else{
-    			$return = ['status' => false, 'code'  => 10004, 'msg' => '已完成年卡办理' ];
-    		}
-    		die(json_encode($return));
+            //验证手机号和验证码
+            $token = $_SERVER['HTTP_AUTHORIZATION'];
+            $session = json_decode(load_redis('get',$token),true);
+            $code = \Libs\Service\LubToken::encryCode($pinfo['code'],$pinfo['phone']);
+            if($code !== $session['code']){
+                $return = ['status' => false, 'code'  => 10003, 'msg' => '验证码不正确或已过期' ];
+                die(json_encode($return));
+            }
+            //验证身份证号
+            $yearCard = new YearCard();
+    		$check_card = $yearCard->check_year_card($pinfo['card']);
+            if(!$check_card){
+                $return = ['status' => false, 'code'  => 10003, 'msg' => $yearCard->error ];
+                die(json_encode($return));
+            }
+            //存储请求数据
+            $session['post'] = [
+                'name' => $pinfo['name'],
+                'phone'=> $pinfo['phone'],
+                'card' => $pinfo['card']
+            ];
+            load_redis('setex',$token,json_encode($session),3600);
+    		die(json_encode(['status' => true, 'code'  => 10001, 'msg' => 'ok' ]));
 		}else{
 			$this->display();
 		}
 	}
+    public function temp()
+    {
+        $ginfo = I('get.');
+        $yearCard = new YearCard();
+        $check_card = $yearCard->check_year_card($ginfo['card']);
+        echo $yearCard->error;
+    }
 	/**
 	 * 开通确认
 	 * @Author   zhoujing   <zhoujing@leubao.com>
@@ -111,35 +131,8 @@ class ApplyController extends TrustController{
 			header('location:'. $targetUrl);
     	}
     }
-    /**
-     * 判断是否已经存在年卡
-     * @Author   zhoujing   <zhoujing@leubao.com>
-     * @DateTime 2017-11-04
-     * @param    string     $param                openID  或身份证号码
-     * @param    string     $type                 openid 或 idcard
-     * @return   [type]                           [description]
-     */
-    public function check_wechat_card($param = '', $type = 'openid')
-    {	
-    	if(empty($param)){return false;}
-        $model = D('Crm/Member');
-    	if($type == 'openid'){
-            $map = [
-                'openid' => $param
-            ];
-    	}
-    	if($type == 'idcard'){
-            $map = [
-                'idcard' => $param
-            ];
-    	}
-        $count = $model->where($map)->count();
-        if($conut <> 0){
-            return $count;
-        }else{
-            return true;
-        }
-    }
+    
+
     /**
      * 云鹿票务分销平台
      * 平台放到
@@ -176,6 +169,28 @@ class ApplyController extends TrustController{
     	//写入Redis
     	//没10分钟写入一次数据库
     	//
+    }
+    /**
+     * 发送验证码
+     * @Company  承德乐游宝软件开发有限公司
+     * @Author   zhoujing      <zhoujing@leubao.com>
+     * @DateTime 2017-11-05
+     * @return   [type]        [description]
+     */
+    public function tosms()
+    {
+        $pinfo = I('post.data');
+        $token = json_decode(load_redis('get',$_SERVER['HTTP_AUTHORIZATION']),true);
+        if(empty($token)){
+            die(json_encode(['status'=>false,'code'=>'10004','msg'=>'会话异常,请刷新页面']));
+        }
+        $code = genRandomString(4,1);
+        $token['code'] = \Libs\Service\LubToken::encryCode($code,$pinfo['phone']);
+        load_redis('setex',$_SERVER['HTTP_AUTHORIZATION'],json_encode($token),3600);
+        //链接短信接口 
+        //\Libs\Service\Sms::toSms();
+        die(json_encode(['status'=>true,'code'=>'10001','msg'=>'ok']));
+
     }
     /**
      * 年卡是否存在校验

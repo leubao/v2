@@ -51,6 +51,7 @@
             <a href="/card/confirm.html" class="btn-block btn-primary">立即确认</a>
             <a href="/card/renewal.html" class="btn-block btn-primary"立即续费</a>
             <a href="/card/succeed.html" class="btn-block btn-primary">成功</a>
+            <a href="javascript:;" class="btn-block" id="clear">清理</a>
         </div>
     </div>
 </div>
@@ -60,7 +61,7 @@
 <script src="static/js/ydui.js"></script>
 <script>
     !function ($) {
-        var name = '', card = '', phone = '', code = '', err = '', openid = '';
+        var name = '', card = '', phone = '', code = '', err = '', openid = '0';
         //判断会话ID是否存在，取得会话ID
         get_token();
         if(!is_weixn()){
@@ -68,8 +69,8 @@
         }else{
             //判断是否存在openID
             openid = sessionStorage.getItem('openid');
-            console.log(openid.replace(/(^s*)|(s*$)/g, "").length);
-            if(openid.replace(/(^s*)|(s*$)/g, "").length == 0){console.log(openid);
+            if(openid == null || openid == '0' || openid == undefined){
+                console.log(openid);
                 var reset = GetPostHttp('http://ticket.leubao.com/api.php?m=apply&a=oauth','{"url":"'+window.location.href+'"}');
                 console.log(reset);
                 if(reset.code == '10001'){
@@ -77,6 +78,7 @@
                     window.location.href = reset.data.auth;
                 }
             }
+            console.log(openid);
         }
         
         $('#applySubmit').on('click', function () {
@@ -92,8 +94,19 @@
                YDUI.dialog.toast(err+'不能为空', 'error', 1500);
                return false; 
             }
+            var postData = 'data={"name":"'+name+'","card":"'+card+'","phone":"'+phone+'","code":"'+code+'"}';
+            var reset = GetPostHttp('api.php?m=apply&a=apply',postData);
+            if(reset.status){
+                //提交成功
+                sessionStorage.setItem('postData',postData);
+                //服务端存储一次数据，客户端同时存储数据
+                YDUI.dialog.toast(err+'不能为空', 'error', 1500);
+            }else{
+                //主要判断身份证号段是否可用，以及手机验证码
+                YDUI.dialog.alert(reset.msg);
+            }
             //提交成功后判断是否
-            YDUI.dialog.alert('我有一个小毛驴我从来也不骑！');
+            
         });
         var $getCode = $('#J_GetCode');
         /* 定义参数 */
@@ -111,6 +124,8 @@
                 YDUI.dialog.toast('手机号码不正确', 'error', 1500);
                 return false;
             }
+            var postData = '{"phone":"'+phone+'"}'
+            var reset = GetPostHttp('api.php?m=apply&a=tosms',)
             $getCode.sendCode('start');
         });
         function is_card(str) {
@@ -145,7 +160,10 @@
                 return false;
             }
         }
-
+        $('#clear').on('click', function () {
+            sessionStorage.clear();
+            alert('ok');
+        })
         /**
          * 封装会话token 的ajax请求包
          * @Author   zhoujing   <zhoujing@leubao.com>
@@ -203,9 +221,7 @@
          * @return   {string}   会话token
          */
         function get_token() {
-            sessionStorage.clear();
             var token = sessionStorage.getItem('token');
-            console.log(token);
             if(!token){
                 $.ajax({
                     url: 'http://ticket.leubao.com/api.php?m=apply',
@@ -215,7 +231,7 @@
                         if(ret.status){
                             sessionStorage.setItem('token', ret.data.token);
                             sessionStorage.setItem('openid', ret.data.openid);
-                            return ret.data.token;
+                            return true;
                         }
                     }
                 });

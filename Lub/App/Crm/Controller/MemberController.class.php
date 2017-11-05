@@ -81,6 +81,9 @@ class MemberController extends ManageBase{
 	public function del_type()
 	{
 		$id = I('get.id',0,intval);
+		if($id == '1'){
+			$this->erun('系统内置类型禁止删除!');
+		}
 		if(!empty($id)){
 			$map = array("id"=>$id);
 			$model = D('Item/MemberType');
@@ -110,9 +113,35 @@ class MemberController extends ManageBase{
 	public function add_member()
 	{
 		if(IS_POST){
-			
+
 		}else{
 			$this->display();
+		}
+	}
+	//类型配置
+	public function config()
+	{
+		if(IS_POST){
+			$map = array("id"=>$id);
+			$model = D('Item/MemberType');
+			$info = $model->where($map)->find('rule');
+			$info['rule'] = json_decode($info['rule'],true);
+			$rule = [
+
+			];
+			$info['rule']['year'] = 
+			$status = $model->where($map)->setField('rule',json_encode($rule));
+			//rule
+		}else{
+			$id = I('get.id',0,intval);
+			if(!empty($id)){
+				$map = array("id"=>$id);
+				$model = D('Item/MemberType');
+				$info = $model->where($map)->find();
+				$this->assign('data',$info)->display();
+			}else{
+				$this->erun('参数错误!');
+			}
 		}
 	}
 	//类型详情
@@ -121,7 +150,98 @@ class MemberController extends ManageBase{
 		$id = I('get.id',0,intval);
 		if(!empty($id)){
 			$map = array("id"=>$id);
-			$model = D('Item/MemberType');
+			$model = D('Crm/MemberType');
+			$info = $model->where($map)->find();
+			$this->display();
+		}else{
+			$this->erun('参数错误!');
+		}
+	}
+	public function year()
+	{
+		$groupid = I('id');    //客户分组id
+		$type = I('type');
+		$name = I('name');
+		$level = I('level');//级别
+		$status = I('status');
+		$product_id = get_product('id');
+		//$map["id"] = $groupid;
+		//$map =  array('id'=>$groupid,'type'=>$type,'product_id'=>$product_id);
+		$map =  array('groupid'=>$groupid);
+		/*搜索查询*/
+		if(!empty($name)){
+			if($type <> '2'){
+				$map['name'] = array("like","%".$name."%");
+			}else{
+				$map['nickname'] = array("like","%".$name."%");
+			}
+			$this->assign("name",$name);
+		}
+		$map['level'] = $level ? $level : '16';
+		if(!empty($status)){
+			$map['status'] = $status;
+		}
+		/*搜索END查询级别END*/
+		if($type == '1'  || $type == '3'){
+			//企业
+			$db = "Crm";
+		}elseif ($type == '4') {
+			//个人
+			$db = "User";
+		}
+		$this->basePage($db,$map,array('status'=>"DESC","id"=>"DESC"));
+		$this->assign ('groupid',$groupid)
+			 ->assign('type',$type)
+			 ->assign('map',$map)
+			 ->display();
+	}
+	/**
+	 * 年卡设置
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2017-11-06
+	 * @return   [type]        [description]
+	 */
+	public function config_year()
+	{
+		$map = array("id"=>'1');
+		$model = D('Crm/MemberType');
+		$info = $model->where($map)->find();
+		$info['rule'] = json_decode($info['rule'],true);
+		if(IS_POST){
+			$pinfo = I('post.');
+			$rule = [
+				'area' => $pinfo['area'],
+				'day'  => (int)$pinfo['day'],
+				'datetime' => [
+					'starttime' => date('Ymd',strtotime($pinfo['starttime'])),
+					'endtime'	=> date('Ymd',strtotime($pinfo['endtime']))
+				],
+				'overdue'	=> date('Ymd',strtotime($pinfo['overdue'])),//过期时间
+			];
+			$data = [
+				'update_time' => time(),
+				'money'		  => $pinfo['money'],
+				'rule'		  => json_encode($rule),
+			];
+			if($model->where($map)->save($data)){
+				$this->srun('配置成功!', array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun('配置失败!');
+			}
+		}
+		$url = $this->config['siteurl'].'card/apply.html';
+		$this->assign('url',$url)
+			->assign('data',$info)
+			->display();
+	}
+	//会员详情
+	public function public_member()
+	{
+		$id = I('get.id',0,intval);
+		if(!empty($id)){
+			$map = array("id"=>$id);
+			$model = D('Crm/Member');
 			$info = $model->where($map)->find();
 			$this->display();
 		}else{

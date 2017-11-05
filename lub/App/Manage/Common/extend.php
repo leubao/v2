@@ -34,7 +34,6 @@ function pay_status($param)
     }
     $return = "<span class='label label-".$status."'>".$msg."</span>";
     echo $return;
-
 }
 /**
  * 判断文件是否存在
@@ -57,5 +56,9 @@ function if_file($path,$type = ''){
         $return = "<span class='label label-".$status."'>".$msg."</span>";
         echo $return;
     }
+}
+function cronName($param = '')
+{
+    echo M('Cron')->where(['id'=>$param])->getField('subject');
 }
 ?>

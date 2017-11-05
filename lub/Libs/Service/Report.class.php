@@ -226,7 +226,6 @@ class Report{
  	@param $number int 数量
  	return $data*/
  	function ticket_type($general, $seat, $param, $datetime, $type, $product_type, $child = null, $number = null){
- 	//dump($seat);
  		//根据票型归类
  		foreach($seat as $k=>$v){
  			$datalist[$v['priceid']][] = $v;
@@ -256,7 +255,7 @@ class Report{
 					'moneys'	=>	$money[$i]['moneys'],//结算金额
 					'subsidy'   =>  $money[$i]['rebate'],  //补贴金额  
 					'region'	=>	$param[0]['tour'] ? $param[0]['tour'] : '0',
-	 			);//dump($data[$i]);
+	 			);
 	 			$datas[$i] = array_merge($data[$i],$general);
  			}else{
  				//记录异常日志
@@ -264,7 +263,6 @@ class Report{
  				error_insert('400012');
  			}
  		}
- 		//dump($datas);
  		if($type == '1'){
  			//计划任务拆解
  			return Report::insert_report($datas);
@@ -290,7 +288,6 @@ class Report{
  	function operator($data){
  		foreach ($data as $k => $v) {
 			foreach ($v as $key => $value) {
-				
 				$list[] = array(
 					'datetime'	=>	$value['datetime'],	//报表日期时间
 					'product_id'=>	$value['product_id'],
@@ -312,8 +309,6 @@ class Report{
 					'moneys'	=>	$value['moneys'],//结算金额
 					'subsidy'   =>  $value['subsidy'],  //补贴金额  
 				);
-				
-				
 			}
 		}
 		return $list;

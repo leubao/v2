@@ -9,7 +9,6 @@
         <tr>
           <td width="100px">类型属性:</td>
           <td>
-            <input type="radio" name="type" value="2" data-toggle="icheck" data-label="年卡" />
             <input type="radio" name="type" value="1" data-toggle="icheck" data-label="按次计费" />
             <input type="radio" name="type" value="3" data-toggle="icheck" data-label="时间段计费" />
             <input type="radio" name="type" value="4" data-toggle="icheck" data-label="身份识别" />
@@ -31,6 +30,7 @@
           <td><input type="text" name="money" value="0" size="5" /><span class="fun_tips">起售金额</span></td>
         </tr>
         </tbody>
+        <input type="hidden" name="rule" value="">
     </table>
   </div>
   <div class="bjui-pageFooter">
