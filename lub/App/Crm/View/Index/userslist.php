@@ -28,9 +28,9 @@
         <th align="center">用户名</th>
         <th width="55" align="center">权限组</th>
         <th align="center">电话</th>
-        <th align="center">邮箱</th>
         <th width="90" align="center">状态</th>
         <th align="center">添加时间</th>
+        <th align="center">最后登录时间</th>
       </tr>
     </thead>
     <tbody>
@@ -40,9 +40,9 @@
         <td align="center">{$vo.username}</td>
         <td align="center">{$vo.role_id|roleName}</td>
         <td align="center">{$vo.phone}</td>
-        <td align="center">{$vo.email}</td>
         <td align="center">{$vo.status|status}</td>
         <td align="center">{$vo.create_time|date="Y-m-d H:i:s",###}</td>
+        <td align="center">{$vo.last_login_time|date="Y-m-d H:i:s",###}</td>
       </tr>
     </volist>
     </tbody>

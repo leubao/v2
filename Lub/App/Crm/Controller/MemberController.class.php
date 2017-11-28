@@ -225,6 +225,7 @@ class MemberController extends ManageBase{
 				'rule'		  => json_encode($rule),
 			];
 			if($model->where($map)->save($data)){
+				//生成year.config.js
 				$this->srun('配置成功!', array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('配置失败!');

@@ -37,7 +37,7 @@
     </thead>
     <tbody>
     <volist name="data" id="vo">
-      <tr data-id="{$vo.order_sn}">
+      <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" >
         <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
         <td align="center">{$vo.plan_id|planShow}</td>
         <td align="center">{$vo.number}</td>
@@ -51,9 +51,26 @@
         </td>
        </tr>
     </volist>
+    <tr>
+     <td></td>
+     <td align="right">当前页合计:</td>
+     <td id="pre_order_num" align="center">0</td>
+     <td></td>
+     <td></td><td></td><td></td><td></td></tr>
     </tbody>
   </table>
 </div>
+<script type="text/javascript">
+$(document).ready(function() {
+  var pre_order_num = 0;
+  $('#order-list tr').each(function(i){
+    if($(this).data('num') != null){
+      pre_order_num += parseInt($(this).data('num'));
+    }
+  });
+  $("#pre_order_num").html(pre_order_num);
+});
+</script>
 <div class="bjui-pageFooter">
   <div class="pages">
     <span>共 {$totalCount} 条</span>
