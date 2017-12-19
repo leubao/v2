@@ -11,7 +11,7 @@ $(function(){
     var id  = this.id;
     var ids = id.split("_");
     //订单信息中显示票型、价格等信息
-    if($("#cart_"+ids[1]).length <= 0){
+    if($("#cart_"+ids[1]+"_"+ids[2]).length <= 0){
       var obj = $(this);
       var data_name  = obj.find("td").eq(0).text();
       var data_price = obj.find("td").eq(1).text();
