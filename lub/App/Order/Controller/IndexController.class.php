@@ -16,70 +16,9 @@ use Libs\Service\Order;
 class IndexController extends ManageBase {
 	/*订单列表*/
 	function index(){
-		$starttime = I('starttime');
-	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
-	    $sn = I('sn');
-	    $status = I('status');
-	    $channel_id = I('channel_id');
-	    $channel_name = I('channel_name');
-	    $user_id = I('user_id');
-	    $user_name = I('user_name');
-	    $plan_id = I('plan_id');
-	    $plan_name = I('plan_name');
-	    $type = I('type');
-	    $phone = I('phone');
-	    $pay = I('pay');
-	    
-	    //传递条件
-        $this->assign('channel_id',$channel_id)
-	        ->assign('channel_name',$channel_name)
-	        ->assign('user_id',$user_id)
-	        ->assign('user_name',$user_name)
-	        ->assign('starttime',$starttime)
-	        ->assign('endtime',$endtime)
-	        ->assign('plan_id',$plan_id)
-	        ->assign('plan_name',$plan_name)
-	        ->assign('status',$status)
-	        ->assign('pay',$pay);
-	    //导出条件
-	    $export_map = array();
-        if(!empty($sn)){
-        	$map['order_sn'] = array('like','%'.$sn.'%');
-        }elseif(!empty($phone)){
-        	$map['phone'] = $phone;
-        }else{
-        	if(!empty($plan_id)){
-				$map['plan_id'] = $plan_id;
-				$export_map['plan_id'] = $plan_id;
-        	}else{
-        		if (!empty($starttime) && !empty($endtime)) {
-        			$export_map['starttime'] = $starttime;
-        			$export_map['endtime'] = $endtime;
-		            $starttime = strtotime($starttime);
-		            $endtime = strtotime($endtime) + 86399;
-		            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
-		        }else{
-		        	//默认显示当天的订单
-		        	$starttime = strtotime(date("Ymd"));
-		            $endtime = $starttime + 86399;
-		        	$map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
-		        }
-        	}
-	        if(!empty($channel_id)){
-	        	$export_map['channel_id'] = $channel_id;
-	        	$map['channel_id'] = array('in',agent_channel($channel_id,2));
-
-	        }
-	        if(!empty($user_id)){
-	        	$export_map['user_id'] = $user_id;
-	        	$map['user_id'] = $user_id;
-	        }
-	        if(!empty($status)){$export_map['status'] = $status;$map['status'] = array('in',$status);}
-	        if(!empty($type)){$map['type'] = $type;}
-	        if(!empty($pay)){$map['pay'] = $pay;}
-        }//dump($map);
-		$map['product_id'] = get_product('id');
-		//dump($map);
+		$map = [];
+		$rest = $this->get_order_map();
+		$map = array_merge($rest['map'],$map);
 		$this->basePage('Order',$map,array('createtime'=>'DESC'));	
 		$this->assign('map',$map)->assign('export_map',$export_map)->display();
 	}
@@ -167,5 +106,125 @@ class IndexController extends ManageBase {
 		}else{
 			$this->erun('订单确认失败...');
 		}
+	}
+	/**
+	 * 团队订单
+	 */
+	public function team()
+	{
+		$map = [];
+        $map['type'] = ['in','2,4,6'];
+        $map['status'] = ['in','1,9'];
+		$rest = $this->get_order_map();
+		$map = array_merge($rest['map'],$map);
+		$this->basePage('Order',$map,array('createtime'=>'DESC'));	
+		$this->assign('map',$map)->assign('export_map',$rest['export'])->display();
+	}
+	/**
+	 * 获取订单列表条件
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2017-12-18
+	 * @return   array
+	 */
+	function get_order_map()
+	{
+		$starttime = I('starttime');
+	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
+	    $sn = I('sn');
+	    $status = I('status');
+	    $channel_id = I('channel_id');
+	    $channel_name = I('channel_name');
+	    $user_id = I('user_id');
+	    $user_name = I('user_name');
+	    $plan_id = I('plan_id');
+	    $plan_name = I('plan_name');
+	    $type = I('type');
+	    $phone = I('phone');
+	    $pay = I('pay');
+	    
+	    //传递条件
+        $this->assign('channel_id',$channel_id)
+	        ->assign('channel_name',$channel_name)
+	        ->assign('user_id',$user_id)
+	        ->assign('user_name',$user_name)
+	        ->assign('starttime',$starttime)
+	        ->assign('endtime',$endtime)
+	        ->assign('plan_id',$plan_id)
+	        ->assign('plan_name',$plan_name)
+	        ->assign('status',$status)
+	        ->assign('pay',$pay);
+	    //导出条件
+	    $export_map = array();
+        if(!empty($sn)){
+        	$map['order_sn'] = array('like','%'.$sn.'%');
+        }elseif(!empty($phone)){
+        	$map['phone'] = $phone;
+        }else{
+        	if(!empty($plan_id)){
+				$map['plan_id'] = $plan_id;
+				$export_map['plan_id'] = $plan_id;
+        	}else{
+        		if (!empty($starttime) && !empty($endtime)) {
+        			$export_map['starttime'] = $starttime;
+        			$export_map['endtime'] = $endtime;
+		            $starttime = strtotime($starttime);
+		            $endtime = strtotime($endtime) + 86399;
+		            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+		        }else{
+		        	//默认显示当天的订单
+		        	$starttime = strtotime(date("Ymd"));
+		            $endtime = $starttime + 86399;
+		        	$map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+		        }
+        	}
+	        if(!empty($channel_id)){
+	        	$export_map['channel_id'] = $channel_id;
+	        	$map['channel_id'] = array('in',agent_channel($channel_id,2));
+
+	        }
+	        if(!empty($user_id)){
+	        	$export_map['user_id'] = $user_id;
+	        	$map['user_id'] = $user_id;
+	        }
+	        if(!empty($status)){$export_map['status'] = $status;$map['status'] = array('in',$status);}
+	        if(!empty($type)){$map['type'] = $type;}
+	        if(!empty($pay)){$map['pay'] = $pay;}
+        }
+        $map['product_id'] = get_product('id');
+        $return = [
+        	'map'	=>	$map,
+        	'export'=>	$export_map
+        ];
+        return $return;
+	}
+	/*打印团队接待单*/
+	function team_report()
+	{
+		$ginfo = I('get.');
+		if(empty($ginfo['sn'])){
+			$this->erun("参数错误");
+		}
+		//根据单号获取订单信息
+		$model= D('Order');
+		$map = [
+			'order_sn'	=>	$ginfo['sn'],
+			'type'  =>	['in','2,4,6'],
+			'status'=>	['in','1,9']
+		];
+		$info = $model->where($map)->field('id,order_sn,user_id,plan_id,product_id,type,number,money,guide_id,channel_id,phone,take,status,createtime')->relation(true)->find();
+		$detail = unserialize($info['info']);dump($detail);
+		foreach ($detail['data'] as $k => $v) {
+			$tic[$v['areaId']][$v['priceid']]['areaId']	=	$v['areaId'];
+			$tic[$v['areaId']][$v['priceid']]['priceid'] = $v['priceid'];
+			$tic[$v['areaId']][$v['priceid']]['price'] = $v['price'];
+			$tic[$v['areaId']][$v['priceid']]['number'] += 1;
+		}
+		foreach ($tic as $key => $value) {
+			foreach ($value as $ke => $va) {
+				$ticket[] = $va;
+			}
+		}
+		$this->assign('data',$info)->assign('ticket',$ticket)->assign('param',$detail['param'])->assign('crm',$detail['crm'])->display();
 	}
 }

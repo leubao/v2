@@ -15,9 +15,10 @@ class OrderModel extends RelationModel{
 			'mapping_type' => self::HAS_ONE,
 			'class_name'   => 'OrderData',
 			'mapping_name' => 'info',
-			'foreign_key'  => 'order_sn',
+			'foreign_key'  => 'oid',
 			//'parent_key'   => 'Order_sn',
-			//'condition'	=> ''
+			//'condition'	=> '''foreign_key'  => 'oid',
+			'as_fields'	   => 'info,remark,win_rem',
 		),
 	);
 }
