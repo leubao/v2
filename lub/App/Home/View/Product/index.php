@@ -381,7 +381,7 @@ var type = {$info['type']},
 function showtype(t){
   var id1    = t.id.split("_");
   var areaid = id1[1];
-  var data = 'info={"area":'+areaid+',"type":'+type+',"plan":'+plan+',"product":'+product+'}',content = "";
+  var data = 'info={"area":'+areaid+',"type":'+type+',"plan":'+plan+',"sale":1,"product":'+product+'}',content = "";
   $.post("index.php?g=Home&m=Product&a=quickPrice", data, function(rdata) {
       if(rdata.statusCode == '200'){
          if(rdata.price != null){

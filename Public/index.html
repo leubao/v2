@@ -1,0 +1,170 @@
+<<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="utf-8">
+	<meta http-equiv="X-UA-Compatible" content="IE=edge">
+	<title></title>
+	<link rel="stylesheet" href="">
+	<style type="text/css" media="screen">
+	    /*首页显示panel块*/
+.panel-stat3 {
+  position: relative;
+  overflow: hidden;
+  padding: 25px 20px;
+  margin-bottom: 20px;
+  color: #fff;
+  cursor: pointer;
+  border-radius: 10px;
+  -moz-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+.panel-stat3 .stat-icon {
+  position: absolute;
+  top: 20px;
+  right: 10px;
+  font-size: 30px;
+  opacity: 0.3;
+}
+.panel-stat3 .refresh-button {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+  color: rgba(0, 0, 0, 0.3);
+}
+.panel-stat3 .refresh-button:hover {
+  color: #fff;
+  transition: all 0.2s ease;
+  -webkit-transition: all 0.2s ease;
+  -moz-transition: all 0.2s ease;
+  -ms-transition: all 0.2s ease;
+  -o-transition: all 0.2s ease;
+}
+.m-top-none {margin-top: 0;}
+.no-radius {border-radius: 0 !important;}
+h2 {
+  font-size: 24px;
+  font-weight: normal;
+  font-family:'Microsoft YaHei','SimSun','Arial';
+}
+h2.smaller {
+  font-size: 23px;
+}
+h2.bigger {
+  font-size: 25px;
+}
+h2.block {
+  margin-bottom: 16px;
+}
+h3 {
+  font-size: 20px;
+  font-weight: normal;
+  font-family: 'Microsoft YaHei','SimSun','Arial';
+}
+h3.smaller {
+  font-size: 19px;
+}
+h3.bigger {
+  font-size: 21px;
+}
+h3.block {
+  margin-bottom: 16px;
+}
+h4 {
+  font-size: 16px;
+  font-weight: normal;
+  font-family:'Microsoft YaHei','SimSun','Arial';
+}
+h4.smaller {
+  font-size: 15px;
+}
+h4.bigger {
+  font-size: 17px;
+}
+h4.block {
+  margin-bottom: 16px;
+}
+h5 {
+  font-size: 13px;
+  font-weight: normal;
+  font-family: 'Microsoft YaHei','SimSun','Arial';
+}
+h5.smaller {
+  font-size: 12px;
+}
+h5.bigger {
+  font-size: 14px;
+}
+h5.block {
+  margin-bottom: 16px;
+}	
+	</style>
+</head>
+<body>
+	<div class="row col-md-11" id="CountMark">                    
+            <div class="col-sm-6 col-md-3">
+             <div class="panel-stat3 no-radius btn-danger" id="cm0101" style="margin-bottom: 5px;margin-top: 5px;padding-top: 15px; padding-bottom: 15px;height: 137px;">
+              <div style="height: 41px;">
+               <h2 class="m-top-none" id="h2010101" style="margin-bottom: 0px;">0</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">已出票订单</h5>
+              </div>
+              <div style="height: 41px; margin-top: 20px;">
+               <h2 class="m-top-none" id="h2010102" style="margin-bottom: 0px;">0</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">未出票订单</h5>
+              </div>
+              <div class="stat-icon"><i class="fa fa-3x fa-cubes"></i></div>
+              <div class="refresh-button" onclick=""><i class="fa fa-refresh"></i></div>
+              
+             </div>
+            </div>                                   
+            <div class="col-sm-6 col-md-3">
+             <div class="panel-stat3 no-radius btn-info" id="cm0301" style="margin-bottom: 5px;margin-top: 5px;padding-top: 15px; padding-bottom: 15px;height: 137px;">
+              <div style="height: 41px;">
+               <h2 class="m-top-none" id="h2030101" style="margin-bottom: 0px;">0</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">累计人数</h5>
+              </div>
+              <div style="height: 41px; margin-top: 20px;">
+               
+               <h2 class="m-top-none" id="h2030102" style="margin-bottom: 0px;">0</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">本月接待人数</h5>
+               
+              </div>
+              <div class="stat-icon"><i class="fa fa-3x fa-users"></i></div>
+              <div class="refresh-button" onclick=""><i class="fa fa-refresh"></i></div>
+             </div>
+            </div>                                    
+            <div class="col-sm-6 col-md-3">
+             <div class="panel-stat3 no-radius btn-warning" id="cm0302" style="margin-bottom: 5px;margin-top: 5px;padding-top: 15px; padding-bottom: 15px;height: 137px;">
+              <div style="height: 41px;">
+               <h2 class="m-top-none" id="h2030201" style="margin-bottom: 0px;">0.00</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">本周接待人数</h5>
+              </div>
+              <div style="height: 41px; margin-top: 20px;">
+               
+               <div class="count2" style="padding-top: 10px;"><i class="fa fa-arrow-circle-o-right fa-lg  bigger-150"></i><span class="m-left-xs" style="font-size: 15px;">0%比上周</span></div>
+              </div>
+              <div class="stat-icon"><i class="fa fa-3x fa-street-view"></i></div>
+              <div class="refresh-button" onclick=""><i class="fa fa-refresh"></i></div>
+             </div>
+            </div>                                    
+            <div class="col-sm-6 col-md-3">
+             <div class="panel-stat3 no-radius btn-success" id="cm0402" style="margin-bottom: 5px;margin-top: 5px;padding-top: 15px; padding-bottom: 15px;height: 137px;">
+              <div style="height: 41px;">
+               <h2 class="m-top-none" id="h2040201" style="margin-bottom: 0px;">0.00</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">票面金额</h5>
+              </div>
+              <div style="height: 41px; margin-top: 20px;">
+               <h2 class="m-top-none" id="h2040202" style="margin-bottom: 0px;">0.00</h2>
+               <h5 style="margin-top: 2px; margin-bottom: 0px;">结算金额</h5>
+              </div>
+              <div class="stat-icon"><i class="fa fa-3x fa-cny"></i></div>
+              <div class="refresh-button" onclick=""><i class="fa fa-refresh"></i></div>
+             </div>
+            </div>
+        </div>
+</body>
+</html>

@@ -49,7 +49,7 @@ function scenic_drifting_plan(plantime,type,product){
 }
 //加载价格
 function getprice(plan,type,tooltype){
-    var data = 'info={"area":'+plan+',"type":'+type+',"plan":'+plan+'}',
+    var data = 'info={"area":'+plan+',"type":'+type+',"sale":2,"plan":'+plan+'}',
         content = '',
         show_price = '',
         url = 'index.php?g=Home&m=Product&a=quickPrice';
@@ -65,13 +65,21 @@ function getprice(plan,type,tooltype){
                     }else{
                         show_price = ticket.discount;
                     }
+                    if(type == '1'){
+                      content += "<tr id='tro_"+ticket.id+"_"+ticket.area_id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.area_id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                              +"<td align='center'>["+ticket.area+"]"+ticket.name+"</td>"
+                              +"<td>"+show_price+"</td>"
+                              +"<td align='center'>"+ticket.area_num+"</td>"
+                              +"</tr>";
+                    }
                     if(type == '2'){
                         content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                               +"<td align='center'>"+ticket.name+"</td>"
                               +"<td>"+show_price+"</td>"
                               +"<td align='center'>"+ticket.area_num+"</td>"
                               +"</tr>";
-                    }else{
+                    }
+                    if(type == '3'){
                         content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                               +"<td align='center'>["+tooltype+"]"+ticket.name+"</td>"
                               +"<td>"+show_price+"</td>"

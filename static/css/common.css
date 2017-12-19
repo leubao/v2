@@ -197,7 +197,7 @@ div.left_seat_info{border-right: 1px dotted #adadad;padding: 5px;}
 /*打印控制*/
 #printBox{display: none;}
 @media print{
-	#bjui-header,#bjui-container,#bjui-footer,.bjui-pageHeader,.bjui-pageContent,.bjui-pageFooter{display:none;}
+	#bjui-header,#bjui-container,#bjui-footer,.bjui-pageHeader,.bjui-pageContent,.bjui-pageFooter,#bjui-taskbar,.bjui-dialog,.taskbutton{display:none;}
 	#printBox{display:block;}
 	.mb10{margin-bottom: 10px;}
 }

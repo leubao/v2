@@ -15,7 +15,7 @@ $(function(){
       var obj = $(this);
       var data_name  = obj.find("td").eq(0).text();
       var data_price = obj.find("td").eq(1).text();
-      detail = "<tr id='cart_"+ids[1]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
+      detail = "<tr id='cart_"+ids[1]+"_"+ids[2]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
       detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
       detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";
       detail += "<div class='input-group-addon'><a href='javascript:;' class='spin-up' data-spin='up'>+</a></div></div>";
@@ -461,6 +461,126 @@ $("#govPay").bind("click",function(){
 	var sn = $("#sn").attr('value'),
 		pay_type =  $("input[name='pay_type']:checked").val(),
 		seat_type = $("input[name='seat_type']:checked").val(),
+		money = parseFloat($("#tomoney").attr('value'));
+	if(sn){
+		$("#myModal").modal('hide');  //关闭支付模态框
+		var postData = 'info={"tomoney":'+money+',"sn":'+sn+',"pay_type":'+pay_type+',"seat_type":'+seat_type+'}'
+		$.ajax({
+			type:'POST',
+			url:'index.php?g=Home&m=Order&a=pay',
+			data:postData,
+			dataType:'json',
+			success:function(data){
+			  if(data.statusCode == "200"){
+				  //成功提示
+				  var content = "订单<a href='index.php?g=Home&m=Order&a=orderinfo&type=2&sn="+data.sn+"' target='_blank'>"+data.sn+"</a>创建成功!</a>";
+				  $("#succ_info").html(content);
+				  $("#success").modal('show');
+			  }else{
+				$("#error").text("订单提交失败!");
+				$("#myModal2").modal('show');  //出票失败的提示
+			  }
+			}
+		  });
+	}else{
+		$("#error").text("参数错误!");
+		$("#myModal2").modal('show');
+	}
+});
+//团队预约
+$("#preteam").bind("click",function(){
+	var rstr = "",
+		car = $("#car").val(),
+		teamno = $("#teamno").val(),
+		plan = $('#planID').val(),
+		remark = $("#remark").val();
+    if($(".contact_input").css("display")=="block"){
+	    var vMobile = $("#phone").val();
+	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	      rstr += "手机格式不正确!";
+	    } 
+	    var vmima = $("#contacts").val();
+	    if (vmima == '') {
+	        rstr += "姓名不能为空!";
+	    }
+	}else{
+		var contact = $("#contact").val();
+		var vMobile = $("#contact").find('option:selected').attr('data-phone');
+		var vmima = $("#contact").find('option:selected').data('name');
+		if(contact == ''){
+			rstr += "取票人不能为空!";
+		}
+	}
+	if(car == ''){
+		rstr += "车牌号不能为空!";
+	}
+	if(teamno == ''){
+		rstr += "旅行团号不能为空!";
+	}
+	if(!remark){
+		remark = "空..";
+	}
+    if(rstr !=""){
+      layer.msg(rstr);
+    }else{
+		var 
+        pay = " ",
+        toJSONString = " ",
+        length =  $("#kselect tr").length - 2,
+		num = 0,
+		nums= 0;
+        if(length < 0){
+		  	layer.msg("请选择要售出的票型!");
+	        return false;
+        }
+        $("#kselect tr").each(function(i){
+	        if(i != 0 ){
+	          	var fg  = i <= length ? ',':' ';/*判断是否增加分割符*/
+	          	var ids = this.id.split("_");
+			  	nums = parseInt(nums)+parseInt($("#qnum_"+ids[1]).val());
+	          	toJSONString = toJSONString + '{"areaId":'+ids[2]+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
+	        }
+        });
+        if(nums <= PRO_CONF.channel_order){
+		  /*获取支付相关数据*/
+		  var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
+      		  itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客导游的id*/
+		      checkinT = 1,
+			  pre	= 1,
+			  param = "";/*付款但不排座*/
+		  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
+		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","teamno":"'+teamno+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
+		
+		  /*提交到服务器*/
+		  $.ajax({
+			type:'POST',
+			url:'index.php?g=Home&m=Order&a=channelPost',
+			data:postData,
+			dataType:'json',
+			success:function(data){
+			  if(data.statusCode == "200"){
+				$("#myModal").modal('show');
+				var total = $("#subtoal",window.parent.document).html();
+				$("#totalcash").text(total);
+				$("#tomoney").attr('value',total);
+				$("#sn").attr('value',data.sn);
+			  }else{
+				$("#error").text("预约失败!");
+				$("#myModal2").modal('show');  //出票失败的提示
+			  }
+			}
+		  });
+        }else{
+        	layer.msg("超出单笔订单门票总数限额...");
+	        return false;
+        }
+	}	  
+ });
+$("#teamPrePay").bind("click",function(){
+	var sn = $("#sn").attr('value'),
+		pay_type =  $("input[name='pay_type']:checked").val(),
+		seat_type = '2',
 		money = parseFloat($("#tomoney").attr('value'));
 	if(sn){
 		$("#myModal").modal('hide');  //关闭支付模态框

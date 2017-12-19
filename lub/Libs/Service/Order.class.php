@@ -702,7 +702,8 @@ class Order extends \Libs\System\Service {
 			/*查询是否开启配额 读取是否存在不消耗配额的票型*/
 			if($proconf['quota'] == '1'){
 				if(in_array($info['type'],array('2','4'))){
-					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id']);
+					$quota = new \Libs\Service\Quota();
+					$up_quota = update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id']);
 				}else{
 					//TODO  全员营销的配额
 					//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
@@ -1025,7 +1026,11 @@ class Order extends \Libs\System\Service {
 			//更新订单 status=5支付但未排座 TODO  政企订单 TDOD
 			$status_one = $info['status'] == 6 ? 6 : 5;
 			if($status_one <> '6'){
-				$state = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(array('status'=>$status_one));
+				$updata = [
+					'pay'=>$is_pay ? $is_pay : $oInfo['pay'],
+					'status'=>$status_one
+				];
+				$state = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField($updata);
 			}else{
 				$state = true;
 			}

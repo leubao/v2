@@ -106,6 +106,7 @@ class MenuModel extends Model {
                 if ($a['parameter']) {
                     $fu = "?" . $a['parameter'];
                 }
+                //dump($fu);
                 //TODO 临时解决首页链接加参数之后404的问题
                 if($id == '240'){
                 	$array = array(
