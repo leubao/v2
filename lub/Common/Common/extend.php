@@ -266,7 +266,7 @@ function seatShow($param,$type=NULL){
         $seta = explode('-', $param);
         $name = $seta['0']."排".$seta['1']."号";
         if($type){
-            return $name;
+            return $name; 
          }else{
             echo $name;
          }
@@ -303,9 +303,10 @@ function seatOrder($param,$plan_id,$area_id,$type = NULL){
                     $table = 'drifting';
                     break;
             }
-            $info = M(ucwords($table))->where($map)->field('order_sn,status,print,checktime')->find();
+            $info = M(ucwords($table))->where($map)->field('order_sn,status,print,checktime,idcard')->find();
             $checktime = $info['checktime'] ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
-            $name = $info['order_sn'].'/'.seat_status($info['status'],1).'/'.$info['print'].'/'.$checktime;
+            $idcard = !empty($info['idcard']) ? '<i class="fa fa-address-card""></i> ' : '';
+            $name = $idcard.$info['order_sn'].' /'.seat_status($info['status'],1).' /'.$info['print'].' /'.$checktime;
         }
         if($type){
             return $name;
@@ -441,7 +442,7 @@ function get_chinese_weekday($datetime){
  */
 function get_today_plan(){
     $today = strtotime(date('Ymd'));
-    $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
+    $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->cache('today_plan',14400)->select();
     return $plan;
 }
 /*
@@ -1691,8 +1692,9 @@ function crmName($param,$type=NULL){
      * @param $area int 区域
      * @apram $scene int 销售场景
      * @param $group string 票型分组 支持多个分组
+     * @param $sale string 1根据区域获取可售票型,2获取当前计划所有可售票型 注意 只在剧场模式下有效
     */
-    function pullprice($planid, $type, $area, $scene, $group = null){
+    function pullprice($planid, $type, $area, $scene, $group = null, $sale = '1'){
         switch ($type) {
             case '1':
                 $types = array('in','1,3,4');
@@ -1725,9 +1727,13 @@ function crmName($param,$type=NULL){
             case '1':
                 //获取当前可售数量
                 $table = ucwords($plan['seat_table']);
-                $area_num = D($table)->where(array('area'=>$area,'status'=>'0'))->count();
-                $area_nums = D($table)->where(array('area'=>$area,'status'=>'2'))->count();
-                $area = array('area' => $area);
+                if($sale == '1'){
+                    $area_num = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);;
+                    $area_nums = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);;
+                    $area = array('area' => $area);
+                }else{
+                    $area = [];
+                }
                 break;
             case '2':
                 $number = D('Scenic')->where($where)->count();
@@ -1751,16 +1757,30 @@ function crmName($param,$type=NULL){
             $map = array_merge($area,$map);
         }
         //获取价格信息
-        $tickets = M('TicketType')->where($map)->select();
-        foreach ($param['ticket'] as $v){
-            foreach ($tickets as $va){
-                if($v == $va['id']){
-                    $va['area_num'] = $area_num;
-                    $va['area_nums']= $area_nums;
-                    $price[] = $va;
+        $tickets = M('TicketType')->where($map)->field('id,name,area,price,discount')->select();
+        if($plan['product_type'] == '1' && $sale == '2'){
+            foreach ($param['ticket'] as $v){
+                foreach ($tickets as $va){
+                    if($v == $va['id']){
+                        $va['area_num'] = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);
+                        $va['area_nums'] = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);
+                        $va['area'] = areaName($va['area'],1);
+                        $price[] = $va;
+                    }
+                }
+            }
+        }else{
+            foreach ($param['ticket'] as $v){
+                foreach ($tickets as $va){
+                    if($v == $va['id']){
+                        $va['area_num'] = $area_num;
+                        $va['area_nums']= $area_nums;
+                        $price[] = $va;
+                    }
                 }
             }
         }
+        
         return $price;
     }
     /**

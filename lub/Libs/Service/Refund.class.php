@@ -22,7 +22,7 @@ class Refund extends \Libs\System\Service {
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
 		//$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
-		$info = D('Common/Order')->where(['order_sn'=>$sn])->relation(true)->find();
+		$info = D('Item/Order')->where(['order_sn'=>$sn])->relation(true)->find();
 		if(empty($sn) || empty($info)){
 			error_insert('400410');return false;
 		}
@@ -217,6 +217,7 @@ class Refund extends \Libs\System\Service {
 			're_money'		=>	$unset_moeny,
 			're_type'		=>	$info['type'] <> 1 ? 1:2,
 			'launch'		=>	'1',
+			'number'		=>	$child_ticket_count,
 			'updatetime'	=> 	$createtime,
 			'poundage'		=> 	'0',
 			'poundage_type'	=>	'1',
@@ -344,7 +345,7 @@ class Refund extends \Libs\System\Service {
 				if($income == false){echo "15";
 					$model->rollback();return false;
 				}
-			}else{echo "16";
+			}else{//echo "16";
 				$model->rollback();return false;
 			}
 		}
@@ -518,6 +519,7 @@ class Refund extends \Libs\System\Service {
 				're_money'		=>	$subtotal,
 				're_type'		=>	$info['type'] <> 1 ? 1:2,
 				'launch'		=>	'1',
+				'number'		=>	$unit == 1 ? $counts : 1,
 				'updatetime'	=> 	$createtime,
 				'poundage'		=> 	'0',
 				'poundage_type'	=>	'1',
@@ -531,6 +533,7 @@ class Refund extends \Libs\System\Service {
 			$refund_data = array(
 				'poundage'		=>	$poundage,
 				're_money'		=>	$subtotal,
+				'number'		=>	$counts,
 				'poundage_type'	=>	'1',
 				'updatetime'	=>	$createtime,
 				'status'		=>	'3',
@@ -546,6 +549,7 @@ class Refund extends \Libs\System\Service {
 			//单个座位退单
 			$newData = array(
 				'subtotal'	=> 	$money,
+				'number'	=>	$counts,
 				'checkin'	=> 	$info['checkin'],
 				'data'		=> 	$seas['data'],
 				'crm'		=>	$seas['crm'],

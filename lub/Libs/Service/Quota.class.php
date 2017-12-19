@@ -160,7 +160,7 @@ class Quota extends \Libs\System\Service {
 	 * @param $product_id 产品ID
 	 * @param $sale 销售类型 2常规渠道 4政企渠道 8全员销售 9 三级分销
 	 */
-	public function update_quota($number, $crm_id, $plan_id, $product_id, $salse)
+	public function update_quota($number = '', $crm_id = '', $plan_id = '', $product_id = '', $salse = '')
 	{
 		$plan = F('Plan_'.$plan_id);
 		$today = date('Ymd',time());
@@ -169,15 +169,15 @@ class Quota extends \Libs\System\Service {
 			return '200';
 		}
 		//判断销售类型是否存在余量
-		$salse = $this->pin_sales_link($salse);
+		$salse = self::pin_sales_link($salse);
 		(int)$salse_num = load_redis('decrby','pin_'.$product_id.'_'.$plan_id.'_'.$salse,$number);
 		if($salse_num < 0){
-			$this->error = "销售类型余量不足...";
+			//$this->error = "销售类型余量不足...";
 			return false;
 		}
 		//判断是否设置单体限额，目前只有常规渠道和政企渠道需要设置
 		if(in_array($salse,['2','4'])){
-			$this->check_quota($plan_id,$plan['product_id'],$crm_id);
+			self::check_quota($plan_id,$plan['product_id'],$crm_id);
 			$config = cache("Config");
 			//判断渠道商级别,写入消耗配额
 			$cinfo = M('Crm')->where(array('id'=>$crm_id))->field('id,level,f_agents')->find();
