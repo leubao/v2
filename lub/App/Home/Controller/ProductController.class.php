@@ -78,6 +78,16 @@ class ProductController extends Base{
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$pinfo['product']))->field('id,starttime,endtime,games,param,product_type')->select();
 		foreach ($plan as $k => $v) {
 			$param = unserialize($v['param']);
+			if($v['product_type'] == '1'){
+				$data[] = array(
+					'id'	=> $v['id'],
+					'pid'   => '1',
+					'pId'	=>	'1',
+					'plan' 	=>	$v['id'],
+					'type'	=>	$pinfo['type'],
+					'name'  => '[第'.$v['games'].'场] '. date('H:m',$v['starttime']) .'-'. date('H:m',$v['endtime']),
+				);
+			}
 			if($v['product_type'] == '2'){
 				$data[] = array(
 					'id'	=>  $v['id'],
@@ -87,7 +97,8 @@ class ProductController extends Base{
 					'type'	=>	$pinfo['type'],
 					'name'  =>  "青龙大瀑布",
 				);
-			}else{
+			}
+			if($v['product_type'] == '3'){
 				$data[] = array(
 					'id'	=> $v['id'],
 					'pid'   => '1',
@@ -133,7 +144,7 @@ class ProductController extends Base{
 		$plan = F('Plan_'.$pinfo['plan']);
 		//根据分组加载价格
 		$price_group  = $this->crm_price_group($uInfo['groupid'],$plan['product_id']);
-		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,2);
+		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,$pinfo['sale']);
 		$return = array(
 			'statusCode' => '200',
 			'price'		 =>	$tictype,
@@ -197,6 +208,37 @@ class ProductController extends Base{
                 $data["statusCode"] = "0";echo json_encode($data);return false;
             }
 		}
+	}
+	/**
+	 * 预约订单
+	 * @company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2017-12-18
+	 * @return   [type]        [description]
+	 */
+	function pre_order()
+	{
+		$ginfo = I('get.');
+		$ginfo = [
+			'type'	=>	'1',
+			'productid' => '41'
+		];
+		//if(empty($ginfo['productid'])){$this->error('参数错误!');}
+		//默认日期
+		$plantime = date("Y-m-d",strtotime("+1 day"));
+		//选择计划
+		//加载票型
+		$this->public_info_conf();
+		$data = [
+			'order_sn'	=> 	'get_order_sn()',
+			'user_id'	=>	'',
+			'datetime'	=>	$info['datetime'],
+			'number'	=>	$info['number'],
+			'phone'		=>	$info['phone'],
+			'channel_id'=>	'',
+			'type'		=>	'1',
+		];
+		$this->assign('plantime',$plantime)->assign('info',$ginfo)->assign('data',$data)->display();
 	}
 	/**
 	 * 渠道售票公共信息

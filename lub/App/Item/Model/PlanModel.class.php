@@ -461,9 +461,10 @@ class PlanModel extends Model{
         $dbPrefix = C("DB_PREFIX");
         if($type == 'seat'){
         	$sql = <<<sql
-				CREATE TABLE IF NOT EXISTS `{$dbPrefix}{$tableName}` (
+				CREATE TABLE `{$dbPrefix}{$tableName}` (
 				  `id` smallint(5) unsigned NOT NULL AUTO_INCREMENT,
 				  `order_sn` bigint(18) unsigned NOT NULL,
+				  `idcard` varchar(18) DEFAULT NULL,
 				  `area` smallint(5) unsigned NOT NULL,
 				  `print` int(2) unsigned NOT NULL,
 				  `seat` varchar(10) NOT NULL,
@@ -471,6 +472,7 @@ class PlanModel extends Model{
 				  `status` tinyint(1) unsigned NOT NULL,
 				  `group` smallint(3) NOT NULL,
 				  `sort` int(3) DEFAULT NULL,
+				  `number` int(3) DEFAULT NULL,
 				  `soldtime` int(10) unsigned DEFAULT NULL,
 				  `checktime` int(10) unsigned NOT NULL,
 				  `price_id` int(3) unsigned NOT NULL,
@@ -481,13 +483,13 @@ class PlanModel extends Model{
 				  KEY `seat` (`seat`),
 				  KEY `group` (`group`),
 				  KEY `IDX_SEAT_AREA` (`seat`,`area`),
-				  KEY `price_id` (`price_id`) USING BTREE
-				) 
+				  KEY `price_id` (`price_id`) USING BTREE,
+				  KEY `idcard` (`idcard`) USING BTREE
+				)
 				ENGINE=InnoDB 
-				DEFAULT CHARACTER SET=utf8 COLLATE=utf8_general_ci
-				CHECKSUM=0
+				DEFAULT 
+				CHARSET=utf8 
 				ROW_FORMAT=DYNAMIC
-				DELAY_KEY_WRITE=0
 				;
 sql;
         }

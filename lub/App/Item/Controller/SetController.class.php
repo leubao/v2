@@ -85,6 +85,8 @@ class SetController extends ManageBase{
 	function proset(){
 		$db = M("ConfigProduct");   //产品设置表
 		$type = '1';
+		//产品编号用于检票
+		$proNo = (string)base_convert($this->pid,10,16);
 		$list = $db->where(array('product_id'=>$this->pid,'type'=>$type))->select();
 		foreach ($list as $k => $v) {
 			$config[$v["varname"]] = $v["value"];
@@ -139,7 +141,7 @@ class SetController extends ManageBase{
 		}else{
 			//获取价格政策
 			$pricegroup = D('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
-			$this->assign("vo",$config)->assign('pricegroup',$pricegroup);
+			$this->assign("vo",$config)->assign('pricegroup',$pricegroup)->assign('prono',$proNo);
 			$this->display();
 		}
 	}

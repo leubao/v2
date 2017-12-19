@@ -281,7 +281,7 @@ class WorkController extends ManageBase{
 			$channel = I('channel_id');
 			$channelname = I('channel_name');
 			$map = array(
-				'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+				'product_id'=>get_product('id'),
 				'status'=>array('in','5,6'),
 			);	
 			if(!empty($plan)){
@@ -293,16 +293,39 @@ class WorkController extends ManageBase{
 			if(!empty($sn)){
 				$map['order_sn'] = $sn;
 			}
-			
+			$map['createtime'] = array('GT', strtotime(date("Ym",time())));//过滤已过期的订单
 		}else{
 			$map = array(
-				'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+				'product_id'=>get_product('id'),
 				'status'=>array('in','5,6'),
 				'createtime'=>array('GT', strtotime(date("Ymd",time()))),//过滤已过期的订单
 			);
 		}
 		$this->basePage('Order',$map, 'createtime DESC');
 		$this->assign('map',$map)->assign('planname',$planname)->assign('channel',$channel)->assign('channelname',$channelname)->display();
+	}
+	/*编辑预订单数量*/
+	public function edit_pre_order()
+	{
+		if(IS_POST){
+			//修正数量
+			M('OrderData')->where(array('order_sn'=>$sn))->setField('number',$number);
+		}else{
+			$sn = I('sn');
+			if(empty($sn)){
+				$this->erun('参数错误!');
+			}
+			$data = $this->getOrder($sn);
+			if($data == false){
+				$this->erun("未找到相应订单...");
+			}else{
+				$this->assign('data',$data['info'])
+					->assign('type',$data['info']['product_type'])
+					->assign('area',$data['area'])
+					->assign('ticket',$data['ticket'])
+					->display();
+			}
+		}
 	}
 	/**
 	 *订单详情
@@ -325,40 +348,64 @@ class WorkController extends ManageBase{
 			if(empty($sn)){
 				$this->erun('参数错误!');
 			}
-			$info = D('Order')->where(array('order_sn'=>$sn))->relation(true)->find();
-			$info['info']=unserialize($info['info']);
-			//当前产品类型
-			if($info['product_type'] == '1'){
-				//区域分类
-				foreach ($info['info']['data'] as $key => $value) {
-					$area[$value['areaId']]['area'] = $value['areaId'];
-					$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
-				}
+			$data = $this->getOrder($sn);
+			if($data == false){
+				$this->erun("未找到相应订单...");
 			}else{
-				//区域分类
-				foreach ($info['info']['data'] as $key => $value) {
-					$area[$value['priceid']]['area'] = $value['priceid'];
-					$area[$value['priceid']]['num'] = $area[$value['priceid']]['num']+1;
-				}
-				if($info['product_type'] == '2'){
-					$table = 'Scenic';
-				}else{
-					$table = 'Drifting';
-				}
-				$ticket = M($table)->where(array('order_sn'=>$sn))->field('id,price_id,ciphertext,status,checktime')->select();
-				$this->assign('ticket',$ticket);
-
+				
+				$info = $data['info'];
+				//dump($data['info']);
+				//生成打印URl
+				$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2);
+				$this->assign('data',$info)
+					->assign('type',$info['product_type'])
+					->assign('area',$data['area'])
+					->assign('ticket',$data['ticket'])
+					->assign('prshow',$prshow)
+					->display();
 			}
-			//生成打印URl
-			$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2);
-			$this->assign('data',$info)
-				->assign('type',$info['product_type'])
-				->assign('area',$area)
-				->assign('prshow',$prshow)
-				->display();
 		}
 	}
-	
+	/**
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2017-12-15
+	 * @param    string        $sn                   订单号
+	 */
+	function getOrder($sn = '')
+	{
+		$info = D('Order')->where(array('order_sn'=>$sn))->relation(true)->find();
+		if(empty($info)){
+			return false;
+		}
+		$info['info']=unserialize($info['info']);
+		//当前产品类型
+		if($info['product_type'] == '1'){
+			//区域分类
+			foreach ($info['info']['data'] as $key => $value) {
+				$area[$value['areaId']]['area'] = $value['areaId'];
+				$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
+			}
+		}else{
+			//区域分类
+			foreach ($info['info']['data'] as $key => $value) {
+				$area[$value['priceid']]['area'] = $value['priceid'];
+				$area[$value['priceid']]['num'] = $area[$value['priceid']]['num']+1;
+			}
+			if($info['product_type'] == '2'){
+				$table = 'Scenic';
+			}else{
+				$table = 'Drifting';
+			}
+			$ticket = M($table)->where(array('order_sn'=>$sn))->field('id,price_id,ciphertext,status,checktime')->select();
+		}
+		$return = [
+			'info' 		=> $info,
+			'ticket'	=> $ticket,
+			'area'		=> $area
+		];
+		return $return;
+	}
 	/**
 	 * 获取当前区域价格与座椅信息 景区产品根据销售计划获取价格信息
 	 * @param $pinfo['area'] int 当前区域ID

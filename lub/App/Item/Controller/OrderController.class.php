@@ -149,7 +149,7 @@ class OrderController extends ManageBase{
 		}
 		/** 订单状态校验 */
 		$checkOrder = new CheckStatus();
-		if(!$checkOrder->OrderCheckStatus($pinfo['sn'],2103)){
+		if(!$checkOrder->OrderCheckStatus($ginfo['sn'],2103)){
 			$this->erun($checkOrder->error,array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 		}
 		//更新门票打印状态
