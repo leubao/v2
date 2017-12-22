@@ -213,7 +213,7 @@ class IndexController extends ManageBase {
 			'status'=>	['in','1,9']
 		];
 		$info = $model->where($map)->field('id,order_sn,user_id,plan_id,product_id,type,number,money,guide_id,channel_id,phone,take,status,createtime')->relation(true)->find();
-		$detail = unserialize($info['info']);dump($detail);
+		$detail = unserialize($info['info']);
 		foreach ($detail['data'] as $k => $v) {
 			$tic[$v['areaId']][$v['priceid']]['areaId']	=	$v['areaId'];
 			$tic[$v['areaId']][$v['priceid']]['priceid'] = $v['priceid'];

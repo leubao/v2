@@ -36,7 +36,44 @@ class IndexController extends ManageBase {
         $this->assign('userInfo', User::getInstance()->getInfo());
         $this->assign('role_name', D('Manage/Role')->getRoleIdName(User::getInstance()->role_id));
         $seale = U('Api/figure/index',array('pid'=>\Libs\Util\Encrypt::authcode($pid,'ENCODE'),'type'=>$this->product['type']));
+        $this->totup($pid);
         $this->assign('seale',$seale);
+    }
+    /**
+     * 首页数据统计
+     * @Company  承德乐游宝软件开发有限公司
+     * @Author   zhoujing      <zhoujing@leubao.com>
+     * @DateTime 2017-11-28
+     * @return   [type]                              [description]
+     */
+    function totup($pid)
+    {
+        $order = D('Order');
+        //查询系统中待取票的订单数，累计人数
+        //系统目前可售场次
+        $normal = normal_plan();
+        //只查询未过期场次
+        $map_order = [
+            'plan_id' => ['in', $normal],
+            'status'  => ['in', '1']
+        ];
+        $pre_order_count = $order->where($map_order)->count();
+        $pre_order_sum = $order->where($map_order)->sum('number');
+        //今日售出
+        $today_count = $order->where(['plan_id' => ['in', $normal],'status'=>['in','1,9']])->sum('number');
+        //历史累计人数
+        $people_count = D('ReportData')->where(['status'=>1])->sum('number');
+        //历史累计场次
+        $plan_count = D('Plan')->where(['status'=>4])->count();
+        $totup = [
+            'normal_plan'       =>  count(explode(',',$normal)),//可售场次
+            'pre_order_count'   =>  $pre_order_count,
+            'pre_order_sum'     =>  $pre_order_sum,
+            'people_count'      =>  $people_count,
+            'plan_count'        =>  $plan_count,
+            'today_count'       =>  $today_count
+        ];
+        $this->assign('totup',$totup);
     }
     //缓存更新
     public function cache() {

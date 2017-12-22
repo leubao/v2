@@ -50,7 +50,7 @@ class ReportController extends ManageBase{
         $map['type'] = array('in','1,2,4,7');
         $map['status'] = '1';
         $db = M('ReportData');
-		$map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+		$map['product_id'] = get_product('id');
 		$list = $db->where($map)->order('plantime ASC,games')->select();
 		//加载当前产品配置 TODO
 		if($this->procof['agent'] == '1'){
@@ -87,7 +87,7 @@ class ReportController extends ManageBase{
         	$map['channel_id'] = array('in',agent_channel($channel,2));
         }
         $db = M('Report');
-        $map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+        $map['product_id'] = get_product('id');
 		$list = $db->where($map)->select();
 		$this->area();
 		$this->assign('data',$channe_fold)
@@ -254,7 +254,7 @@ class ReportController extends ManageBase{
 	    $channel = I('orgLookup_id');
 	    $guide = I('orgLookup_ids');
 	    $sum_det = I('sum_det') ? I('sum_det') : '1';//1明细2合计
-	    $map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+	    $map['product_id'] = get_product('id');
 	    //传递条件
 	    $this->assign('starttime',$start_time ? $start_time : $end_time)
         	->assign('endtime',$end_time)
@@ -308,7 +308,7 @@ class ReportController extends ManageBase{
             $end_time = strtotime($end_time);
             $map['createtime'] = $maps['createtime'] =array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
             //查询所有一级渠道商
-			$product_id = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+			$product_id = get_product('id');
 			$crm = F('Crm_level'.$product_id);
 			foreach ($crm as $key => $value) {
 				//根据一级渠道商查询旗下所有渠道商
@@ -472,6 +472,39 @@ class ReportController extends ManageBase{
 	function channel_sales_ranking(){
 
 	}
+	/**
+     * 退票日志
+     * @Company  承德乐游宝软件开发有限公司
+     * @Author   zhoujing      <zhoujing@leubao.com>
+     * @DateTime 2017-11-28
+     */
+    function report_refund(){
+    	if(IS_POST){
+    		$plan_id = I('plan_id');
+    	}
+        $where = array();
+        $start_time = I('starttime');
+        $end_time = I('endtime');
+        $this->assign('starttime',$start_time)->assign('endtime',$end_time);
+        if (!empty($start_time) && !empty($end_time)) {
+            $start_time = strtotime($start_time);
+            $end_time = strtotime($end_time) + 86399;
+            $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }
+        $where = [
+        	'status'	=>	3,
+        	'product_id'=> get_product('id')
+        ];
+        $model = D('Item/TicketRefund');
+        $field = ['createtime','order_sn','applicant','param','reason','status','re_money','re_type','updatetime','poundage','poundage_type','against_reason','order_status','user_id'];
+        $list = $model->where($where)->field($field,true)->select();
+        foreach ($list as $k => $v) {
+        	$data[$v['plan_id']][$v['launch']][] = $v[''];
+        	$data[$v['plan_id']][$v['launch']]
+        }
+        //按照场次分退票场景合并
+        $this->assign('where', $where)->display();
+    }
 	//渠道任务完成情况
 	function channel_kpi(){
 		$this->display();

@@ -45,18 +45,18 @@ function getprice(event, treeId, treeNode){
 
     <div style="margin-left:12px; width:350px;height:93.5%; float: left;" class="border">
         <table class="table table-bordered">
-        <thead>
-         <tr>
-            <th align="center" width="150">票型名称</th>
-            <th align="center" width="50">票面价</th>
-            <th align="center" width="50">结算价</th>
-            <th align="center" width="50">已售数</th>
-            <th align="center" width="50">可售数</th>
-          </tr>
-        </thead>
-        <tbody id="quick-price">
-        </tbody>
-      </table>
+            <thead>
+             <tr>
+                <th align="center" width="150">票型名称</th>
+                <th align="center" width="50">票面价</th>
+                <th align="center" width="50">结算价</th>
+                <th align="center" width="50">已售数</th>
+                <th align="center" width="50">可售数</th>
+              </tr>
+            </thead>
+            <tbody id="quick-price">
+            </tbody>
+        </table>
     </div>
 
     <div style="margin-left:14px; width:400px;  height: auto; float: left; overflow:hidden;">
@@ -112,40 +112,30 @@ function getprice(event, treeId, treeNode){
             </tr>
             </tbody>
         </table>
-        
         <table class="table table-bordered mt20">
-            <thead>
-                <tr>
-                  <th align="center" width="80">操作</th>
-                  <th align="center">支付方式</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td align='right'>
-                    <input type="radio" name="pay" value="1" checked="">
-                    </td>
-                    <td>现金</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" class="pay" name="pay" value="6"></td>
-                    <td>POS机划卡</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" class="pay" name="pay" value="3"></td>
-                    <td>签单</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" id="alipay_sweep" class="pay" name="pay" value="4"></td>
-                    <td>支付宝支付</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" id="wxpay_sweep" class="pay" name="pay" value="5"></td>
-                    <td>微信支付</td>
-                </tr>
-            </tbody>
+            <tr>
+                <td align='right'>选择活动:</td>
+                <td><select class="required" name="" data-toggle="selectpicker">
+                        <option value="1" selected>现金</option>
+                        <option value="6">POS机划卡</option>
+                        <option value="3">签单</option>
+                        <option value="4">支付宝支付</option>
+                        <option value="5">微信支付</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td align='right'>支付方式:</td>
+                <td><select class="required" name="pay" id="selectPay" data-toggle="selectpicker">
+                        <option value="1" selected>现金</option>
+                        <option value="6">POS机划卡</option>
+                        <option value="3">签单</option>
+                        <option value="4">支付宝支付</option>
+                        <option value="5">微信支付</option>
+                    </select>
+                </td>
+            </tr>
         </table>
-        
         <!--提交-->
         <div class="submit_seat"><a href="#" class="btn btn-success" onclick="quick_server();">立即出票</a></div>
     </div>
@@ -174,7 +164,6 @@ $(document).ready(function(){
         if(falg){
             $(this).alertmsg('error', '票型已选择!若要继续添加,请直接改变票型数量');
         }else{
-          // var spinner = "<input type='text' data-toggle='spinner' value='1' size='8' id='quick-num-"+trId+"'>";
            var spinner = "<span class='wrap_bjui_btn_box' style='position: relative;'><input type='text' data-toggle='spinner' value='1' size='8' id='quick-num-"+trId+"' class='form-control' style='padding-right: 13px; width: 80px;'><ul class='bjui-spinner' style='height: 22px;'><li class='up' data-input='quick-num-"+trId+"' onclick='addNum("+trId+","+price+");'>∧</li><li class='down' onclick='delNum("+trId+","+price+")'>∨</li></ul></span>";
            var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td> <td>"+spinner+"</td><td>"+price+"</td> <td id='quick-subtotal-"+trId+"''>"+subtotal+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
             
@@ -231,47 +220,7 @@ $(document).ready(function(){
         });  
     });
 });
-    /*删除已选择*/
-function delRow(rows){
-    $(rows).parent("td").parent("tr").remove();
-    $("#quick-total").html(total());/*合计*/
-    //$("#kcash_quick").val(total());/*更新收款方式*/
-}
-/*计算小计金额*/
-function amount(num,price){
-    var count = parseFloat(num * price).toFixed(2);
-    return count;
-}
-function total(){
-    var sum = 0;
-    $("#quick-price-select tr").each(function(i){
-        var _val = parseFloat($("#quick-subtotal-"+$(this).data("id")).html());
-        sum += _val;
-    });
-    return sum.toFixed(2);
-}
-/*数量增加与减少*/
-function addNum(trId,price){
-    var cnum = $("#quick-num-"+trId).val();//当前数量
-    var num1 = parseInt(cnum)+1;
-    $("#quick-num-"+trId).val(num1);
-    //金额
-    $("#quick-subtotal-"+trId).html(amount(num1,price));
-    $("#quick-total").html(total());/*合计*/
-    //$("#tcash").val(total());/*更新收款方式*/
-}
 
-function delNum(trId,price){
-    var cnum = $("#quick-num-"+trId).val();//当前数量
-    if(cnum == 1){
-        $(this).alertmsg('error','亲，已经是最少了！');
-        return false;
-    }
-    var num1 = parseInt(cnum)-1;
-    $("#quick-num-"+trId).val(num1);
-    $("#quick-subtotal-"+trId).html(amount(num1,price));
-    $("#quick-total").html(total());/*合计*/
-}
 function quick_server(){
     var postData = '',
         pay = '',
@@ -286,7 +235,7 @@ function quick_server(){
         guide = '0',
         qditem = '0',
         settlement = PRODUCT_CONF.settlement,
-        is_pay = $('input[name="pay"]:checked').val(),
+        is_pay = $('#selectPay option:selected').val(),
         length =  $("#quick-price-select tr").length,
         url = '<?php echo U('Item/Order/quickpost',array('plan'=>$plan['id'],'type'=>$type));?>';
     if(length <= 0){

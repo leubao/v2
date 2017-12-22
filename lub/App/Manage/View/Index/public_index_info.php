@@ -44,24 +44,24 @@
       <div class="widget-box-content widget-store-overview">
         <ul>
           <li>
-            <p>今日可售场次</p>
-            <a href="">0</a>
+            <p>可售场次</p>
+            <a href="">{$totup.normal_plan}</a>
           </li>
           <li>
-            <p>今日剩余票量</p>
-            <a href="">0</a>
+            <p>今日售出</p>
+            <a href="">{$totup.today_count}</a>
           </li>
           <li>
             <p>待取票订单</p>
-            <a href="">0</a>
+            <a href="">{$totup.pre_order_count}</a> | {$totup.pre_order_sum}
           </li>
           <li>
             <p>历史累计场次</p>
-            <a href="">0</a>
+            <a href="">{$totup.plan_count}</a>
           </li>
           <li>
             <p>历史累计人数</p>
-            <a href="">0</a>
+            <a href="">{$totup.people_count}</a>
           </li>
         </ul>
       </div>

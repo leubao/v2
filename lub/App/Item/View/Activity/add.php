@@ -23,14 +23,33 @@
         <tr>
             <td>活动类型:</td>
             <td colspan="3">
-              <select name="type" class="required" data-toggle="selectpicker" data-rule="required">
+              <select name="type" class="required" id="activity_type" data-toggle="selectpicker" data-rule="required">
                 <option value="">活动类型</option>
-                <option value="1">买赠</option>
-                <option value="2">首单免</option>
+                <option value="1" data-area="buy">买赠</option>
+                <option value="2" data-area="first">首单免</option>
+                <option value="3" data-area="area">限制区域销售</option>
               </select>
             </td>
         </tr>
         
+        <tr>
+            <td>排序:</td><td><input type="text" name="sort" value="0" size="15"></td>
+            <td>状态:</td><td>
+              <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="">状态</option>
+                <option value="1">启用</option>
+                <option value="0">禁用</option>
+            </select></td>
+        </tr>
+        <tr>
+          <td>备注:</td><td colspan="3"><input type="text" name="remark" placeholder="如:备注" value="" size="50"></td>
+        </tr>
+      </tbody>
+    </table>
+    <!--买赠-->
+    <div id="buy" style="display: none;">
+      <table class="table table-striped table-bordered">
+        <tbody>
         <volist name="seat" id="vo"> 
         <tr>
             <td>活动区域：</td>
@@ -47,20 +66,30 @@
             <td><a href="{:U('Item/Activity/row_seat',array('area'=>$vo['id']));}" data-toggle="dialog" data-mask="true" data-max="true" data-id="activity_seat">指定区域</a></td>
         </tr>
         </volist>
-        <tr>
-            <td>排序:</td><td><input type="text" name="sort" value="0" size="15"></td>
-            <td>状态:</td><td>
-              <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
-                <option value="">状态</option>
-                <option value="1">启用</option>
-                <option value="0">禁用</option>
-            </select></td>
-        </tr>
-        <tr>
-          <td>备注:</td><td colspan="3"><input type="text" name="remark" placeholder="如:备注" value="" size="50"></td>
-        </tr>
       </tbody>
-    </table>
+      </table>
+    </div>
+    <!--首单免-->
+    <!--区域销售-->
+    <div id="area" style="display: none;">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>身份证号段:</td><td colspan="3"><input type="text" name="card" value="" size="45"><span class="remark">身份证号前6位,多个区域用“|”分隔开</span></td>
+          </tr>
+          <tr>
+            <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+          <tr>
+            <td>其它设置:</td>
+            <td colspan="3">
+              <input type="checkbox" name="voucher" value="card"> 身份证入园
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
   <input name="product_id" value="{$product_id}" type="hidden">
   <div class="bjui-pageFooter">
@@ -68,5 +97,22 @@
       <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
       <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
     </ul>
-  </div>
+  </div
 </form>
+<script type="text/javascript">
+$(document).ready(function() {
+  //监听类型切换
+  $('#activity_type').change(function(){
+      var selected = $(this).children('option:selected').data('area');
+      $("#"+selected).css('display','block');
+      $("#activity_type option").map(function(){return $(this).data('area');}).each(function(index,select) {
+        if(select != selected){
+          $("#"+select).css('display','none');
+        }
+    });
+  });
+  function checkSelect(selected) {
+    
+  }
+});
+</script>

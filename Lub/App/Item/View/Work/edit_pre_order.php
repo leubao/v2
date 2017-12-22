@@ -16,7 +16,7 @@
         <td>{$data['user_id']|userName=$data['addsid']}</td>
       </tr>
       <tr>
-        <td>联系人/导游</td>
+        <td>联系人</td>
         <td>{$data['info']['crm']['0']['contact']} </td>
         <td>手机</td>
         <td>{$data.phone}</td>
@@ -31,14 +31,7 @@
       <tr>
         <td>渠道商(业务员)</td>
         <td colspan="3">{$data.channel_id|hierarchy}({$data.guide_id|userName=$data['addsid']})   
-        <if condition="$proconf.black eq '1' AND $data['info']['param']['0']['guide_black'] neq 'undefined'">[导游手机号:{$data['info']['param']['0']['guide_black']}]</if>
-        <if condition="!empty($data['info']['param']['0']['teamno'])">
-          [ 团号: {$data.info.param.0.teamno}]
-        </if>
-        <if condition="!empty($data['info']['param']['0']['car'])">
-          [ 车牌号: {$data.info.param.0.car} ] 
-        </if>
-        </td>
+        <if condition="$proconf.black eq '1' AND $data['info']['param']['0']['guide_black'] neq 'undefined'">[导游手机号:{$data['info']['param']['0']['guide_black']}]</if></td>
       </tr>
       </if>
       <tr>

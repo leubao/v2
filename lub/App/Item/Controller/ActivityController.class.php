@@ -58,9 +58,16 @@ class ActivityController extends ManageBase{
 					);
 		 		}
 	 		}
+	 		//限定区域销售
+	 		if($pinfo['type'] == '3'){
+	 			$card = explode($pinfo['card'],'|');
+	 			$info['card'] = $card;
+	 			$info['voucher'] = $pinfo['voucher'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
 	 		$param = array(
 	 			'info' =>  $info,
-	 			);
+	 		);
 	 		$data = array(
 	 			'title'	=>	$pinfo['title'],
 	 			'type'	=>	$pinfo['type'],
@@ -69,7 +76,7 @@ class ActivityController extends ManageBase{
 	 			'endtime'	=> strtotime($pinfo['endtime']),
 	 			'status'	=> $pinfo['status'],
 	 			'is_scene'	=> implode(',',$pinfo['scene']),
-	 			'param'		=> serialize($param),
+	 			'param'		=> json_encode($param),
 	 			'remark'	=> $pinfo['remark'],
 	 		);
 	 		if(D('Item/Activity')->add($data)){

@@ -33,18 +33,22 @@
           <td>票面标记:</td>
           <td>
             <input type="checkbox" name="param[ticket_print]" value="1">
-              <input type="text" name="param[ticket_print_custom]" value="" size="10"><span class="remark">座位号选择自定义时打印该内容</span>
+            <input type="text" name="param[ticket_print_custom]" value="" size="10"><span class="remark">座位号选择自定义时打印该内容</span>
           </td>
         </tr>
         <tr>
           <td>联票支持:</td>
           <td>
             <input type="radio" name="param[present]" value="1">  是
-             <input type="radio" name="param[present]" value="0">  否
+            <input type="radio" name="param[present]" value="0">  否
             <span class="remark">用于子票设置，主票不用设置</span>
           </td>
-          <td></td>
-          <td></td>
+          <td>活动标记</td>
+          <td>
+            <input type="radio" name="param[activity]" value="1">  是
+            <input type="radio" name="param[activity]" value="0">  否
+            <span class="remark">仅用于活动销售</span>
+          </td>
         </tr>
         <tr>
           <td>销售场景:</td>

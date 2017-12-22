@@ -91,9 +91,12 @@ class FinancialController extends ManageBase{
         //按照客户分组来统计报表 TODO 政企订单不计算在内
         $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
+        G('begin');
         $db = M('ReportData');
 		$map['product_id'] = $this->pid;
-		$list = $db->where($map)->order('plantime ASC,games')->select();
+		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,createtime,region,pay,type,plantime,games,user_id,status',true)->select();
+		
+		
 		if($this->procof['agent'] == '1'){
 			//开启代理商制度，时执行
 			$list = Report::level_fold($list);
@@ -109,6 +112,9 @@ class FinancialController extends ManageBase{
 			$list = Report::channel_fold($list);
 			
 		}
+		G('end');
+		echo G('begin','end').'s';
+		echo G('begin','end','m').'kb';
 		$export_map['report'] = 'channel';
 		$export_map['type']	= $type;
 		S('ChannelReport'.get_user_id(),$list);

@@ -44,6 +44,7 @@
         <th align="center">ID</th>
         <th align="center">申请人</th>
         <th align="center">订单号</th>
+        <th align="center">数量</th>
         <th align="center">创建场景</th>
         <th align="center">所属场次</th>
         <th align="center">退票时间</th>
@@ -60,6 +61,7 @@
             <td align="center">{$vo.id}</td>
             <td align="center">{$vo.applicant|userName}</td>
             <td align="center">{$vo.order_sn}</td>
+            <td align="center">{$vo.number}</td>
             <td><if condition="$vo['launch'] eq '1'">窗口<else/>渠道商</if></td>
             <td>{$vo.plan_id|planShows}</td>
             <td align="center">{$vo.updatetime|date="Y-m-d H:i:s",###}</td>

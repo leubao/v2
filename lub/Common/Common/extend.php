@@ -303,7 +303,8 @@ function seatOrder($param,$plan_id,$area_id,$type = NULL){
                     $table = 'drifting';
                     break;
             }
-            $info = M(ucwords($table))->where($map)->field('order_sn,status,print,checktime,idcard')->find();
+            //->field('order_sn,status,print,checktime,idcard')  暂时屏蔽  原始数据表无idcard 字段
+            $info = M(ucwords($table))->where($map)->find();
             $checktime = $info['checktime'] ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
             $idcard = !empty($info['idcard']) ? '<i class="fa fa-address-card""></i> ' : '';
             $name = $idcard.$info['order_sn'].' /'.seat_status($info['status'],1).' /'.$info['print'].' /'.$checktime;
@@ -1692,9 +1693,10 @@ function crmName($param,$type=NULL){
      * @param $area int 区域
      * @apram $scene int 销售场景
      * @param $group string 票型分组 支持多个分组
-     * @param $sale string 1根据区域获取可售票型,2获取当前计划所有可售票型 注意 只在剧场模式下有效
+     * @param $seale string 1根据区域获取可售票型,2获取当前计划所有可售票型 注意 只在剧场模式下有效
+     * @param $sealeTicket array 特殊方式限定销售票型 比如活动
     */
-    function pullprice($planid, $type, $area, $scene, $group = null, $sale = '1'){
+    function pullprice($planid, $type, $area, $scene, $group = null, $seale = '1', $sealeTicket = []){
         switch ($type) {
             case '1':
                 $types = array('in','1,3,4');
@@ -1727,7 +1729,7 @@ function crmName($param,$type=NULL){
             case '1':
                 //获取当前可售数量
                 $table = ucwords($plan['seat_table']);
-                if($sale == '1'){
+                if($seale == '1'){
                     $area_num = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);;
                     $area_nums = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);;
                     $area = array('area' => $area);
@@ -1752,31 +1754,41 @@ function crmName($param,$type=NULL){
         }else{
             $map = array('status'=>1,'type'=>$types,'product_id'=>$plan['product_id']); 
         }
+        //计划可销售票型
+        $planTicket = implode(',',$param['ticket']);//dump($param['ticket']);
+        //是否限制票型
+        if(empty($sealeTicket)){
+            $map['id'] = ['in',$planTicket];
+        }else{
+            $confineTicket = array_intersect($param['ticket'], $sealeTicket);
+            if(!empty($confineTicket)){
+                $map['id'] = ['in',implode(',',$confineTicket)];
+            }else{
+                return false;
+            }
+        }
         $map['_string']="FIND_IN_SET(".$scene.",scene)";
         if(!empty($area)){
             $map = array_merge($area,$map);
         }
         //获取价格信息
         $tickets = M('TicketType')->where($map)->field('id,name,area,price,discount')->select();
-        if($plan['product_type'] == '1' && $sale == '2'){
-            foreach ($param['ticket'] as $v){
-                foreach ($tickets as $va){
-                    if($v == $va['id']){
-                        $va['area_num'] = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);
-                        $va['area_nums'] = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);
-                        $va['area'] = areaName($va['area'],1);
-                        $price[] = $va;
-                    }
+        if($plan['product_type'] == '1' && $seale == '2'){
+            foreach ($tickets as $va){
+                if(in_array($va['id'],$param['ticket'])){
+                    $va['area_num'] = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);
+                    $va['area_nums'] = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);
+                    $va['area_id'] = $va['area'];
+                    $va['area'] = areaName($va['area'],1);
+                    $price[] = $va;
                 }
             }
         }else{
-            foreach ($param['ticket'] as $v){
-                foreach ($tickets as $va){
-                    if($v == $va['id']){
-                        $va['area_num'] = $area_num;
-                        $va['area_nums']= $area_nums;
-                        $price[] = $va;
-                    }
+            foreach ($tickets as $va){
+                if(in_array($va['id'],$param['ticket'])){
+                    $va['area_num'] = $area_num;
+                    $va['area_nums']= $area_nums;
+                    $price[] = $va;
                 }
             }
         }

@@ -2,7 +2,6 @@
 <div class="bjui-pageHeader">
 <!--工具条 s-->
   <Managetemplate file="Common/Nav"/>
-
 <!--Page -->
 <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Work/bookticket',array('menuid'=>$menuid));}" method="post">
   <input type="hidden" name="pageSize" value="{$numPerPage}">             
@@ -34,6 +33,7 @@
         <th align="center">渠道商</th>
         <th align="center">创建时间</th>
         <th align="center">状态</th>
+        <th align="center">操作</th>
       </tr>
     </thead>
     <tbody>
@@ -47,8 +47,9 @@
         <td align="right">{$vo.money}</td>
         
         <td>{$vo.channel_id|crmName}</td>
-        <td>{$vo.createtime|date="Y-m-d H:i:s",###}</td>
+        <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>
         <td align="center">{$vo['status']|order_status}</td>
+        <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">编辑</a></td>
        </tr>
     </volist>
     

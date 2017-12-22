@@ -72,9 +72,9 @@ function scenic_drifting_plan(plantime,type){
         }
     });
 }
-//加载价格
+//普通加载价格
 function getprice(event, treeId, treeNode){
-    var data = 'info={"area":'+treeNode.id+',"type":'+treeNode.type+',"plan":'+treeNode.plan+'}',
+    var data = 'info={"area":'+treeNode.id+',"type":'+treeNode.type+',"plan":'+treeNode.plan+',"method":"general"}',
         content = '',
         url = 'index.php?g=Item&m=Work&a=getprice';
     //刷新购物车
@@ -96,6 +96,79 @@ function getprice(event, treeId, treeNode){
         }
     },"json");
     event.preventDefault();
+}
+//活动加载价格  根据销售计划加载价格
+function getActivtyPrice(plan,actid,type,seale) {
+  var postData = 'info={"type":'+type+',"seale":'+seale+',"actid":'+actid+',"plan":'+plan+',"method":"activity"}',
+      content = '',
+      url = 'index.php?g=Item&m=Work&a=getprice';
+    //刷新购物车
+    $(this).bjuiajax('refreshDiv', 'promotions-price-select');
+    $.ajax({
+        type:'POST',
+        url: url,
+        data:postData,
+        dataType:'json',
+        timeout: 3500,
+        error: function(){
+          layer.msg('服务器请求超时，请检查网络...');
+        },
+        success:function(rdata){
+            if(rdata.statusCode == "200"){
+               if(rdata.price != null && rdata.price != false){
+                  $(rdata.price).each(function(idx,ticket){
+                    content += "<tr data-id='"+ticket.id+"' data-area='"+ticket.area_id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'><td align='center'>["+ticket.area+"]"+ticket.name+"</td><td>"+ticket.price+"</td><td>"+ticket.discount+"</td><td align='center'>"+ticket.area_nums+"</td><td align='center'>"+ticket.area_num+"</td>"
+                    +"</tr>";
+                  });
+                  $("#promotions-price").html(content);
+               }else{
+                  var error_msg = "<tr><td style='padding:15px;' colspan='6' align='center'><strong style='color:red;font-size:48px;'>未找到可售票型</strong></td></tr>";
+                  $("#promotions-price").html(error_msg);
+               }
+            }else{
+                $(this).alertmsg('error','出票失败!');
+            }
+        }
+    });
+}
+  /**
+ * 活动加载销售计划
+ * @Company  承德乐游宝软件开发有限公司
+ * @Author   zhoujing      <zhoujing@leubao.com>
+ * @DateTime 2017-12-21
+ * @param    {string}      plantime              销售日期
+ * @param    {string}      type                  活动类型
+ */
+function activity_plan(plantime){
+    var postData = 'info={"plantime":"'+plantime+'"}',
+        content = '';
+    $("#promotions_plan").empty();
+    //切换日期查询场次
+    $.ajax({
+        type:'POST',
+        url:'index.php?g=Item&m=Work&a=public_get_date_plan',
+        data:postData,
+        dataType:'json',
+        timeout: 3500,
+        error: function(){
+          layer.msg('服务器请求超时，请检查网络...');
+        },
+        success:function(rdata){
+            if(rdata.statusCode == "200"){
+               if(rdata.plan != null){
+                  $(rdata.plan.children).each(function(idx,item){
+                    content += "<option data-id='"+item.id+"' value='"+item.plan+"'>"+item.name+"</option>";
+                  });
+               }else{
+                  content += "<option value=''>+=^^=未找到可售计划=^^=+</option>";
+               }
+               $("#promotions_plan").append(content);
+               $("#promotions_plan").selectpicker('refresh');
+            }else{
+                $(this).alertmsg('error','出票失败!');
+            }
+        }
+    });
 }
 /** 
 * 判断是否null 
@@ -212,6 +285,47 @@ function post_server(postData,url,asside){
         }
     }
   });
+}
+/****  购物车结算 ***/
+/*删除已选择*/
+function delRow(rows,htmlTal){
+    $(rows).parent("td").parent("tr").remove();
+    $("#"+htmlTal+"-total").html(total(htmlTal));/*合计*/
+    //$("#kcash_quick").val(total());/*更新收款方式*/
+}
+/*计算小计金额*/
+function amount(num,price){
+    var count = parseFloat(num * price).toFixed(2);
+    return count;
+}
+function total(htmlTal){
+    var sum = 0;
+    $("#"+htmlTal+"-price-select tr").each(function(i){
+        var _val = parseFloat($("#"+htmlTal+"-subtotal-"+$(this).data("id")).html());
+        sum += _val;
+    });
+    return sum.toFixed(2);
+}
+/*数量增加与减少*/
+function addNum(trId,price,htmlTal){
+    var cnum = $("#"+htmlTal+"-num-"+trId).val();//当前数量
+    var num1 = parseInt(cnum)+1;
+    $("#"+htmlTal+"-num-"+trId).val(num1);
+    //金额
+    $("#"+htmlTal+"-subtotal-"+trId).html(amount(num1,price));
+    $("#"+htmlTal+"-total").html(total(htmlTal));/*合计*/
+    //$("#tcash").val(total());/*更新收款方式*/
+}
+function delNum(trId,price,htmlTal){
+    var cnum = $("#"+htmlTal+"-num-"+trId).val();//当前数量
+    if(cnum == 1){
+        $(this).alertmsg('error','亲，已经是最少了！');
+        return false;
+    }
+    var num1 = parseInt(cnum)-1;
+    $("#"+htmlTal+"-num-"+trId).val(num1);
+    $("#"+htmlTal+"-subtotal-"+trId).html(amount(num1,price));
+    $("#"+htmlTal+"-total").html(total(htmlTal));/*合计*/
 }
 /*窗口打印*/
 (function($){

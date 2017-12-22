@@ -54,13 +54,13 @@ class WorkController extends ManageBase{
 			 ->assign('product',$this->product)
 		     ->display($template);
 	}
-	/*日期查场次漂流项目*/
+	/*日期查场次漂流项目*/ 
 	function public_get_date_plan(){
 		$pinfo = json_decode($_POST['info'],true);
-		
 		$plantime = strtotime($pinfo['plantime']);
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$this->pid))->field('id,starttime,endtime,games,param,product_type')->select();
 		foreach ($plan as $k => $v) {
+			/*
 			$param = unserialize($v['param']);
 			switch ($v['product_type']) {
 				case '2':
@@ -81,7 +81,39 @@ class WorkController extends ManageBase{
 				'type'	=>	$pinfo['type'],
 				'tooltype' => $tooltype,
 				'name'  => $name,
-			);
+			);*/
+			$param = unserialize($v['param']);
+			if($v['product_type'] == '1'){
+				$data[] = array(
+					'id'	=> $v['id'],
+					'pid'   => '1',
+					'pId'	=>	'1',
+					'plan' 	=>	$v['id'],
+					'type'	=>	$pinfo['type'],
+					'name'  => '[第'.$v['games'].'场] '. date('H:m',$v['starttime']) .'-'. date('H:m',$v['endtime']),
+				);
+			}
+			if($v['product_type'] == '2'){
+				$data[] = array(
+					'id'	=>  $v['id'],
+					'pid'   =>  '1',
+					'pId'	=>	'1',
+					'plan' 	=>	$v['id'],
+					'type'	=>	$pinfo['type'],
+					'name'  =>  date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']),
+				);
+			}
+			if($v['product_type'] == '3'){
+				$data[] = array(
+					'id'	=> $v['id'],
+					'pid'   => '1',
+					'pId'	=>	'1',
+					'plan' 	=>	$v['id'],
+					'type'	=>	$pinfo['type'],
+					'tooltype' => tooltype($param['tooltype'],1),
+					'name'  => '[第'.$v['games'].'趟] '. date('H:m',$v['starttime']),
+				);
+			}
 		}
 		if(!empty($data)){
 			$str = array(
@@ -413,7 +445,24 @@ class WorkController extends ManageBase{
 	function getprice(){
 		if(IS_POST){
 			$pinfo = json_decode($_POST['info'],true);
-			$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1);
+			//常规根据计划、区域、产品类型获取销售价格
+			if($pinfo['method'] == 'general'){
+				$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1);
+			}//dump($pinfo);
+			//根据销售计划和产品类型以及可售的票型获取整体销售票型
+			if($pinfo['method'] == 'activity'){
+				//读取当前活动绑定的票型
+				$where = [
+					'status'	=>	'1',
+					'_string'   =>  "FIND_IN_SET(1,is_scene)",
+					'id'		=>	$pinfo['actid']
+				];
+				$param = D('Activity')->where($where)->getField('param');
+				$param = json_decode($param,true);
+				//dump($param['info']['ticket']);
+				$ticket = explode(',',$param['info']['ticket']);
+				$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1,$pinfo['seale'],$ticket);
+			}
 			$return =  array(
 				'statusCode' => 200,
 				'price' =>$price,
@@ -423,6 +472,9 @@ class WorkController extends ManageBase{
 			$this->erun("未允许次类操作");
 		}
 	}
+	/**
+	 * 根据销售计划加载价格加载
+	 */
 	/**
 	 * 获取联票票型
 	 */
