@@ -29,24 +29,35 @@
       </table>
     </div>
   </div>
-  <div style="width:450px;float: left;">
+  <div style="width:350px;float: left;">
     <table class="table table-bordered">
-        <thead>
-        <tr>
-            <th align="center" width="130">票型名称</th>
-            <th align="center" width="45">数量</th>
-            <th align="center" width="120">身份证号</th>
-            <th align="center" width="50">结算价</th>
-            <th align="center" width="45">操作</th>
-          </tr>
-        </thead>
-        <tbody id="promotions-price-select">
-        </tbody>
-        <tr>
-            <td colspan="2" align='right'>合计:</td>
-            <td colspan='3'><strong style='color:red;font-size:18px;' id="promotions-total">0.00</strong></td>
-        </tr>
-    </table>
+            <thead>
+            <tr>
+                <th align="center" width="150">票型名称</th>
+                <th align="center" width="90">数量</th>
+                <th align="center" width="50">结算价</th>
+                <th align="center" width="50">小计</th>
+                <th align="center" width="50">操作</th>
+              </tr>
+            </thead>
+            <tbody id="promotions-price-select">
+            </tbody>
+            <tr>
+                <td colspan="2" align='right'>合计:</td>
+                <td colspan='3'><strong style='color:red;font-size:18px;' id="promotions-total">0.00</strong></td>
+            </tr>
+        </table>
+        <button type="button" class="btn-green" data-toggle="tableditadd" data-target="#promotions_table" data-num="1" data-icon="plus">添加编辑行</button>
+        <table class="table table-bordered table-hover table-striped table-top mt20" id="promotions_table" data-toggle="tabledit">
+          <thead>
+              <tr>
+                <th title="编号"><input type="text" name="plan[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
+                <th title="身份证号"><input type="text" name="card[#index#][card]" data-rule="required" size="25" placeholder="身份证号"></th>
+              </tr>
+          </thead>
+          <tbody>
+          </tbody>
+        </table>
   </div>
   <div style="margin-left:14px; width:400px;  height: auto; float: left; overflow:hidden;">
         <table class="table table-bordered">
@@ -86,6 +97,17 @@
         </table>
         <table class="table table-bordered mt20">
             <tr>
+                <td align='right'>选择活动:</td>
+                <td><select class="required" name="" data-toggle="selectpicker">
+                        <option value="1" selected>现金</option>
+                        <option value="6">POS机划卡</option>
+                        <option value="3">签单</option>
+                        <option value="4">支付宝支付</option>
+                        <option value="5">微信支付</option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
                 <td align='right'>支付方式:</td>
                 <td><select class="required" name="pay" id="selectPay" data-toggle="selectpicker">
                         <option value="1" selected>现金</option>
@@ -98,7 +120,7 @@
             </tr>
         </table>
         <!--提交-->
-        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="promotions_server();">立即出票</a></div>
+        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="quick_server();">立即出票</a></div>
   </div>
 </div>
 <div class="bjui-pageFooter">
@@ -118,7 +140,8 @@ $(document).ready(function(){
       //刷新购物车
       $(this).bjuiajax('refreshLayout','promotions-price-select');
   });
-  //获取日期，加载销售计划自动加载默认选框
+  //获取日期，加载销售计划
+  //自动加载默认选框
   plan = $('#promotions_plan').children('option:selected').val();
   if(isNull(plan)){
     console.log(plan);
@@ -145,78 +168,48 @@ $(document).ready(function(){
             number = '1',
             price = PRODUCT_CONF.settlement == 2 ? $(this).data('discount') : $(this).data('price'),
             falg = false,
+            htmlTal = "promotions",
             subtotal = parseFloat(price * parseInt(number)).toFixed(2);/*计算小计金额*/
+        //判断是否当前选择之前是否已选择
+        $("#promotions-price-select tr").each(function(i){
+            if(trId == $(this).data("id")){
+               falg = true;
+               return false;
+            }
+        });
         if(falg){
             $(this).alertmsg('error', '票型已选择!若要继续添加,请直接改变票型数量');
         }else{
-           var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='' size='20' id='promotions-card-"+trId+"' class='form-control' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
+           var spinner = "<span class='wrap_bjui_btn_box' style='position: relative;'><input type='text' data-toggle='spinner' value='1' size='8' id='promotions-num-"+trId+"' class='form-control' style='padding-right: 13px; width: 80px;'><ul class='bjui-spinner' style='height: 22px;'><li class='up' data-input='promotions-num-"+trId+"' onclick='addNum("+trId+","+price+",\""+htmlTal+"\");'>∧</li><li class='down' onclick='delNum("+trId+","+price+",\""+htmlTal+"\")'>∨</li></ul></span>";
+           var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td> <td>"+spinner+"</td><td>"+price+"</td> <td id='promotions-subtotal-"+trId+"''>"+subtotal+"</td><td align='center'><a href='#' onclick='delRow(this,\""+htmlTal+"\");'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
+            
            $('#promotions-price-select').append(row);
-           //$(this).tabledit('add', $('#promotions_table'), 1);
+           //更新身份证输入框
+           //add_row('promotions_table',1);
+           $(this).tabledit('add', $('#promotions_table'), 1);
         }
         //计算合计金额
-        $("#promotions-total").html(total());
+        $("#promotions-total").html(total('promotions'));
+    });
+  //快捷售票键盘直接输入数量
+  $('#promotions-price-select').click(function(){
+      $("#promotions-price-select tr").each(function(i){
+          var trIds = $(this).data('id'),
+              prices = $(this).data('price');
+          $("#promotions-num-"+trIds).keyup(function(){
+              var val_num = parseInt(this.value);
+              if (isNaN(val_num) || val_num < 1) {                                  
+                  val_num = 1;
+              }
+              this.value = val_num;
+              //更新身份证输入框
+              add_row('promotions_table',val_num);
+              $("#promotions-subtotal-"+trIds).html(amount(val_num,prices));/*小计*/
+              $("#promotions-total").html(total('promotions'));/*合计*/
+          })         
+      });  
   });
+  //加载身份证号码
+  
 });
-function total(){
-    var sum = 0;
-    $("#promotions-price-select tr").each(function(i){
-        var _val = parseFloat($(this).data("price"));
-        sum += _val;
-    });
-    return sum.toFixed(2);
-}
-/*删除已选择*/
-function delRow(rows){
-    $(rows).parent("td").parent("tr").remove();
-    $("#promotions-total").html(total());/*合计*/
-}
-function promotions_server(){
-    var postData = '',
-        pay = '',
-        crm = '',
-        contact = $("#promotions-crm input[name='content']").val() ? $("#promotions-crm input[name='content']").val() : '0',
-        phone = $("#promotions-crm input[name='phone']").val() ? $("#promotions-crm input[name='phone']").val() : '0',
-        remark = $("#promotions-crm textarea[name='remark']").val() ? $("#promotions-crm textarea[name='remark']").val() : "空...",
-        sub_type = $("#promotions-crm input[type='radio']:checked").val() ? $("#promotions-crm input[type='radio']:checked").val() : '1',
-        toJSONString = '',
-        checkinT = '1',
-        plan = $('#promotions_plan').children('option:selected').val(),
-        guide = '0',
-        qditem = '0',
-        activety_area = {$idcard},
-        activety = {$data.id},
-        settlement = PRODUCT_CONF.settlement,
-        is_pay = $('#selectPay option:selected').val(),
-        length =  $("#promotions-price-select tr").length,
-        url = '<?php echo U('Item/Order/quickpost',array('plan'=>$plan['id'],'type'=>$type));?>';
-    if(length <= 0){
-        $(this).alertmsg('error','请选择要售出的票型!');
-        return false;
-    }
-    <?php if($type == '2'){?>
-        guide = $("#promotions-crm input[name='user.id']").val(),
-        qditem = $("#promotions-crm input[name='channel.id']").val();
-        if(phone == '' || contact == '' || guide == '' || qditem == ''){
-          $(this).alertmsg('error','请完善团队信息!');
-          return false;
-        }
-    <?php } ?>
-    $("#promotions-price-select tr").each(function(i){
-        var idcard = $("#promotions-card-"+$(this).data("id")).val();
-        if(!check_idcard(idcard) || !check_idcard_area(idcard)){
-          $(this).alertmsg('error','身份证号有误或该地区不参加活动!');
-          //return false;
-        }  
-        //判断身份证是否可用
-        var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-        toJSONString = toJSONString + '{"areaId":'+$(this).data("area")+',"priceid":' +$(this).data("id")+',"price":'+parseFloat($(this).data('price')).toFixed(2)+',"idcard":'+idcard+',"num":"'+$("#promotions-num-"+$(this).data("id")).val()+'"}'+fg;
-    });
-    console.log(toJSONString);
-    /*获取支付相关数据*/
-    pay = '{"cash":'+parseFloat($('#promotions-total').html())+',"card":0,"alipay":0}';
-    param = '{"remark":"'+remark+'","settlement":"'+settlement+'","activity":"'+activety+'","is_pay":"'+is_pay+'"}';
-    crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
-    postData = 'info={"subtotal":'+parseFloat($('#promotions-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-    //post_server(postData,url,'work_quick');
-}
 </script> 

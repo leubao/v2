@@ -200,7 +200,7 @@ $(document).ready(function(){
            $('#quick-price-select').append(row);
         }
         /*加载可选择联票*/
-        var child_data = 'info={"area":'+trId+',"type":5,"plan":'+$("#planID").val()+'}',
+        var child_data = 'info={"area":'+trId+',"type":5,"plan":'+$("#planID").val()+',"method":"general"}',
             child_content = '';
         $.post('{:U('Item/Work/getprice');}', child_data, function(rdata) {
             if(rdata.statusCode == '200'){

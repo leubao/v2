@@ -7,6 +7,7 @@
               <li class="active"><a data-toggle="tab" href="#tab-1" aria-expanded="true"><i class="fa fa-codepen"></i> 运营设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-3" aria-expanded="true"><i class="fa fa-codepen"></i> 销控设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-2" aria-expanded="false"><i class="fa fa-print"></i> 打印设置</a></li>
+              <li class=""><a data-toggle="tab" href="#tab-4" aria-expanded="false"><i class="fa fa-print"></i> 检票设置</a></li>
               <li class=""><a data-toggle="tab" href="#tab-6" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  官网设置</a></li>
           </ul>
           <div class="tabs-content">
@@ -263,6 +264,25 @@
                   </div>
                 </fieldset>
                 </div>
+              </div>
+              <div id="tab-4" class="tab-pane">
+                <div class="panel-body">
+                 <fieldset style="height:100%;">
+                  <legend>检票设置</legend>
+                  <div style="height:94%; overflow:hidden;">
+                    <table class="table  table-bordered">
+                      <tbody>
+                        <tr>
+                          <td width="120px">产品编号:</td>
+                          <td>{$prono}
+                          <span class="remark">用于检票设置</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </fieldset>
+              </div>
               </div>
               <div id="tab-6" class="tab-pane">
               <script>KindEditor.create('textarea[name="agreement"]',{

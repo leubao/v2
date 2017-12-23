@@ -9,7 +9,7 @@ function do_open_layout(event, treeId, treeNode) {
     event.preventDefault()
 }
 function getprice(event, treeId, treeNode){
-    var data = 'info={"area":'+treeNode.id+',"type":'+treeNode.type+',"plan":'+treeNode.plan+'}',
+    var data = 'info={"area":'+treeNode.id+',"type":'+treeNode.type+',"plan":'+treeNode.plan+',"method":"general"}',
         content = '';
     $.post('{:U('Item/Work/getprice');}', data, function(rdata) {
         if(rdata.statusCode == '200'){
@@ -220,7 +220,47 @@ $(document).ready(function(){
         });  
     });
 });
+    /*删除已选择*/
+function delRow(rows){
+    $(rows).parent("td").parent("tr").remove();
+    $("#quick-total").html(total());/*合计*/
+    //$("#kcash_quick").val(total());/*更新收款方式*/
+}
+/*计算小计金额*/
+function amount(num,price){
+    var count = parseFloat(num * price).toFixed(2);
+    return count;
+}
+function total(){
+    var sum = 0;
+    $("#quick-price-select tr").each(function(i){
+        var _val = parseFloat($("#quick-subtotal-"+$(this).data("id")).html());
+        sum += _val;
+    });
+    return sum.toFixed(2);
+}
+/*数量增加与减少*/
+function addNum(trId,price){
+    var cnum = $("#quick-num-"+trId).val();//当前数量
+    var num1 = parseInt(cnum)+1;
+    $("#quick-num-"+trId).val(num1);
+    //金额
+    $("#quick-subtotal-"+trId).html(amount(num1,price));
+    $("#quick-total").html(total());/*合计*/
+    //$("#tcash").val(total());/*更新收款方式*/
+}
 
+function delNum(trId,price){
+    var cnum = $("#quick-num-"+trId).val();//当前数量
+    if(cnum == 1){
+        $(this).alertmsg('error','亲，已经是最少了！');
+        return false;
+    }
+    var num1 = parseInt(cnum)-1;
+    $("#quick-num-"+trId).val(num1);
+    $("#quick-subtotal-"+trId).html(amount(num1,price));
+    $("#quick-total").html(total());/*合计*/
+}
 function quick_server(){
     var postData = '',
         pay = '',

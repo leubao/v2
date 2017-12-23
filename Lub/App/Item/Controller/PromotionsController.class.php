@@ -36,6 +36,8 @@ class PromotionsController extends ManageBase{
 		//根据活动类型加载
 		switch ($info['type']) {
 			case '3':
+				$idcard = $info['param']['info']['card'];
+				$this->assign('idcard',json_encode($idcard));
 				$tempate = 'area_sale';
 				break;
 			
@@ -43,7 +45,7 @@ class PromotionsController extends ManageBase{
 				break;
 		}
 		//售票类型
-		$pinfo = I('get.');
+		$pinfo = I('get.');dump($idcard);
 		$today = date('Y-m-d');
 		$this->assign('today',$today)
 			->assign('data',$info)

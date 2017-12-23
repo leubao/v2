@@ -60,7 +60,7 @@ class ActivityController extends ManageBase{
 	 		}
 	 		//限定区域销售
 	 		if($pinfo['type'] == '3'){
-	 			$card = explode($pinfo['card'],'|');
+	 			$card = explode('|',$pinfo['card']);
 	 			$info['card'] = $card;
 	 			$info['voucher'] = $pinfo['voucher'];
 	 			$info['ticket'] = $pinfo['ticket_id'];

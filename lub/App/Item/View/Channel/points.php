@@ -1,6 +1,6 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <!--Page -->
-<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Channel/index',array('menuid'=>$menuid));}" method="post">
+<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Item/Channel/points',array('menuid'=>$menuid));}" method="post">
   <input type="hidden" name="pageSize" value="{$numPerPage}">             
   <input type="hidden" name="pageCurrent" value="{$currentPage}"> 
 </form>
@@ -16,6 +16,7 @@
         <th align="center">考核对象</th>
         <th align="center">记录类型</th>
         <th align="center">分值</th>
+        <th align="center">备注</th>
         <th align="center">操作员</th>
         <th align="center">状态</th>
       </tr>
@@ -27,6 +28,7 @@
         <td>{$vo.crm_id|crmName}</td>
         <td align="center">{$vo.fill|kpi_fill}</td>
         <td align="center">{$vo.score}</td>
+        <td>{$vo.remark}</td>
         <td align="center">{$vo.user_id|userName}</td>
         <td align="center">{$vo.status|status}</td>
        </tr>

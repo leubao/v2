@@ -156,6 +156,7 @@ function activity_plan(plantime){
         success:function(rdata){
             if(rdata.statusCode == "200"){
                if(rdata.plan != null){
+                  content += "<option value=''>+=^^=请选择销售计划=^^=+</option>";
                   $(rdata.plan.children).each(function(idx,item){
                     content += "<option data-id='"+item.id+"' value='"+item.plan+"'>"+item.name+"</option>";
                   });
@@ -287,45 +288,58 @@ function post_server(postData,url,asside){
   });
 }
 /****  购物车结算 ***/
-/*删除已选择*/
-function delRow(rows,htmlTal){
-    $(rows).parent("td").parent("tr").remove();
-    $("#"+htmlTal+"-total").html(total(htmlTal));/*合计*/
-    //$("#kcash_quick").val(total());/*更新收款方式*/
-}
+
 /*计算小计金额*/
 function amount(num,price){
     var count = parseFloat(num * price).toFixed(2);
     return count;
 }
-function total(htmlTal){
-    var sum = 0;
-    $("#"+htmlTal+"-price-select tr").each(function(i){
-        var _val = parseFloat($("#"+htmlTal+"-subtotal-"+$(this).data("id")).html());
-        sum += _val;
+//身份证校验
+function check_idcard(code) {
+  code = code.split('');
+  if(!/^\d{6}(17|18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|Xx)$/i.test(code)){
+    return false;
+  }
+  //∑(ai×Wi)(mod 11)
+  //加权因子
+  var factor = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 ];
+  //校验位
+  var parity = [ 1, 0, 'x', 9, 8, 7, 6, 5, 4, 3, 2, 'X' ];
+  var sum = 0;
+  var ai = 0;
+  var wi = 0;
+  for (var i = 0; i < 17; i++)
+  {
+      ai = code[i];
+      wi = factor[i];
+      sum += ai * wi;
+  }
+  var last = parity[sum % 11];
+  if(parity[sum % 11] != code[17]){
+      return false;
+  }else{
+    return true;
+  }
+}
+/**
+ * @Company  承德乐游宝软件开发有限公司
+ * @Author   zhoujing      <zhoujing@leubao.com>
+ * @DateTime 2017-12-22
+ * @param    {string}      code                  身份证号码
+ * @param    {objct}      area                  允许区域
+ * @return   {[type]}                            [description]
+ */
+function check_idcard_area(code,area) {
+    var length = 0;
+    area.each(function(index,item){
+      length = item.length();
+      var site = code.substr(1,length);
+      if(site === item){
+        //发送到服务器验证 TODO 
+        return true;
+      }
     });
-    return sum.toFixed(2);
-}
-/*数量增加与减少*/
-function addNum(trId,price,htmlTal){
-    var cnum = $("#"+htmlTal+"-num-"+trId).val();//当前数量
-    var num1 = parseInt(cnum)+1;
-    $("#"+htmlTal+"-num-"+trId).val(num1);
-    //金额
-    $("#"+htmlTal+"-subtotal-"+trId).html(amount(num1,price));
-    $("#"+htmlTal+"-total").html(total(htmlTal));/*合计*/
-    //$("#tcash").val(total());/*更新收款方式*/
-}
-function delNum(trId,price,htmlTal){
-    var cnum = $("#"+htmlTal+"-num-"+trId).val();//当前数量
-    if(cnum == 1){
-        $(this).alertmsg('error','亲，已经是最少了！');
-        return false;
-    }
-    var num1 = parseInt(cnum)-1;
-    $("#"+htmlTal+"-num-"+trId).val(num1);
-    $("#"+htmlTal+"-subtotal-"+trId).html(amount(num1,price));
-    $("#"+htmlTal+"-total").html(total(htmlTal));/*合计*/
+    return false;
 }
 /*窗口打印*/
 (function($){

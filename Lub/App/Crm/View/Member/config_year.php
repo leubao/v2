@@ -27,6 +27,10 @@
           <td><input type="text" size="11" name="overdue" data-toggle="datepicker" value="{$data.rule.overdue}"></td>
         </tr>
         <tr>
+          <td width="130px">背景图片:</td>
+          <td><input type="text" size="11" name="overdue" data-toggle="datepicker" value="{$data.rule.overdue}"><span class="fun_tips">推荐尺寸</span></td>
+        </tr>
+        <tr>
           <td width="130px">申请地址:</td>
           <td>
             <textarea name="url">{$url}</textarea><a href="https://www.leubao.com/tool/qr/data={$url}">二维码下载</a>
