@@ -477,6 +477,7 @@ class ReportController extends ManageBase{
      * @Company  承德乐游宝软件开发有限公司
      * @Author   zhoujing      <zhoujing@leubao.com>
      * @DateTime 2017-11-28
+     * TODO
      */
     function report_refund(){
     	if(IS_POST){
@@ -498,10 +499,7 @@ class ReportController extends ManageBase{
         $model = D('Item/TicketRefund');
         $field = ['createtime','order_sn','applicant','param','reason','status','re_money','re_type','updatetime','poundage','poundage_type','against_reason','order_status','user_id'];
         $list = $model->where($where)->field($field,true)->select();
-        foreach ($list as $k => $v) {
-        	$data[$v['plan_id']][$v['launch']][] = $v[''];
-        	$data[$v['plan_id']][$v['launch']]
-        }
+        
         //按照场次分退票场景合并
         $this->assign('where', $where)->display();
     }

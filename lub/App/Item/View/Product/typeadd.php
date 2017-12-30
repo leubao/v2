@@ -23,6 +23,7 @@
               <option value="2">团队票</option>
               <option value="3">散客、团队票</option>
               <option value="4">政企票</option>
+              <option value="5">活动票</option>
             </select></td>
         </tr>
         <tr>
@@ -45,8 +46,8 @@
           </td>
           <td>活动标记</td>
           <td>
-            <input type="radio" name="param[activity]" value="1">  是
-            <input type="radio" name="param[activity]" value="0">  否
+            <input type="radio" name="activity" value="1">  是
+            <input type="radio" name="activity" value="0">  否
             <span class="remark">仅用于活动销售</span>
           </td>
         </tr>

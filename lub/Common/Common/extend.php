@@ -279,7 +279,7 @@ function seatShow($param,$type=NULL){
 * @param $plan_id 计划id
 * @param $areaid 区域ID
 */
-function seatOrder($param,$plan_id,$area_id,$type = NULL){
+function seatOrder($param,$plan_id,$area_id = '',$type = NULL){
     if(!empty($param) && !empty($plan_id)){
         $plan = F('Plan_'.$plan_id);
         if(empty($plan)){
@@ -303,11 +303,10 @@ function seatOrder($param,$plan_id,$area_id,$type = NULL){
                     $table = 'drifting';
                     break;
             }
-            //->field('order_sn,status,print,checktime,idcard')  暂时屏蔽  原始数据表无idcard 字段
-            $info = M(ucwords($table))->where($map)->find();
-            $checktime = $info['checktime'] ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
-            $idcard = !empty($info['idcard']) ? '<i class="fa fa-address-card""></i> ' : '';
-            $name = $idcard.$info['order_sn'].' /'.seat_status($info['status'],1).' /'.$info['print'].' /'.$checktime;
+            $info = M(ucwords($table))->where($map)->field('id,group,sort,number,soldtime,sale,middle,price_id',true)->find();
+            $checktime = !empty($info['checktime']) ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
+            $idcard = !empty($info['idcard']) ? '<i class="fa fa-address-card" data-toggle="tooltip" data-placement="bottom" title="'.$info['idcard'].'"></i> ' : '';
+            $name = $idcard.$info['order_sn'].' / '.seat_status($info['status'],1).' / '.$info['print'].' / '.$checktime;
         }
         if($type){
             return $name;
@@ -443,7 +442,7 @@ function get_chinese_weekday($datetime){
  */
 function get_today_plan(){
     $today = strtotime(date('Ymd'));
-    $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->cache('today_plan',14400)->select();
+    $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
     return $plan;
 }
 /*
@@ -1389,7 +1388,12 @@ function crmName($param,$type=NULL){
                 }else{
                     $etime = date('Hi');
                 }
-                //演出结束时间
+                /*演出结束时间
+                if(date('H',$v['endtime']) == '00'){
+                    $endtime = '24'.date('i',$v['endtime']);
+                }else{
+                    $endtime = date('Hi',$v['endtime']);
+                }*/
                 $endtime = date('Hi',$v['endtime']);
                 if($etime > $endtime){
                     //停用已过期场次
@@ -1539,7 +1543,7 @@ function crmName($param,$type=NULL){
     * 判断打印订单类型
     */
     function order_type($sn){
-        $type = M('Order')->where(array('order_sn'=>$sn))->field('status,pay,type,user_id,plan_id,channel_id')->find();
+        $type = M('Order')->where(array('order_sn'=>$sn))->field('status,pay,type,user_id,plan_id,channel_id,is_print')->find();
         return $type;
     }
     /*
@@ -1758,7 +1762,8 @@ function crmName($param,$type=NULL){
         $planTicket = implode(',',$param['ticket']);//dump($param['ticket']);
         //是否限制票型
         if(empty($sealeTicket)){
-            $map['id'] = ['in',$planTicket];
+           // $map['id'] = ['in',$planTicket];
+            $map['activity'] = '0';
         }else{
             $confineTicket = array_intersect($param['ticket'], $sealeTicket);
             if(!empty($confineTicket)){
@@ -1792,7 +1797,6 @@ function crmName($param,$type=NULL){
                 }
             }
         }
-        
         return $price;
     }
     /**

@@ -90,7 +90,7 @@ class WorkController extends ManageBase{
 					'pId'	=>	'1',
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
-					'name'  => '[第'.$v['games'].'场] '. date('H:m',$v['starttime']) .'-'. date('H:m',$v['endtime']),
+					'name'  => '[第'.$v['games'].'场] '. date('H:i',$v['starttime']) .'-'. date('H:i',$v['endtime']),
 				);
 			}
 			if($v['product_type'] == '2'){
@@ -100,7 +100,7 @@ class WorkController extends ManageBase{
 					'pId'	=>	'1',
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
-					'name'  =>  date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']),
+					'name'  =>  date('H:i',$v['starttime']).'-'.date("H:i",$v['endtime']),
 				);
 			}
 			if($v['product_type'] == '3'){
@@ -111,7 +111,7 @@ class WorkController extends ManageBase{
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
 					'tooltype' => tooltype($param['tooltype'],1),
-					'name'  => '[第'.$v['games'].'趟] '. date('H:m',$v['starttime']),
+					'name'  => '[第'.$v['games'].'趟] '. date('H:i',$v['starttime']),
 				);
 			}
 		}
@@ -325,12 +325,13 @@ class WorkController extends ManageBase{
 			if(!empty($sn)){
 				$map['order_sn'] = $sn;
 			}
-			$map['createtime'] = array('GT', strtotime(date("Ym",time())));//过滤已过期的订单
+			//$map['createtime'] = array('GT', strtotime(date("Ym",time())));//过滤已过期的订单
 		}else{
 			$map = array(
 				'product_id'=>get_product('id'),
 				'status'=>array('in','5,6'),
-				'createtime'=>array('GT', strtotime(date("Ymd",time()))),//过滤已过期的订单
+				'plan_id'	=>	['in',normal_plan()]
+				//'createtime'=>array('GT', strtotime(date("Ymd",time()))),//过滤已过期的订单
 			);
 		}
 		$this->basePage('Order',$map, 'createtime DESC');
@@ -762,8 +763,8 @@ class WorkController extends ManageBase{
 		switch ($ginfo['type']) {
 			case '1':
 				//只能退当天的场次
-				$today = strtotime(date('Y-m-d'));
-				$plan = M('Plan')->where(array('plantime'=>$today,'status'=>'2'))->select();
+				$today = strtotime(date('Ymd'));
+				$plan = M('Plan')->where(array('plantime'=>$today,'status'=>2))->select();
 				break;
 			case '2':
 				//显示当前要退的场次
@@ -885,6 +886,17 @@ class WorkController extends ManageBase{
 		if($pinfo['type'] == '2'){
 			//二维码查订单
 			$info = \Libs\Service\Checkin::prison($pinfo['sn']);
+		}
+		if($pinfo['type'] == '3'){
+			//身份证号查询
+			$map = array(
+				'idcard' => $pinfo['sn'],
+			);
+			$plan_info = F('Plan_'.$pinfo['plan']);
+			if(empty($plan_info)){
+				$plan_info = M('Plan')->where(array('id'=>$pinfo['plan']))->find();
+			}
+			$info = M(ucwords($plan_info['seat_table']))->where($map)->find();
 		}
 		$data = D('Order')->where(array('order_sn'=>$info['order_sn']))->relation(true)->find();
 		if(!empty($data)){

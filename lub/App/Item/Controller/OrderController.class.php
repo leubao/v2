@@ -90,6 +90,9 @@ class OrderController extends ManageBase{
 			// 检测订单是否过期
 			if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
 				$order_type = order_type($ginfo['sn']);
+				if($order_type['is_print'] == '1'){
+					$this->erun("该订单仅支持身份证入园,不能打印纸质门票!");
+				}
 				//判断订单状态是否可执行此项操作
 				if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
 					$this->erun("订单状态不允许此项操作!");
@@ -137,7 +140,7 @@ class OrderController extends ManageBase{
 		}
 		$plan = F('Plan_'.$ginfo['plan_id']);
 		if(empty($plan)){
-			$plan = D('Plan')->where(['id'=>$ginfo['plan_id']])->field('id,product_type,seat_table,encry,starttime,product_id')->find();
+			$plan = D('Plan')->where(['id'=>$ginfo['plan_id']])->field('id,product_type,seat_table,encry,starttime,endtime,product_id')->find();
 		}
 		if(empty($plan)){
 			$return = array(
@@ -200,6 +203,8 @@ class OrderController extends ManageBase{
 					'field'			=>	$info_field,
 					'games'			=>	$sale['games'],
 					'plantime'		=>	planShow($ginfo['plan_id'],1,2),
+					'starttime'     =>  date('H:i',$plan['starttime']),
+					'endtime'		=>	date('H:i',$plan['endtime']),
 					'price'			=>	$sale['price'],
 					'product_name' 	=>	$sale['product_name'],
 					'remark'		=>	$sale['remark'],
@@ -322,6 +327,8 @@ class OrderController extends ManageBase{
 				$height = '208';
 				$pageId = 'print';
 			}
+			//禁止打印
+			
 			$return = array(
 				'statusCode' => '200',
 				'title'		 =>	$title,
@@ -741,5 +748,25 @@ class OrderController extends ManageBase{
 				->assign('type',$type)
 				->display();
 		}
+	}
+	//身份证查询
+	public function query_card()
+	{
+		$model = D('IdcardLog');
+		$map['idcard'] = I('idcard');
+		$info = $model->where($map)->find();
+		$this->assign('data',$info);
+		$this->display();
+	}
+	//标记完结
+	public function public_tag_status($sn='')
+	{
+		$status = D('Order')->where(['order_sn'=>$sn,'status'=>1])->setField('status',9);
+		if($status){
+			$this->srun('标记成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+		}else{
+			$this->srun('标记失败',array('tabid'=>$this->menuid.MODULE_NAME));
+		}
+		
 	}
 }

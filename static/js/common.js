@@ -271,6 +271,10 @@ function post_server(postData,url,asside){
                   //超量排座  会关闭打印窗口
                   $(this).dialog("closeCurrent","true");
                   break;
+                case 'activity':
+                  //活动订单 
+                  
+                  break;
             }
             //刷新
             if(data.dialog){
@@ -296,10 +300,12 @@ function amount(num,price){
 }
 //身份证校验
 function check_idcard(code) {
-  code = code.split('');
+  /*
   if(!/^\d{6}(17|18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|Xx)$/i.test(code)){
+    console.log(code);
     return false;
-  }
+  }*/
+  code = code.split('');
   //∑(ai×Wi)(mod 11)
   //加权因子
   var factor = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 ];
@@ -316,7 +322,8 @@ function check_idcard(code) {
   }
   var last = parity[sum % 11];
   if(parity[sum % 11] != code[17]){
-      return false;
+    console.log(code+'2');
+    return false;
   }else{
     return true;
   }
@@ -329,17 +336,50 @@ function check_idcard(code) {
  * @param    {objct}      area                  允许区域
  * @return   {[type]}                            [description]
  */
-function check_idcard_area(code,area) {
-    var length = 0;
-    area.each(function(index,item){
-      length = item.length();
-      var site = code.substr(1,length);
-      if(site === item){
-        //发送到服务器验证 TODO 
-        return true;
-      }
-    });
-    return false;
+function check_idcard_area(code,area,actid) {
+    var length = 0, retu = false;
+    for (var i = 0; i < area.length; i++) {
+        length = area[i].length;
+        var site = code.substr(0,length);
+        //var log = 'length:'+length+'code:'+code+'site:'+site+'item:'+area[i]+'area:'+area.length;
+        //console.log(log);
+        //console.log(site === area[i]);
+        if(site === area[i]){
+          //发送到服务器验证 TODO
+          $.ajax({
+            url: 'index.php?g=Item&m=Check&a=public_check_idcard',
+            type: 'GET',
+            dataType: 'json',
+            async:false,
+            data: {'ta': '31','idcard': code, 'actid': actid},
+            error: function(){
+              layer.msg('服务器请求超时，请检查网络...');
+            },
+            success:function(rdata){
+              if(rdata.status){
+                retu = true;
+              }else{
+                retu = false;
+              }
+            }
+          });
+        }
+    }
+    if(retu){
+      return true;
+    }else{
+      return false;
+    }
+}
+/**
+ * @Company  承德乐游宝软件开发有限公司
+ * @Author   zhoujing      <zhoujing@leubao.com>
+ * @DateTime 2017-12-23
+ * @param    {array}      arr                   验证数组
+ * @return   存在重复返回true  不存在false
+ */
+function is_array_unique(arr){
+  return /(\x0f[^\x0f]+)\x0f[\s\S]*\1/.test("\x0f"+arr.join("\x0f\x0f") +"\x0f");
 }
 /*窗口打印*/
 (function($){

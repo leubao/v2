@@ -6,8 +6,8 @@
 // +----------------------------------------------------------------------
 // | Author: zhoujing <admin@chengde360.com>
 // +----------------------------------------------------------------------
-
 namespace Report\Model;
+use Common\Model\Model;
 class ReportDataModel extends Model {
 	/*
 	protected $partition = array(

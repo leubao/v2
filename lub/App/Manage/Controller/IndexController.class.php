@@ -35,7 +35,8 @@ class IndexController extends ManageBase {
         $this->assign('pid',$pid);
         $this->assign('userInfo', User::getInstance()->getInfo());
         $this->assign('role_name', D('Manage/Role')->getRoleIdName(User::getInstance()->role_id));
-        $seale = U('Api/figure/index',array('pid'=>\Libs\Util\Encrypt::authcode($pid,'ENCODE'),'type'=>$this->product['type']));
+        $proNo = (string)base_convert($this->pid,10,16);
+        $seale = U('Api/figure/index',array('pid'=>$proNo,'type'=>$this->product['type']));
         $this->totup($pid);
         $this->assign('seale',$seale);
     }
@@ -261,10 +262,10 @@ class IndexController extends ManageBase {
         if(IS_POST){
             if($_POST["name"] != ""){
                 $map["name"] = array('like','%'.$_POST["name"].'%');
-                $map['product_id'] = get_product('id');
                 $this->assign("name",$_POST["name"]);
             }
         }
+        $map['product_id'] = get_product('id');
         $ifadd = I('ifadd');
         $this->basePage('TicketType',$map,array('id'=>'DESC','status'=>'DESC'),10);
         $this->assign("ifadd",$ifadd)

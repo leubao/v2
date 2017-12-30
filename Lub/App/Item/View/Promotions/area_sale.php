@@ -149,7 +149,7 @@ $(document).ready(function(){
         if(falg){
             $(this).alertmsg('error', '票型已选择!若要继续添加,请直接改变票型数量');
         }else{
-           var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='' size='20' id='promotions-card-"+trId+"' class='form-control' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
+           var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='' size='20' class='form-control idcard' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
            $('#promotions-price-select').append(row);
            //$(this).tabledit('add', $('#promotions_table'), 1);
         }
@@ -188,7 +188,7 @@ function promotions_server(){
         settlement = PRODUCT_CONF.settlement,
         is_pay = $('#selectPay option:selected').val(),
         length =  $("#promotions-price-select tr").length,
-        url = '<?php echo U('Item/Order/quickpost',array('plan'=>$plan['id'],'type'=>$type));?>';
+        url = '<?php echo U('Item/Order/quickpost',array('type'=>$type));?>'+'&plan='+plan;
     if(length <= 0){
         $(this).alertmsg('error','请选择要售出的票型!');
         return false;
@@ -201,22 +201,45 @@ function promotions_server(){
           return false;
         }
     <?php } ?>
-    $("#promotions-price-select tr").each(function(i){
-        var idcard = $("#promotions-card-"+$(this).data("id")).val();
-        if(!check_idcard(idcard) || !check_idcard_area(idcard)){
-          $(this).alertmsg('error','身份证号有误或该地区不参加活动!');
-          //return false;
-        }  
-        //判断身份证是否可用
-        var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-        toJSONString = toJSONString + '{"areaId":'+$(this).data("area")+',"priceid":' +$(this).data("id")+',"price":'+parseFloat($(this).data('price')).toFixed(2)+',"idcard":'+idcard+',"num":"'+$("#promotions-num-"+$(this).data("id")).val()+'"}'+fg;
+    let idcardList = [];
+    let idError = true;
+    $("#promotions-price-select .idcard").each(function(){
+      var idcardThis = $(this).val(); 
+      //console.log(check_idcard(idcardThis));
+      console.log(check_idcard_area(idcardThis,activety_area,activety));
+      //判断身份证是否可用
+      if(!check_idcard(idcardThis)){
+        $(this).alertmsg('error','身份证号'+idcardThis+'有误!');
+        idError = false;
+        return false;
+      }else if(!check_idcard_area(idcardThis,activety_area,activety)){
+        $(this).alertmsg('error','身份证号'+idcardThis+'该地区不参加活动或该用户已参加过活动!');
+        idError = false;
+        return false;
+      }
+      idcardList.push(idcardThis);
     });
-    console.log(toJSONString);
+    //TODO 循环体内返回中断执行不行
+    if(!idError){
+       return false;
+    }
+    //身份照号码唯一
+    if(is_array_unique(idcardList)){
+      $(this).alertmsg('error','身份证号码重复!');
+      return false;
+    }
+    $("#promotions-price-select tr").each(function(i){
+        var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+        var idcard = idcardList[i];
+        toJSONString = toJSONString + '{"areaId":'+$(this).data("area")+',"priceid":' +$(this).data("id")+',"price":'+parseFloat($(this).data('price')).toFixed(2)+',"idcard":"'+idcard+'","num":"'+$("#promotions-num-"+$(this).data("id")).val()+'"}'+fg;
+    });
+    //console.log(toJSONString);
     /*获取支付相关数据*/
     pay = '{"cash":'+parseFloat($('#promotions-total').html())+',"card":0,"alipay":0}';
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","activity":"'+activety+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
     postData = 'info={"subtotal":'+parseFloat($('#promotions-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-    //post_server(postData,url,'work_quick');
+    console.log(postData);
+    post_server(postData,url,'activity');
 }
 </script> 

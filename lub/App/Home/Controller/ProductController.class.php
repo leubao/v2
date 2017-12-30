@@ -85,7 +85,7 @@ class ProductController extends Base{
 					'pId'	=>	'1',
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
-					'name'  => '[第'.$v['games'].'场] '. date('H:m',$v['starttime']) .'-'. date('H:m',$v['endtime']),
+					'name'  => '[第'.$v['games'].'场] '. date('H:i',$v['starttime']) .'-'. date('H:i',$v['endtime']),
 				);
 			}
 			if($v['product_type'] == '2'){
@@ -106,7 +106,7 @@ class ProductController extends Base{
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
 					'tooltype' => tooltype($param['tooltype'],1),
-					'name'  => '[第'.$v['games'].'趟] '. date('H:m',$v['starttime']),
+					'name'  => '[第'.$v['games'].'趟] '. date('H:i',$v['starttime']),
 				);
 			}
 		}
@@ -138,16 +138,41 @@ class ProductController extends Base{
 		//判断是否是政企渠道用户
 		if($uInfo['group']['type'] == '3'){
 			$type = 4;/*政企渠道*/
-		}else{
+		}else{ 
 			$type = 2;
 		}
 		$plan = F('Plan_'.$pinfo['plan']);
-		//根据分组加载价格
 		$price_group  = $this->crm_price_group($uInfo['groupid'],$plan['product_id']);
+		/*
+		//根据分组加载价格
+		
 		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,$pinfo['sale']);
+		*/
+
+		//常规根据计划、区域、产品类型获取销售价格
+		if($pinfo['method'] == 'general'){
+			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale']);
+		}
+		//根据销售计划和产品类型以及可售的票型获取整体销售票型
+		if($pinfo['method'] == 'activity'){
+			//读取当前活动绑定的票型
+			$where = [
+				'status'	=>	'1',
+				'_string'   =>  "FIND_IN_SET(1,is_scene)",
+				'id'		=>	$pinfo['actid']
+			];
+			$param = D('Activity')->where($where)->getField('param');
+			$param = json_decode($param,true);
+			//dump($param['info']['ticket']);
+			$ticket = explode(',',$param['info']['ticket']);
+			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale'],$ticket);
+		}
+
+
+
 		$return = array(
 			'statusCode' => '200',
-			'price'		 =>	$tictype,
+			'price'		 =>	$price,
 		);
 		die(json_encode($return));	
 	}
@@ -221,7 +246,7 @@ class ProductController extends Base{
 		$ginfo = I('get.');
 		$ginfo = [
 			'type'	=>	'1',
-			'productid' => '41'
+			'productid' => '43'
 		];
 		//if(empty($ginfo['productid'])){$this->error('参数错误!');}
 		//默认日期

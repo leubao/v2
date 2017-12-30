@@ -19,7 +19,7 @@
             <h3 class="panel-title">{$vo.name}</h3>
           </div>
           <div class="panel-body">
-            <volist name="vo['plan']"  id="plan"> <a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'type'=>$vo['type'],'plan_id'=>$plan['id'],'games'=>$plan['games']))}" >{$plan.plantime|date="Y-m-d",###}第{$plan.games}场</a>  &nbsp;&nbsp;&nbsp;</volist>
+            <volist name="vo['plan']"  id="plan"> <a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games']))}" >{$plan.plantime|date="Y-m-d",###}第{$plan.games}场</a>  &nbsp;&nbsp;&nbsp;</volist>
           </div>
         </div>
       </div>

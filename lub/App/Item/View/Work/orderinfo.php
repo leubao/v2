@@ -47,14 +47,15 @@
         <td>支付方式</td>
         <td>{$data.pay|pay}</td>
       </tr>
-      <!--
+      <if condition="!empty($data['activity'])">
       <tr>
-        <td>支付单号</td>
-        <td>{$data['id_card']} </td>
+        <td>活动名称</td>
+        <td>{$data['activity']|activity_name} 
+          <a href="{:U('Item/Order/public_tag_status',array('sn'=>$data['order_sn'],'menuid'=>$menuid));}" data-toggle="doajax" data-confirm-msg="确定要改变订单状态吗?" type="button" class="btn-info">标记</a></td>
         <td></td>
         <td></td>
       </tr>
-    -->
+      </if>
       <if condition="$data['status'] eq '9'">
       <tr>
         <td>出票员</td>

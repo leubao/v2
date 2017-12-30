@@ -22,6 +22,24 @@ function activity_type($param,$type = null)
 	}
 }
 /**
+ * @Company  承德乐游宝软件开发有限公司
+ * @Author   zhoujing      <zhoujing@leubao.com>
+ * @DateTime 2017-12-25
+ * @param    int        $param                活动ID
+ * @param    int        $type                 返回类型
+ * @return   [type]                              [description]
+ */
+function activity_name($param, $type = null)
+{
+	$model = D('Activity');
+	$info = $model->where(['id'=>$param])->getField('title');
+	if($type){
+		return $info;
+	}else{
+		echo $info;
+	}
+}
+/**
  * 获取有效推广数
  */
 function get_effective_focus($param,$type = null){

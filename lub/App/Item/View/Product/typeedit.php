@@ -44,8 +44,12 @@
              <input type="radio" name="param[present]" value="0" <if condition="$data['param']['present'] eq '0'">checked</if>>  否
             <span class="remark">用于子票设置，主票不用设置</span>
           </td>
-          <td></td>
-          <td></td>
+          <td>活动标记</td>
+          <td>
+            <input type="radio" name="activity" value="1" <if condition="$data['activity'] eq '1'">checked</if>>  是
+            <input type="radio" name="activity" value="0" <if condition="$data['activity'] eq '0'">checked</if>>  否
+            <span class="remark">仅用于活动销售</span>
+          </td>
         </tr>
         <tr>
           <td>销售场景:</td>

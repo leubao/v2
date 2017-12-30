@@ -409,7 +409,12 @@ class IndexController extends ApiBase {
           }
           break;
       }
+      //排除禁止打印的订单
+      $map['is_print'] = 0;
       $info = M('Order')->where($map)->field('plan_id,product_id,order_sn,status,money,number,take,type,pay,phone')->find();
+      if(empty($info)){
+        return false;
+      }
       if($info['status'] == '1'){
         if(in_array($info['pay'],['2','4','5'])){
           //授信额、支付宝、微信支付

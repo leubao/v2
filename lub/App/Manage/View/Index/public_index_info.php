@@ -56,7 +56,7 @@
             <a href="">{$totup.pre_order_count}</a> | {$totup.pre_order_sum}
           </li>
           <li>
-            <p>历史累计场次</p>
+            <p>历史累计销售计划</p>
             <a href="">{$totup.plan_count}</a>
           </li>
           <li>

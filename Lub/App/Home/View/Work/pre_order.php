@@ -1,4 +1,3 @@
-
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <!DOCTYPE HTML>
 <html lang="zh-CN">
@@ -11,35 +10,30 @@
 <Managetemplate file="Home/Public/menu"/>
 <!--内容主体区域 start-->
 <div class="main row">
-<!--面包屑导航-->
-<ol class="breadcrumb">
-  <li><a href="{:U('Home/Index/index');}">首页</a></li>
-  <li><a href="{:U('Home/Index/product');}">售票</a></li>
-  <li class="active">{$info['productid']|product_name}</li>
-  <li class="active">{$plan['id']|planShow}</li>
-</ol>
-<input type="hidden" id="channel_id" value="{$uinfo['cid']}"/>
-<div class="row">
-  <div class="col-md-2">
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title"><span class="glyphicon glyphicon-globe"></span> 座椅区域</h3>
-      </div>
-      <div class="panel-body">
-        <p>请选择座位等级</p>
-      </div>
-      <div class="list-group" id="area">
-        <volist name="area['seat']" id="li"> <a href="javascript:void(0);" onclick="showtype(this)" class="list-group-item" id="list_{$li}" data-id="{$li}" title="{$li|areaName}">{$li|areaName}</a></volist>
-      </div>
-    </div>
+  <!--面包屑导航-->
+  <ol class="breadcrumb">
+    <li><a href="{:U('Home/Index/index');}">首页</a></li>
+    <li><a href="{:U('Home/Index/product');}">售票</a></li>
+    <li class="active">{$info['productid']|product_name}</li>
+  </ol>
+  <input type="hidden" id="channel_id" value="{$uinfo['cid']}"/>
+  <div class="input-group col-md-5">
+    <span class="input-group-addon" id="basic-addon1">请选择预约日期</span>
+    <input size="16" type="text" value="{$plantime}" readonly class="form-control form_date" id="plantime" name="plantime">
   </div>
-  <div class="col-md-5">
+  <!-- Nav tabs -->
+  <ul class="nav nav-tabs mt20" role="tablist" id="tablelist">
+  </ul>
+  <div class="row">
+  <!-- Tab panes -->
+  <div class="tab-content col-md-7 mt20" id="pageContent">
     <div class="table-responsive" id="ticketType">
       <table class="table table-bordered table-hover table-condensed">
         <thead>
           <tr>
-            <td>票型名称</td>
-            <td>单价</td>
+            <td align="center">票型名称</td>
+            <td align="center">单价</td>
+            <td align="center">可售</td>
           </tr>
         </thead>
         <tbody id="tro" style="cursor: pointer;">
@@ -50,96 +44,115 @@
     <div class="panel-body"><textarea class="form-control" name="remark" id="remark" rows="2" placeholder="请输入订单备注.."></textarea></div>
     </div>
   </div>
-  <div class="col-md-5">
-    <div class="panel panel-warning">
-      <div class="panel-heading">
-        <h3 class="panel-title"><span class="glyphicon glyphicon-list-alt"></span> 订单信息</h3>
-      </div>
-      <div class="panel-body">
-        <p>说明：取票人凭身份信息及手机，前往景区指定窗口兑换纸质门票！</p>
-      </div>
-      <ul class="list-group form-inline">
-        <li class="list-group-item">
-          <div class="form-group">
-              <input type="radio" name="contact_option" id="contact1" checked onclick="$('.contact_select').css('display','block'),$('.contact_input').css('display','none');">常用联系人
-              <input type="radio" name="contact_option" id="contact2" onclick="$('.contact_select').css('display','none'),$('.contact_input').css('display','block');">设置联系人
-          </div>
-          <div class="form-group"><select class="form-control" name="tourists" id="tourists">
-            <option value="">请选择客源地</option>
-            <volist name="tour" id="vo">
-              <option value="{$vo.id}">{$vo.name}</option>
-            </volist>  
-          </select></div>
-        </li>
-        <li class="list-group-item contact_select">            
-          <select class="form-control" name="contact" id="contact">
-            <option value="">常用联系人</option>
-            <volist name="list" id="vo">
-              <option value="{$vo.id}" data-phone="{$vo.phone}" data-name="{$vo.name}" data-idcard="{$vo.id_card}">{$vo.name}</option>
-            </volist>  
-          </select>
-        </li>
-        <li class="list-group-item contact_input" style="display:none"> 
-        <div class="form-group"><input type="text" name="contacts" class="form-control" id="contacts" placeholder="联系人"></div>
-        <div class="form-group"><input type="text" name="phone" class="form-control" id="phone" placeholder="手机号"></div>          
-        </li>
-        <li class="list-group-item contact_input" style="display:none">
-        <div class="input-group">
-          <div class="input-group-addon">身份证取票</div>
-          <input type="text" name="id_card" id="id_card" class="form-control" placeholder="身份证号码">
-          <div class="input-group-addon"><i class="glyphicon glyphicon-info-sign"></i> 自助取票机取票</div>
-          </div>
-        </li>
-        <!--导游手机号 s-->
-        <if condition="$proconf.black eq '1'">
-        <li class="list-group-item">
-        <div class="input-group">
-          <div class="input-group-addon">导游手机号</div>
-          <input type="text" name="guide_black" id="guide_black" class="form-control" placeholder="导游手机号码">
-          <div class="input-group-addon"><i class="glyphicon glyphicon-info-sign"></i> 许可验证</div>
-          </div>
-        </li>
-        </if>
-        <!--导游手机号 e-->
-        <if condition="$uinfo['group']['type'] eq '1'">
-        <li class="list-group-item">
+  <div class="col-md-5 mt20">
+      <div class="panel panel-warning">
+        <div class="panel-heading">
+          <h3 class="panel-title"><span class="glyphicon glyphicon-list-alt"></span> 订单信息</h3>
+        </div>
+        <div class="panel-body">
+          <p>说明：取票人凭身份信息及手机，前往景区指定窗口兑换纸质门票！</p>
+        </div>
+        <ul class="list-group form-inline">
+          <li class="list-group-item">
+            <div class="form-group">
+                <input type="radio" name="contact_option" id="contact1" checked onclick="$('.contact_select').css('display','block'),$('.contact_input').css('display','none');">常用联系人
+                <input type="radio" name="contact_option" id="contact2" onclick="$('.contact_select').css('display','none'),$('.contact_input').css('display','block');">设置联系人
+            </div>
+          </li>
+          <li class="list-group-item contact_select">            
+            <select class="form-control" name="contact" id="contact">
+              <option value="">常用联系人</option>
+              <volist name="list" id="vo">
+                <option value="{$vo.id}" data-phone="{$vo.phone}" data-name="{$vo.name}" data-idcard="{$vo.id_card}">{$vo.name}</option>
+              </volist>  
+            </select>
+          </li>
+          <li class="list-group-item contact_input" style="display:none"> 
+          <div class="form-group"><input type="text" name="contacts" class="form-control" id="contacts" placeholder="联系人"></div>
+          <div class="form-group"><input type="text" name="phone" class="form-control" id="phone" placeholder="手机号"></div>          
+          </li>
+          <li class="list-group-item contact_input" style="display:none">
           <div class="input-group">
-          <span class="input-group-addon">业务员</span>
-          <input type="hidden" id="guideid" name="guide" value="{$uinfo['id']}" >
-          <input type="text" class="form-control" id="guidename" value="{$uinfo['nickname']}" placeholder="业务员姓名" disabled="">
-          <span class="input-group-addon"><a id="findguide" href="#" data-toggle="modal"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></span></div>
-        </li>
-        <else />
-        <input type="hidden" id="guideid" value="{$uinfo['id']}"/>
-        </if>
-      </ul>
-    </div>
-    <div class="panel panel-default table-responsive" id="selectTickt">
-      <table class="table table-bordered table-hover table-condensed" id="kselect">
-        <thead>
-          <tr>
-            <td>票型</td>
-            <td>单价</td>
-            <td style="width:120px">数量</td>
-            <td>小计</td>
-            <td>操作</td>
-          </tr>
-        </thead>
-        <tbody id="cart">
-        </tbody>
-      </table>
-      <div class="panel-footer" >合计：<span id="subtoal">0.00</span></div>
-    </div>
-    <input type="hidden" value="{$plan['id']}" id="planID">
-    <div class="btn-group">
-    <if condition="$uinfo['group']['type'] neq '3'">
-      <button type="button" id="print" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-qrcode"></span>立即下单</button>
-      <button type="button" class="btn btn-default" id="pre" data-toggle="modal">超量申请</button>
-     <else />
-     <button type="button" class="btn btn-default" id="gov" data-toggle="modal">立即预定</button>
-     </if>
-    </div>
+            <div class="input-group-addon">身份证取票</div>
+            <input type="text" name="id_card" id="id_card" class="form-control" placeholder="身份证号码">
+            <div class="input-group-addon"><i class="glyphicon glyphicon-info-sign"></i> 自助取票机取票</div>
+            </div>
+          </li>
+          <!--导游手机号 s-->
+          <if condition="$proconf.black eq '1'">
+          <li class="list-group-item">
+          <div class="input-group">
+            <div class="input-group-addon">导游手机号</div>
+            <input type="text" name="guide_black" id="guide_black" class="form-control" placeholder="导游手机号码">
+            <div class="input-group-addon"><i class="glyphicon glyphicon-info-sign"></i> 许可验证</div>
+            </div>
+          </li>
+          </if>
+          <!--导游手机号 e-->
+          <if condition="$uinfo['group']['type'] eq '1'">
+          <li class="list-group-item">
+            <div class="input-group">
+            <span class="input-group-addon">业务员</span>
+            <input type="hidden" id="guideid" name="guide" value="{$uinfo['id']}" >
+            <input type="text" class="form-control" id="guidename" value="{$uinfo['nickname']}" placeholder="业务员姓名" disabled="">
+            <span class="input-group-addon"><a id="findguide" href="#" data-toggle="modal"><span class="glyphicon glyphicon-search" aria-hidden="true"></span></a></span></div>
+          </li>
+          <else />
+          <input type="hidden" id="guideid" value="{$uinfo['id']}"/>
+          </if>
+        </ul>
+      </div>
+      <div class="panel panel-default table-responsive" id="selectTickt">
+        <table class="table table-bordered table-hover table-condensed" id="kselect">
+          <thead>
+            <tr>
+              <td>票型</td>
+              <td>单价</td>
+              <td style="width:120px">数量</td>
+              <td>小计</td>
+              <td>操作</td>
+            </tr>
+          </thead>
+          <tbody id="cart">
+          </tbody>
+        </table>
+        <div class="panel-footer" >合计：<span id="subtoal">0.00</span></div>
+      </div>
+      <input type="hidden" value="" id="planID">
+      <div class="btn-group">
+      <if condition="$uinfo['group']['type'] neq '3'">
+        <button type="button" id="print" class="btn btn-default" data-toggle="modal"><span class="glyphicon glyphicon-qrcode"></span>立即下单</button>
+        <button type="button" class="btn btn-default" id="pre" data-toggle="modal">超量申请</button>
+       <else />
+       <button type="button" class="btn btn-default" id="gov" data-toggle="modal">立即预定</button>
+       </if>
+      </div>
   </div>
+  </div>
+  <script type="text/javascript">
+  var selectdate;
+  $(function() {
+    $("#plantime").datetimepicker({
+        language:  'zh-CN',
+        format: "yyyy-mm-dd",
+        autoclose: true,
+        minView: "month",
+        maxView: "decade",
+        todayBtn: true,
+        pickerPosition: "bottom-left",
+        startDate:new Date(new Date()-1000 * 60 * 60 * 24 * 30),
+        endDate : new Date()
+    });
+    empty_cart_ticket();
+    scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['productid']});
+    $('#plantime').datetimepicker().on('changeDate', function(ev) {
+        selectdate = $('#plantime').val();
+        empty_cart_ticket();
+        scenic_drifting_plan(selectdate,{$info['type']},{$info['productid']});
+    });
+  });
+  </script>
+
 </div>
 <div> 
   <!--内容主体区域 end--> 
@@ -369,66 +382,14 @@
   <!--弹出窗口 end-->
   <Managetemplate file="Home/Public/footer"/>
   <!--页脚--> 
-</div> 
+</div>
 </body>
 </html>
 <script src="{$config_siteurl}static/home/js/cart.js?=<?php echo  rand(100,999);?>"></script>
 <script type="text/javascript">
-/*根据座位区域，显示相关票型*/
+
 var type = {$info['type']},
-    plan = {$plan['id']},
     product = {$info['productid']};
-function showtype(t){
-  var id1    = t.id.split("_");
-  var areaid = id1[1];
-  var data = 'info={"area":'+areaid+',"type":'+type+',"plan":'+plan+',"method":"general","seale":1,"product":'+product+'}',content = "";
-  $.post("index.php?g=Home&m=Product&a=quickPrice", data, function(rdata) {
-      if(rdata.statusCode == '200'){
-         if(rdata.price != null){
-              $(rdata.price).each(function(idx,item){
-                var id    = item.id;
-                var name  = item.name;
-                <?php if($uinfo['group']['settlement'] == '1'){?>
-                var price = item.price;
-                  content += "<tr id='tro_"+id+"_"+areaid+"' class='tro'><td>"+name+"</td><td>"+price+"</td></tr>";
-                  <?php }else{?>
-                var discount = item.discount;
-                  content += "<tr id='tro_"+id+"_"+areaid+"' class='tro'><td>"+name+"</td><td>"+discount+"</td></tr>";
-                  <?php }?>
-              });
-         }else{
-             var error_msg = "<tr><td style='padding:15px;' colspan='5' align='center'><strong style='color:red;font-size:18px;'>未找到可售票型</strong></td></tr>";
-         }
-         $("#tro").html(content);
-      }
-  },"json");
-  /*
-  $.get("index.php?g=Home&m=Product&a=quickPrice&areaid="+areaid+"&productid={$info['productid']}", function(data){
-    if(data != 0){
-      var content = "";
-      var result = $.parseJSON(data);
-      $.each(result,function(idx,item){ 
-        var id    = item.id;
-        var name  = item.name;
-        <?php if($uinfo['group']['settlement'] == '1'){?>
-        var price = item.price;
-          content += "<tr id='tro_"+id+"_"+areaid+"' class='tro'><td>"+name+"</td><td>"+price+"</td></tr>";
-          <?php }else{?>
-        var discount = item.discount;
-          content += "<tr id='tro_"+id+"_"+areaid+"' class='tro'><td>"+name+"</td><td>"+discount+"</td></tr>";
-          <?php }?>
-      });
-    }else{
-      var content = "<tr><td colspan='2'>未找到价格政策...</td></tr>";
-    }
-    $("#tro").html(content);
-  });*/
-  //确定当前选中的区域为选中的状态
-  $('#area a').each(function () {
-    $(this).attr("class","list-group-item");
-  });
-  $(t).attr("class","list-group-item active");
-}
 /*网银支付*/
 $('#webpay').click(function(){
     $("#pay_money").val($("#tomoney").val()); //订单金额

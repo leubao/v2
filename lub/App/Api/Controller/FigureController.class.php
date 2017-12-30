@@ -12,8 +12,7 @@ class FigureController extends Controller{
 	//加载所有区域及座位
 	function index(){
 		$ginfo = I('get.');
-		$product = \Libs\Util\Encrypt::authcode($ginfo['pid'],'DECODE');
-		//产品类型
+		$product = (string)base_convert($ginfo['pid'],16,10);		//产品类型
 		switch ($ginfo['type']) {
 			case '1':
 				//今天时间戳
@@ -23,6 +22,7 @@ class FigureController extends Controller{
 					'status'=>2
 				];
 				$plan = D('Plan')->where($where)->order('plantime ASC,games ASC')->select();
+				$type = $pinfo['type'] ? $pinfo['type'] : '1';
 				//剧场
 				$template = 'index';
 				break;
@@ -38,7 +38,7 @@ class FigureController extends Controller{
 				$template = 'drifting';
 				$type = $pinfo['type'] ? $pinfo['type'] : '1';
 				break;
-		}
+		}//dump($plan);
 		$this->assign('plan',$plan)
 		     ->assign('today',$today)
 		     ->assign('type',$type)
@@ -52,7 +52,7 @@ class FigureController extends Controller{
 		if(IS_POST){
 			$pinfo = json_decode($_POST['info'],true);
 			$param = I('get.param',0,intval) ? I('get.param',0,intval) : '3';
-			$product = \Libs\Util\Encrypt::authcode(I('get.pid'),'DECODE');
+			$product = (string)base_convert(I('get.pid'),16,10);
 			$return = \Libs\Service\Api::get_plan($product,$pinfo,$param);
 			die(json_encode($return));
 		}

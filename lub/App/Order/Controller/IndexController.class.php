@@ -227,4 +227,42 @@ class IndexController extends ManageBase {
 		}
 		$this->assign('data',$info)->assign('ticket',$ticket)->assign('param',$detail['param'])->assign('crm',$detail['crm'])->display();
 	}
+	//按场次加载座位销售情况
+	public function plan_sales_seat()
+	{
+		$pinfo = I('post.');
+		switch ($pinfo['type']) {
+			case '1':
+				$map = [];
+				break;
+			case '2':
+				$map = ['status' =>	0];
+				break;
+			case '3':
+				$map = ['status' =>	['in','2,99']];
+				break;
+			case '4':
+				$map = ['idcard' => ['neq','']];
+				break;
+			case '5':
+				$map = ['status' =>	99];
+				break;
+			case '6':
+				$map = ['status' =>	2];
+				break;
+		}
+		if(!empty($pinfo['plan'])){
+			$plan_info = F('Plan_'.$pinfo['plan']);
+			if(empty($plan_info)){
+				$plan_info = M('Plan')->where(array('id'=>$pinfo['plan']))->find();
+			}
+			$table = ucwords($plan_info['seat_table']);
+			$this->basePage($table, $map, '', 25, 'id,order_sn,area,seat,idcard,status,checktime');
+		}
+		$plantime = strtotime(" -2 day ",strtotime(date('Y-m-d')));
+		$plan = M('Plan')->where(array('plantime'=>array('egt',$plantime)))->field('plantime,games,id,starttime')->order('plantime ASC')->select();
+		$this->assign('plan',$plan)
+			->assign('pinfo',$pinfo)
+			->display();
+	}
 }

@@ -6,10 +6,10 @@
 // +----------------------------------------------------------------------
 // | Author: zhoujing <admin@leubao.com>
 // +----------------------------------------------------------------------
-namespace Item\Controller;
-use Common\Controller\ManageBase;
-use Item\Service\Partner;
-class CheckController extends ManageBase{
+namespace Home\Controller;
+use Common\Controller\Base;
+use Home\Service\Partner;
+class CheckController extends Base{
 	protected function _initialize() {
 	 	parent::_initialize();
 	 }
@@ -69,7 +69,7 @@ class CheckController extends ManageBase{
 				$map = ['idcard'=>$ginfo['idcard'],'activity_id'=>$ginfo['actid']];
 				$return = $this->check_name2('IdcardLog',$map);
 		}
-		if(empty($return)){
+		if($return == False){
 			$this->ajaxReturn(array('ok'=>'名称可用','state'=>'ok'),json);
 		}else{
 			$this->ajaxReturn(array('error'=>'名称已存在','state'=>'error'),json);

@@ -28,7 +28,13 @@ class ApplyController extends TrustController{
 			$token = $session['token'];
 			$openid = $session['openid'] ? $session['openid'] : 0;
 		}
-		$return = ['status'=>true, 'code'=>10001, 'data'=>[ 'token'=>$token, 'openid'=> $openid], 'msg'=>'ok'];
+        //返回年卡的基本配置
+        $base = [
+            'money'=>,
+            'bjimg'=>,
+            'call' => $this->config['call'],
+        ]
+		$return = ['status'=>true, 'code'=>10001, 'data'=>[ 'token'=>$token, 'openid'=> $openid, 'base'=> $base], 'msg'=>'ok'];
 		die(json_encode($return));
 	}
 	/**

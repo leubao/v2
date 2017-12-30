@@ -19,6 +19,7 @@
         <option value="">类型</option>
         <option value="1" <eq name="pinfo['type']" value="1"> selected</eq>>座位号</option>
         <option value="2" <eq name="pinfo['type']" value="2"> selected</eq>>二维码</option>
+        <option value="3" <eq name="pinfo['type']" value="3"> selected</eq>>身份证</option>
     </select>
     &nbsp;
     <input type="text" name="sn" value="{$pinfo['sn']}">

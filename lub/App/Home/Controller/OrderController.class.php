@@ -84,7 +84,7 @@ class OrderController extends Base{
 		$user = M('User')->where(array('status'=>'1','cid'=>$uinfo['cid']))->field('id,nickname')->select();
 		$product = M('Product')->field('id,name')->select();
 		$count = $db->where($where)->count();
-		$Page  = new \Home\Service\Page($count,25);
+		$Page  = new \Home\Service\Page($count,20);
 		$show  = $Page->show();
 		$list = $db->where($where)->limit($Page->firstRow.','.$Page->listRows)->order($order)->select();
 		//统计数量和金额
@@ -639,5 +639,49 @@ class OrderController extends Base{
 			}
 		}
 		$this->assign('data',$data)->assign('area',$area)->assign('pinfo',$pinfo)->display();
+	}
+	//添加身份证
+	function upidcard(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			$plan = F('Plan_'.$pinfo['plan_id']);
+			$db = M($plan['seat_table']);
+			//读取订单号，读取计划
+			$list = $db->where(['order_sn'=>$pinfo['sn']])->field('id,seat')->select();
+			foreach ($list as $k => $v) {
+				$data[] = [
+					'id'	=>	$v['id'],
+					'seat'	=>	$v['seat'],
+					'idcard'=>	$pinfo['card'][$k]
+				];
+			}
+			if($db->save($data)){
+				$this->srun('更新成功!');
+			}else{
+				$this->erun('更新失败!');
+			}
+			$this->belonging($pinfo['card']);
+		}else{
+			$model = D('Home/Order');
+			$info = $model->where(['order_sn'=>$sn])->field('plan_id,number,order_sn')->find();
+			$this->assign('info',$info)->display();
+		}
+	}
+	//execl d导入身份证
+	function upexecl(){
+		//读取身份证
+		//
+	}
+	//身份证写入
+	function belonging($card){
+		//同时把身份证写入身份证记录表
+		foreach ($card as $k => $v) {
+			$data[] = [
+				'idcard' 	=>	$v,
+				'createtime'=>	time()
+			];
+		}
+		D('Belonging')->addAll($data);
+		return true;
 	}
 }

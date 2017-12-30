@@ -19,15 +19,14 @@
   <input type="radio" name="type" id="print_type" value="1" <if condition="$proconf['print_type'] eq '1'">checked</if>> 一人一票  
   <input type="radio" name="type" id="print_type" value="2" <if condition="$proconf['print_type'] eq '2'">checked</if>> 一单一票
   </div>
-  <button type="button" style="width:200px; height:130px" id="print_ticket">打印门票</button>
+  <button type="button" style="width:200px; height:130px" id="print_ticket" onclick="printTicket({$data.sn},{$data.plan_id})">打印门票</button>
   </div>
 </div>
 </div>
 <script>
-var LODOP; //声明为全局变量
-$("#print_ticket").click(function() {
-	var sn = '{$data.sn}',planid = '{$data.plan_id}';
-	$(this).attr("disabled", true).val('打印中..');
+var LODOP; //声明为全局变量  
+function printTicket(sn,planid){
+	$("#print_ticket").attr("disabled", true).val('打印中..');
 	var type = $('#print_type:checked').val();
 	$.ajax({
 		type:'get',
@@ -40,12 +39,8 @@ $("#print_ticket").click(function() {
             layer.msg('服务器请求超时，请检查网络...');
         },
 		success:function(data){
-			if(data.status == '300'){
-				//订单收款
-            	$(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
-			}
+			var selSeat = eval(data.info);/*返回的座位信息*/
 			if(data.status == '1'){
-				var selSeat = eval(data.info);/*返回的座位信息*/
 				$.each(selSeat,function(){
 					/*打印设置部分*/
 					CreateFullBill(this);
@@ -56,66 +51,308 @@ $("#print_ticket").click(function() {
 					/*关闭当前弹窗*/
 					$(this).dialog('close','print');
 				});
-			}
-			if(data.status != '1' && data.status != '300'){
+			}else{
 				$(this).alertmsg('error',data.message);
 				$(this).dialog('close','print');
 			}
 		}
 	});
-});
 
+	}
 /*打印页面控制*/
 function CreateFullBill(data) {
-			LODOP=getLodop();
-		LODOP.ADD_PRINT_TEXT(91,220,140,30,"时间/TIME");
-		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
-		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(165,220,140,30,"票价/PRICE");
-		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
-		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(166,370,108,30,data.price+"元");
-		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
-		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(42,240,451,46,"印象大红袍山水实景演出");
+		LODOP=getLodop();
+
+		LODOP.ADD_PRINT_TEXT(50,125,316,46,"印象普陀");
 		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",20);
 		LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
 		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(91,370,280,30,data.plantime);
+		LODOP.ADD_PRINT_TEXT(83,123,299,30,"迎新祈福大型灯会");
 		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
+		LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
 		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(128,220,140,30,"座位/SEAT");
+		/*
+		LODOP.ADD_PRINT_TEXT(114,175,140,30,"区域/AREA");
 		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);*/
+		LODOP.ADD_PRINT_TEXT(143,175,140,30,"票价/PRICE");
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
 		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_BARCODE(98,620,110,110,"QRCode",data.sn);
+		/*
+		LODOP.ADD_PRINT_TEXT(171,175,140,30,"票价/PRICE");
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);*/
+		LODOP.ADD_PRINT_TEXT(198,175,140,30,"时间/TIME");
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
+
+
+
+
+
+		
+
+		
+
+		/*
+		LODOP.ADD_PRINT_TEXT(114,300,147,30,data.area);
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);*/
+		LODOP.ADD_PRINT_TEXT(144,300,140,30,data.price+"元");
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+		/*
+		LODOP.ADD_PRINT_TEXT(172,300,165,29,data.price+"元");
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);*/
+		LODOP.ADD_PRINT_TEXT(199,300,364,30,data.plantime);
+		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",16);
+		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
+
+		LODOP.ADD_PRINT_BARCODE(140,587,110,110,"QRCode",data.sn);
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",127);
 		LODOP.SET_PRINT_STYLEA(0,"ShowBarText",0);
 		LODOP.SET_PRINT_STYLEA(0,"GroundColor","#FFFFFF");
 		LODOP.SET_PRINT_STYLEA(0,"QRCodeErrorLevel","H");
-		LODOP.ADD_PRINT_TEXT(129,370,163,29,data.seat);
-		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-		LODOP.SET_PRINT_STYLEA(0,"FontSize",18);
-		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-		LODOP.ADD_PRINT_TEXT(62,793,100,20,data.plantime);
+		
+
+		LODOP.ADD_PRINT_TEXT(81,1,100,20,data.plantime);
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
 		LODOP.SET_PRINT_STYLEA(0,"Alignment",3);
-		LODOP.ADD_PRINT_TEXT(99,791,100,20,data.seat);
+		/*
+		LODOP.ADD_PRINT_TEXT(117,1,100,20,data.seat);
 		LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-		LODOP.SET_PRINT_STYLEA(0,"Alignment",3);
-		LODOP.ADD_PRINT_TEXT(238,222,100,20,data.sns);
+		LODOP.SET_PRINT_STYLEA(0,"Alignment",3);*/
+		LODOP.ADD_PRINT_TEXT(244,515,100,20,data.sns);
 
 		
-		LODOP.ADD_PRINT_TEXT(221,240,448,30,"凭票可在武夷山高铁北站印象大红袍休息室免费兑换矿泉水");
-		LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-		LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-		LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+		
 
+
+		LODOP.ADD_PRINT_TEXT(234,166,248,20,"剧场地址：朱家尖印象普陀大剧场");
+		LODOP.SET_PRINT_STYLEA(0,"FontSize",10);
+		
+		
+
+
+		/*打印备注*/
+		var type = data.remark_type;
+		switch(type){
+			case '1':
+				/*儿童票*/
+				LODOP.ADD_PRINT_RECT(72,485,200,50,0,2);
+				LODOP.ADD_PRINT_TEXT(102,491,196,23,"仅限身高1.2米至1.5米儿童使用");
+				LODOP.SET_PRINT_STYLEA(0,"FontSize",10);
+				LODOP.ADD_PRINT_TEXT(79,551,100,30,"儿童票");
+				LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+				LODOP.SET_PRINT_STYLEA(0,"FontSize",14);
+				LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				break;
+			case '2':
+				/*接待票*/
+				break;
+			case '3':
+				/*市民票*/
+				$.each(data.remark,function(item,name){
+					LODOP.ADD_PRINT_RECT(72,485,218,50,0,2);
+					LODOP.ADD_PRINT_TEXT(80,502,214,40,name+"市民优惠票");
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",14);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				});
+
+				
+				break;
+			case '4':
+				/*特殊团队票*/
+				$.each(data.remark,function(item,name){
+					LODOP.ADD_PRINT_RECT(72,495,200,50,0,2);
+					LODOP.ADD_PRINT_TEXT(105,504,196,23,"需同时持"+name+"市民身份证入场");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",10);
+					LODOP.ADD_PRINT_TEXT(80,514,158,30,name+"团队专用");
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",14);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				});
+				break;
+			case '5':
+				/*景区联合售票*/
+				var width_s = 401,
+					width_pse = 424,
+					width_br = 401,
+					width_pse_br = 424, 
+					top1 = 40,
+					top2 = 44,
+					top3 = 63,
+					top4 = 80;
+				$.each(data.remark,function(item,name){
+					if(item == 4){
+						width_s = width_br;
+						width_pse = width_pse_br
+						top1 = 110;
+						top2 = 114;
+						top3 = 133;
+						top4 = 150;
+					}
+					LODOP.ADD_PRINT_RECT(top1,width_s,60,68,0,2);
+					LODOP.ADD_PRINT_ELLIPSE(top2,width_pse,13,13,0,1);
+					LODOP.ADD_PRINT_TEXT(top4,width_s,59,30,"打孔后无效\n3天内有效");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",7);
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.ADD_PRINT_TEXT(top3,width_s,65,22,name);
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+					width_s = width_s+62;
+					width_pse = width_pse+62;
+					height = height+62;
+				});
+				break;
+			case '6':
+				LODOP.ADD_PRINT_RECT(72,485,180,50,0,2);
+				LODOP.ADD_PRINT_TEXT(87,495,172,40,"赠不肯去观音号夜游");
+				LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+				LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
+				LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				break;
+			case '7':
+				LODOP.ADD_PRINT_RECT(72,485,170,50,0,2);
+				LODOP.ADD_PRINT_TEXT(87,495,172,40,"赠观光巴士夜游");
+				LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+				LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
+				LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				break;
+			case '8':
+				LODOP.ADD_PRINT_RECT(72,485,170,50,0,2);
+				LODOP.ADD_PRINT_TEXT(87,495,172,40,"赠东海音乐节门票");
+				LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+				LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
+				LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				break;
+			case '9':
+				LODOP.ADD_PRINT_RECT(72,485,170,50,0,2);
+				LODOP.ADD_PRINT_TEXT(87,495,172,40,"小手牵大手活动票");
+				LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+				LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
+				LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+				break;
+			case '10':
+				/*景区联合售票*/
+				var width_s = 431,
+					height = 454;
+				$.each(data.remark,function(item,name){
+					LODOP.ADD_PRINT_RECT(75,width_s,60,68,0,2);
+					LODOP.ADD_PRINT_ELLIPSE(79,height,13,13,0,1);
+					LODOP.ADD_PRINT_TEXT(114,width_s,59,30,"打孔后无效\n28、29天内有效");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",7);
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.ADD_PRINT_TEXT(98,width_s,60,22,name);
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+					width_s = width_s+62;
+					height = height+62;
+				});
+				break;
+			case '11':
+				/*景区联合售票*/
+				var width_s = 431,
+					height = 454;
+				$.each(data.remark,function(item,name){
+					LODOP.ADD_PRINT_RECT(73,width_s,60,68,0,2);
+					LODOP.ADD_PRINT_ELLIPSE(77,height,13,13,0,1);
+					LODOP.ADD_PRINT_TEXT(112,width_s,59,30,"打孔后无效\n29天内有效");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",7);
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.ADD_PRINT_TEXT(96,width_s,60,22,name);
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+					width_s = width_s+62;
+					height = height+62;
+				});
+				break;
+			case '12':
+				/*景区联合售票*/
+				var width_s = 401,
+					width_pse = 424,
+					width_br = 401,
+					width_pse_br = 424, 
+					top1 = 40,
+					top2 = 44,
+					top3 = 63,
+					top4 = 80;
+				$.each(data.remark,function(item,name){
+					if(item == 4){
+						width_s = width_br;
+						width_pse = width_pse_br
+						top1 = 110;
+						top2 = 114;
+						top3 = 133;
+						top4 = 150;
+					}
+					LODOP.ADD_PRINT_RECT(top1,width_s,60,68,0,2);
+					LODOP.ADD_PRINT_ELLIPSE(top2,width_pse,13,13,0,1);
+					LODOP.ADD_PRINT_TEXT(top4,width_s,59,30,"打孔后无效\n1天内有效");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",7);
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.ADD_PRINT_TEXT(top3,width_s,65,22,name);
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+					width_s = width_s+62;
+					width_pse = width_pse+62;
+					height = height+62;
+				});
+				break;
+			case '13':
+				/*景区联合售票*/
+				var width_s = 401,
+					width_pse = 424,
+					width_br = 401,
+					width_pse_br = 424, 
+					top1 = 40,
+					top2 = 44,
+					top3 = 63,
+					top4 = 80;
+				$.each(data.remark,function(item,name){
+					if(item == 4){
+						width_s = width_br;
+						width_pse = width_pse_br
+						top1 = 110;
+						top2 = 114;
+						top3 = 133;
+						top4 = 150;
+					}
+					LODOP.ADD_PRINT_RECT(top1,width_s,60,68,0,2);
+					LODOP.ADD_PRINT_ELLIPSE(top2,width_pse,13,13,0,1);
+					LODOP.ADD_PRINT_TEXT(top4,width_s,59,30,"打孔后无效\n2天内有效");
+					LODOP.SET_PRINT_STYLEA(0,"FontSize",7);
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.ADD_PRINT_TEXT(top3,width_s,65,22,name);
+					LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+					LODOP.SET_PRINT_STYLEA(0,"Alignment",2);
+					LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+					width_s = width_s+62;
+					width_pse = width_pse+62;
+					height = height+62;
+				});
+				break;
+				
+		}
+		LODOP.ADD_PRINT_TEXT(234,410,100,20,data.user);
 }
 </script>
 </body>
