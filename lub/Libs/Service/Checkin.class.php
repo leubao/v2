@@ -174,8 +174,7 @@ class Checkin extends \Libs\System\Service{
 			}
 		}else{
 			return false;
-		}		
-
+		}
 	}
 	/**
 	 * 检票类型   一团 ||  一人

@@ -50,8 +50,7 @@ class CheckStatus extends \Libs\System\Service {
 			return false;
 		}
 		$code = $code ? $code : '0000';
-		$status = \Libs\Service\ReturnCode::$return_code($code);
-		load_redis('setex','marking_'.$sn,$status,'300');
+		load_redis('setex','marking_'.$sn,$code,'100');
 		return true;
 	}
 	/**

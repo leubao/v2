@@ -798,6 +798,7 @@ class Order extends \Libs\System\Service {
 		$ticketType = F("TicketType".$plan['product_id']);
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
+		$idcard = [];
 		if(empty($ticketType) || empty($seat)){$this->error = '4000076 : 票型获取失败';return false;}
 		/*多表事务*/
 		$model = new Model();
@@ -879,6 +880,7 @@ class Order extends \Libs\System\Service {
 						'soldtime'=> $createtime,
 						'status'  => '2',
 						'price_id'=> $va['priceid'],
+						'idcard'  => strtoupper($va['idcard']),
 						'sale'    => serialize(array('priceid'=>$va['priceid'],'price'=>$va['price'])),//售出信息 票型  单价
 					);
 					//计算消耗配额的票型 只有团队订单时才执行此项操作 21060118
@@ -895,9 +897,14 @@ class Order extends \Libs\System\Service {
 						return false;
 						break;
 					}
+					/*
+					$log[$k] = $count[$k] .'-'.  $ke;
+					dump($ke);
+					TODO  这里似乎没有任何意义
 					if($count[$k] == $ke+1){
-						$flag=true;
-					}
+						$flag = true;
+					}*/
+					$flag = true;
 					//统计订单座椅个数
 					$number = (int)$number+$va['num'];
 					if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
@@ -906,7 +913,7 @@ class Order extends \Libs\System\Service {
 				if($proconf['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
 			}
 			/*座椅信息*/
-			$seatInfo = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(array('order_sn'=>$info['order_sn']))->field('order_sn,area,seat,sale')->select();
+			$seatInfo = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(array('order_sn'=>$info['order_sn']))->field('order_sn,area,seat,sale,idcard')->select();
 			/*更新售出信息*/
 			$counts = count($seatInfo);//统计座椅个数
 			//校验已排座位数与实际座位数是否相符合 不相符合直接返回false
@@ -916,6 +923,8 @@ class Order extends \Libs\System\Service {
 				$this->error = '400010 : 排座失败';
 				return false;
 			}
+			//格式化订单详情
+			$oInfo = unserialize($info['info']);
 			foreach ($seatInfo as $ks => $vs){
 				//写入数据
 				$maps = array('area'=>$vs['area'],'seat'=>$vs['seat'],'status' => array('eq',2));
@@ -938,12 +947,18 @@ class Order extends \Libs\System\Service {
 				);
 				/*重组座位数据*/
 				$seatData[$ks] = array(
-					'areaId' =>	$vs['area'],
-					'priceid'=>	$sale[$ks]['priceid'],
-					'price'=>$ticketType[$sale[$ks]['priceid']]['price'],
-					'discount'=>$ticketType[$sale[$ks]['priceid']]['discount'],/*结算价格*/
-					'seatid'=>	$vs['seat']
+					'areaId' 	=>	$vs['area'],
+					'priceid'	=>	$sale[$ks]['priceid'],
+					'idcard'	=>	$vs['idcard'],
+					'price'		=>	$ticketType[$sale[$ks]['priceid']]['price'],
+					'discount'	=>	$ticketType[$sale[$ks]['priceid']]['discount'],/*结算价格*/
+					'seatid'	=>	$vs['seat']
 				);
+				//统计身份证号
+				$idcard[] = [
+					'idcard'		=>	$vs['idcard'],
+					'activity_id'	=>	$oInfo['param'][0]['activity']
+				];
 				$up[$ks] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($maps)->lock(true)->save($datas);
 				if(empty($up[$ks])){
 					//error_insert('400011');
@@ -955,12 +970,17 @@ class Order extends \Libs\System\Service {
 				if($counts == $ks+1){
 					$flags = true;
 				}
+			}//dump($flag);
+			
+			//判断活动属性 todo 读取活动属性
+			if(!empty($oInfo['param'][0]['activity'])){
+				$is_print = 1;
+				//写入身份证号
+				D('IdcardLog')->addAll($idcard);
 			}
-			//格式化订单详情
-			$oInfo = unserialize($info['info']);
 			//重新组合订单详情  增加座位信息  与选做订单详情一至
 			$newData = array('subtotal'	=> $oInfo['subtotal'],'checkin'	=> $oInfo['checkin'],'data' => $seatData,'crm' => $oInfo['crm'],'pay' => $is_pay ? $is_pay : $oInfo['pay'],'param'	=> $oInfo['param']);
-			$state = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(array('number'=>$counts,'status'=>1,'uptime'=>$createtime,'pay'=>$is_pay ? $is_pay : $oInfo['pay']));
+			$state = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(array('number'=>$counts,'status'=>1,'uptime'=>$createtime,'pay'=>$is_pay ? $is_pay : $oInfo['pay'],'is_print'=> $is_print ? $is_print : '0'));
 			$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->setField('info',serialize($newData));
 			/*活动订单也消耗配额
 			if(!empty($oInfo['param'][0]['activity'])){
@@ -971,6 +991,7 @@ class Order extends \Libs\System\Service {
 					return false;
 				}
 			}*/
+
 			//是否为团队订单 
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
@@ -1038,6 +1059,7 @@ class Order extends \Libs\System\Service {
 			$pre = $model->table(C('DB_PREFIX').'pre_order')->add(array('order_sn'=>$info['order_sn'],'user_id'=>get_user_id(),'status'=>'1','createtime'=>$createtime));
 			$flag=true;$flags = true;$o_status = true;$no_sms = 1;
 		}
+		//dump($flag);dump($flags);dump($state);dump($o_status);dump($pre);
 		if($flag && $flags && $state && $o_status && $pre){
 			$model->commit();//提交事务
 			//发送成功短信
@@ -1125,7 +1147,7 @@ class Order extends \Libs\System\Service {
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
 		$plan_param = unserialize($plan['param']);
-		$ticketType = F("TicketType".$plan['product_id']);
+		$ticketType = F("TicketType".$plan['product_id']);//dump($seat);
 		foreach ($seat['area'] as $k=>$v){
 			//循环区域
 			$count[$k] = count($v['seat']);//统计座椅个数
@@ -1194,6 +1216,7 @@ class Order extends \Libs\System\Service {
 			$sale[$ks]=unserialize($vs['sale']);
 			$remark = print_remark($ticketType[$sale[$ks]['priceid']]['remark'],$plan['product_id']);
 			$datas = array(
+				'idcard'=>	$vs['idcard'],
 				'sale' => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 										'area'=>areaName($vs['area'],1),
 										'seat'=>Order::print_seat($vs['seat'],$plan['product_id'],$ticketType[$sale[$ks]['priceid']]['param']['ticket_print'],$ticketType[$sale[$ks]['priceid']]['param']['ticket_print_custom']),
@@ -1208,11 +1231,12 @@ class Order extends \Libs\System\Service {
 			);
 			/*重组座位数据*/
 			$seatData[$ks] = array(
-				'areaId' =>	$vs['area'],
-				'priceid'=>	$sale[$ks]['priceid'],
-				'price'=>$ticketType[$sale[$ks]['priceid']]['price'],
-				'discount'=>$ticketType[$sale[$ks]['priceid']]['discount'],/*结算价格*/
-				'seatid'=>	$vs['seat']
+				'areaId' 	=>	$vs['area'],
+				'priceid'	=>	$sale[$ks]['priceid'],
+				'price'		=>	$ticketType[$sale[$ks]['priceid']]['price'],
+				'discount'	=>	$ticketType[$sale[$ks]['priceid']]['discount'],/*结算价格*/
+				'seatid'	=>	$vs['seat'],
+				'idcard'	=>	$vs['idcard']
 			);
 			$up[$ks] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($maps)->lock(true)->save($datas);
 			if(empty($up[$ks])){
@@ -1588,10 +1612,12 @@ class Order extends \Libs\System\Service {
 		/*重新组合区域*/
 		foreach($area as $k=>$v){
 			if($product_type == '1'){
-				$seat['area'][$v['areaId']]['seat'][$k]=array(
+				//相同区域相同票型合并
+				$seat['area'][$v['areaId']]['seat'][$k] = array(
 					'priceid'=>$v['priceid'],
 					'price'=>$v['price'],
 					'num'=>$v['num'],
+					'idcard' => $v['idcard']
 				);
 				$seat['area'][$v['areaId']]['num'] += $v['num'];
 				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];

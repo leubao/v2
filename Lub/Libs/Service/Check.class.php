@@ -122,5 +122,41 @@ class Check{
     	}
     	return true;
     }
+    /**
+     * 标记电子票 身份证入园的门票标记为完结
+     */
+    function check_ticket_order_tag()
+    {
+    	//读取所有产品
+    	$product = D('Product')->where(['status'=>1])->field('id')->select();
+    	$model = D('Order');
+    	foreach ($product as $k => $v) {
+    		//读取Redis中已检票的订单号
+    		$size = load_redis('lsize','check_order_'.$v['id']);
+    		if($size > 0){
+    			$list = load_redis('lrange','check_order_'.$v['id'],0,-1);
+    			//删除
+ 				load_redis('delete','check_order_'.$v['id']);
+ 				$lists = array_unique($list);
+ 				foreach ($lists as $ka => $va) {dump($va);
+ 					//获取查询表名称
+ 					$plan = json_decode(load_redis('get','check_plan_'.$v['id']),true);
+ 					if(!empty($plan)){
+ 						//按订单去查询座位是否都已检票 ,查询是否存在未检票的座位
+	 					$count = M(ucwords($plan['seat_table']))->where(['order_sn'=>$va,'status'=>2])->count();
+	    				//都已检票则标记订单状态为完结
+	    				if($count == 0){
+	    					D('Order')->where(['order_sn'=>$va])->save(['status'=>9,'uptime'=>time()]);
+	    				}
+ 					}else{
+ 						load_redis('set','check','未找到检票场次');
+ 					}
+ 				}
+    		}
+    	}
+    	
+    	//去重
+    	
+    }
 }
 	

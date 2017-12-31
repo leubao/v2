@@ -296,7 +296,7 @@ class Refund extends \Libs\System\Service {
 		/*=============处理座位===============*/
 		if(in_array($type,array('81','83','91'))){
 			//有座位
-			$data = array('status'=>'0','sale'=> '','order_sn'=> '0','price_id'=>'0');
+			$data = array('status'=>'0','sale'=> '','idcard'=>'','order_sn'=> '0','price_id'=>'0');
 			if($unit == '2'){
 				//按座位退
 				if($plan['product_type'] == '1'){

@@ -105,7 +105,7 @@ class LubTMP extends \Think\Controller {
         $this->assign("config_siteurl", $config_siteurl);
         $this->assign("Config", $Config);
     }
-	/**
+    /**
      *  系统初始化 
      */
     function initApp(){
@@ -133,7 +133,7 @@ class LubTMP extends \Think\Controller {
         if(empty($kpimoney)){D('Item/KpiChannel')->kpi_channel_cache();}
         //统计历史累计场次和历史累计人数
         //停用已过期的场次
-        check_plan();
+       // check_plan();
     }
     /**
      * Ajax方式返回数据到客户端
@@ -194,14 +194,15 @@ class LubTMP extends \Think\Controller {
      * @param type $where 条件表达式
      * @param type $order 排序
      * @param type $limit 每次显示多少
+     * @param filed 要返回的字段 
      */
-    protected function basePage($model, $where = '', $order = '', $limit = 25) {
+    protected function basePage($model, $where = '', $order = '', $limit = 25,$field = '') {
         $model = $this->getModelObject($model);
         $count = $model->where($where)->count();
         $currentPage = !empty($_REQUEST["pageCurrent"])?$_REQUEST["pageCurrent"]:1;
         $firstRow = ($currentPage - 1) * $limit;
         $page = new page($count, $limit);
-        $data = $model->where($where)->order($order)->limit($firstRow . ',' . $page->listRows)->select();
+        $data = $model->where($where)->order($order)->limit($firstRow . ',' . $page->listRows)->field($field)->select();
         $this->assign('data', $data)
              ->assign( 'totalCount', $count )
              ->assign( 'numPerPage', $page->listRows)
