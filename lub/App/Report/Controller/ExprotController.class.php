@@ -37,6 +37,9 @@ class ExprotController extends ManageBase{
 				//授信记录导出
 				return $this->top_up($info);
 				break;
+			case 'channel_months':
+				return $this->months_report($info);
+				break;
 			default:
 				# code...
 				break;
@@ -186,6 +189,16 @@ class ExprotController extends ManageBase{
 		}else{
 			//导出汇总
 		}
+	}
+	//渠道商销售统计月度汇总
+	function months_report($info)
+	{
+		$data = S('ChannelMonths'.get_user_id());
+		if(empty($data)){
+			$this->erun("缓存已过期，请重新查询!");
+		}
+		//汇总
+		return Exports::templateExecl($data,'channel_sum',$info,8);
 	}
 	//构造表头
 	function headArr(){

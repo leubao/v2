@@ -625,7 +625,7 @@ class FinancialController extends ManageBase{
 			    'moneys'	 => $value['moneys'] + $channel[$value['channel_id']]['price'][$value['price_id']]['moneys'],
 			    'subsidy'	 => $value['subsidy'] + $channel[$value['channel_id']]['price'][$value['price_id']]['subsidy'],
 			];
-			// sort($channel[$value['channel_id']]['price']);
+			$channel[$value['channel_id']]['channel_id'] = $value['channel_id'];
 			$channel[$value['channel_id']]['number'] = $value['number'] + $channel[$value['channel_id']]['number'];
 			$channel[$value['channel_id']]['money'] = $value['money'] + $channel[$value['channel_id']]['money'];
 			$channel[$value['channel_id']]['moneys'] = $value['moneys'] + $channel[$value['channel_id']]['moneys'];
@@ -633,6 +633,8 @@ class FinancialController extends ManageBase{
 			$channel[$value['channel_id']]['tic_num'] = count($channel[$value['channel_id']]['price']);
 		}
 		ksort($channel);
+		$export_map['report'] = 'channel_months';
+		S('ChannelMonths'.get_user_id(),$channel);
 		$this->assign('data',$channel)->assign('export_map',$export_map)->assign('type',$type)->assign('product_id',$map['product_id'])->display();
 	}
 }

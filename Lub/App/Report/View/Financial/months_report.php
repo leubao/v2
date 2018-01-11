@@ -26,9 +26,7 @@
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">
         <a type="button" class="btn btn-default" onclick="$(this).navtab('refresh');" data-placement="left" data-toggle="tooltip" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>
-        <!--
         <a type="button" class="btn btn-primary" href="{:U('Report/Exprot/export_execl',$export_map);}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出报表信息吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
-        -->
     </div>
   </div>
   <!--检索条件 e-->

@@ -418,6 +418,59 @@ class Exports{
                 }
                 $filename = "Lubtoday_credit_".time();
                 break;
+            case '8':
+                /* 渠道月度汇总表 */
+                $objActSheet->setTitle ("渠道商销售统计报表");
+                $objActSheet->setCellValue ('A1',"渠道商销售(票型)统计(月度)报表");
+                $objActSheet->setCellValue ('B2',$header['datetime']);
+                $objActSheet->setCellValue ('I2',date('Y-m-d H:i:s'));
+                /* excel文件内容 */
+                $zz = 5;
+                //循环数据
+                foreach ($data as $ks=>$va){
+                    $objActSheet->setCellValue ($a.$zz, crmName($va['channel_id'],1));
+                    $objActSheet->setCellValue ($i.$zz, $va['number']);
+                    $objActSheet->setCellValue ($j.$zz, $va['money']);
+                    $objActSheet->setCellValue ($k.$zz, $va['moneys']);
+                    $objActSheet->setCellValue ($l.$zz, $va['rebate'] );
+                    //设置合并的行数
+                    $ss = $va['tic_num'] == '1' ? $zz : $zz+$va['tic_num']-1;
+                    if($va['tic_num'] > '1'){
+                        //合并单元格
+                        $objActSheet->mergeCells($a.$zz.':'.$a.$ss);
+                        $objActSheet->mergeCells($i.$zz.':'.$i.$ss);
+                        $objActSheet->mergeCells($j.$zz.':'.$j.$ss);
+                        $objActSheet->mergeCells($k.$zz.':'.$k.$ss);
+                        $objActSheet->mergeCells($l.$zz.':'.$l.$ss);
+                        $objActSheet->mergeCells($m.$zz.':'.$m.$ss);
+                    }
+                    //计算合计
+                    $number += $va['number'];
+                    $money += $va['money'];
+                    $moneys += $va['moneys'];
+                    $rebate += $va['rebate'];
+                    foreach ($va['price'] as $ke => $da) {
+                        /*详细 s*/
+                        $ticketname = ticketName($da['price_id'],1);
+                        $objActSheet->setCellValue ($b.$zz, $ticketname);
+                        $objActSheet->setCellValue ($c.$zz, $da['price']);
+                        $objActSheet->setCellValue ($d.$zz, $da['discount'] );
+                        $objActSheet->setCellValue ($e.$zz, $da['number'] );
+                        $objActSheet->setCellValue ($f.$zz, $da['money'] );
+                        $objActSheet->setCellValue ($g.$zz, $da['moneys'] );
+                        $objActSheet->setCellValue ($h.$zz, $da['rebate'] );
+                        $objActSheet->getStyle($a.$zz.':'.$m.$zz)->applyFromArray($styleArray);
+                        $zz += 1;   
+                    }
+                    $objActSheet->getStyle($a.$zz.':'.$m.$zz)->applyFromArray($styleArray);
+                }
+                $objActSheet->setCellValue ($h.$zz, '合计:' );
+                $objActSheet->setCellValue ($i.$zz, $number);
+                $objActSheet->setCellValue ($j.$zz, $money);
+                $objActSheet->setCellValue ($k.$zz, $moneys);
+                $objActSheet->setCellValue ($l.$zz, $rebate );
+                $filename = "Lub_channel_sum_".time();
+                break;
             default:
                 # code...
                 break;
