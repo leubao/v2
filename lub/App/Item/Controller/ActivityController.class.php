@@ -111,7 +111,31 @@ class ActivityController extends ManageBase{
 	 
 	 //特殊订单记录表
 	 //使用优惠券
-	 
+	 public function edit()
+	 {
+	 	$model = D('Item/Activity');
+	 	if(IS_POST){
+	 		$data = array(
+	 			'title'	=>	$pinfo['title'],
+	 			'starttime' => strtotime($pinfo['starttime']),
+	 			'endtime'	=> strtotime($pinfo['endtime']),
+	 			'status'	=> $pinfo['status'],
+	 			'is_scene'	=> implode(',',$pinfo['scene']),
+	 			'param'		=> json_encode($param),
+	 			'remark'	=> $pinfo['remark'],
+	 		);
+	 		if(D('Item/Activity')->add($data)){
+	 			$this->srun("新增成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+	 		}else{
+	 			$this->erun("新增失败!");
+	 		}
+	 	}else{
+	 		$ginfo = I('get.');
+	 		$info = $model->where(['id'=>$ginfo['id']])->find();
+	 		$info['param'] = json_decode($info['param'],true);
+	 		$this->assign('data',$info)->display();
+	 	}
+	 }
 	 
 	 //编辑活动
 	 //删除活动  订单表中增加活动标记

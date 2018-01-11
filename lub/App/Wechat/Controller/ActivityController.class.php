@@ -14,9 +14,17 @@ use Wechat\Service\Api;
 
 
 class ActivityController extends LubTMP {
+    function act()
+    {
+        $ginfo = I('get.');
+        if(empty($ginfo['actid'])){
+            $this->error('页面不存在!');
+        }
+        //获取销售计划
+    }
 	/**
      * 活动支持
-     */
+    
     function acty(){
         $ginfo = I('get.');
         if(empty($ginfo['act'])){
@@ -100,7 +108,7 @@ class ActivityController extends LubTMP {
         //TODO 加载页面模板
         $this->assign('goods_info',json_encode($goods_info))
              ->display();
-    }
+    } */
     //活动订单
     function acty_order(){
         if(IS_POST){
@@ -140,7 +148,6 @@ class ActivityController extends LubTMP {
             echo json_encode($return);
         }
     }
-
 
     public function xm()
     {

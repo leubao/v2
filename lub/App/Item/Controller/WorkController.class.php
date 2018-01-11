@@ -872,6 +872,11 @@ class WorkController extends ManageBase{
 	//座位号反查订单 二维码反查订单
 	function check_oreder(){
 		$pinfo = I('post.');
+		if(IS_POST){
+			if(empty($pinfo['sn'])){
+			 $this->erun('查询条件不能为空');
+			}
+		}
 		if($pinfo['type'] == '1'){
 			//座位号查订单
 			$map = array(

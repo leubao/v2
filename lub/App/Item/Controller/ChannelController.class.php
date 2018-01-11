@@ -152,7 +152,7 @@ class ChannelController extends ManageBase{
 	
 	//直接扣分记录
 	function points(){
-		$this->basePage('KpiWater','','status DESC');
+		$this->basePage('KpiWater',['status'=>1],'status DESC');
 		$this->display();
 	}
 	//新增扣分记录

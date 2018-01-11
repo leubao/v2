@@ -170,7 +170,6 @@ class OrderController extends ManageBase{
 				break;
 		}
 		$list = M(ucwords($table))->where(array('order_sn'=>$ginfo['sn']))->select();
-		
 		if($ginfo['type'] == '1'){
 			//一人一票
 			//读取门票列表

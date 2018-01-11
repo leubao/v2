@@ -176,7 +176,7 @@ class ReportController extends Base{
 		$today = date('Y-m-d',time());
 		$start_time = I('start_time') ? I('start_time') : $today;
 		$this->assign('sum_det',$sum_det)
-			->assign('start_time',$start_time);
+			->assign('start_time',$start_time)->assign('channel_id',$channel);
 		//当前用户
 		$uinfo = Partner::getInstance()->getInfo();
         if(!empty($channel)){//按渠道
@@ -213,7 +213,7 @@ class ReportController extends Base{
 			$ticket_fold = Report::channel_plan_fold($list);
 		}
 		$this->user_channel();
-		
+		//获取下级所有下级渠道商
 		$this->assign('data',$ticket_fold)
 			->assign('where',$where)
 			->display();
@@ -224,7 +224,8 @@ class ReportController extends Base{
 		//读取当前当前渠道商所有员工
 		$this->assign('user',$this->get_channel_user_list());
 		//获取当前用户所属渠道商
-		$this->assign('channel',$this->get_channel());
+		//$this->assign('channel',$this->get_channel());
+		$this->assign('channel',$this->get_channel_list());
 		//获取所有票型
 		$this->assign('type',$this->ticket_type());
 	}
@@ -382,10 +383,11 @@ class ReportController extends Base{
 	    $start_time = I('start_time');
         $end_time = I('end_time') ? I('end_time') : date('Y-m-d',time());
 	    $sum_det = I('sum_det');
+	    $channel = I('channel');
 	    //传递条件
 	    $this->assign('sum_det',$sum_det)
 	        ->assign('starttime',$start_time)
-             ->assign('endtime',$end_time);
+             ->assign('endtime',$end_time)->assign('channel_id',$channel);
         $export_map['datetime'] = $start_time.'至'.$end_time;
 		if (!empty($start_time) && !empty($end_time)) {
             $start_time = date("Ymd",strtotime($start_time));
@@ -413,6 +415,7 @@ class ReportController extends Base{
 		$export_map['report'] = 'channel';
 		$export_map['type']	= $sum_det;
 		S('ChannelReport'.get_user_id(),$list);
+		$this->user_channel();
 		//加载当前产品配置 TODO
 		$this->assign('data',$list)->assign('export_map',$export_map)->display();
 	}

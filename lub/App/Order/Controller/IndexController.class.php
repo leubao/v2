@@ -230,6 +230,7 @@ class IndexController extends ManageBase {
 	//按场次加载座位销售情况
 	public function plan_sales_seat()
 	{
+		$map = [];
 		$pinfo = I('post.');
 		switch ($pinfo['type']) {
 			case '1':
@@ -264,5 +265,53 @@ class IndexController extends ManageBase {
 		$this->assign('plan',$plan)
 			->assign('pinfo',$pinfo)
 			->display();
+	}
+	/**
+	 * 身份证日志
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2018-01-04
+	 * @return   [type]        [description]
+	 */
+	public function idcard_log()
+	{
+		$pinfo = I('post.');
+		//是否是活动
+		if(!empty($pinfo['active'])){
+			$map['activity_id'] = $pinfo['active'];
+		}
+		if(!empty($pinfo['idcard'])){
+			$map['idcard']	= $pinfo['idcard'];
+		}
+		//获取半年内的活动
+		$datetime = strtotime("-0 year -6 month -0 day");
+		$where = [
+			'product_id'	=>	get_product('id'),
+			'endtime'		=>	['gt',$datetime]
+		];//dump($map);
+		$activity = D('Activity')->where($where)->field('id,title')->select();
+		$this->assign('activity',$activity)->assign('pinfo',$pinfo);
+		$this->basePage('idcardLog',$map,'id DESC');
+		$this->display();
+	}
+	/**
+	 * 删除身份证号
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2018-01-04
+	 * @return   [type]        [description]
+	 */
+	public function del_idcard()
+	{
+		$ginfo = I('get.');
+		if(empty($ginfo['id'])){
+			$this->erun('参数错误...');
+		}
+		$status = D('idcardLog')->delete($ginfo['id']);
+		if($status){
+			$this->srun('删除成功',array('tabid'=>$this->menuid.MODULE_NAME));
+		}else{
+			$this->erun('删除失败...');
+		}
 	}
 }

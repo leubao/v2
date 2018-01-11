@@ -38,6 +38,14 @@
                 <input size="16" type="text" value="{$endtime}" readonly class="form-control form_date" name="end_time">
               </div>
             </div>
+            <div class="form-group">
+              <select class="form-control" name="channel">
+                <option value="">全部渠道商</option>
+                <volist name="channel" id="chan">
+                <option value="{$chan.id}" <if condition="$chan['id'] eq $channel_id">selected </if>>{$chan.name}</option>
+                </volist>
+              </select>
+            </div>
             <button type="submit" class="btn btn-default">查询</button>
           </form>
         </div>

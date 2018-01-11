@@ -10,8 +10,9 @@ namespace Wechat\Controller;
 use Common\Controller\LubTMP;
 use Wechat\Service\Wticket;
 use \Wechat\WechatReceive;
+use Libs\Service\Order;
 class IndexController extends LubTMP {
-	/**
+    /**
      * 微信消息对象
      * @var WechatReceive 
      */
@@ -21,15 +22,15 @@ class IndexController extends LubTMP {
      * @var type 
      */
     protected $openid;
-	protected function _initialize() {
+    protected function _initialize() {
         parent::_initialize();
         $this->ginfo = I('get.');
         $this->pid = $this->ginfo['pid'];
         $this->user = $this->ginfo['u'];
         $this->param = $this->ginfo['param'];
         if(empty($this->pid) && empty(session('pid'))){
-    		$this->error("参数错误");
-    	}
+            $this->error("参数错误");
+        }
         if(empty($this->pid)){
             $this->pid = session('pid');
         }else{
@@ -51,34 +52,34 @@ class IndexController extends LubTMP {
      * 微信入口
      */
     function index(){
-    	//消息回复接口
-    	$wechat = & load_wechat('Receive',$this->pid,1);
-    	//dump($wechat);
-    	/* 验证接口 */
-		if ($wechat->valid() === FALSE) {
-		    // 接口验证错误，记录错误日志
-		     // log_message('ERROR', "微信被动接口验证失败，{$wechat->errMsg}[{$wechat->errCode}]"); 
-		    // error_insert($wechat->errMsg.$wechat->errCode);
-		     // 退出程序
-		     exit($wechat->errMsg);
-		}
-		/* 获取粉丝的openid */
-		$openid = $wechat->getRev()->getRevFrom();
-		/* 记录接口日志，具体方法根据实际需要去完善 */
-		// _logs();
+        //消息回复接口
+        $wechat = & load_wechat('Receive',$this->pid,1);
+        //dump($wechat);
+        /* 验证接口 */
+        if ($wechat->valid() === FALSE) {
+            // 接口验证错误，记录错误日志
+             // log_message('ERROR', "微信被动接口验证失败，{$wechat->errMsg}[{$wechat->errCode}]"); 
+            // error_insert($wechat->errMsg.$wechat->errCode);
+             // 退出程序
+             exit($wechat->errMsg);
+        }
+        /* 获取粉丝的openid */
+        $openid = $wechat->getRev()->getRevFrom();
+        /* 记录接口日志，具体方法根据实际需要去完善 */
+        // _logs();
         $url = U('Wechat/Index/ticket',array('openid'=>$openid,'pid'=>$this->pid));
         $user = & load_wechat('User',$this->pid,1);
         // 读取微信粉丝列表
         $result = $user->getUserInfo($openid);
-		/* 分别执行对应类型的操作*/
-		switch ($wechat->getRev()->getRevType()) {
-		    // 文本类型处理
-		     case WechatReceive::MSGTYPE_TEXT:
-		          $keys = $wechat->getRevContent();
+        /* 分别执行对应类型的操作*/
+        switch ($wechat->getRev()->getRevType()) {
+            // 文本类型处理
+             case WechatReceive::MSGTYPE_TEXT:
+                  $keys = $wechat->getRevContent();
                   $wechat->text($tomsg)->reply();
-		          //return _keys($keys);
-		     // 事件类型处理
-		     case WechatReceive::MSGTYPE_EVENT:
+                  //return _keys($keys);
+             // 事件类型处理
+             case WechatReceive::MSGTYPE_EVENT:
                     $event = $wechat->getRevEvent();
                     switch (strtolower($event['event'])) {
                         // 粉丝关注事件
@@ -96,7 +97,7 @@ class IndexController extends LubTMP {
                             exit("success");
                     }
                 break;
-		 } 
+         } 
     }
     function stikcet($result = ''){
          //查询是否已经写入
@@ -187,18 +188,18 @@ class IndexController extends LubTMP {
         $proconf = cache('ProConfig');
         $proconf = $proconf[$product_id][2];
         //微信jssdk 签名包
-		$script = & load_wechat('Script',$product_id,1);
+        $script = & load_wechat('Script',$product_id,1);
 
-		// 获取JsApi使用签名，通常这里只需要传 $ur l参数
-		$jsapi = $script->getJsSign($url, $timestamp, $noncestr, $appid);
+        // 获取JsApi使用签名，通常这里只需要传 $ur l参数
+        $jsapi = $script->getJsSign($url, $timestamp, $noncestr, $appid);
 
-		// 处理执行结果
-		if($jsapi===FALSE){
-		    // 接口失败的处理
-		    echo $script->errMsg;
-		}else{
-		    // 接口成功的处理
-		}
+        // 处理执行结果
+        if($jsapi===FALSE){
+            // 接口失败的处理
+            echo $script->errMsg;
+        }else{
+            // 接口成功的处理
+        }
 
         $this->assign('wechat',$proconf[$product_id][1]);
         $this->assign('jsapi',json_encode($jsapi))->assign('pid',$product_id)->assign('user',session('user'));
@@ -217,12 +218,26 @@ class IndexController extends LubTMP {
            Wticket::xm_tologin($this->ginfo);
            $user = session('user');
         }
+        $actid = 25;
         //判断是否已经在登录
-        $this->check_login(U('Wechat/Index/acty',array('pid'=>$this->pid,'u'=>$this->user,'param'=>$this->param)));
+        $this->check_login(U('Wechat/Index/acty',array('pid'=>$this->pid,'u'=>$this->user,'actid'=>$actid,'param'=>$this->param)));
         $plan = Wticket::getplan($this->pid);
         $param = array('pid'=>$this->pid);
         $goods_info = array_merge($plan,$user);
+        //获取活动
+        $info = D('Activity')->where(['id'=>$actid])->find();
+        $info['param'] = json_decode($info['param'],true);
+        //根据活动类型加载
+        switch ($info['type']) {
+            case '3':
+                $idcard = $info['param']['info']['card'];
+                $this->assign('idcard',json_encode($idcard));
+                break;
+            default:
+                break;
+        }
 
+        $this->assign('actid',$actid);
         $this->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('param',$param)->display();
     }
     /**
@@ -394,7 +409,7 @@ class IndexController extends LubTMP {
     //注册二维码
     function reg_code()
     {
-    	$user = session('user');
+        $user = session('user');
         $uid = $user['user']['id'];
         if(empty($uid) || $uid == '2'){
             $this->error("您还没有登录",U('Wechat/index/login'));
@@ -611,7 +626,7 @@ class IndexController extends LubTMP {
                 $this->error("授权失败...");
             }
             //查询是否已经绑定
-            $this->assign('data',$user['user']['openid'])->assign('type',$status)->display();
+            $this->assign('openid',$user['user']['openid'])->assign('type',$status)->display();
         }
     }
     /**
@@ -683,8 +698,8 @@ class IndexController extends LubTMP {
             if($this->check_card($pinfo['info']['param'][0]['id_card'])){
                 //判断数据的完整性
                 $uinfo = session('user');
-                
-                $sn = \Libs\Service\Order::mobile($info,$uinfo['user']['scene'],$uinfo['user']);
+                $order = new Order();
+                $sn = $order->mobile($info,$uinfo['user']['scene'],$uinfo['user']);
                 if($sn != false){
                    // dump(U('Wechat/Index/order',array('sn'=>$sn,'pid'=>$this->pid)));
                     $return = array(
@@ -752,7 +767,8 @@ class IndexController extends LubTMP {
             $info = $_POST['info'];
             //判断数据的完整性
             $uinfo = session('user');
-            $sn = \Libs\Service\Order::mobile($info,$uinfo['user']['scene'],$uinfo['user']);
+            $order = new Order();
+            $sn = $order->mobile($info,$uinfo['user']['scene'],$uinfo['user']);
             if($sn != false){
                // dump(U('Wechat/Index/order',array('sn'=>$sn,'pid'=>$this->pid)));
                 $return = array(
@@ -787,19 +803,19 @@ class IndexController extends LubTMP {
                     }
                     //$money = 1;
                     $proconf = cache('ProConfig');
-        			$proconf = $proconf[$this->pid][2];
+                    $proconf = $proconf[$this->pid][2];
                     $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
                     $product_name = product_name($this->pid,1);
                     $pay = & load_wechat('Pay',$this->pid);
-					$prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
+                    $prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
                     if($prepayid){
                         $options = $pay->createMchPay($prepayid);
                     }else{
                         // 创建JSAPI签名参数包，这里返回的是数组
                         $this->assign('error',$pay->errMsg.$pay->errCode);
                     }
-					$this->assign('jsapi',$prepayid)->assign('wxpay',$options);
+                    $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                 }
             }
             $this->assign('data',$info)->display();
@@ -813,7 +829,8 @@ class IndexController extends LubTMP {
             //渠道商  支付且开始排座
             $oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn']))->relation(true)->find();
             if(empty($info) || empty($oinfo)){echo json_encode(array('statusCode' => '300','msg' => $oinfo));return false;}
-            $status = \Libs\Service\Order::mobile_seat($info,$oinfo);
+            $order = new Order();
+            $status = $order->mobile_seat($info,$oinfo);
             $product_name = product_name($oinfo['product_id'],1);
            // 支付成功，发送模板消息
             if($status != false){
@@ -865,7 +882,8 @@ class IndexController extends LubTMP {
             //渠道商  支付且开始排座
             $oinfo = D('Item/Order')->where(array('order_sn'=>$info['sn']))->relation(true)->find();
             if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300','msg' => "订单获取失败")));return false;}
-            $status = \Libs\Service\Order::mobile_seat($info,$oinfo);
+            $order = new Order();
+            $status = $order->mobile_seat($info,$oinfo);
             // 支付成功，发送模板消息
             if($status != false){
                 //构造模板消息
@@ -994,66 +1012,66 @@ class IndexController extends LubTMP {
         //TODO  回传模板消息发送状态
     }
     /*微信API 相关处理  后期完善
-	文本消息
+    文本消息
     */
     function _keys($keys){
-	    global $wechat;
+        global $wechat;
         error_insert("111微信被动接口验证失败");
-	    // 这里直接原样回复给微信(当然你需要根据业务需求来定制的)
-	    return $wechat->text($keys)->reply();
-	}
-	/**
-	 * 事件消息
-	 * @param  [type] $event [description]
-	 * @return [type]        [description]
-	 */
-	function _event($event) {
-	    global $wechat;
-	    switch ($event) {
-	        // 粉丝关注事件
-	        case 'subscribe':
-	           return $wechat->text('欢迎关注公众号dd！')->reply();
-	        // 粉丝取消关注
-	        case 'unsubscribe':
-	            exit("success");
-	        // 点击微信菜单的链接
-	        case 'click': 
-	            return $wechat->text('你点了菜单链接！')->reply();
-	        // 微信扫码推事件
-	        case 'scancode_push':
-	        case 'scancode_waitmsg':
-	                $scanInfo = $wechat->getRev()->getRevScanInfo();
-	                return $wechat->text("你扫码的内容是:{$scanInfo['ScanResult']}")->reply();
-	        // 扫码关注公众号事件（一般用来做分销）
-	        case 'scan':
-	             return $wechat->text('欢迎关注公众号！')->reply();
-	    }
-	}
-	/**
-	 * 图片消息
-	 * @return [type] [description]
-	 
-	function _images(){
-	    //global $wechat;
-	　  //$wechat 中有获取图片的方法
-	    //return $wechat->text('您发送了一张图片过来')->reply();
-	}*/
-	/**
-	 * 位置消息
-	 */
-	function _location(){
+        // 这里直接原样回复给微信(当然你需要根据业务需求来定制的)
+        return $wechat->text($keys)->reply();
+    }
+    /**
+     * 事件消息
+     * @param  [type] $event [description]
+     * @return [type]        [description]
+     */
+    function _event($event) {
+        global $wechat;
+        switch ($event) {
+            // 粉丝关注事件
+            case 'subscribe':
+               return $wechat->text('欢迎关注公众号dd！')->reply();
+            // 粉丝取消关注
+            case 'unsubscribe':
+                exit("success");
+            // 点击微信菜单的链接
+            case 'click': 
+                return $wechat->text('你点了菜单链接！')->reply();
+            // 微信扫码推事件
+            case 'scancode_push':
+            case 'scancode_waitmsg':
+                    $scanInfo = $wechat->getRev()->getRevScanInfo();
+                    return $wechat->text("你扫码的内容是:{$scanInfo['ScanResult']}")->reply();
+            // 扫码关注公众号事件（一般用来做分销）
+            case 'scan':
+                 return $wechat->text('欢迎关注公众号！')->reply();
+        }
+    }
+    /**
+     * 图片消息
+     * @return [type] [description]
+     
+    function _images(){
+        //global $wechat;
+    　  //$wechat 中有获取图片的方法
+        //return $wechat->text('您发送了一张图片过来')->reply();
+    }*/
+    /**
+     * 位置消息
+     */
+    function _location(){
 
-	}
-	/**
-	 * 其它消息
-	 */
-	function _default(){
+    }
+    /**
+     * 其它消息
+     */
+    function _default(){
 
-	}
-	/**
-	 * 日志
-	 */
-	function _logs(){
+    }
+    /**
+     * 日志
+     */
+    function _logs(){
 
-	}
+    }
 }

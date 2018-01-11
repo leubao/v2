@@ -307,6 +307,8 @@
       name = $("#name").val().replace(/ /g,''),
       phone = $("#phone").val(),
       card = $("#card").val().replace(/ /g,''),
+      activety_area = {$idcard},
+      activety = {$actid},
       msg = '';
       if(plan.length == 0){
         msg = "请选择销售日期!";
@@ -320,19 +322,19 @@
       if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(phone)){
         msg = "手机号码格式不正确!";
       }
-      console.log(/(17|18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|Xx)$/i.test(card));
-      console.log(check_ID(card));
-      if(/^\d{6}(17|18|19|20)?\d{2}(0[1-9]|1[012])(0[1-9]|[12]\d|3[01])\d{3}(\d|Xx)$/i.test(card) == false || check_ID(card) == false){
-        msg = "身份证号码输入有误!";
-      }else if(/^3502[0-9Xx]{14}$/.test(card) == false){
-        //3502
-        msg = "非常抱歉,此次活动只面向厦门地区的游客!";
+      //判断身份证是否可用
+      console.log(check_idcard_area(card,activety_area,activety));
+      if(!check_ID(card)){
+        $.toast('身份证号有误!');
+        return false;
+      }else if(!check_idcard_area(card,activety_area,activety)){
+        $.toast('该地区不参加活动或用户已参加过活动!');
+        return false;
       }
       if(msg != ''){$.toast(msg);return false;}{post_server(2,card);}
     });
     function check_ID(code) {
       code = code.split('');
-      //∑(ai×Wi)(mod 11)
       //加权因子
       var factor = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 ];
       //校验位
@@ -375,9 +377,9 @@
             if(data.statusCode == "200"){
               /*获取支付相关数据*/
               pay = '{"cash":0,"card":0,"alipay":0}';
-              param = '{"remark":"'+remark+'","id_card":"'+card+'","activity":"1","settlement":"'+globals['user']['epay']+'"}';
+              param = '{"remark":"'+remark+'","id_card":"'+card+'","activity":"'+activety+'","settlement":"'+globals['user']['epay']+'"}';
               crm = '{"guide":"'+globals['user']['guide']+'","qditem":"'+globals['user']['qditem']+'","phone":"'+phone+'","contact":"'+name+'","memmber":"'+globals['user']['memmber']+'"}';
-              toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}';
+              toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"idcard":"'+card+'","price":'+price+',"num":'+num+'}';
               postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
               /*提交到服务器**/
               $.ajax({
@@ -400,9 +402,9 @@
       }); 
     }
   });
-  var text = "<p style='text-align:left'>1、本票型针对厦门市民票，下单时必须输入厦门身份证号。<br>"+
-  "2、活动期间一个身份证号一次最多可购三张票。门票一经售出，恕不退换，下单时请慎重。<br >"+
-  "3、如果是厦门市民但身份证号非厦门号段，请至人工窗口购买。<br>"+
+  var text = "<p style='text-align:left'>1、本票型针对南平地区居民票，下单时必须输入南平身份证号。<br>"+
+  "2、活动期间一个身份证号一次最多可购一张票。门票一经售出，恕不退换，下单时请慎重。<br >"+
+  "3、如果是南平地区居民但身份证号非南平号段，请至人工窗口购买。<br>"+
   "4、本系统根据订单顺序安排位置，不能保证位置一定相连，如有位置需求，请至人口窗口购买。<br>"+
   "5、1.2米以下儿童免票进场不占座，1.2米以上请购成人票。</p>";
   $(document).on('click','.open-goods-cart', function () {
@@ -410,6 +412,41 @@
       $.popup('.goods-cart');
     });
   });
+  function check_idcard_area(code,area,actid) {
+    var length = 0,retu = '';
+    for (var i = 0; i < area.length; i++) {
+        length = area[i].length;
+        var site = code.substr(0,length);
+        //var log = 'length:'+length+'code:'+code+'site:'+site+'item:'+area[i]+'area:'+area.length;
+        //console.log(log);
+        //console.log(site === area[i]);
+        if(site === area[i]){
+          //发送到服务器验证 TODO
+          $.ajax({
+            url: 'index.php?g=Api&m=Check&a=public_check_idcard',
+            type: 'GET',
+            dataType: 'json',
+            async:false,
+            data: {'ta': '31','idcard': code, 'actid': actid},
+            error: function(){
+              $.toast('服务器请求超时，请检查网络...');
+            },
+            success:function(rdata){
+              if(rdata.status){
+                retu = true;
+              }else{
+                retu = false;
+              }
+            }
+          });
+        }
+    }
+    if(retu){
+      return true;
+    }else{
+      return false;
+    }
+}
 </script>
 <script id="plantpl" type="text/html">
 {{# for(var i = 0, len = d.plan.length; i < len; i++){ }}
