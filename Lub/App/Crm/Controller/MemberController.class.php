@@ -129,7 +129,7 @@ class MemberController extends ManageBase{
 			$rule = [
 
 			];
-			$info['rule']['year'] = 
+			//$info['rule']['year'] = 
 			$status = $model->where($map)->setField('rule',json_encode($rule));
 			//rule
 		}else{
@@ -189,7 +189,7 @@ class MemberController extends ManageBase{
 			//个人
 			$db = "User";
 		}
-		$this->basePage($db,$map,array('status'=>"DESC","id"=>"DESC"));
+		$this->basePage('Member',$map,array('update_time'=>"DESC","id"=>"DESC"));
 		$this->assign ('groupid',$groupid)
 			 ->assign('type',$type)
 			 ->assign('map',$map)
@@ -244,6 +244,7 @@ class MemberController extends ManageBase{
 			$map = array("id"=>$id);
 			$model = D('Crm/Member');
 			$info = $model->where($map)->find();
+			$this->assign('data',$info);
 			$this->display();
 		}else{
 			$this->erun('参数错误!');

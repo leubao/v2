@@ -351,7 +351,7 @@ class FinancialController extends ManageBase{
 		$map['product_id'] = get_product('id');
 		$map['status'] = '1';
    		$price = F('TicketType'.$map['product_id']);
-        $list = $db->where($map)->select();
+        $list = $db->where($map)->field('price,price_id,number,subsidy,discount')->select();
         foreach ($list as $k => $v) {
             $data['price'][$v['price_id']]['name'] = $price[$v['price_id']]['name'];
             $data['price'][$v['price_id']]['price'] = $price[$v['price_id']]['price'];

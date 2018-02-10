@@ -75,6 +75,19 @@ class ProductController extends Base{
 	function get_date_plan(){
 		$pinfo = json_decode($_POST['info'],true);
 		$plantime = strtotime($pinfo['plantime']);
+		$pro_conf = $this->pro_conf($pinfo['product']);
+		//开启预约
+		if($pro_conf['channel_pre_team'] > 0){
+			//读取可预约日期
+			$pretime = strtotime(date('Ymd',strtotime('+'.$pro_conf['channel_pre_team'].' day')));
+			if($plantime < $pretime){
+				$return = array(
+					'statusCode'=>'300',
+					'msg'	=>	'当前日期不可销售'
+				);
+				die(json_encode($return));
+			}
+		}
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$pinfo['product']))->field('id,starttime,endtime,games,param,product_type')->select();
 		foreach ($plan as $k => $v) {
 			$param = unserialize($v['param']);
@@ -95,7 +108,7 @@ class ProductController extends Base{
 					'pId'	=>	'1',
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
-					'name'  =>  "青龙大瀑布",
+					'name'  =>  "梦里老家演艺小镇",
 				);
 			}
 			if($v['product_type'] == '3'){
@@ -134,6 +147,7 @@ class ProductController extends Base{
 		if(empty($pinfo)){
 			$this->error('参数错误!');
 		}
+
 		$uInfo = Partner::getInstance()->getInfo(); //当前登录用户
 		//判断是否是政企渠道用户
 		if($uInfo['group']['type'] == '3'){
@@ -148,7 +162,6 @@ class ProductController extends Base{
 		
 		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,$pinfo['sale']);
 		*/
-
 		//常规根据计划、区域、产品类型获取销售价格
 		if($pinfo['method'] == 'general'){
 			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale']);

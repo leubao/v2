@@ -54,7 +54,7 @@
             <td>身份证号段:</td><td colspan="3"><input type="text" name="card" value="" size="45"><span class="remark">身份证号前6位,多个区域用“|”分隔开</span></td>
           </tr>
           <tr>
-            <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="">
+            <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="{$data.}">
     <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
           <tr>

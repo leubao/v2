@@ -530,6 +530,7 @@ $("#preteam").bind("click",function(){
 		car = $("#car").val(),
 		teamno = $("#teamno").val(),
 		plan = $('#planID').val(),
+		teamtype = $('#teamtype').val(),
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
@@ -554,6 +555,7 @@ $("#preteam").bind("click",function(){
 	if(teamno == ''){
 		rstr += "旅行团号不能为空!";
 	}
+	if(teamtype == ''){rstr += "请选择团队类型!";}
 	if(!remark){
 		remark = "空..";
 	}
@@ -586,7 +588,7 @@ $("#preteam").bind("click",function(){
 			  pre	= 1,
 			  param = "";/*付款但不排座*/
 		  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","teamno":"'+teamno+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","teamno":"'+teamno+'","teamtype":"'+teamtype+'","settlement":"'+USER_INFO.group.settlement+'"}';
 		  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
 		
 		  /*提交到服务器*/
@@ -603,7 +605,7 @@ $("#preteam").bind("click",function(){
 				$("#tomoney").attr('value',total);
 				$("#sn").attr('value',data.sn);
 			  }else{
-				$("#error").text("预约失败!");
+				$("#error").text(data.msg);
 				$("#myModal2").modal('show');  //出票失败的提示
 			  }
 			}

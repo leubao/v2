@@ -38,6 +38,9 @@
         <if condition="!empty($data['info']['param']['0']['car'])">
           [ 车牌号: {$data.info.param.0.car} ] 
         </if>
+        <if condition="!empty($data['info']['param']['0']['teamtype'])">
+          [ 团队类型: {$data.info.param.0.teamtype|teamtype} ] 
+        </if>
         </td>
       </tr>
       </if>

@@ -46,14 +46,14 @@ function scenic_drifting_plan(plantime,type,product,actid){
                    $("#tablelist").html(error_msg); 
                }
             }else{
-                layer.msg("远端服务器连接出错!");
+                layer.msg(rdata.msg);
             }
         }
     });
 }
 //加载价格
 function getprice(plan,type,tooltype){
-    var data = 'info={"area":'+plan+',"type":'+type+',"sale":2,"method":general,"plan":'+plan+'}',
+    var data = 'info={"area":'+plan+',"type":'+type+',"seale":2,"method":"general","plan":'+plan+'}',
         content = '',
         show_price = '',
         url = 'index.php?g=Home&m=Product&a=quickPrice';

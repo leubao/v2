@@ -18,7 +18,7 @@ class ProductModel extends Model{
 	
 	protected $_auto = array(
 		array('createtime',time,1,'function'),
-		array('idCode','genRandomString', 1, 'function', 6), //新增时自动生成识别码
+		//array('idCode','genRandomString', 1, 'function', 6), //新增时自动生成识别码
 	);
 	
 	/**
@@ -39,14 +39,17 @@ class ProductModel extends Model{
 	/**
      * 插入成功后的回调方法
      */
-    protected function _after_insert() {
+    protected function _after_insert($data) {
+        //更新产品编码
+        $code = $data['type'].date('YmdH').$data['id'];
+        $this->where(['id'=>$data['id']])->setField('idCode',$code);
         $this->product_cache();
     }
     /**
      *更新成功后的回调方法
      *
      */
-     protected function _after_update(){
+     protected function _after_update($data){
      	$this->product_cache();
      }
 }

@@ -27,6 +27,7 @@ class IndexController extends ManageBase{
 		$groupid = I('id');    //客户分组id
 		$type = I('type');
 		$name = I('name');
+		$phone = I('phone');
 		$level = I('level');//级别
 		$status = I('status');
 		$product_id = get_product('id');
@@ -41,6 +42,9 @@ class IndexController extends ManageBase{
 				$map['nickname'] = array("like","%".$name."%");
 			}
 			$this->assign("name",$name);
+		}
+		if(!empty($phone)){
+			$map['phone'] = $phone;
 		}
 		$map['level'] = $level ? $level : '16';
 		if(!empty($status)){
@@ -168,9 +172,14 @@ class IndexController extends ManageBase{
 	 */
 	function detail(){
 		$id = I("get.id");  //客户id
-		$condition = array("id"=>$id);
-		$list = Operate::do_read('Crm',0,$condition);
-		$this->assign("data",$list);
+		$type = I("get.type");
+		if($type == 4){
+			$info = D('User')->where(['id'=>$id])->find();
+		}else{
+			$info = D('Crm')->where(['id'=>$id])->find();
+		}
+		$this->assign("data",$info);
+		$this->assign('type',$type);
 		$this->display();
 	}
 	/**

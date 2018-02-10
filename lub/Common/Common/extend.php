@@ -1043,7 +1043,7 @@ function crmName($param,$type=NULL){
    /*获取渠道商余额
     *@param $param int 渠道商ID 1企业 4个人
    */
-   function balance($param,$type = '1'){
+    function balance($param,$type = '1'){
         if(empty($param)){return '0.00';}
         if($type == '1'){
             //渠道商客户
@@ -1061,7 +1061,7 @@ function crmName($param,$type=NULL){
             load_redis('lpush','preEvent','money_low|'.$param);
         }
         return $return;
-   }
+    }
    /**
     * 获取渠道商集合
     * @param $param int id
@@ -2085,6 +2085,37 @@ function industry($param,$type = ''){
     }else{
        echo $return;
     }   
+}
+/*
+*预约团队类型
+*/
+function teamtype($param = null)
+{
+    switch ($param) {
+        case 1:
+            echo "含行程";
+            break;
+        case 2:
+            echo "自费加点";
+            break;
+        case 3:
+            echo "直通车";
+            break;
+    }
+}
+//根据日期计算生日
+function getAgeByID($id){ 
+    //过了这年的生日才算多了1周岁 
+    if(empty($id)) return ''; 
+    $date = strtotime(substr($id,6,8));
+    //获得出生年月日的时间戳 
+    $today = strtotime('today');
+    //获得今日的时间戳 111cn.net
+    $diff = floor(($today-$date)/86400/365);
+    //得到两个日期相差的大体年数 
+    //strtotime加上这个年数后得到那日的时间戳后与今日的时间戳相比 
+    $age = strtotime(substr($id,6,8).'+'.$diff.'years') > $today ? ($diff+1) : $diff;
+    echo $age; 
 }
 /**
  * 模拟请求

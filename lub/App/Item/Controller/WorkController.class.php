@@ -14,6 +14,7 @@ use Libs\Service\Operate;
 use Libs\Service\Refund;
 use Libs\Service\Sms;
 use Libs\Service\CheckStatus;
+use Common\Model\Model;
 class WorkController extends ManageBase{
 	protected function _initialize() {
 		parent::_initialize();
@@ -312,6 +313,7 @@ class WorkController extends ManageBase{
 			$planname = I('plan_name');
 			$channel = I('channel_id');
 			$channelname = I('channel_name');
+			$phone = I('phone');
 			$map = array(
 				'product_id'=>get_product('id'),
 				'status'=>array('in','5,6'),
@@ -324,6 +326,9 @@ class WorkController extends ManageBase{
 			}
 			if(!empty($sn)){
 				$map['order_sn'] = $sn;
+			}
+			if(!empty($phone)){
+				$map['phone'] = $phone;
 			}
 			//$map['createtime'] = array('GT', strtotime(date("Ym",time())));//过滤已过期的订单
 		}else{
@@ -342,9 +347,68 @@ class WorkController extends ManageBase{
 	{
 		if(IS_POST){
 			//修正数量
-			M('OrderData')->where(array('order_sn'=>$sn))->setField('number',$number);
+			$pinfo = I('post.');
+			//读取订单
+			foreach ($pinfo['priceid'] as $ke => $va) {
+				$new[$va] = (int)$pinfo['price_num'][$ke];
+			}
+			$data = $this->getOrder($pinfo['sn']);
+			if($data == false){
+				$this->erun("未找到相应订单...");
+			}
+			//dump($data);
+			//更新数量
+			$oinfo = $data['info'];
+			$info = $oinfo['info'];
+			foreach ($info['data']['area'] as $k => $v) {
+				$newArea[$v['priceid']] = [
+					'areaId'	=>	$v['areaId'],
+					'priceid'	=>	$v['priceid'],
+					'price'		=>	$v['price'],
+					'num'		=>	$new[$v['priceid']],
+					'idcard'	=>	$v['idcard']
+				];
+			}
+			$order = new \Libs\Service\Order();
+			$areaSeat = $order->area_group($newArea,$oinfo['product_id'],$info['param'][0]['settlement'],$oinfo['product_type'],$info['child_ticket']);
+			//更新订单
+			$newInfo = [
+				'subtotal'		=> $areaSeat['moneys'],
+				'checkin'		=> $info['checkin'],
+				'data'			=> $areaSeat,
+				'child_ticket'	=> $info['child_ticket'],
+				'crm'			=> $info['crm'],
+				'pay'			=> $info['pay'],				
+				'param'			=> $info['param'],	
+			];
+			$newData = [
+				'number'		=> $areaSeat['num'],
+				'money' 		=> $areaSeat['money'],
+			];
+			$model = new Model();
+			$model->startTrans();
+
+			$up_order = $model->table(C('DB_PREFIX').'order')->where(['order_sn' => $pinfo['sn']])->save($newData);
+			$states = $model->table(C('DB_PREFIX').'order_data')->where(['order_sn' => $pinfo['sn']])->setField('info',serialize($newInfo));
+			if($up_order && $states){
+				$model->commit();//提交事务
+				$this->srun("核准成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$model->rollback();//事务回滚
+				$this->erun('核准失败!');
+				return false;
+			}
+			//dump($newArea);
+			//修改日志
+			$editOrderLog = [
+				'user_id'	=>	get_user_id(),
+				'order_sn'	=>	$pinfo['sn'],
+				'createtime'=>	time(),
+				'status'	=>	''
+			];
+			//M('OrderData')->where(array('order_sn'=>$sn))->setField('number',$number);
 		}else{
-			$sn = I('sn');
+			$sn = I('id');
 			if(empty($sn)){
 				$this->erun('参数错误!');
 			}
@@ -943,4 +1007,106 @@ class WorkController extends ManageBase{
 			->assign('sale',unserialize($seat['sale']))
 			->display();
 	}
+	//年卡办理
+	function year_card(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			$model = D('Item/Member');
+			//判断身份证号是否唯一
+			if($model->where(['idcard'=>$pinfo['idcard']])->field('id')->find()){
+				$this->erun("添加失败,该身份证已注册");
+				return false;
+			}
+			$data = [
+				'source'	=>  '1',
+				'no-number' =>  date('YmdH').genRandomString(6,1),
+				'idcard'	=>	$pinfo['idcard'],
+				'nickname'	=>	$pinfo['content'],
+				'phone'		=>	$pinfo['phone'],
+				'user_id'	=>	get_user_id(),//窗口时写入办理人
+				'thetype'	=>	$pinfo['type'], //凭证类型
+				'remark'	=>	$pinfo['remark'],//备注
+				'status'	=>	'1',
+			];
+			try{ 
+				$model->token(false)->create($data);
+				$model->add();
+			}catch(Exception $e){ 
+				$this->erun("添加失败:".$e);
+			}
+			$this->srun('办理成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+		}else{
+			$this->display();
+		}
+	}
+	//年卡临时凭证
+	function year_ticket(){
+		if(IS_POST){
+			//根据身份证或手机号 查询年卡然后打印  打印日期 人数
+			$pinfo = I('post.');
+			if(empty($pinfo['phone']) && empty($pinfo['card'])){
+				$this->erun("请输入查询条件...");
+			}
+			if(!empty($pinfo['phone'])){
+				$where['phone'] = $pinfo['phone'];
+			}
+			if(!empty($pinfo['card'])){
+				$where['idcard'] = $pinfo['card'];
+			}
+			$list = D('Crm/Member')->where($where)->field('openid,password,verify,thetype,remark,user_id,create_time',true)->select();
+			$this->assign("data",$list);
+			//打印凭证
+		}
+		$this->display();
+	}
+	//打印临时凭证
+	function print_year(){
+		//读取信息
+		$id = I('get.id',0,intval);
+		if(empty($id)){
+			$this->erun('参数错误!');
+		}
+
+		$info = D('Crm/Member')->where(['id'=>$id,'status'=>1])->field('id,idcard.no-number')->find();
+		if(empty($info)){
+			$this->erun('未找到有效年票!');
+		}
+		//组合二维码信息
+		$code = \Libs\Service\LubToken::createToken();
+		//写入临时入园库
+		$sn = get_order_sn();
+		$data = [
+			'sn'		=> $sn,
+			'code' 		=> $code,
+			'member_id'	=> $info['id'],
+			'status'	=> 2,//已售出可检票
+			'user_id'   => get_user_id(),
+			'plantime'  => date('Ymd'),
+			'createtime'=> time(),
+		];
+		D('Temporary')->add($data);
+		$return = [
+			'code'		=>	$code,
+			'sn'		=>	$sn,
+			'plantime'	=>	date('Y-m-d'),
+			'number'	=>	1,
+		];
+		//身份证过来 直接比对会员信息库
+		
+		//二微码过来 比对临时凭证表
+	}
+	//年卡入园记录
+	function year_garden_log(){
+		//记录入园日志
+		$data = [
+			'data'		=>	'',//凭证数据
+			'thetype'	=>	'',//凭证类型
+			'createtime'=>  '',//入园日期时间
+		];
+		D('MemberLog')->add($data);
+		//更新入园次数
+		D('Item/Member')->where(['idcard'=>$idcard])->setInc('number',1);
+		return true;
+	}
+	//打开订单详情,直接编辑区域数量
 }

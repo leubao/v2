@@ -56,7 +56,7 @@ class YearCard extends \Libs\System\Service {
         if(checkIdCard($idcard)){
             $model = D('Crm/Member');
             $map = [
-                'cardid' => $idcard,
+                'idcard' => $idcard,
                 'status' => 1,
             ];
             $count = $model->where($map)->count();
@@ -74,14 +74,25 @@ class YearCard extends \Libs\System\Service {
                'sex'      =>  $sex,//第17位 奇数男 偶数女
                'sexs'     =>  $sex%2 == 0 ? '女' : '男'
             ];
-            //读取年卡配置
-            $year = D('Crm/MemberType')->where(['id'=>1])->cache('year_card',3600)->getField('rule');
+            //读取年卡配置->cache('year_card',3600) TODO 缓存配置
+            $year = D('Crm/MemberType')->where(['id'=>1])->getField('rule');
             $rule = json_decode($year,true);
             $area = explode(',',$rule['area']);
-            if(in_array($card['province'].$card['city'],$area)){
+            $status =  false;
+            foreach ($area as $k => $v) {
+               //读取长度
+                $length = mb_strlen($v);
+                $constant = substr($idcard,0,$length);
+                //比较
+                if(in_array($constant,$area)){
+                    $status = true;
+                    return true;
+                }
+            }
+            if($status){
                 return true;
             }else{
-            	$this->error = '非常抱歉,您所在的区域暂不能办理年卡';
+                $this->error = '非常抱歉,您所在的区域暂不能办理年卡';
                 return false;
             }
         }else{

@@ -15,15 +15,11 @@ use Libs\Service\Report;
 class TempController extends ApiBase {
   public function index()
   {
-    $a = '1';
-    $post = array(
-        'appid' => '39989',
-        'appkey'=> 'c922b084221663d43ef62e54142923a7',
-      );
-      $post['data'] = json_encode($post);
-      dump($post);
-    dump(empty($a));
-    dump(isset($a));
+        $list = D('IdcardLog')->field('idcard')->order('id desc')->select();
+        foreach ($list as $key => $value) {
+          $ab[] = $value['idcard'];
+        }
+        dump(array_count_values($ab));
   }
         //测试计划接入
     function c_plan(){
@@ -435,6 +431,15 @@ class TempController extends ApiBase {
         dump($data);
       }
       
+    }
+    public function tianchong()
+    {
+        for($i;$i<500;$i++){
+          load_redis('lpush','check_order_41',get_order_sn('891'));
+        }
+    }
+    function sy(){
+      \Libs\Service\Check::check_ticket_order_tag();
     }
     //生成结算数据
     public function js($starttime = '', $endtime = '')

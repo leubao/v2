@@ -26,11 +26,12 @@
           <td>数量</td>
           <td>{$data.number}</td>
         </tr>
+        <!--
         <tr>
           <td>金额</td>
           <td colspan="2">{$data.money|num_to_rmb}</td>
           <td>{$data.money|format_money}</td>
-        </tr>
+        </tr>-->
         <tr>
           <td>取票人</td>
           <td>{$data.take}</td>
@@ -38,12 +39,21 @@
           <td>{$data.phone}</td> 
         </tr>
         <tr>
+          <td>开票人</td>
+          <td>{$user_id|userName}</td>
+          <td></td>
+          <td></td> 
+          
+        </tr>
+        <tr>
           <td>备注</td>
           <td colspan="3">{$data.remark}</td>
         </tr>
         <tr>
           <td>团队信息</td>
-          <td colspan="3">团号:{$param.0.teamno}; 车牌号:{$param.0.car}; 导游:{$crm.0.contact}; 联系电话:{$crm.0.phone};</td>
+          <td colspan="3">团号:{$param.0.teamno}; 车牌号:{$param.0.car}; 导游:{$crm.0.contact}; 联系电话:{$crm.0.phone};<if condition="!empty($param['0']['teamtype'])">
+          [ 团队类型: {$param.0.teamtype|teamtype} ] 
+        </if></td>
         </tr>
       </tbody>
     </table>
@@ -77,7 +87,7 @@
       <button type="button" class="btn-close" data-icon="close">关闭</button>
     </li>
     <if condition="$data['status'] eq '9' ">
-    <li><a type="button" class="btn btn-info" href="javascript:$.printBox('w_team_report_print')"><i class="fa fa-print"> 打印报表</i></a></li>
+    <li><a type="button" class="btn btn-info" href="javascript:$.printBox('w_team_report_print')"><i class="fa fa-print"> 打印回单</i></a></li>
     </if>
     </ul>
 </div>

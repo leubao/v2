@@ -225,7 +225,7 @@ class IndexController extends ManageBase {
 				$ticket[] = $va;
 			}
 		}
-		$this->assign('data',$info)->assign('ticket',$ticket)->assign('param',$detail['param'])->assign('crm',$detail['crm'])->display();
+		$this->assign('data',$info)->assign('user_id',get_user_id())->assign('ticket',$ticket)->assign('param',$detail['param'])->assign('crm',$detail['crm'])->display();
 	}
 	//按场次加载座位销售情况
 	public function plan_sales_seat()

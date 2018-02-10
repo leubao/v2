@@ -75,6 +75,7 @@ function kpi_fill($param = null){
 
     }
 }
+
 /**
  * 记录窗口售票代收款
  * @param  订单内容 $info

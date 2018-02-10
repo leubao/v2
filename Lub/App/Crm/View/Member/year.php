@@ -13,25 +13,25 @@
   <table data-toggle="tablefixed" data-width="100%">
     <thead>
       <tr>
-        <th width="30" align="center">编号</th>
+        <th width="100" align="center">编号</th>
         <th width="100" align="center">姓名</th>
-        <th width="100">性别</th>
-        <th width="100">年龄</th>
+        <th width="100" align="center">办理方式</th>
+        <th width="100" align="center">年龄</th>
         <th width="60" align="center">入园数</th>
         <th width="60" align="center">状态</th>
-        <th width="130" align="center">注册时间</th>
+        <th width="130" align="center">入园时间</th>
       </tr>
     </thead>
     <tbody>
       <volist id="vo" name="data">
       <tr data-id="{$vo['id']}">
-        <td>{$i}</td>
-        <td>{$vo['name']}</td>
-        <td>{$vo['sex']}</td>
-        <td>{$vo['count']}</td>
+        <td align="center"><a data-toggle="dialog" href="{:U('Crm/Member/public_member',array('id'=>$vo['id'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="年卡详情">{$vo.no-number}</a></td>
+        <td align="center">{$vo['nickname']}</td>
+        <td align="center"><if condition="$vo['source'] eq 5"> 自助办理 <else /> 窗口办理 </if></td>
+        <td align="center">{$vo['idcard']|getAgeByID}</td>
+        <td align="center">{$vo['number']}</td>
         <td align="center">{$vo['status']|status}</td>
-        <td align="center">{$vo['create_time']|datetime}</td>
-        <td align="center"></td>
+        <td align="center">{$vo['update_time']|datetime}</td>
       </tr>
     </volist>
     </tbody>

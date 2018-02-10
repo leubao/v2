@@ -37,6 +37,7 @@
     </ul>
   </div>
 </form>
+
 <if condition="$type eq '1' OR $type eq '3'">
 <div class="panelBar">
   <ul class="toolBar">

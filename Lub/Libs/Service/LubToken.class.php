@@ -24,7 +24,7 @@ class LubToken extends \Libs\System\Service {
     {
     	$param = $param ? $param : genRandomString(8);
     	$token = session_create_id($param.'-');
-    	return = $token;
+    	return $token;
     }
     /**
      * @Company  承德乐游宝软件开发有限公司

@@ -259,6 +259,12 @@
                          <input type="text" name="channel_electricity_quota" value="{$vo.channel_electricity_quota}" size="10"><span class="remark">0为不限制</span>
                           </td>
                         </tr>
+                        <tr>
+                          <td width="120px">团队预约:</td>
+                          <td>
+                          <input type="text" name="channel_pre_team" value="{$vo.channel_pre_team}" size="10"><span class="remark">0为不限制,1为提前一天</span>
+                          </td>
+                        </tr>
                       </tbody>
                     </table>
                   </div>

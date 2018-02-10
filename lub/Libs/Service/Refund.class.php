@@ -829,20 +829,25 @@ class Refund extends \Libs\System\Service {
 		$model = new \Think\Model();
 		$model->startTrans();
 		$createtime = time();
-		$cid = money_map($oinfo['channel_id']);
-		//先消费后记录
-		$crmData = array('cash' => array('exp','cash+'.$oinfo['money']),'uptime' => $createtime);
-		$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
-		$data = array(
-			'cash'		=>	$oinfo['money'],
-			'user_id'	=>	get_user_id(),
-			'crm_id'	=>	$cid,
-			'createtime'=>	$createtime,
-			'type'		=>	'5',
-			'order_sn'	=>	$oinfo['order_sn'],
-			'balance'	=>  balance($cid),
-		);
-		$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+		//读取支付方式 非授信额不退款 TODO 微信支付宝支付
+		if($oinfo['pay'] == 2){
+			$cid = money_map($oinfo['channel_id']);
+			//先消费后记录
+			$crmData = array('cash' => array('exp','cash+'.$oinfo['money']),'uptime' => $createtime);
+			$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+			$data = array(
+				'cash'		=>	$oinfo['money'],
+				'user_id'	=>	get_user_id(),
+				'crm_id'	=>	$cid,
+				'createtime'=>	$createtime,
+				'type'		=>	'5',
+				'order_sn'	=>	$oinfo['order_sn'],
+				'balance'	=>  balance($cid),
+			);
+			$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+		}else{
+			$c_pay = true;$c_pay2 = true;
+		}
 		//修改订单状态
 		$up = $model->table(C('DB_PREFIX')."order")->where(array('order_sn'=>$oinfo['order_sn']))->setField('status','3');
 		$up2 = $model->table(C('DB_PREFIX')."pre_order")->where(array('order_sn'=>$oinfo['order_sn']))->setField('status','4');

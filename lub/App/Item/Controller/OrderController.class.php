@@ -570,7 +570,9 @@ class OrderController extends ManageBase{
 		}else{
 			if($ginfo['type'] == '1'){
 				//同意 排座
-				$status = Order::add_seat($oinfo);			
+				//$status = Order::add_seat($oinfo);
+				$order = new Order();
+				$status = $order->add_seat($oinfo);
 			}else{
 				//不同意退款
 				$status = \Libs\Service\Refund::arefund($oinfo);			
@@ -766,6 +768,6 @@ class OrderController extends ManageBase{
 		}else{
 			$this->srun('标记失败',array('tabid'=>$this->menuid.MODULE_NAME));
 		}
-		
 	}
+	
 }

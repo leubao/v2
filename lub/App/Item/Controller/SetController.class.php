@@ -73,12 +73,7 @@ class SetController extends ManageBase{
 			$this->display();
 		}
 	}
-	/**
-	 * 打印设置
-	 */
-	function printer(){
-		$this->display();
-	}
+
 	/**
 	 * 产品设置
 	 */
@@ -757,6 +752,81 @@ class SetController extends ManageBase{
 		$id = I('get.id',0,intval);
 		if(!empty($id)){
 			$del = Operate::do_del("Blacklist",array('id'=>$id));
+			if($del){
+				$this->srun('删除成功',array('tabid'=>$this->menuid.MODULE_NAME));
+			}else{
+				$this->erun('删除失败!');
+			}
+		}else{
+			$this->erun('参数错误!');
+		}
+	}
+	/**
+	 * 打印设置
+	 */
+	function printer(){
+		$this->basePage('Printer',$map,"status DESC");
+		$this->display();
+	}
+	//添加模板
+	public function add_print_tpl()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			$data = [
+				'title'		=>	$pinfo['title'],
+				'info'		=>	$pinfo['info'],
+				'product'	=>	implode(',', I('post.post')),
+				'status'	=>	1
+			];
+
+			if(D('Printer')->add($data)){
+				$this->srun('新增成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun("添加失败！");
+			}
+		}else{
+			$product = D('Product')->where(['status'=>1])->field('id,name')->select();
+			$this->assign('product',$product);
+			$this->display();
+		}
+	}
+	//编辑模板
+	public function edit_print_tpl()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			$data = [
+				'title'		=>	$pinfo['title'],
+				'info'		=>	$pinfo['info'],
+				'product'	=>	implode(',', I('post.post')),
+				'status'	=>	1
+			];
+			$status = D('Printer')->where(['id'=>$pinfo['id']])->save($data);
+			if($status){
+				$this->srun('更新成功',array('tabid'=>$this->menuid.MODULE_NAME));
+			}else{
+				$this->erun('更新失败!');
+			}
+		}else{
+			$id = I('get.id',0,intval);
+			if(!empty($id)){
+				$info = D('Printer')->where(['id'=>$pinfo['id']])->find();
+				$product = D('Product')->where(['status'=>1])->field('id,name')->select();
+				$this->assign('product',$product);
+				$this->assign("data",$info);
+				$this->display();
+			}else{
+				$this->erun('参数错误!');
+			}
+		}
+	}
+	//删除模板
+	public function del_print_tpl()
+	{
+		$id = I('get.id',0,intval);
+		if(!empty($id)){
+			$del = D('Printer')->delete($id);
 			if($del){
 				$this->srun('删除成功',array('tabid'=>$this->menuid.MODULE_NAME));
 			}else{

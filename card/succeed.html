@@ -3,7 +3,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>年卡续费</title>
+    <title>支付成功</title>
     <meta content="width=device-width,initial-scale=1.0,maximum-scale=1.0,user-scalable=0" name="viewport" />
     <meta content="yes" name="apple-mobile-web-app-capable" />
     <meta content="black" name="apple-mobile-web-app-status-bar-style" />
@@ -64,86 +64,28 @@
         <div class="maxicon suces">
             <i class="icon-checkoff"></i>
         </div>
+        <div class="m-button">
+                <a href="#" id="closeWindow" class="btn-block btn-danger">确定</a>
+            </div>
+        
         <aside class="promp-tip">
-            <p>1. 示例请使手机或浏览器切换手机模式(后刷新)查看</p>
-            <p>2. 考虑到移动设备的整体性能，不直接拖动整个列表</p>
+            <p>1. 感谢你办理梦里老家演艺小镇年卡</p>
+            <p>2. 客服电话:400-608-8889</p>
     </aside>
     </div>
 </section>
+<div class="footer">
+    <p class="c">云鹿票券@梦里老家演艺小镇</p>
+</div>
 <!-- 引入jQuery 2.0+ -->
 <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
 <!-- 引入YDUI脚本 -->
 <script src="static/js/ydui.js"></script>
+<script src="http://res.wx.qq.com/open/js/jweixin-1.2.0.js"></script>
 <script>
-    !function ($) {
-        $(document).ready(function() {
-            
-        }); 
-        if(!is_weixn()){
-                YDUI.dialog.alert('亲,为获得更好的用户体验,请在微信中打开!');
-            }
-        var name = '',
-            card = '',
-            phone = '',
-            code = '',
-            err = '';
-        $('#J_Btn').on('click', function () {
-            name = $('#name').val();
-            card = $('#card').val();
-            code = $('#code').val();
-            /*验证身份证*/
-            if(!name){ err = "姓名";}
-            if(!card || is_card(card)){err = "身份证号";}
-            if(!phone){err = "手机号";}
-            if(!code){err = "验证码";}
-            if(err){
-               YDUI.dialog.toast(err+'不能为空', 'error', 1500);
-               return false; 
-            }
-            /* 使用：js模块以dialog为例 */
-            YDUI.dialog.alert('我有一个小毛驴我从来也不骑！');
-        });
-        var $getCode = $('#J_GetCode');
-
-        /* 定义参数 */
-        $getCode.sendCode({
-            disClass: 'btn-disabled',
-            secs: 60,
-            run: false,
-            runStr: '{%s}秒后重新获取',
-            resetStr: '重新获取验证码'
-        });
-        $getCode.on('click', function () {
-            phone = $('#phone').val();
-            //验证手机号是否正确，是否已经注册过
-            if(!is_mobile(phone)){
-                YDUI.dialog.toast('手机号码不正确', 'error', 1500);
-                return false;
-            }
-            $getCode.sendCode('start');
-        });
-        function is_card(str) {
-            //是否是符合标准的身份证号码
-            //是否已经注册
-        }
-        function is_mobile(str) {
-            var re = /^1\d{10}$/;
-            if (re.test(str)) {
-                return true;
-            } else {
-                return false;
-            }
-        }
-        //判断是否在微信中打开
-        function is_weixn(){
-            var ua = navigator.userAgent.toLowerCase();
-            if(ua.match(/MicroMessenger/i)=="micromessenger") {
-                return true;
-            } else {
-                return false;
-            }
-        }
-    }(jQuery);
+document.querySelector('#closeWindow').onclick = function () {
+    wx.closeWindow();
+  };
 </script>
 </body>
 </html>

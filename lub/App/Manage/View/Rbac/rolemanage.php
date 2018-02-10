@@ -3,7 +3,6 @@
 <Managetemplate file="Common/Nav"/>
 </div>
 <div class="bjui-pageContent tableContent">
- <form name="myform" action="{:U("Rbac/listorders")}" method="post">
  <table data-toggle="tablefixed" data-width="100%" data-nowrap="true">
     <thead>
       <tr>
@@ -18,7 +17,6 @@
     <tbody>
         {$role}
     </tbody>
-   </table>
-  </form>
+  </table>
 </div>
 <div class="bjui-pageFooter"></div>

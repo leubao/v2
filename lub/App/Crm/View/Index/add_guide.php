@@ -5,14 +5,17 @@
     <label class="col-sm-3 control-label">姓名:</label>
     <input type="text" name="username" class="form-control required" data-rule="required;" size="20" placeholder="姓名">
   </div>
-  
   <div class="form-group">
     <label class="col-sm-3 control-label">手机号码:</label>
     <input type="text" name="phone" class="form-control required" size="20" data-rule="required;name;remote[get:{:U('Item/Check/public_check_name',array('ta'=>19))}]" placeholder="手机号码">
   </div>
   <div class="form-group">
     <label class="col-sm-3 control-label">身份证:</label>
-    <input type="text" name="legally" class="form-control required" data-rule="required;ID_card;remote[get:{:U('Item/Check/public_check_name',array('ta'=>20))}]" size="20" placeholder="身份证号码">
+    <input type="text" name="legally" class="form-control" data-rule="ID_card;remote[get:{:U('Item/Check/public_check_name',array('ta'=>20))}]" size="20" placeholder="身份证号码">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-3 control-label">备注:</label>
+    <textarea name="remark"></textarea>
   </div>
   <div class="form-group">
       <label class="col-sm-3 control-label">状态：</label>

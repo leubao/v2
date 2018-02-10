@@ -20,9 +20,12 @@
       <else />
         <div class="bjui-searchBar">
           <div class="btn-group" role="group">
+           <a type="button" class="btn btn-success" href="{:U('Crm/Index/add_guide',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type));}" data-toggle="dialog" data-width="600" data-height="400" data-id="新增" data-mask="true"><i class="fa fa-plus"></i> 新增</a> 
           <a type="button" class="btn btn-default" href="{:U('Crm/Index/checkcash',array('menuid'=>$menuid,'groupid'=>$groupid,'channel'=>$type))}&id={#bjui-selected}" data-toggle="dialog" data-mask="true" data-max="true" data-id="checkcash"><i class="fa fa-cc-visa"></i> 授信</a>
           </div>
         </div>
+        <label>手机号：</label>
+        <input type="text" value="" name="phone" size="15">
      </if>
       <label>名称：</label>
       <input type="text" value="" name="name" size="15">
@@ -63,7 +66,7 @@
     <table data-toggle="tablefixed" data-width="100%">
       <thead>
         <tr>
-          <th width="30">编号</th>
+          <th width="60">编号</th>
           <th width="180">客户名称</th>
           <th width="60" align="center">状态</th>
           <th width="60">管理员</th>
@@ -78,7 +81,7 @@
         <volist name="data" id="vo">
           <tr data-id="{$vo['id']}">
             <td>{$vo['id']}</td>
-            <td><a href="{:U('Crm/Index/detail',array('id'=>$vo['id']))}" data-toggle="dialog" data-width="800" data-height="450" data-id="detail" data-mask="true">{$vo['name']}</a></td>
+            <td><a href="{:U('Crm/Index/detail',array('id'=>$vo['id'],'type'=>$type))}" data-toggle="dialog" data-width="800" data-height="450" data-id="detail" data-mask="true">{$vo['name']}</a></td>
             <td align="center">{$vo.status|status}</td>
             <td>{$vo['salesman']|userName}</td>
             <td>{$vo['uptime']|datetime}</td>
@@ -94,7 +97,7 @@
     <table data-toggle="tablefixed" data-width="100%">
       <thead>
         <tr>
-          <th width="30">编号</th>
+          <th width="60">编号</th>
           <th width="180">姓名</th>
           <th width="80">手机号</th>
           <th width="60" align="center">状态</th>
@@ -108,7 +111,7 @@
         <volist name="data" id="vo">
           <tr data-id="{$vo['id']}">
             <td>{$vo['id']}</td>
-            <td><a href="{:U('Crm/Index/detail',array('id'=>$vo['id'],'channel'=>$type))}" data-toggle="dialog" data-width="800" data-height="450" data-id="detail" data-mask="true">{$vo['nickname']}</a></td>
+            <td><a href="{:U('Crm/Index/detail',array('id'=>$vo['id'],'type'=>$type))}" data-toggle="dialog" data-width="800" data-height="450" data-id="detail" data-mask="true">{$vo['nickname']}</a></td>
             <td>{$vo['phone']}</td>
             <td align="center">{$vo.status|status}</td>
             <td>{$vo['create_time']|datetime}</td>

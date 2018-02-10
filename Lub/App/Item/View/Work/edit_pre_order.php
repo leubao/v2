@@ -1,5 +1,5 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<form class="form-horizontal" action="{:U('Item/Work/orderinfo',array('sn'=>$data['order_sn'],'menuid'=>$menuid));}" method="post" data-toggle="validate">
+<form class="form-horizontal" action="{:U('Item/Work/edit_pre_order',array('sn'=>$data['order_sn'],'menuid'=>$menuid));}" method="post" data-toggle="validate">
 <div class="bjui-pageContent">
   <table class="table table-striped table-bordered">
     <tbody>
@@ -40,22 +40,6 @@
         <td>支付方式</td>
         <td>{$data.pay|pay}</td>
       </tr>
-      <!--
-      <tr>
-        <td>支付单号</td>
-        <td>{$data['id_card']} </td>
-        <td></td>
-        <td></td>
-      </tr>
-    -->
-      <if condition="$data['status'] eq '9'">
-      <tr>
-        <td>出票员</td>
-        <td>{$data.order_sn|print_ticket_user}</td>
-        <td></td>
-        <td></td>
-      </tr>
-      </if>
       <if condition="$type eq '1'">
       <tr>
         <td>区域详情</td>
@@ -77,58 +61,28 @@
       </tr>
     </tbody>
   </table>
-  <if condition="$type eq '1'">
   <table class="table table-bordered table-hover mb25">
   <thead>
     <tr>
       <th>编号</th>
       <th>票型</th>
-      <th>票面单价</th>
-      <th>结算单价</th>
+      <th>价格</th>
       <th>区域</th>
-      <th>座位</th>
-      <th>订单号/状态/打印次数/更新时间</th>
+      <th>数量</th>
     </tr>
   </thead>
-  <tbody><?php if(empty($data['info']['data']['area'])){ ?>
-
-    <volist name="data['info']['data']" id="vo">
+  <tbody>
+    <volist name="data['info']['data']['area']" id="vo">
       <tr>
         <td>{$i}</td>
         <td>{$vo.priceid|ticketName}</td>
         <td>{$vo.price}</td>
-        <td>{$vo.discount}</td>
         <td>{$vo.areaId|areaName}</td>
-        <td>{$vo.seatid|seatShow}</td>
-        <td>{$vo.seatid|seatOrder=$data['plan_id'],$vo['areaId']}</td>
+        <td><input type="hidden" value="{$vo.priceid}" name="priceid[]"><input type="text" name="price_num[]" value="{$vo.num}"></td>
       </tr>
     </volist>
-    <?php } if(!empty($data['info']['data']['area'])){ ?>
-      <volist name="data['info']['data']['area']" id="vo">
-        <tr>
-          <td>{$i}</td>
-          <td></td>
-          <td></td>
-          <td>{$vo.price}</td>
-          <td>{$vo.areaId|areaName}</td>
-          <td></td>
-          <td></td>
-        </tr>
-      </volist>
-    <?php } ?>
   </tbody>
   </table>
-  <else/>
-  <div class="mt20 scenic_ticket">
-    <volist name="ticket" id="vo">
-      <if condition="$vo['status'] eq '2'">
-      <span class="label label-success">{$vo.ciphertext}</span> 
-      <elseif condition="$vo['status'] eq '9'" />
-       <span class="label label-danger">{$vo.ciphertext}</span> 
-      </if>
-    </volist>
-  </div>
-  </if>
 </div>
 <input type="hidden" value="{$data.order_sn}" name="sn"></input>
 <div class="bjui-pageFooter">
@@ -136,11 +90,6 @@
     <li>
       <button type="button" class="btn-close" data-icon="close">关闭</button>
     </li>
-    <if condition="$data['status'] eq '1' ">
-    <li>
-      <button type="button" class="btn-info" data-icon="print" data-url="{$prshow.url}" data-width="{$prshow.width}" data-height="{$prshow.height}" data-title="{$prshow.title}" data-pageid="{$prshow.pageId}" id="print_window">打印</button>
-    </li>
-    </if>
     <li>
       <button type="submit" class="btn-default" data-icon="save">提交</button>
     </li>
@@ -148,9 +97,5 @@
 </div>
 </form>
 <script>
-$('#print_window').click(function(){
-    /*关闭订单详情的窗口*/
-    $(this).dialog('close','orderinfo');
-    $(this).dialog({id:''+$(this).data('pageid')+'', url:''+$(this).data('url')+'', title:''+$(this).data('title')+'',width:''+$(this).data('width')+'',height:''+$(this).data('height')+'',resizable:false,maxable:false,mask:true});
-});
+
 </script>

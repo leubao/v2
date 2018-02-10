@@ -15,11 +15,7 @@ class CheckController extends LubTMP{
     function _initialize(){
        
 	}
-	private function check_name2($table,$map){
-		$db = D("$table");
-		$status = $db->where($map)->find();
-		return $status;
-	}
+	
 	//检测身份证是否可用
 	public function public_check_idcard()
 	{
@@ -37,5 +33,10 @@ class CheckController extends LubTMP{
 		}else{
 			die(json_encode(['msg'=>'名称已存在','status'=>false]));
 		}
+	}
+	private function check_name2($table,$map){
+		$db = D("$table");
+		$status = $db->where($map)->find();
+		return $status;
 	}
 }

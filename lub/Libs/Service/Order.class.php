@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Author: zhoujing <admin@leubao.com>
 // +----------------------------------------------------------------------
-namespace Libs\Service;
+namespace Libs\Service; 
 use Org\Util\Date;
 use Libs\Service\Sms;
 use Common\Model\Model;
@@ -860,7 +860,56 @@ class Order extends \Libs\System\Service {
 		/*==============================自动排座开始 start =============================================*/
 		if($is_seat == '1'){
 			foreach ($seat['area'] as $k=>$v){
-				//循环区域
+
+				//检测是否有足够的座位 TODO   智能排座
+				if(!empty($plan_param['auto_group'])){
+					$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$k,$v['num'],$plan['product_id'],$plan['seat_table']);
+				}else{
+					$auto[$k] = "0";
+				}
+				//写入数据
+				$map = array(
+					'area' => $v['areaId'],
+					'group' => $auto[$k] ?  array('in',$auto[$k]) : '0',
+					'status' => array('eq',0),
+				);
+				$data = array(
+					'order_sn'=> $info['order_sn'],
+					'soldtime'=> $createtime,
+					'status'  => '2',
+					'price_id'=> $v['priceid'],
+					'idcard'  => strtoupper($v['idcard']),
+					'sale'    => serialize(array('priceid'=>$v['priceid'],'price'=>$v['price'])),//售出信息 票型  单价
+				);
+				//计算消耗配额的票型 只有团队订单时才执行此项操作 21060118
+				if($info['type'] == '2' || $info['type'] == '4' && $ticketType[$v['priceid']]['param']['quota'] <> '1'){
+					$quota_num += $va['num'];
+				}
+				$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
+				/*以下代码用于校验*/
+				$money = $money+$ticketType[$v['priceid']]['discount']*$v['num'];
+				if(empty($status[$ke])){
+					//error_insert('400009');
+					$model->rollback();//事务回滚
+					$this->error = '400009 : 排座失败';
+					return false;
+					break;
+				}
+				/*
+				$log[$k] = $count[$k] .'-'.  $ke;
+				dump($ke);
+				TODO  这里似乎没有任何意义
+				if($count[$k] == $ke+1){
+					$flag = true;
+				}*/
+				$flag = true;
+				//统计订单座椅个数
+				$number = (int)$number+$v['num'];
+				if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
+
+
+
+				/*循环区域
 				$count[$k] = count($v['seat']);//统计座椅个数
 				foreach($v['seat'] as $ke=>$va){
 					//检测是否有足够的座位 TODO   智能排座
@@ -888,7 +937,7 @@ class Order extends \Libs\System\Service {
 						$quota_num += $va['num'];
 					}
 					$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
-					/*以下代码用于校验*/
+					/*以下代码用于校验*
 					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
 					if(empty($status[$ke])){
 						//error_insert('400009');
@@ -903,12 +952,12 @@ class Order extends \Libs\System\Service {
 					TODO  这里似乎没有任何意义
 					if($count[$k] == $ke+1){
 						$flag = true;
-					}*/
+					}*
 					$flag = true;
 					//统计订单座椅个数
 					$number = (int)$number+$va['num'];
 					if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
-				}
+				}*/
 				//按区域发送短信
 				if($proconf['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
 			}
@@ -1137,7 +1186,7 @@ class Order extends \Libs\System\Service {
 	function add_seat($oinfo){
 		$model = new Model();
 		$model->startTrans();
-		$flag=false;
+		$flag=true;//TODO 无用变量了 暂时保留
 		$flags=false;
 		$createtime = time();
 		$param = unserialize($oinfo['info']);
@@ -1149,7 +1198,46 @@ class Order extends \Libs\System\Service {
 		$plan_param = unserialize($plan['param']);
 		$ticketType = F("TicketType".$plan['product_id']);//dump($seat);
 		foreach ($seat['area'] as $k=>$v){
-			//循环区域
+			//检测是否有足够的座位 TODO   智能排座
+			if(!empty($plan_param['auto_group'])){
+				$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$v['areaId'],$v['num'],$plan['product_id'],$plan['seat_table']);
+			}else{
+				$auto[$k] = "0";
+			}
+			//写入数据
+			$map = array(
+				'area' => $v['areaId'],
+				'group' => $auto[$k] ?  array('in',$auto[$k]) : '0',
+				'status' => array('eq',0),
+			);
+			$data = array(
+					'order_sn'=> $oinfo['order_sn'],
+					'soldtime'=> $createtime,
+					'status'  => '2',
+					'price_id' => $v['priceid'],
+					'sale'    => serialize(array('priceid'=>$v['priceid'],'price'=>$v['price'])),//售出信息 票型  单价
+			);
+			$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
+			//计算订单返佣金额
+			$rebate = $rebate+$ticketType[$v['priceid']]['rebate']*$v['num'];
+			/*以下代码用于校验*/
+			$money = $money+$ticketType[$v['priceid']]['discount']*$v['num'];
+			if(empty($status[$ke])){
+				$model->rollback();//事务回滚
+				$this->error = '400009 : 排座失败';
+				return false;
+				break;
+			}
+			/*
+			if($count[$k] == $ke+1){
+				$flag=true;
+			}*/
+			//统计订单座椅个数
+			$number = (int)$number+$v['num'];
+			//按票型发送短信
+			if($proconf[$plan['product_id']]['1']['ticket_sms']){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
+
+			/*循环区域
 			$count[$k] = count($v['seat']);//统计座椅个数
 			foreach($v['seat'] as $ke=>$va){
 				//检测是否有足够的座位 TODO   智能排座
@@ -1174,7 +1262,7 @@ class Order extends \Libs\System\Service {
 				$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
 				//计算订单返佣金额
 				$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
-				/*以下代码用于校验*/
+				/*以下代码用于校验*
 				$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
 				if(empty($status[$ke])){
 					$model->rollback();//事务回滚
@@ -1189,9 +1277,9 @@ class Order extends \Libs\System\Service {
 				$number = (int)$number+$va['num'];
 				//按票型发送短信
 				if($proconf[$plan['product_id']]['1']['ticket_sms']){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
-			}
+			}*/
 			//按区域发送短信
-			if($proconf[$plan['product_id']]['1']['area_sms']){$msg = $msg.areaName($k,1).$v['num']."张";}
+			if($proconf[$plan['product_id']]['1']['area_sms']){$msg = $msg.areaName($v['areaId'],1).$v['num']."张";}
 		}
 		/*金额校验
 		if($money == $info['subtotal']){
@@ -1267,7 +1355,7 @@ class Order extends \Libs\System\Service {
 		if($crmInfo['group']['settlement'] == '1'){
 			load_redis('lpush','PreOrder',$info['order_sn']);
 		}
-		//dump($flag);dump($flags);dump($state);dump($in_team);dump($oinfo);
+		//dump($flag);dump($flags);dump($state);dump($ostate);//dump($in_team);
 		if($state && $flag && $flags && $ostate){
 			$model->commit();//提交事务
 			//发送成功短信
@@ -1601,7 +1689,7 @@ class Order extends \Libs\System\Service {
 	*@param $child_ticket array 联票子票型
 	*return $seat 包含座椅区域信息 及座椅数量 
 	*/
-	private function area_group($area,$product_id,$settlement,$product_type,$child_ticket = ''){
+	public function area_group($area,$product_id,$settlement,$product_type,$child_ticket = ''){
 		if(empty($area)){$this->error = "门票类型为空,操作终端...";return false;}
 		//$this->error = "门票类型为空,操作终端...";return false;
 		if(!empty($child_ticket)){
@@ -1612,7 +1700,7 @@ class Order extends \Libs\System\Service {
 		/*重新组合区域*/
 		foreach($area as $k=>$v){
 			if($product_type == '1'){
-				//相同区域相同票型合并
+				/*相同区域相同票型合并
 				$seat['area'][$v['areaId']]['seat'][$k] = array(
 					'priceid'=>$v['priceid'],
 					'price'=>$v['price'],
@@ -1622,7 +1710,15 @@ class Order extends \Libs\System\Service {
 				$seat['area'][$v['areaId']]['num'] += $v['num'];
 				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];
 				$seat['area'][$v['areaId']]['price'] = $v['price'];
-				$seat['num'] += $seat['area'][$v['areaId']]['num'];
+				*/
+				//新未排座情况
+				$seat['area'][$v['priceid']]['areaId'] = $v['areaId'];//票型区域
+				$seat['area'][$v['priceid']]['priceid'] = $v['priceid'];//票型id
+				$seat['area'][$v['priceid']]['price'] = $v['price'];//票型价格
+				$seat['area'][$v['priceid']]['num'] = $v['num'];//票型数量
+				$seat['area'][$v['priceid']]['idcard'] = $v['idcard'];
+
+				$seat['num'] += $seat['area'][$v['priceid']]['num'];
 			}else{
 				//景区、漂流
 				$seat['area'][$v['priceid']] = array(

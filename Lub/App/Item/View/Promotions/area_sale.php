@@ -239,7 +239,6 @@ function promotions_server(){
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","activity":"'+activety+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
     postData = 'info={"subtotal":'+parseFloat($('#promotions-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-    console.log(postData);
     post_server(postData,url,'activity');
 }
 </script> 
