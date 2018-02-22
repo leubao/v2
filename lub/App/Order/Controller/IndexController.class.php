@@ -277,8 +277,8 @@ class IndexController extends ManageBase {
 	{
 		$pinfo = I('post.');
 		//是否是活动
-		if(!empty($pinfo['active'])){
-			$map['activity_id'] = $pinfo['active'];
+		if(!empty($pinfo['activity'])){
+			$map['activity_id'] = $pinfo['activity'];
 		}
 		if(!empty($pinfo['idcard'])){
 			$map['idcard']	= $pinfo['idcard'];

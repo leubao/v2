@@ -806,6 +806,8 @@ class Order extends \Libs\System\Service {
 		$flags = false;
 		$money = 0;
 		$rebate	= 0;
+		$msgTpl = 1;//默认短信模板
+		$quota_num = 0;//默认配额消耗量
 		/*==============================渠道版扣费 start===============================================*/
 		if(in_array($channel,['1','4']) && $is_pay == '2'){
 			if($channel == '1'){
@@ -1024,6 +1026,7 @@ class Order extends \Libs\System\Service {
 			//判断活动属性 todo 读取活动属性
 			if(!empty($oInfo['param'][0]['activity'])){
 				$is_print = 1;
+				$msgTpl = 8;//后期短信模板动态配置
 				//写入身份证号
 				D('IdcardLog')->addAll($idcard);
 			}
@@ -1044,7 +1047,7 @@ class Order extends \Libs\System\Service {
 			//是否为团队订单 
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
-				if($proconf['quota'] == '1'){
+				if($proconf['quota'] == '1' && $quota_num > 0){
 					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$info['type']);
 					/*判断销售类型?.
 					if(in_array($info['type'],array('2','4'))){
@@ -1122,7 +1125,7 @@ class Order extends \Libs\System\Service {
 				if($pay == '1' || $pay == '3'){
 					Sms::order_msg($msgs,6);
 				}else{
-					Sms::order_msg($msgs,1);
+					Sms::order_msg($msgs,$msgTpl);
 				}
 			}
 			return $info['order_sn'];

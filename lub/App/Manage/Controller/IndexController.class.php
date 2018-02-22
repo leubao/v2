@@ -75,6 +75,18 @@ class IndexController extends ManageBase {
             'today_count'       =>  $today_count
         ];
         $this->assign('totup',$totup);
+        //年卡统计
+        $year_count = D('Member')->where(['status'=>1])->count();
+        //年卡今日办理
+        //$year_today = D('Member')->where(['create_time',['et',strtotime(date('Y-m-d'))]])->count();
+        //未支付
+        $year_pre = D('Member')->where(['status'=>2])->count();
+        $year = [
+            'year_count'    =>  $year_count,
+            'year_today'    =>  $year_today,
+            'year_pre'      =>  $year_pre
+        ];
+        $this->assign('year',$year);
     }
     //缓存更新
     public function cache() {

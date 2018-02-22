@@ -89,7 +89,7 @@ class CheckController extends ManageBase{
 		}
 		switch ($ginfo['ta']){
 			case 31:
-				$map = ['idcard'=>$ginfo['idcard'],'activity_id'=>$ginfo['actid']];
+				$map = ['idcard'=>$ginfo['idcard'],'activity_id'=>$ginfo['actid']];//dump($map);
 				$return = $this->check_name2('IdcardLog',$map);
 		}
 		if(empty($return)){

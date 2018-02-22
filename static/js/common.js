@@ -304,7 +304,7 @@ function check_idcard(code) {
   var tip = "";
   var pass= true;
 
-  if(!code || !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|X)$/i.test(code)){
+  if(!code || !/^\d{6}(18|19|20)?\d{2}(0[1-9]|1[12])(0[1-9]|[12]\d|3[01])\d{3}(\d|x)$/i.test(code)){
       tip = "身份证号格式错误";
       pass = false;
   }else if(!city[code.substr(0,2)]){
@@ -318,7 +318,7 @@ function check_idcard(code) {
           //加权因子
           var factor = [ 7, 9, 10, 5, 8, 4, 2, 1, 6, 3, 7, 9, 10, 5, 8, 4, 2 ];
           //校验位
-          var parity = [ 1, 0, 'X', 9, 8, 7, 6, 5, 4, 3, 'x', 2 ];
+          var parity = [ 1, 0, 'X', 9, 8, 7, 6, 5, 4, 3, 2 ];
           var sum = 0;
           var ai = 0;
           var wi = 0;
@@ -329,7 +329,8 @@ function check_idcard(code) {
               sum += ai * wi;
           }
           var last = parity[sum % 11];
-          if(parity[sum % 11] != code[17]){
+          var check = code[17].toUpperCase();
+          if(last != check){
               tip = "校验位错误";
               pass =false;
           }
@@ -347,13 +348,13 @@ function check_idcard(code) {
  * @return   {[type]}                            [description]
  */
 function check_idcard_area(code,area,actid) {
-    var length = 0, retu = false;
+    var length = 0, retu = false;//console.log(actid);
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
         var site = code.substr(0,length);
         //var log = 'length:'+length+'code:'+code+'site:'+site+'item:'+area[i]+'area:'+area.length;
         //console.log(log);
-        //console.log(site === area[i]);
+        //console.log(area);
         if(site === area[i]){
           //发送到服务器验证 TODO
           $.ajax({

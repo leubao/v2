@@ -66,6 +66,25 @@
         </ul>
       </div>
     </div>
+    <div class="widget-box widget-gray-box">
+      <div class="widget-box-content widget-store-overview">
+        <ul>
+          <li>
+            <p>年卡数</p>
+            <a href="">{$year.year_count}</a>
+          </li>
+          <li>
+            <p>今日新增</p>
+            <a href="">{$year.year_today}</a>
+          </li>
+          <li>
+            <p>待支付</p>
+            <a href="">{$year.year_pre}</a>
+          </li>
+          
+        </ul>
+      </div>
+    </div>
     <!--折线图-->
     <div style="mini-width:400px;height:350px" data-toggle="echarts" data-type="line,bar" data-url="http://ticket.leubao.com/bar.json"></div>
     <div class="widget-box recommended-apps">

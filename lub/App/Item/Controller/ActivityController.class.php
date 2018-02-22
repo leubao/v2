@@ -60,7 +60,7 @@ class ActivityController extends ManageBase{
 	 		}
 	 		//限定区域销售
 	 		if($pinfo['type'] == '3'){
-	 			$card = explode('|',$pinfo['card']);
+	 			$card = explode('|',trim($pinfo['card']));
 	 			$info['card'] = $card;
 	 			$info['voucher'] = $pinfo['voucher'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
@@ -115,7 +115,19 @@ class ActivityController extends ManageBase{
 	 {
 	 	$model = D('Item/Activity');
 	 	if(IS_POST){
+	 		$pinfo = I('post.');
+	 		//限定区域销售
+	 		if($pinfo['type'] == '3'){
+	 			$card = explode('|',trim($pinfo['card']));
+	 			$info['card'] = $card;
+	 			$info['voucher'] = $pinfo['voucher'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
+	 		$param = array(
+	 			'info' =>  $info,
+	 		);
 	 		$data = array(
+	 			'id'	=>	$pinfo['id'],
 	 			'title'	=>	$pinfo['title'],
 	 			'starttime' => strtotime($pinfo['starttime']),
 	 			'endtime'	=> strtotime($pinfo['endtime']),
@@ -124,15 +136,25 @@ class ActivityController extends ManageBase{
 	 			'param'		=> json_encode($param),
 	 			'remark'	=> $pinfo['remark'],
 	 		);
-	 		if(D('Item/Activity')->add($data)){
-	 			$this->srun("新增成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+	 		if(D('Item/Activity')->save($data)){
+	 			$this->srun("更新成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 	 		}else{
-	 			$this->erun("新增失败!");
+	 			$this->erun("更新失败!");
 	 		}
 	 	}else{
 	 		$ginfo = I('get.');
-	 		$info = $model->where(['id'=>$ginfo['id']])->find();
-	 		$info['param'] = json_decode($info['param'],true);
+	 		$info = $this->get_activity($ginfo['id']);
+	 		//限制区域销售
+	 		if($info['type'] == '3'){
+	 			$ticket = explode(',',$info['param']['info']['ticket']);
+	 			foreach ($ticket as $k => $v) {
+	 				$name[] = ticketName($v,1);
+	 			}
+	 			$ticket_name = implode(',',$name);
+	 			$card = implode('|',$info['param']['info']['card']);
+	 			$this->assign('ticket_name',$ticket_name);
+	 			$this->assign('card',$card);
+	 		}
 	 		$this->assign('data',$info)->display();
 	 	}
 	 }
@@ -159,9 +181,10 @@ class ActivityController extends ManageBase{
 	 	
 	 	$this->assign('data',$this->get_activity($ginfo['id']))->display();
 	}
+
 	function get_activity($id){
 	 	$info = M('Activity')->where(array('id'=>$id))->find();
-	 	$info['param'] = unserialize($info['param']);
+	 	$info['param'] = json_decode($info['param'],true);
 	 	return $info;
 	}
 	/**

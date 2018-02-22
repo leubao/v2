@@ -206,7 +206,7 @@ function promotions_server(){
     $("#promotions-price-select .idcard").each(function(){
       var idcardThis = $(this).val(); 
       //console.log(check_idcard(idcardThis));
-      console.log(check_idcard_area(idcardThis,activety_area,activety));
+      //console.log(check_idcard_area(idcardThis,activety_area,activety));
       //判断身份证是否可用
       if(!check_idcard(idcardThis)){
         $(this).alertmsg('error','身份证号'+idcardThis+'有误!');
