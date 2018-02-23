@@ -25,6 +25,7 @@
         <option value="6" <eq name="pinfo['type']" value="6"> selected</eq>>未检票</option>
     </select>
     &nbsp;
+    <input type="text" name="sn" value="{$pinfo['sn']}" placeholder="订单号或身份证号">
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
 

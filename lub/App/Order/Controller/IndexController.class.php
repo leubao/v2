@@ -252,6 +252,9 @@ class IndexController extends ManageBase {
 				$map = ['status' =>	2];
 				break;
 		}
+		if(!empty($pinfo['sn'])){
+			$map['order_sn|idcard'] = $pinfo['sn'];
+		}
 		if(!empty($pinfo['plan'])){
 			$plan_info = F('Plan_'.$pinfo['plan']);
 			if(empty($plan_info)){
