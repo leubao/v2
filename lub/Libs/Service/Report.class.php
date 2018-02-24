@@ -592,15 +592,17 @@ class Report{
 	* @param $work int 是否包含工作票 1 含工作票 2不含工作票
 	*/
 	function plan_ticket_folds($data,$work = '1'){
+		//只能显示当前产品的报表
+		$product_id = get_product('id');
 		foreach ($data as $k => $valu) {
 			if($work == '1'){
 				//含工作票统计
 				$num[$valu['price_id']]['num'] += $valu['number'];
 				$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
-				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$valu['product_id']);
+				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
 				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
-						'product_id'=> $valu['product_id'],
+						'product_id'=> $product_id,
 						'plan_id' 	=> $valu['plan_id'], 
 					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
@@ -615,10 +617,10 @@ class Report{
 					//不含工作票统计
 					$num[$valu['price_id']]['num'] += $valu['number'];
 					$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
-					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$valu['product_id']);
+					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
-							'product_id'=> $valu['product_id'],
+							'product_id'=> $product_id,
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
@@ -634,10 +636,10 @@ class Report{
 					//不含工作票统计
 					$num[$valu['price_id']]['num'] += $valu['number'];
 					$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
-					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$valu['product_id']);
+					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
-							'product_id'=> $valu['product_id'],
+							'product_id'=> $product_id,
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],

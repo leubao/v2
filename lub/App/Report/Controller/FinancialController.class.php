@@ -92,9 +92,9 @@ class FinancialController extends ManageBase{
         $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
         //G('begin');
-        $db = M('ReportData');
+        $db = D('ReportData');
 		$map['product_id'] = $this->pid;
-		$list = $db->where($map)->order('plantime ASC,games')->field('datetime,order_sn,games,area,createtime,region,pay,type,plantime,games,user_id,status',true)->select();
+		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,createtime,region,pay,type,plantime,games,user_id,status',true)->select();
 		
 		
 		if($this->procof['agent'] == '1'){

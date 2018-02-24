@@ -206,7 +206,7 @@ class IndexController extends ManageBase {
 			$this->erun("参数错误");
 		}
 		//根据单号获取订单信息
-		$model= D('Order');
+		$model= D('Item/Order');
 		$map = [
 			'order_sn'	=>	$ginfo['sn'],
 			'type'  =>	['in','2,4,6'],
