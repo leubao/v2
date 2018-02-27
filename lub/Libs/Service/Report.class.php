@@ -599,6 +599,7 @@ class Report{
 				//含工作票统计
 				$num[$valu['price_id']]['num'] += $valu['number'];
 				$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
+				if(empty($product_id)){$product_id = $valu['product_id'];}
 				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
 				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],

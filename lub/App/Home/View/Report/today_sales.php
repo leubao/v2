@@ -81,7 +81,7 @@
             <tbody>
               <volist name="v['price']" id="vi">  
                 <tr>
-                  <td align="center">{$vi.priceid|ticketName}</td>
+                  <td align="center">{$vi.price_id|ticketName}</td>
                   <td align="center">{$vi.price}</td>
                   <td align="center">{$vi.discount}</td>
                   <td align="center">{$vi.number}</td>
@@ -122,7 +122,7 @@
             <tbody>
               <volist name="v['price']" id="vi">  
                 <tr>
-                  <td align="center">{$vi.priceid|ticketName}</td>
+                  <td align="center">{$vi.price_id|ticketName}</td>
                   <td align="center">{$vi.price}</td>
                   <td align="center">{$vi.discount}</td>
                   <td align="center">{$vi.number}</td>

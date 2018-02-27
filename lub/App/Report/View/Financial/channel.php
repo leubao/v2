@@ -181,7 +181,7 @@
     <tbody>
     <?php //dump($data);?>
     <volist name="data" id="channel">
-    <?php $price_count = count($channel['price']);?>
+    <?php $price_count = count($channel['price']);?> 
       <volist name="channel['price']" id="item" key="k">
         <if condition="$price_count neq '1'">
           <if condition="$k eq '1'">

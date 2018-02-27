@@ -1026,6 +1026,8 @@ class Order extends \Libs\System\Service {
 				);
 				//统计身份证号
 				$idcard[] = [
+					'plan_id'		=>	$info['plan_id'],
+					'order_sn'		=>	$info['order_sn'],
 					'idcard'		=>	$vs['idcard'],
 					'activity_id'	=>	$oInfo['param'][0]['activity']
 				];
