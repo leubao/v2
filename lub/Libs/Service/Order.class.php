@@ -515,6 +515,15 @@ class Order extends \Libs\System\Service {
 		if($info['crm'][0]['phone']){
 			$this->is_tourists($info['crm'][0]['contact'],$info['crm'][0]['phone'],$info['crm'][0]['qditem'],$plan['product_id'],$plan['id']);
 		}
+		/*校验身份证号码是否正确*/
+		$id_card = strtoupper($info['param'][0]['id_card']);
+		if(!empty($id_card)){
+			if(!checkIdCard($id_card)){
+				$this->error = '400030 : 身份证号码有误...';
+				return false;
+			}
+		}
+		
 		/*写入订单信息*/
 		$orderData = array(
 			'order_sn' 		=> $sn,
@@ -522,7 +531,7 @@ class Order extends \Libs\System\Service {
 			'product_type'	=> $plan['product_type'],//产品类型
 			'product_id' 	=> $plan['product_id'],
 			'user_id' 		=> $uinfo['id'],
-			'id_card'		=> $info['param'][0]['id_card'],
+			'id_card'		=> $id_card,
 			'channel_id' 	=> $info['crm'][0]['qditem'],
 			'guide_id'		=> $info['crm'][0]['guide'],
 			'number'		=> $seat['num'],
@@ -875,12 +884,22 @@ class Order extends \Libs\System\Service {
 					'group' => $auto[$k] ?  array('in',$auto[$k]) : '0',
 					'status' => array('eq',0),
 				);
+				/*校验身份证号码是否正确*/
+				$id_card = strtoupper($v['idcard']);
+				if(!empty($id_card)){
+					if(!checkIdCard($id_card)){
+						$this->error = '400030 : 身份证号码有误...';
+						$model->rollback();
+						return false;
+						break;
+					}
+				}
 				$data = array(
 					'order_sn'=> $info['order_sn'],
 					'soldtime'=> $createtime,
 					'status'  => '2',
 					'price_id'=> $v['priceid'],
-					'idcard'  => strtoupper($v['idcard']),
+					'idcard'  => $id_card,
 					'sale'    => serialize(array('priceid'=>$v['priceid'],'price'=>$v['price'])),//售出信息 票型  单价
 				);
 				//计算消耗配额的票型 只有团队订单时才执行此项操作 21060118

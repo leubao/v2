@@ -336,7 +336,7 @@ function check_idcard(code) {
           }
       }
   }
-  //if(!pass) alert(tip);
+  if(!pass) alert(tip);
   return pass;
 }
 /**

@@ -528,7 +528,7 @@ $("#govPay").bind("click",function(){
 $("#preteam").bind("click",function(){
 	var rstr = "",
 		car = $("#car").val(),
-		teamno = $("#teamno").val(),
+		tour = "",
 		plan = $('#planID').val(),
 		teamtype = $('#teamtype').val(),
 		remark = $("#remark").val();
@@ -549,11 +549,10 @@ $("#preteam").bind("click",function(){
 			rstr += "取票人不能为空!";
 		}
 	}
+	var tour = $("#tourists").val();
+	if(!tour){ rstr += "请选择客源地!";}
 	if(car == ''){
 		rstr += "车牌号不能为空!";
-	}
-	if(teamno == ''){
-		rstr += "旅行团号不能为空!";
 	}
 	if(teamtype == ''){rstr += "请选择团队类型!";}
 	if(!remark){
@@ -588,7 +587,7 @@ $("#preteam").bind("click",function(){
 			  pre	= 1,
 			  param = "";/*付款但不排座*/
 		  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","teamno":"'+teamno+'","teamtype":"'+teamtype+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","tour":'+tour+',"teamtype":"'+teamtype+'","settlement":"'+USER_INFO.group.settlement+'"}';
 		  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
 		
 		  /*提交到服务器*/

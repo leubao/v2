@@ -192,7 +192,7 @@ function check_idcard(code) {
           }
       }
   }
-  //if(!pass) alert(tip);
+  if(!pass) alert(tip);
   return pass;
 }
 /**
@@ -208,9 +208,6 @@ function check_idcard_area(code,area,actid) {
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
         var site = code.substr(0,length);
-        //var log = 'length:'+length+'code:'+code+'site:'+site+'item:'+area[i]+'area:'+area.length;
-        //console.log(log);
-        //console.log(site === area[i]);
         if(site === area[i]){
           //发送到服务器验证 TODO
           $.ajax({
