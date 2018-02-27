@@ -32,8 +32,8 @@
         <td>渠道商(业务员)</td>
         <td colspan="3">{$data.channel_id|hierarchy}({$data.guide_id|userName=$data['addsid']})   
         <if condition="$proconf.black eq '1' AND $data['info']['param']['0']['guide_black'] neq 'undefined'">[导游手机号:{$data['info']['param']['0']['guide_black']}]</if>
-        <if condition="!empty($data['info']['param']['0']['teamno'])">
-          [ 团号: {$data.info.param.0.teamno}]
+        <if condition="!empty($data['info']['param']['0']['tour'])">
+          [ 客源地: {$data.info.param.0.tour|provinces}]
         </if>
         <if condition="!empty($data['info']['param']['0']['car'])">
           [ 车牌号: {$data.info.param.0.car} ] 

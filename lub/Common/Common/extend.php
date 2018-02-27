@@ -2086,6 +2086,13 @@ function industry($param,$type = ''){
        echo $return;
     }   
 }
+/**
+ * 客源地 
+ */
+function provinces($param = null){
+    $provinces = F('Province');
+    echo $provinces[$param]['name'];
+}
 /*
 *预约团队类型
 */
