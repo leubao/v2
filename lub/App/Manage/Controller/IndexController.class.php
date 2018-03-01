@@ -206,6 +206,7 @@ class IndexController extends ManageBase {
         }
         $ifadd = I('ifadd');
         $level = I('level') ? I('level') : '16';//默认为一级代理商
+        $map['status'] = '1';
         $map['level'] = $level;
         $this->basePage('Crm',$map,array('id'=>'ASC'),10);
         $this->assign("ifadd",$ifadd)->display();

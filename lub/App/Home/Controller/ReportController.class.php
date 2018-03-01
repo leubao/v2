@@ -198,7 +198,7 @@ class ReportController extends Base{
 		//$where['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
 		//$where['product_id'] = $uinfo['product'];
 		//dump($where);
-		$list = $db->where($where)->select();//dump($list);
+		$list = $db->where($where)->field('datetime,order_sn,games,area,guide_id,createtime,region,pay,type,plantime,games,user_id,status',true)->select();//dump($list);
 		if($sum_det == '1'){
 			$ticket_fold = Report::channel_plan_fold($list);
 			//根据计划汇总
@@ -406,7 +406,7 @@ class ReportController extends Base{
         $map['status'] = '1';
         $db = M('ReportData');
 		//$map['product_id'] = $uInfo['product'];
-		$list = $db->where($map)->order('plantime ASC,games')->select();
+		$list = $db->where($map)->order('plantime ASC,games')->field('datetime,order_sn,games,area,guide_id,createtime,region,pay,type,plantime,games,user_id,status',true)->select();
 		if($sum_det == '1'){
 			$list = Report::channel_plan_fold($list);
 		}else{
