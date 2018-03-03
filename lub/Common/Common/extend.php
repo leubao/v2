@@ -414,7 +414,7 @@ function planShows($param){
                 if($proconf['plan_start_time'] == '1'){
                     $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场,开演时间".date('H:i',$plan['starttime']);
                 }else{
-                    $name = date('m月d日',$plan['plantime'])."第".$plan['games']."场";
+                    $name = date('m月d日',$plan['plantime']).date('H:i',$plan['starttime']);
                 }
                 break;
             case '2':
@@ -1558,6 +1558,7 @@ function crmName($param,$type=NULL){
         $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;
         $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
+        
         $sn = $code."^#";
         //条码号
         if($proconf['barcode'] == '1'){

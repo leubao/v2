@@ -436,7 +436,7 @@ class OrderController extends ManageBase{
 		*/
 		$config = load_payment('wx_bar',$product_id);
 		//记录支付日志
-		payLog();
+		//payLog();
 		try {
 			$payData['auth_code'] = $paykey;
 		    $ret = Charge::run('wx_bar', $config, $payData);
@@ -634,7 +634,9 @@ class OrderController extends ManageBase{
 	function row_seat(){
 		if(IS_POST){
 			$pinfo = $_POST['info'];
-			if(Order::govSeat($pinfo)){
+			$order = new Order();
+			$run = $order->govSeat($pinfo);
+			if($run != false){
 				$return = array(
 					'statusCode' => '200',
 					'message'	 => "排座成功",
@@ -672,10 +674,10 @@ class OrderController extends ManageBase{
 				die(json_encode($return));
 			}else{
 				$list = Operate::do_read('Order',0,$map,'','',true);
-				$info = unserialize($list['info']);
+				$info = unserialize($list['info']);//dump($info);
 				foreach ($info['data']['area'] as $key => $value) {
 					$area[]=array(
-						'area' => $key,
+						'area' => $value['areaId'],
 						'num'  => $value['num'],
 						'priceid' => $value['seat'][0]['priceid'],
 						'price' => $value['seat'][0]['price'],
@@ -701,18 +703,18 @@ class OrderController extends ManageBase{
 		$ginfo = I('get.');
 		if(empty($ginfo)){$this->erun('参数错误!');}
 		$map = array(
-			'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+			'product_id'=>get_product('id'),
 			'order_sn' => $ginfo['sn'],
 		);
 		$list = Operate::do_read('Order',0,$map,'','',true);
 		if($list['status'] == '1' || $list['status'] == '9' ){
 			$this->erun("该订单已完成排座，或已打印,请从订单管理中查询此订单!");
 		}else{
-			$info = unserialize($list['info']);
+			$info = unserialize($list['info']);dump($info);
 			foreach ($info['data']['area'] as $key => $value) {
 				if($ginfo['num'] == $value['num']){
-					$ginfo['priceid'] = $value['seat'][0]['priceid'];
-					$ginfo['price'] = $value['seat'][0]['price'];
+					$ginfo['priceid'] = $value['priceid'];
+					$ginfo['price'] = $value['price'];
 				}
 			}
 			//加载座椅

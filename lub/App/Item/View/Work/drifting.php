@@ -78,7 +78,7 @@
             <tr>
                 <td align='right'>渠道商:</td>
                 <td><input type="hidden" name="channel.id" value="">
-                    <input type="text" name="channel.name" disabled value="" size="20" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel');}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
+                    <input type="text" name="channel.name" disabled value="" size="20" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel',array('full'=>1));}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
                 </td>
             </tr>
             <tr>

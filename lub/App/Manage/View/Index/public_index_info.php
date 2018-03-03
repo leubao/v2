@@ -85,7 +85,7 @@
         </ul>
       </div>
     </div>
-    <!--折线图-->
+    <!--折线图
     <div style="mini-width:400px;height:350px" data-toggle="echarts" data-type="line,bar" data-url="http://ticket.leubao.com/bar.json"></div>
     <div class="widget-box recommended-apps">
       <div class="widget-box-header">
@@ -117,11 +117,13 @@
           </div>
       </div>
     </div>
+    -->
   </div>
   <div class="col-md-4">
     <div class="service-hotline">
       电话协助：0314 - 2157 - 042
     </div>
+    <!--
     <div class="ui-box widget-box widget-cms-list">
       <div class="widget-box-header">
           <h4 class="widget-box-title">帮助中心</h4>
@@ -141,6 +143,7 @@
         </ul>
       </div>
     </div>
+  -->
     <div class="alert alert-info" role="alert" style="margin:0 0 5px; padding:5px 15px;">
       <strong>常用软件下载</strong>
       <h5>打印插件 : <a href="http://ticket.leubao.com/d/print_32.exe" target="_blank">32位</a>　|

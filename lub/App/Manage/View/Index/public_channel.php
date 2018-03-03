@@ -5,7 +5,7 @@
         <input type="hidden" name="pageSize" value="{$numPerPage}" />
         <input type="hidden" name="ifadd" value="{$ifadd}" />
         <div class="bjui-searchBar">
-            <label>名称：</label><input type="text" value="" name="name" size="10" />&nbsp;
+            <label>名称：</label><input type="text" value="{$pinfo['name']}" name="name" size="10" />&nbsp;
             <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
             <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>&nbsp;
             <if condition="$ifadd eq '1'">
@@ -33,8 +33,13 @@
                 <tr>
                     <td>{$vo.id}</td>
                     <td>{$vo.name}</td>
-                    <td><input type="checkbox" name="ids" data-toggle="icheck" value="{id:'{$vo.id}', name:'{$vo.name}'}"></td>
-                    <td align="center"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.name}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></td>
+                    <td>
+                        <input type="checkbox" name="ids" <if condition="$vo['status'] neq 1">disabled=""</if> data-toggle="icheck" value="{id:'{$vo.id}', name:'{$vo.name}'}"></td>
+                    <td align="center">
+                        <if condition="$vo['status'] eq 1">
+                        <a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.name}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a>
+                        </if>
+                    </td>
                 </tr>               
             </volist>
         </tbody>
@@ -53,7 +58,11 @@
                 <tr>
                     <td>{$vo.id}</td>
                     <td>{$vo.name}</td>
-                    <td align="center"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.name}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></td>
+                    <td align="center">
+                        <if condition="$vo['status'] eq 1">
+                        <a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.name}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a>
+                        </if>
+                    </td>
                 </tr>               
             </volist>
         </tbody>

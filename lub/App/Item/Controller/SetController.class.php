@@ -145,7 +145,7 @@ class SetController extends ManageBase{
 	 * 渠道座椅
 	 */
 	function auto_seat(){
-		$this->basePage('AutoSeat',array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE')),'sort ASC');
+		$this->basePage('AutoSeat',array('product_id'=>get_product('id')),'id DESC,sort ASC');
 		$this->display();
 	}
 	

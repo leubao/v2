@@ -871,10 +871,9 @@ class Order extends \Libs\System\Service {
 		/*==============================自动排座开始 start =============================================*/
 		if($is_seat == '1'){
 			foreach ($seat['area'] as $k=>$v){
-
 				//检测是否有足够的座位 TODO   智能排座
 				if(!empty($plan_param['auto_group'])){
-					$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$k,$v['num'],$plan['product_id'],$plan['seat_table']);
+					$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$v['areaId'],$v['num'],$plan['product_id'],$plan['seat_table']);
 				}else{
 					$auto[$k] = "0";
 				}
@@ -906,10 +905,10 @@ class Order extends \Libs\System\Service {
 				if($info['type'] == '2' || $info['type'] == '4' && $ticketType[$v['priceid']]['param']['quota'] <> '1'){
 					$quota_num += $va['num'];
 				}
-				$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
+				$status[$k] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
 				/*以下代码用于校验*/
 				$money = $money+$ticketType[$v['priceid']]['discount']*$v['num'];
-				if(empty($status[$ke])){
+				if(empty($status[$k])){
 					//error_insert('400009');
 					$model->rollback();//事务回滚
 					$this->error = '400009 : 排座失败';
@@ -927,58 +926,6 @@ class Order extends \Libs\System\Service {
 				//统计订单座椅个数
 				$number = (int)$number+$v['num'];
 				if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
-
-
-
-				/*循环区域
-				$count[$k] = count($v['seat']);//统计座椅个数
-				foreach($v['seat'] as $ke=>$va){
-					//检测是否有足够的座位 TODO   智能排座
-					if(!empty($plan_param['auto_group'])){
-						$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$k,$va['num'],$plan['product_id'],$plan['seat_table']);
-					}else{
-						$auto[$k] = "0";
-					}
-					//写入数据
-					$map = array(
-						'area' => $k,
-						'group' => $auto[$k] ?  array('in',$auto[$k]) : '0',
-						'status' => array('eq',0),
-					);
-					$data = array(
-						'order_sn'=> $info['order_sn'],
-						'soldtime'=> $createtime,
-						'status'  => '2',
-						'price_id'=> $va['priceid'],
-						'idcard'  => strtoupper($va['idcard']),
-						'sale'    => serialize(array('priceid'=>$va['priceid'],'price'=>$va['price'])),//售出信息 票型  单价
-					);
-					//计算消耗配额的票型 只有团队订单时才执行此项操作 21060118
-					if($info['type'] == '2' || $info['type'] == '4' && $ticketType[$va['priceid']]['param']['quota'] <> '1'){
-						$quota_num += $va['num'];
-					}
-					$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
-					/*以下代码用于校验*
-					$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
-					if(empty($status[$ke])){
-						//error_insert('400009');
-						$model->rollback();//事务回滚
-						$this->error = '400009 : 排座失败';
-						return false;
-						break;
-					}
-					/*
-					$log[$k] = $count[$k] .'-'.  $ke;
-					dump($ke);
-					TODO  这里似乎没有任何意义
-					if($count[$k] == $ke+1){
-						$flag = true;
-					}*
-					$flag = true;
-					//统计订单座椅个数
-					$number = (int)$number+$va['num'];
-					if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
-				}*/
 				//按区域发送短信
 				if($proconf['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
 			}
@@ -1217,17 +1164,19 @@ class Order extends \Libs\System\Service {
 		$seat = $param['data'];
 		//读取订单对应计划
 		$plan = F('Plan_'.$oinfo['plan_id']);
+
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
 		$plan_param = unserialize($plan['param']);
 		$ticketType = F("TicketType".$plan['product_id']);//dump($seat);
 		foreach ($seat['area'] as $k=>$v){
 			//检测是否有足够的座位 TODO   智能排座
+			
 			if(!empty($plan_param['auto_group'])){
 				$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$v['areaId'],$v['num'],$plan['product_id'],$plan['seat_table']);
 			}else{
 				$auto[$k] = "0";
-			}
+			}//dump($v);
 			//写入数据
 			$map = array(
 				'area' => $v['areaId'],
@@ -1241,12 +1190,12 @@ class Order extends \Libs\System\Service {
 					'price_id' => $v['priceid'],
 					'sale'    => serialize(array('priceid'=>$v['priceid'],'price'=>$v['price'])),//售出信息 票型  单价
 			);
-			$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
+			$status[$k] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
 			//计算订单返佣金额
 			$rebate = $rebate+$ticketType[$v['priceid']]['rebate']*$v['num'];
 			/*以下代码用于校验*/
 			$money = $money+$ticketType[$v['priceid']]['discount']*$v['num'];
-			if(empty($status[$ke])){
+			if(empty($status[$k])){
 				$model->rollback();//事务回滚
 				$this->error = '400009 : 排座失败';
 				return false;
@@ -1259,51 +1208,10 @@ class Order extends \Libs\System\Service {
 			//统计订单座椅个数
 			$number = (int)$number+$v['num'];
 			//按票型发送短信
-			if($proconf[$plan['product_id']]['1']['ticket_sms']){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
-
-			/*循环区域
-			$count[$k] = count($v['seat']);//统计座椅个数
-			foreach($v['seat'] as $ke=>$va){
-				//检测是否有足够的座位 TODO   智能排座
-				if(!empty($plan_param['auto_group'])){
-					$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$k,$va['num'],$plan['product_id'],$plan['seat_table']);
-				}else{
-					$auto[$k] = "0";
-				}
-				//写入数据
-				$map = array(
-					'area' => $k,
-					'group' => $auto[$k] ?  array('in',$auto[$k]) : '0',
-					'status' => array('eq',0),
-				);
-				$data = array(
-						'order_sn'=> $oinfo['order_sn'],
-						'soldtime'=> $createtime,
-						'status'  => '2',
-						'price_id' => $va['priceid'],
-						'sale'    => serialize(array('priceid'=>$va['priceid'],'price'=>$va['price'])),//售出信息 票型  单价
-				);
-				$status[$ke] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($va['num'])->lock(true)->save($data);
-				//计算订单返佣金额
-				$rebate = $rebate+$ticketType[$va['priceid']]['rebate']*$va['num'];
-				/*以下代码用于校验*
-				$money = $money+$ticketType[$va['priceid']]['discount']*$va['num'];
-				if(empty($status[$ke])){
-					$model->rollback();//事务回滚
-					$this->error = '400009 : 排座失败';
-					return false;
-					break;
-				}
-				if($count[$k] == $ke+1){
-					$flag=true;
-				}
-				//统计订单座椅个数
-				$number = (int)$number+$va['num'];
-				//按票型发送短信
-				if($proconf[$plan['product_id']]['1']['ticket_sms']){$msg = $msg.$ticketType[$va['priceid']]['name'].$va['num']."张";}
-			}*/
+			if($proconf['ticket_sms']){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
+	
 			//按区域发送短信
-			if($proconf[$plan['product_id']]['1']['area_sms']){$msg = $msg.areaName($v['areaId'],1).$v['num']."张";}
+			if($proconf['area_sms']){$msg = $msg.areaName($v['areaId'],1).$v['num']."张";}
 		}
 		/*金额校验
 		if($money == $info['subtotal']){

@@ -197,19 +197,17 @@ class IndexController extends ManageBase {
     }
     /*获取渠道商*/
     function public_channel(){
-        if(IS_POST){
-            if($_POST["name"] != ""){
-                $map["name"] = array('like','%'.$_POST["name"].'%');
-                $map['product_id'] = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
-                $this->assign("name",$_POST["name"]);
-            }
+        $pinfo = I('post.');
+        if(!empty($pinfo['name'])){
+            $map["name"] = array('like','%'.$pinfo["name"].'%');
         }
         $ifadd = I('ifadd');
         $level = I('level') ? I('level') : '16';//默认为一级代理商
-        $map['status'] = '1';
+        //是否可选择已停用的  1 限制加载  0 无限制加价
+        $full = I('full') ? I('full') : '0';
         $map['level'] = $level;
         $this->basePage('Crm',$map,array('id'=>'ASC'),10);
-        $this->assign("ifadd",$ifadd)->display();
+        $this->assign("ifadd",$ifadd)->assign('full',$full)->display();
 
     }
     /*获取员工*/

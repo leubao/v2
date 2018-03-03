@@ -37,8 +37,8 @@
                     <td>{$i}</td>
                     <td>{$vo.nickname}</td>
                     <td></td>
-                    <td><input type="checkbox" name="ids" data-toggle="icheck" value="{id:'{$vo.id}', name:'{$vo.nickname}'}"></td>
-                    <td align="center"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.nickname}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></td>
+                    <td><input type="checkbox" name="ids" <if condition="$vo['status'] neq 1">disabled=""</if> data-toggle="icheck" value="{id:'{$vo.id}', name:'{$vo.nickname}'}"></td>
+                    <td align="center"><if condition="$vo['status'] eq 1"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.nickname}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></if></td>
                 </tr>               
             </volist>
         </tbody>
@@ -59,7 +59,7 @@
                     <td>{$i}</td>
                     <td>{$vo.nickname}</td>
                     <td></td>
-                    <td align="center"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.nickname}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></td>
+                    <td align="center"><if condition="$vo['status'] eq 1"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.nickname}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></if></td>
                 </tr>               
             </volist>
         </tbody>

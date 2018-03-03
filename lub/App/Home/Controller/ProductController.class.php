@@ -76,7 +76,7 @@ class ProductController extends Base{
 		$pinfo = json_decode($_POST['info'],true);
 		$plantime = strtotime($pinfo['plantime']);
 		$pro_conf = $this->pro_conf($pinfo['product']);
-		//开启预约
+		/*开启预约*/
 		if($pro_conf['channel_pre_team'] > 0){
 			//读取可预约日期
 			$pretime = strtotime(date('Ymd',strtotime('+'.$pro_conf['channel_pre_team'].' day')));
@@ -162,6 +162,10 @@ class ProductController extends Base{
 		
 		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,$pinfo['sale']);
 		*/
+		//根据区域加载门票
+		if($pinfo['method'] == 'ordinary'){
+			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale']);
+		}
 		//常规根据计划、区域、产品类型获取销售价格
 		if($pinfo['method'] == 'general'){
 			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale']);
