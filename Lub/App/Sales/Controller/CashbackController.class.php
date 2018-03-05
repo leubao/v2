@@ -183,7 +183,6 @@ class CashbackController extends ManageBase{
             'mch_billno'        =>  $info['sn'],//商户订单号
             'send_name'         =>  $product['name'],//商户名称
             're_openid'         =>  $info['openid'],//用户openid
-            'payer_real_name'   => userName($info['user_id'],1,1),
             'total_amount'      =>  $info['money'],//付款金额
             'total_num'         =>  '1',//红包发放总人数
             'wishing'           =>  '感谢参与'.$product['name'].'利润分享计划！',//红包祝福语

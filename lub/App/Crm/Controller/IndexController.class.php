@@ -306,7 +306,7 @@ class IndexController extends ManageBase{
                 'groupid' => $info['groupid'],
                 "password" => md5($password.md5($verify)),
                 'status' => '1',
-                'remark' => '窗口增加...'
+                'remark' => $info['remark']
             );
             $user_id = D('User')->add($data);
             if($user_id){

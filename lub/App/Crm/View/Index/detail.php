@@ -58,7 +58,6 @@
   </table>
 <else />
 <!-- 个人客户 -->
-<?php dump($data);?>
   <table class="table table-striped table-bordered table-hover">
     <tbody>
       <tr>
