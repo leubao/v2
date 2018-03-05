@@ -21,12 +21,8 @@ class RedController extends ManageBase{
      */
     public function index()
     {
-    	$ginfo = I('get.');
-        if(!empty($ginfo['id'])){
-            $map['user_id'] = $ginfo['id'];
-        }
-		$this->basePage('RedTpl',$map,array('id'=>'DESC'));
-		$this->assign('ginfo',$ginfo)->display();
+		$this->basePage('RedTpl','',array('id'=>'DESC'));
+		$this->display();
     }
     /**
      * 新增模板
@@ -37,7 +33,21 @@ class RedController extends ManageBase{
    	public function add()
    	{
    		if(IS_POST){
-
+   			$pinfo = I('post.');
+   			if(mb_strlen($pinfo['act_name'], 'utf8') > 10){$this->erun('活动名称超过10个汉字');}
+   			if(mb_strlen($pinfo['send_name'], 'utf8') > 10){$this->erun('商家名称超过10个汉字');}
+   			if(mb_strlen($pinfo['wishing'], 'utf8') > 20){$this->erun('商家名称超过20个汉字');}
+   			if(mb_strlen($pinfo['remark'], 'utf8') > 20){$this->erun('商家名称超过20个汉字');}
+   			$model = D('Sales/RedTpl');
+   			if($model->create($pinfo)){
+   				if($model->add()){
+   					$this->srun("新增成功".mb_substr($pinfo['act_name'], 'utf8'),array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+   				}else{
+   					$this->erun("新增失败");
+   				}
+   			}else{
+   				$this->erun("新增失败");
+   			}
    		}else{
    			$this->display();
    		}
@@ -52,7 +62,7 @@ class RedController extends ManageBase{
    	{
    		if(IS_POST){
 			$pdata = I('post.');
-			if(D('Sales/RedTpl')->field('quota,task,id')->save($pdata)){
+			if(D('Sales/RedTpl')->save($pdata)){
 				$this->srun("更新成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun("更新失败");
@@ -78,27 +88,11 @@ class RedController extends ManageBase{
    	{
    		$id = I('get.id',0,intval);
 		if(!empty($id)){
-			//作废记录
-			$model = new \Common\Model\Model();
-			$model->startTrans();
-			//读取记录
-			$info = M('RedTpl')->where(array('id'=>$id))->find();
-			if(empty($info) || $info['status'] == '0'){
-				$this->erun("考核对象当前状态不允许此项操作");
-			}
-			$up_channel = array(
-				'update_time'	=>	time(),
-				'status'		=>	'0'
-			);
-			$kpi = $model->table(C('DB_PREFIX').'kpi_channel')->where(array('id'=>$id))->save($up_channel);
 			$updata = array('status'=>'0','update_time' => time());
-			$water = $model->table(C('DB_PREFIX')."kpi_Water")->where(array('crm_id'=>$info['crm_id']))->setField($updata);
-			if($water && $kpi){
-				$model->commit();//提交事务
+			$status = D('Sales/RedTpl')->where(array('id'=>$id))->setField($updata);
+			if($status){
 				$this->srun('作废成功',array('tabid'=>$this->menuid.MODULE_NAME));
 			}else{
-				error_insert('410008');
-				$model->rollback();//事务回滚
 				$this->erun('作废失败!');
 			}
 		}else{

@@ -1635,6 +1635,12 @@ function crmName($param,$type=NULL){
         }
         return $userid;
     }
+    //返回当前用户的商户编号
+    function get_item_id()
+    {
+        $itemid = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
+        return $itemid;
+    }
     /**
      * 返回当前产品或根据产品ID 返回产品详情
      * @param  string $type       id  或 info
