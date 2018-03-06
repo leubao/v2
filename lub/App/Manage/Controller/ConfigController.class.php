@@ -224,11 +224,6 @@ class ConfigController extends ManageBase {
             $this->display();
         }
     }
-    //第三方支付
-    function pays()
-    {
-        # code...
-    }
     //云鹿作为销售终端
     function third_sales(){
         //获取当前产品
@@ -262,5 +257,10 @@ class ConfigController extends ManageBase {
                 ->assign('ticket_group',$ticket_group)
                 ->display();
         }
+    }
+    //商户配置
+    public function item_config()
+    {
+        
     }
 }

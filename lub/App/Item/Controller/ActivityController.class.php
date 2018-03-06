@@ -214,7 +214,7 @@ class ActivityController extends ManageBase{
 			$ginfo = I('get.');
 			if(empty($ginfo)){$this->erun('参数错误!');}
 			$map = array(
-				'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),
+				'product_id'=>get_product('id'),
 				//'status'=>6,//只查询未出票的订单
 				'order_sn' => $ginfo['id'],
 			);
@@ -228,7 +228,7 @@ class ActivityController extends ManageBase{
 		$ginfo = I('get.');
 		if(empty($ginfo)){$this->erun('参数错误!');}
 		$map = array(
-			'product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE')
+			'product_id'=>get_product('id')
 		);
 
 		$info = M('Area')->where(array('id'=>$ginfo['area'],'status'=>1))->field('id,name,face,is_mono,seats,num,template_id')->find();
@@ -242,56 +242,4 @@ class ActivityController extends ManageBase{
 	 //新增优惠券
 	 //编辑优惠券
 	 //删除优惠券
-	/**
-     * 领水记录
-     * @return [type] [description]
-     */
-    function water(){
-    	//$this->basePage('ActivityWater','','createtime DESC');
-    	$this->basePage('User',array('type'=>1),'create_time DESC');
-    	$this->display();
-    }
-    CREATE TABLE `lub_activity_water` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `user_id` int(8) NOT NULL COMMENT '操作人员',
-  `member_id` int(8) NOT NULL COMMENT '领取人员',
-  `type` tinyint(1) unsigned NOT NULL COMMENT '1领取2 返还',
-  `number` int(5) NOT NULL COMMENT '水的瓶数',
-  `status` tinyint(1) NOT NULL COMMENT '状态',
-  `createtime` int(11) NOT NULL COMMENT '创建时间',
-  `remark` varchar(320) NOT NULL COMMENT '备注',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `id` (`id`) USING HASH,
-  KEY `user` (`user_id`,`member_id`) USING HASH
-) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='送水活动'
-    /**
-     * 给导游充值
-     */
-    function add_water(){
-        //查询可领水数  通过二维码的有效关注数
-        //已经领水数 
-        if(IS_POST){
-        	$model = D('ActivityWater');
-        	if($model->create()){
-        		if($model->add()){
-        			$this->srun("新增成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-		 		}else{
-		 			$this->erun("新增失败!");
-		 		}
-        	}else{
-        		$error = $model->getError();
-                $this->error($error? : '添加失败！');
-        	}
-        }else{
-        	$ginfo = I('get.');
-        	$this->assign('ginfo',$ginfo)->display();
-        }
-    }
-    /**
-     * 领水日志
-     */
-    function water_log(){
-    	$this->basePage('ActivityWater','','createtime DESC');
-    	$this->display();
-    }
 }

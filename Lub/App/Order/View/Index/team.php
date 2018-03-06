@@ -72,7 +72,7 @@
         <th align="center">操作</th>
       </tr>
     </thead>
-    <tbody id="order-list">
+    <tbody id="order-team-list">
     <volist name="data" id="vo">
       <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" data-money="{$vo.money}">
         <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
@@ -90,8 +90,8 @@
      <tr>
      <td></td>
      <td align="right">当前页合计:</td>
-     <td id="sub-num" align="center">0</td>
-     <td id="sub-money" align="right">0.00</td>
+     <td id="sub-team-num" align="center">0</td>
+     <td id="sub-team-money" align="right">0.00</td>
      <td></td><td></td><td></td><td></td><td></td></tr>
     </tbody>
   </table>
@@ -100,15 +100,15 @@
 $(document).ready(function() {
   var sub_num = 0,
       sub_money = 0;
-  $('#order-list tr').each(function(i){
+  $('#order-team-list tr').each(function(i){
     if($(this).data('num') != null){
       sub_num += parseInt($(this).data('num'));
       sub_money += parseFloat($(this).data('money'));
     }
   });
   sub_money = sub_money.toFixed(2);
-  $("#sub-num").html(sub_num);
-  $("#sub-money").html(sub_money);
+  $("#sub-team-num").html(sub_num);
+  $("#sub-team-money").html(sub_money);
 });
 </script>
 <div class="bjui-pageFooter">

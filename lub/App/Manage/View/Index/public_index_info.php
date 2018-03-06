@@ -4,6 +4,7 @@
 </div>
 <div class="bjui-pageContent">
   <div class="col-md-8">
+    <h4><i class="fa fa-bank"></i> {$userInfo.item_id|itemName}</h4>
     <h4 style="margin-bottom:20px;">
       当前用户:{$userInfo.nickname}  <small>{$role_name}</small>  当前产品:{$pid|product_name}
     </h4>

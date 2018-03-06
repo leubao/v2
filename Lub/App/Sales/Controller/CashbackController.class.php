@@ -37,7 +37,6 @@ class CashbackController extends ManageBase{
             $info = $db->where(array('id'=>$pinfo['id'],'status'=>3))->find();
             if(!empty($info)){
                 $db->where(array('id'=>$pinfo['id']))->save(array('win_remark'=>$pinfo['remark'],'userid'=>get_user_id()));
-                $product = get_product('info');
                 $procofig = $this->procofig[$product['id']][8];
                 //微信企业付款
                 if($procofig['rebate_pay'] == '1'){
@@ -82,10 +81,10 @@ class CashbackController extends ManageBase{
                         }
                         //构建红包基础数据,并发送红包
                         foreach ($redInfo as $k => $v) {
-                            $postData = $this->pay_red($v,$product);
+                            $postData = $this->pay_red($v);
                         }
                     }else{
-                        $postData = $this->pay_red($info,$product);
+                        $postData = $this->pay_red($info);
                     }
                     $this->pay_red_susess($info);
                     $this->srun("红包创建成功,等待领取...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
@@ -177,23 +176,31 @@ class CashbackController extends ManageBase{
         return $postData;
     }
     //微信红包返款
-    function pay_red($info,$product){
+    function pay_red($info){
         /*
+        */
+        /*发起支付*/
+        //读取红包模板
+        $item_id = get_item('id');
+        $itemCof = cache('');
+        $redTpl = D('RedTpl')->where(['status'=>1,'item_id'=>$item_id])->field('create_time,user_id,id,status',true)->find();
+
         $postData = [
             'mch_billno'        =>  $info['sn'],//商户订单号
-            'send_name'         =>  $product['name'],//商户名称
+            'send_name'         =>  $redTpl['send_name'],//商户名称
             're_openid'         =>  $info['openid'],//用户openid
             'total_amount'      =>  $info['money'],//付款金额
             'total_num'         =>  '1',//红包发放总人数
-            'wishing'           =>  '感谢参与'.$product['name'].'利润分享计划！',//红包祝福语
+            'wishing'           =>  $redTpl['wishing'], //'感谢参与'.$product['name'].'利润分享计划！',//红包祝福语
             'client_ip'         =>  get_client_ip(),//Ip地址
-            'act_name'          =>  "利润分享计划",//活动名称
-            'remark'            =>  '感谢参与'.$product['name'].'利润分享计划！',//备注
-            'scene_id'          =>  'PRODUCT_6',//发放红包使用场景，红包金额大于200时必传PRODUCT_1:商品促销PRODUCT_2:抽奖PRODUCT_3:虚拟物品兑奖 PRODUCT_4:企业内部福利PRODUCT_5:渠道分润PRODUCT_6:保险回馈PRODUCT_7:彩票派奖PRODUCT_8:税务刮奖
-            'consume_mch_id'=>  '', //
-        ];*/
-        /*发起支付*/
-        
+            'act_name'          =>  $redTpl['act_name'],//"利润分享计划",//活动名称
+            'remark'            =>  $redTpl['remark'],//'感谢参与'.$product['name'].'利润分享计划！',//备注
+            'scene_id'          =>  $redTpl['scene_id']
+        ];
+
+        $pay = load_payment('wx_red',$item_id);
+
+
         $wishing = '感谢参与'.$product['name'].'利润分享计划！';
         $actname = "利润分享计划";
         $remark = '感谢参与'.$product['name'].'利润分享计划！';

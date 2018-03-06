@@ -76,6 +76,7 @@ class IndexController extends ManageBase {
         ];
         $this->assign('totup',$totup);
         //商户配置，是否开启年卡
+        
         //年卡统计
         $year_count = D('Member')->where(['status'=>1])->count();
         //年卡今日办理
