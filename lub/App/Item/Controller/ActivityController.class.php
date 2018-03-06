@@ -251,6 +251,19 @@ class ActivityController extends ManageBase{
     	$this->basePage('User',array('type'=>1),'create_time DESC');
     	$this->display();
     }
+    CREATE TABLE `lub_activity_water` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `user_id` int(8) NOT NULL COMMENT '操作人员',
+  `member_id` int(8) NOT NULL COMMENT '领取人员',
+  `type` tinyint(1) unsigned NOT NULL COMMENT '1领取2 返还',
+  `number` int(5) NOT NULL COMMENT '水的瓶数',
+  `status` tinyint(1) NOT NULL COMMENT '状态',
+  `createtime` int(11) NOT NULL COMMENT '创建时间',
+  `remark` varchar(320) NOT NULL COMMENT '备注',
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `id` (`id`) USING HASH,
+  KEY `user` (`user_id`,`member_id`) USING HASH
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8 COMMENT='送水活动'
     /**
      * 给导游充值
      */
