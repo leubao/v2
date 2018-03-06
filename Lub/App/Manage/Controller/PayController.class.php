@@ -15,10 +15,10 @@ class PayController extends ManageBase {
 	//配置第三方支付
 	function index()
 	{
-		$db = M("ConfigProduct");   //产品设置表 
-		$type = '11';
-		$product_id = (int)get_product('id');
-		$list = $db->where(array('product_id'=>$product_id,'type'=>$type))->select();
+		//$db = M("ConfigProduct");   //产品设置表 
+        $db = M("ConfigItem");   //产品设置表 
+		$item_id = (int)get_item('id');
+		$list = $db->where(array('item_id'=>$item_id))->select();
 		foreach ($list as $k => $v) {
 			$config[$v["varname"]] = $v["value"];
 		}
@@ -35,18 +35,17 @@ class PayController extends ManageBase {
                 }
                 $saveData = array($config,);
                 $saveData["value"] = trim($value);
-                $count = $db->where(array("varname"=>$key,'type'=>$type,'product_id'=>$product_id))->count();
+                $count = $db->where(array("varname"=>$key,'type'=>$type,'item_id'=>$item_id))->count();
                 $ginfo = array();   
                 if ($count == 0) {//此前无此配置项
-                    if($key!="__hash__"&&$key!="product_id"&&$key!='type'){
+                    if($key!="__hash__"&&$key!="item_id"&&$key!='type'){
                         $ginfo["varname"] = $key;
                         $ginfo["value"]   = trim($value);
-                        $ginfo["product_id"] = $product_id;
-                        $ginfo["type"]  =   $type;
+                        $ginfo["item_id"] = $item_id;
                         $add = $db->add($ginfo);
                     }
                 }else{
-                    if ($db->where(array("varname" => $key,'product_id'=>$product_id,'type'=>$type))->save($saveData) === false) {
+                    if ($db->where(array("varname" => $key,'item_id'=>$item_id))->save($saveData) === false) {
                         $this->erun("更新到{$key}项时，更新失败！");
                         return false;
                     }                   
@@ -56,8 +55,8 @@ class PayController extends ManageBase {
             foreach ($diff_key as $key => $value) {
                 $saveData = array();
                 $saveData["value"] = '0';
-                $saveData["product_id"] = $product_id;
-                if ($db->where(array("varname" => $key,'type'=>$type))->save($saveData) === false) {
+                $saveData["item_id"] = $item_id;
+                if ($db->where(array("varname" => $key))->save($saveData) === false) {
                     $this->erun("更新到{$key}项时，更新失败！");
                     return false;
                 }
@@ -67,8 +66,8 @@ class PayController extends ManageBase {
 		}else{
             //加载几个文件路径
             $path = [
-                'w_cert' => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
-                'w_key'  => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
+                'w_cert' => SITE_PATH.'pay/wxpay/'.$item_id.'/apiclient_cert.pem',
+                'w_key'  => SITE_PATH.'pay/wxpay/'.$item_id.'/apiclient_key.pem',
             ];
 			$this->assign("vo",$config)->assign('path',$path)->display();
 		}

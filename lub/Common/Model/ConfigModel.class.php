@@ -261,9 +261,19 @@ class ConfigModel extends Model {
                     $product_data[$value['id']][$v['type']][$v['varname']] = $v['value'];
                 }
             }
-            //$product_data[$value['id']] = M("ConfigProduct")->where(array('product_id'=>$value['id']))->getField("varname,value");
         }
         cache("ProConfig",$product_data);
+        //缓存商户信息
+        $list = M('Item')->field('id')->select();
+        foreach ($list as $key => $value) {
+            $itemcof = M("ConfigItem")->where(array('item_id'=>$value['id']))->field("varname,value")->select();
+            if(!empty($itemcof)){
+                foreach ($itemcof as $k => $v) {
+                    $item_data[$value['id']][$v['varname']] = $v['value'];
+                }
+            }
+        }
+        cache("ItemConfig",$item_data);
         return $data;
     }
 

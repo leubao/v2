@@ -14,6 +14,6 @@ class RedTplModel extends Model {
 	protected $_auto = array(
         array('create_time', 'time', 1, 'function'),
         array('user_id','get_user_id',1,'function'),
-        array('item_id','get_item_id',1,'function'), 
+        array('item_id','get_item',1,'function'), 
     );
 }

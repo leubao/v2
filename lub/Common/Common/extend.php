@@ -1635,11 +1635,23 @@ function crmName($param,$type=NULL){
         }
         return $userid;
     }
-    //返回当前用户的商户编号
-    function get_item_id()
+    /**
+     * 返回当前用户的商户信息或根据产品ID 返回商户详情
+     * @param  string $type       id  或 info
+     * @param  int $product_id 产品id
+     * @return int || array 
+     */
+    function get_item($type = 'id',$item_id = '')
     {
-        $itemid = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
-        return $itemid;
+        if(empty($item_id)){
+           $item = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
+            if($type == 'info'){
+                $item = M('Item')->where(array('id'=>$item))->find();
+            }
+        }else{
+            $item = M('Item')->where(array('id'=>$item_id))->find();
+        }    
+        return $item;
     }
     /**
      * 返回当前产品或根据产品ID 返回产品详情

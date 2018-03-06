@@ -90,10 +90,6 @@ function getprice(plan,type,tooltype){
                               +"<td align='center'>"+ticket.area_num+"</td>"
                               +"</tr>";
                     }
-                    //活动
-                    if(type == '4'){
-
-                    }
                     
                 });
                 $("#tro").html(content); 

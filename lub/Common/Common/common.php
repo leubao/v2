@@ -778,6 +778,7 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
     return $wechat[$index];
 }
 /**
+ * 将根据产品获取，编程商户获取
  * 获取支付操作配置信息
  * @param $pay string ali_app  ali_wap  ali_web  ali_qr  ali_bar
  * || wx_app    wx_pub   wx_qr   wx_bar  wx_lite   wx_wap

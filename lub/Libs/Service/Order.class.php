@@ -925,9 +925,12 @@ class Order extends \Libs\System\Service {
 				$flag = true;
 				//统计订单座椅个数
 				$number = (int)$number+$v['num'];
-				if($proconf['ticket_sms'] == '1'){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
+
+				//按票型发送短信
+				if($proconf['ticket_sms']){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
+	
 				//按区域发送短信
-				if($proconf['area_sms'] == '1'){$msg = $msg.areaName($k,1).$v['num']."张";}
+				if($proconf['area_sms']){$msg = $msg.areaName($v['areaId'],1).$v['num']."张";}
 			}
 			/*座椅信息*/
 			$seatInfo = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(array('order_sn'=>$info['order_sn']))->field('order_sn,area,seat,sale,idcard')->select();
