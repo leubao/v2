@@ -82,10 +82,9 @@ class FullController extends ManageBase{
             $map = array('status'=>1,'type'=>4,'product_id'=>$product_id);
             $group = M('CrmGroup')->where($map)->field('id,name,price_group')->select();
             $oauth = & load_wechat('Oauth',$product_id,'1');
-            $redtpl = M('RedTpl')->where(['status'=>1])->field('id,act_name')->select();
             // 执行接口操作
             $reg = $oauth->getOauthRedirect(U('Wechat/Index/reg',array('pid'=>$product_id,'type'=>8)), $state, 'snsapi_userinfo');
-            $this->assign('group',$group)->assign('reg',$reg)->assign('redtpl',$redtpl)->display();
+            $this->assign('group',$group)->assign('reg',$reg)->display();
         }
     }
     //审核

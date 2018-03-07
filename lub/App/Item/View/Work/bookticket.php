@@ -36,9 +36,9 @@
         <th align="center">状态</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="order-book-list">
     <volist name="data" id="vo">
-      <tr data-id="{$vo.order_sn}">
+      <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" data-money="{$vo.money}">
         <td><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
         <td>{$vo.plan_id|planShow}</td>
         <td align="center">{$vo.addsid|addsid}（{$vo.type|channel_type}）</td>
@@ -50,9 +50,35 @@
         <td align="center">{$vo['status']|order_status}</td>
        </tr>
     </volist>
+    <tr>
+     <td></td>
+     <td></td>
+     <td align="right">当前页合计:</td>
+     <td id="sub-book-num" align="center">0</td>
+     <td id="sub-book-money" align="right">0.00</td>
+     <td></td>
+     <td></td>
+     <td></td>
+     <td></td>
+    </tr>
     </tbody>
   </table>
 </div>
+<script type="text/javascript">
+$(document).ready(function() {
+  var sub_num = 0,
+      sub_money = 0;
+  $('#order-book-list tr').each(function(i){
+    if($(this).data('num') != null){
+      sub_num += parseInt($(this).data('num'));
+      sub_money += parseFloat($(this).data('money'));
+    }
+  });
+  sub_money = sub_money.toFixed(2);
+  $("#sub-book-num").html(sub_num);
+  $("#sub-book-money").html(sub_money);
+});
+</script>
 <div class="bjui-pageFooter">
   <div class="pages">
     <span>共 {$totalCount} 条</span>

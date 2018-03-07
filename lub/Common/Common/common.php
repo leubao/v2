@@ -786,7 +786,8 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
  * @param $sub 是否开启子商户
  * @param $define 是否采用默认配置
  */
-function load_payment($pay = '',$product_id = ''){
+function load_payment($pay = ''){
+    /*
     static $payment = array();
     //根据产品读取配置信息
     if(empty($product_id)){
@@ -827,8 +828,8 @@ function load_payment($pay = '',$product_id = ''){
     }else{
         $notify_url = U('Api/PayNotify/wxnotify');
         $options = array(
-            'app_cert_pem'      => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
-            'app_key_pem'       => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
+            'app_cert_pem'      => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$product_id. DIRECTORY_SEPARATOR .'apiclient_cert.pem',
+            'app_key_pem'       => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$product_id DIRECTORY_SEPARATOR .'apiclient_key.pem',
             'sign_type'         => 'MD5',// MD5  HMAC-SHA256
             'limit_pay'         => [
                 //'no_credit',
@@ -841,7 +842,38 @@ function load_payment($pay = '',$product_id = ''){
     }
     $options = array_merge($basedata,$options);
     //根据支付类型选择驱动
-    return $options;
+    return $options;*/
+    //获取收银配置
+    $itemCof = get_item_conf('2');
+    //微信支付
+    if(stripos($pay, 'wx') !== false){
+        $config = cache('Config');
+        $domain = $config['siteurl'];
+        $itemid = get_item('id');
+        $options = [
+            'use_sandbox'       => true,// 是否使用 微信支付仿真测试系统
+            'submch'            => true,//是否开启微信服务商
+            'app_id'            => 'wx72bcf45e0f57a192',  // 公众账号ID
+            'mch_id'            => '1377282902',// 商户id
+            'sub_appid'         => $itemCof['wx_sub_appid'],//微信分配的子商户公众账号ID
+            'sub_mch_id'        => $itemCof['wx_sub_mchid'],// 微信支付分配的子商户号
+            'md5_key'           => $itemCof['wx_sub_mchkey'],// md5 秘钥
+            'app_cert_pem'      => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$itemid. DIRECTORY_SEPARATOR .'apiclient_cert.pem',
+            'app_key_pem'       => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$itemid.DIRECTORY_SEPARATOR .'apiclient_key.pem',
+            'sign_type'         => 'MD5',// MD5  HMAC-SHA256
+            'limit_pay'         => [
+            //'no_credit',
+            ],// 指定不能使用信用卡支付   不传入，则均可使用
+            'fee_type'          => 'CNY',// 货币类型  当前仅支持该字段
+
+            'notify_url'        => $domain.'notify/wx',
+
+            //'redirect_url'      => '',// 如果是h5支付，可以设置该值，返回到指定页面
+
+            'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
+        ];
+    }
+    
 }
 /**
  * lubTicket redis 操作API

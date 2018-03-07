@@ -1654,6 +1654,20 @@ function crmName($param,$type=NULL){
         return $item;
     }
     /**
+     * 获取当前商户配置信息
+     * @Company  承德乐游宝软件开发有限公司
+     * @Author   zhoujing      <zhoujing@leubao.com>
+     * @DateTime 2018-03-07
+     * @param    int        $param                配置类型
+     * @return   array
+     */
+    function get_item_conf($param = '1')
+    {
+        $item_id = get_item('id');
+        $itemCof = cache('ItemConfig');
+        return $itemCof[$item_id][$param];
+    }
+    /**
      * 返回当前产品或根据产品ID 返回产品详情
      * @param  string $type       id  或 info
      * @param  int $product_id 产品id

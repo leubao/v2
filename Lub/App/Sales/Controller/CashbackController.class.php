@@ -37,9 +37,10 @@ class CashbackController extends ManageBase{
             $info = $db->where(array('id'=>$pinfo['id'],'status'=>3))->find();
             if(!empty($info)){
                 $db->where(array('id'=>$pinfo['id']))->save(array('win_remark'=>$pinfo['remark'],'userid'=>get_user_id()));
-                $procofig = $this->procofig[$product['id']][8];
+                $itemCof = get_item_conf('1');
+                if(empty($itemCof)){$this->erun("商户配置信息获取失败,请重新登录...");}//dump($itemCof);
                 //微信企业付款
-                if($procofig['rebate_pay'] == '1'){
+                if($itemCof['rebate_pay'] == '1'){
                     $postData = $this->pay_red($info,$product);
                     /*发起支付*/
                     $config = load_payment('wx_transfer',$product['id']);
@@ -58,11 +59,11 @@ class CashbackController extends ManageBase{
                         error_insert($return['err_code']);
                         $this->erun("ERROR:".$return['return_msg'].$return['err_code'].$return['err_code_des']);
                     }
-                }
+                }dump($info);
                 //微信普通红包
-                if($procofig['rebate_pay'] == '2'){
+                if($itemCof['rebate_pay'] == '2'){
                     //注意200的限额
-                    if($info['money'] > '200'){
+                    if($info['money'] > 200){
                         //大于200拆分多个红包
                         $redNum = 1;
                         $redInfo[] = [
@@ -78,18 +79,17 @@ class CashbackController extends ManageBase{
                                 'openid'=> $info['openid'],
                             ];
                             $redNum += 1;
-                        }
+                        }//dump($redInfo);
                         //构建红包基础数据,并发送红包
                         foreach ($redInfo as $k => $v) {
-                            $postData = $this->pay_red($v);
+                            $postData = $this->pay_red($v,$itemCof);
                         }
                     }else{
-                        $postData = $this->pay_red($info);
+                        $postData = $this->pay_red($info,$itemCof);
                     }
                     $this->pay_red_susess($info);
                     $this->srun("红包创建成功,等待领取...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
                 }
-                  
             }else{
                 $this->erun("交易状态不允许此项操作");
             }
@@ -176,15 +176,13 @@ class CashbackController extends ManageBase{
         return $postData;
     }
     //微信红包返款
-    function pay_red($info){
-        /*
-        */
-        /*发起支付*/
+    function pay_red($info,$itemCof){
         //读取红包模板
-        $item_id = get_item('id');
-        $itemCof = cache('');
-        $redTpl = D('RedTpl')->where(['status'=>1,'item_id'=>$item_id])->field('create_time,user_id,id,status',true)->find();
-
+        //dump($itemCof);
+        $redTpl = D('RedTpl')->where(['id'=>$itemCof['red_tpl']])->field('create_time,user_id,id,status',true)->find();
+        if(empty($redTpl)){
+            $this->erun('未找到红包模板,请设置');
+        }
         $postData = [
             'mch_billno'        =>  $info['sn'],//商户订单号
             'send_name'         =>  $redTpl['send_name'],//商户名称
@@ -198,9 +196,16 @@ class CashbackController extends ManageBase{
             'scene_id'          =>  $redTpl['scene_id']
         ];
 
-        $pay = load_payment('wx_red',$item_id);
-
-
+        $config = load_payment('wx_red');
+        try {
+            $ret = Red::run('wx_red', $config, $postData);
+        } catch (PayException $e) {
+            error_insert($e->errorMessage());
+            $this->erun("ERROR:".$e->errorMessage());
+            exit;
+        }
+        return $ret;
+        /*
         $wishing = '感谢参与'.$product['name'].'利润分享计划！';
         $actname = "利润分享计划";
         $remark = '感谢参与'.$product['name'].'利润分享计划！';
@@ -213,7 +218,7 @@ class CashbackController extends ManageBase{
         }else{
             $pay->errMsg;
             return false;
-        }
+        }*/
         //return $postData;
     }
 

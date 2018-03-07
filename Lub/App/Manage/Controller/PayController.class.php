@@ -18,7 +18,8 @@ class PayController extends ManageBase {
 		//$db = M("ConfigProduct");   //产品设置表 
         $db = M("ConfigItem");   //产品设置表 
 		$item_id = (int)get_item('id');
-		$list = $db->where(array('item_id'=>$item_id))->select();
+        $type = '2';
+		$list = $db->where(array('item_id'=>$item_id,'type'=>$type))->select();
 		foreach ($list as $k => $v) {
 			$config[$v["varname"]] = $v["value"];
 		}
@@ -42,10 +43,11 @@ class PayController extends ManageBase {
                         $ginfo["varname"] = $key;
                         $ginfo["value"]   = trim($value);
                         $ginfo["item_id"] = $item_id;
+                        $ginfo["type"] = $type;
                         $add = $db->add($ginfo);
                     }
                 }else{
-                    if ($db->where(array("varname" => $key,'item_id'=>$item_id))->save($saveData) === false) {
+                    if ($db->where(array("varname" => $key,'item_id'=>$item_id,'type'=>$type))->save($saveData) === false) {
                         $this->erun("更新到{$key}项时，更新失败！");
                         return false;
                     }                   
@@ -56,6 +58,7 @@ class PayController extends ManageBase {
                 $saveData = array();
                 $saveData["value"] = '0';
                 $saveData["item_id"] = $item_id;
+                $saveData["type"] = $type;
                 if ($db->where(array("varname" => $key))->save($saveData) === false) {
                     $this->erun("更新到{$key}项时，更新失败！");
                     return false;

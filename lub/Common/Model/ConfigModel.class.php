@@ -266,10 +266,10 @@ class ConfigModel extends Model {
         //缓存商户信息
         $list = M('Item')->field('id')->select();
         foreach ($list as $key => $value) {
-            $itemcof = M("ConfigItem")->where(array('item_id'=>$value['id']))->field("varname,value")->select();
+            $itemcof = M("ConfigItem")->where(array('item_id'=>$value['id']))->field("varname,type,value")->select();
             if(!empty($itemcof)){
                 foreach ($itemcof as $k => $v) {
-                    $item_data[$value['id']][$v['varname']] = $v['value'];
+                    $item_data[$value['id']][$v['type']][$v['varname']] = $v['value'];
                 }
             }
         }

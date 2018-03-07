@@ -31,7 +31,7 @@
         <th align="center" width="60px">状态</th>
       </tr>
     </thead>
-    <tbody id="order-list">
+    <tbody>
     <volist name="data" id="vo">
       <tr>
       	<td align="center"><a data-toggle="dialog" href="{:U('Crm/Member/public_member',array('id'=>$vo['id'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="年卡详情">{$vo.no-number}</a></td>
@@ -49,6 +49,5 @@
 <div class="bjui-pageFooter">
     <ul>
         <li><button type="button" class="btn-close" data-icon="close">关闭</button></li>
-        <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
     </ul>
 </div>

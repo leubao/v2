@@ -35,7 +35,7 @@
         <th align="center">操作</th>
       </tr>
     </thead>
-    <tbody>
+    <tbody id="order-pre-list">
     <volist name="data" id="vo">
       <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" >
         <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
@@ -63,7 +63,7 @@
 <script type="text/javascript">
 $(document).ready(function() {
   var pre_order_num = 0;
-  $('#order-list tr').each(function(i){
+  $('#order-pre-list tr').each(function(i){
     if($(this).data('num') != null){
       pre_order_num += parseInt($(this).data('num'));
     }
