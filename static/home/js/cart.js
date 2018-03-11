@@ -132,7 +132,7 @@ $(function(){
 	    remark = $("#remark").val();
     if($(".contact_input").css("display") == "block"){
 	    vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    vmima = $("#contacts").val();
@@ -247,7 +247,7 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
@@ -353,7 +353,7 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
@@ -534,7 +534,7 @@ $("#preteam").bind("click",function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
