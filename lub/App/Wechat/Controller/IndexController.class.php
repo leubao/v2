@@ -323,7 +323,7 @@ class IndexController extends LubTMP {
         //加密参数
         $user = session('user');
         $uid = $user['user']['id'];
-        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id')->limit('10')->select();
+        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id')->limit('10')->order('createtime DESC')->select();
         $this->wx_init($this->pid);
         $this->assign('data',$list)->display();
     }

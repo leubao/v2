@@ -787,62 +787,6 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
  * @param $define 是否采用默认配置
  */
 function load_payment($pay = ''){
-    /*
-    static $payment = array();
-    //根据产品读取配置信息
-    if(empty($product_id)){
-        $proconf = cache('Config');
-        $options = array(
-            'app_id'  => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
-            'mch_id'  => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
-        );
-        return $options;
-    }
-    $proconf = cache('ProConfig');
-    $proconf = $proconf[$product_id][11];
-    //服务商模式,支持服务商模式与不支持
-    $payment = array('wx_transfer','wx_red','wx_refund','ali_transfer','ali_red','ali_refund');
-    //判断收款还是付款
-    //收款
-    $collection = array();
-    //付款
-    $payment = array('wx_transfer','wx_red','wx_refund','ali_transfer','ali_red','ali_refund');
-    if($proconf['wx_submch'] == '1'){
-        $basedata = [
-            'app_id'        => $proconf['wx_fw_appid'],  // 公众账号ID
-            'mch_id'        => $proconf['wx_fw_mchid'],// 商户id
-            'sub_appid'     => $proconf['wx_sub_appid'], //子APPiD
-            'sub_mch_id'    => $proconf['wx_sub_mchid'],
-            'md5_key'       => $proconf['wx_sub_mchkey'],// md5 秘钥
-        ];
-    }else{
-        $basedata = [
-            'app_id'        => $proconf['wx_sub_appid'], //子APPiD
-            'mch_id'        => $proconf['wx_sub_mchid'],
-            'md5_key'       => $proconf['wx_sub_mchkey'],// md5 秘钥
-        ];
-    }
-    //判断是否是企业付款
-    if (stripos($pay, 'ali') !== false) {
-
-    }else{
-        $notify_url = U('Api/PayNotify/wxnotify');
-        $options = array(
-            'app_cert_pem'      => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$product_id. DIRECTORY_SEPARATOR .'apiclient_cert.pem',
-            'app_key_pem'       => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$product_id DIRECTORY_SEPARATOR .'apiclient_key.pem',
-            'sign_type'         => 'MD5',// MD5  HMAC-SHA256
-            'limit_pay'         => [
-                //'no_credit',
-            ],// 指定不能使用信用卡支付   不传入，则均可使用
-            'fee_type'          => 'CNY',// 货币类型  当前仅支持该字段
-            'notify_url'        => 'http://www.yx513.net/api.php/PayNotify/wxnotify',
-            'redirect_url'      => 'http://www.yx513.net',// 如果是h5支付，可以设置该值，返回到指定页面
-            'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true
-        );
-    }
-    $options = array_merge($basedata,$options);
-    //根据支付类型选择驱动
-    return $options;*/
     //获取收银配置
     $itemCof = get_item_conf('2');
     //微信支付
@@ -851,7 +795,7 @@ function load_payment($pay = ''){
         $domain = $config['siteurl'];
         $itemid = get_item('id');
         $options = [
-            'use_sandbox'       => true,// 是否使用 微信支付仿真测试系统
+            'use_sandbox'       => false,// 是否使用 微信支付仿真测试系统
             'submch'            => true,//是否开启微信服务商
             'app_id'            => 'wx72bcf45e0f57a192',  // 公众账号ID
             'mch_id'            => '1377282902',// 商户id
@@ -862,7 +806,7 @@ function load_payment($pay = ''){
             'app_key_pem'       => SITE_PATH.'pay'. DIRECTORY_SEPARATOR .'wxpay'. DIRECTORY_SEPARATOR .$itemid.DIRECTORY_SEPARATOR .'apiclient_key.pem',
             'sign_type'         => 'MD5',// MD5  HMAC-SHA256
             'limit_pay'         => [
-            //'no_credit',
+                //'no_credit',
             ],// 指定不能使用信用卡支付   不传入，则均可使用
             'fee_type'          => 'CNY',// 货币类型  当前仅支持该字段
 
@@ -870,9 +814,10 @@ function load_payment($pay = ''){
 
             //'redirect_url'      => '',// 如果是h5支付，可以设置该值，返回到指定页面
 
-            'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
+            'return_raw'        => true,// 在处理回调时，是否直接返回原始数据，默认为true 
         ];
     }
+    return $options;
     
 }
 /**

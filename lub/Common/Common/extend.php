@@ -1220,6 +1220,28 @@ function crmName($param,$type=NULL){
         $list = M('Crm')->where(array('level'=>$level,'status'=>1))->field('id')->select();
         return array_column($list,'id');
     }
+    //递归查找上级分销商链条
+    function crm_level_link($id)
+    {
+        static $arr = [];
+        $crm = getChannel($id);
+        
+        $arr[] = $id;
+        if($crm['f_agents'] > 0){//dump($crm['f_agents']);
+            crm_level_link($crm['f_agents']);
+        }//dump($arr);
+        return $arr;
+    }
+    //获取单体渠道商信息
+    function getChannel($param ='')
+    {
+        if(!empty($param)){
+            return D('Crm')->where(array('id'=>$param))->field('id,level,f_agents')->find();
+        }else{
+            return false;
+        }
+
+    }
    /*获取二次打印授权人
    * @param 
     */
@@ -1665,6 +1687,7 @@ function crmName($param,$type=NULL){
     {
         $item_id = get_item('id');
         $itemCof = cache('ItemConfig');
+        if(empty($itemCof)){D('Common/Config')->config_cache();}
         return $itemCof[$item_id][$param];
     }
     /**
@@ -1733,7 +1756,7 @@ function crmName($param,$type=NULL){
      * @param $seale string 1根据区域获取可售票型,2获取当前计划所有可售票型 注意 只在剧场模式下有效
      * @param $sealeTicket array 特殊方式限定销售票型 比如活动
     */
-    function pullprice($planid, $type, $area, $scene, $group = null, $seale = '1', $sealeTicket = []){
+    function pullprice($planid, $type, $areaId, $scene, $group = null, $seale = '1', $sealeTicket = []){
         switch ($type) {
             case '1':
                 $types = array('in','1,3,4');
@@ -1747,6 +1770,11 @@ function crmName($param,$type=NULL){
             case '4':
                 $types = array('in','3,4');
                 break;
+            case '5':
+                //联票支持
+                $types = array('in','1,3,4');
+                //$map = [''=>]
+                break;
             case '9':
                 $types = array('in','1,2,3,4');
                 break;
@@ -1755,6 +1783,7 @@ function crmName($param,$type=NULL){
                 break;
         }
         $plan = F('Plan_'.$planid);
+        $map = []; $area = [];
         if(empty($plan)){return false;}
         if($plan['product_type'] <> '1'){
             $where = array('plan_id'=>$planid,'product_id'=>$plan['product_id'],'status'=>array('in','2,99,66'));
@@ -1769,9 +1798,7 @@ function crmName($param,$type=NULL){
                 if($seale == '1'){
                     $area_num = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);;
                     $area_nums = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);;
-                    $area = array('area' => $area);
-                }else{
-                    $area = [];
+                    $area = array('area' => $areaId);
                 }
                 break;
             case '2':
@@ -1812,12 +1839,29 @@ function crmName($param,$type=NULL){
         //获取价格信息
         $tickets = M('TicketType')->where($map)->field('id,name,area,price,discount')->select();
         if($plan['product_type'] == '1' && $seale == '2'){
+            
             foreach ($tickets as $va){
                 if(in_array($va['id'],$param['ticket'])){
                     $va['area_num'] = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);
                     $va['area_nums'] = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);
                     $va['area_id'] = $va['area'];
                     $va['area'] = areaName($va['area'],1);
+                    //判断是否开启多级扣款 TODO  后期优化
+                    if((int)$scene === (int)2){
+                        //获取当前用户
+                        $uinfo = Home\Service\Partner::getInstance()->getInfo();
+                        $ticketLevel = F('TicketLevel');
+                        if(!$ticketLevel){
+                            D('Home/TicketLevel')->ticke_level_cache();
+                            $ticketLevel = F('TicketLevel');
+                        }
+                        $itemConf = cache('ItemConfig');
+                        //一级代理商直接显示景区结算价格
+                        if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16){
+                            $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];//d//ump($ticket_level);
+                            $va['discount'] = $ticket_level[$va['id']]['discount'];/*结算价格*/
+                        }
+                    }
                     $price[] = $va;
                 }
             }
@@ -1826,6 +1870,23 @@ function crmName($param,$type=NULL){
                 if(in_array($va['id'],$param['ticket'])){
                     $va['area_num'] = $area_num;
                     $va['area_nums']= $area_nums;
+                    //判断是否开启多级扣款 TODO  后期优化
+                    if((int)$scene === (int)2){
+                        //获取当前用户
+                        $uinfo = Home\Service\Partner::getInstance()->getInfo();
+                        $ticketLevel = F('TicketLevel');
+                        if(!$ticketLevel){
+                            D('Home/TicketLevel')->ticke_level_cache();
+                            $ticketLevel = F('TicketLevel');
+                        }
+                        $itemConf = cache('ItemConfig');
+                        //一级代理商直接显示景区结算价格
+                        if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16){
+                            $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];//d//ump($ticket_level);
+                            $va['discount'] = $ticket_level[$va['id']]['discount'];/*结算价格*/
+                        }
+                        
+                    }
                     $price[] = $va;
                 }
             }

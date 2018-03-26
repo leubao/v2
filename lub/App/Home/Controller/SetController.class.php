@@ -31,8 +31,9 @@ class SetController extends Base{
         $start_time = I('start_time');
         $end_time = I('end_time');
         $status = I('status');
+        $uinfo = Partner::getInstance()->getInfo();
 		$where = array(
-			'f_agents'=>\Home\Service\Partner::getInstance()->cid,
+			'f_agents'=>(int)$uinfo['crm']['id'],
 		);
 
 		if (!empty($start_time) && !empty($end_time)) {
@@ -47,9 +48,90 @@ class SetController extends Base{
 		$Page  = new \Home\Service\Page($count,25);
 		$show  = $Page->show();
 		$list = $db->where($where)->order('id DESC')->limit($Page->firstRow.','.$Page->listRows)->select();
+		//判断当前代理商的级别
+		$action = false;
+		if((int)$uinfo['crm']['level'] === (int)18){
+			$action = true;
+			$this->assign('action',$action);
+		}
 		$this->assign('data',$list)
 			->assign('page',$show)
 			->display();
+	}
+	//分级设置价格
+	public function set_channel_price()
+	{
+		//获取当前渠道商
+		$uinfo = Partner::getInstance()->getInfo();//dump($uinfo);
+		if(IS_POST){
+			$pinfo = I('post.');
+			//dump($pinfo);
+			$time = time();
+			foreach ($pinfo['ticket_id'] as $key => $value) {
+				if(empty($pinfo['id'][$key])){
+					$add[] = [
+						'ticket_id'	=>	$value,
+						'crm_id'	=>	$pinfo['crm_id'][$key],
+						'discount'	=>	$pinfo['discount'][$key],
+						'rebate'	=>	$pinfo['rebate'][$key],
+						'user_id'	=> get_user_id(),
+						'status'	=>	1,
+						'create_time'=> $time,
+						'update_time'=> $time,
+					];
+				}else{
+					$save = [
+						'id'		=>	$pinfo['id'][$key],
+						'discount'	=>	$pinfo['discount'][$key],
+						'rebate'	=>	$pinfo['rebate'][$key],
+						'update_time'=> $time,
+					];
+					D('TicketLevel')->save($save);
+				}
+			}
+			if(!empty($add)){
+				$status = D('TicketLevel')->addAll($add);
+			}
+			D('Home/TicketLevel')->ticke_level_cache();
+			$this->success("更新成功!",U('Home/Set/set_channel_price'));
+		}else{
+			//一级 直接读取相关分组的渠道票型 TODO  多产品时存在问题
+			$where = [
+				'group_id'=>['in',$uinfo['group']['price_group']],
+				'status'=>'1',
+				'type'	=>['in','2,3']
+			];
+			$where['_string']="FIND_IN_SET(2,scene)";
+			$list = D('TicketType')->where($where)->field('id,name,price,discount')->select();//dump($where);
+			foreach ($list as $k => $v) {
+				$seale = D('TicketLevel')->where(['ticket_id'=>$v['id'],'crm_id'=>$uinfo['cid']])->find();
+				//判断当前渠道商的级别
+				if((int)$uinfo['crm']['level'] === (int)16){
+					$buy = $v['discount'];
+				}
+				if((int)$uinfo['crm']['level'] === (int)17 || (int)$uinfo['crm']['level'] === (int)18){
+					//二级
+					$seale_level = D('TicketLevel')->where(['ticket_id'=>$v['id'],'crm_id'=>$uinfo['crm']['f_agents']])->field('discount')->find();
+					$buy = $seale_level['discount'];
+				}
+				$ticket[] = [
+					'id'	=>	$seale['id'],
+					'ticket_id'	=>	$v['id'],
+					'crm_id'	=>	$uinfo['cid'],
+					'name'	=>	$v['name'],
+					'price'	=>	$v['price'],
+					'buy'	=>	$buy,//采购价  1级渠道商为景区   2级为一级分销价  3 级为二级分销价
+					'discount'	=>	$seale['discount'],
+					'rebate'	=>	$seale['rebate']
+				];
+			}
+			$points = false;
+			//3级分销商不允许再分销
+			if((int)$uinfo['crm']['level'] === (int)18){
+				$points = true;
+			}//dump($points);
+			$this->assign('ticket',$ticket)->assign('points',$points)->display();
+		}
 	}
 	function public_quota_channel(){
 		if(IS_POST){
@@ -129,6 +211,11 @@ class SetController extends Base{
 				$this->error("新增失败!");
 			}
 		}else{
+			//判断当前代理商的级别
+			$uinfo = Partner::getInstance()->getInfo();
+			if((int)$uinfo['crm']['level'] === (int)18){
+				$this->error("三级分销商不允许再次分销!");
+			}
 			$this->assign("product",M('Product')->where(['status'=>1])->field('id,name')->select())
 				->display();
 		}

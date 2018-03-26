@@ -394,7 +394,7 @@ class OrderController extends ManageBase{
 			}
 			if($info['pay_type'] == '5'){
 				//微信支付
-				$result = $this->weixin_code($oinfo['product_id'],$info['paykey'],$payData);
+				$result = $this->weixin_code($info['paykey'],$payData);
 				if($result['errCode'] == USERPAYING){
 					//用户支付中，需要输入密码
 					$return = array(
@@ -425,23 +425,18 @@ class OrderController extends ManageBase{
 	{	
 	}
 	//微信扫码支付
-	function weixin_code($product_id,$paykey,$payData)
-	{	/*
-		$pay = & load_wechat('Pay',$product_id);
-		$money = $payData['amount']*100;
-		$result = $pay->createMicroPay($paykey,$payData['order_no'],$money,'',$payData['body']);
-		if($result === FALSE){
-			return array('errCode'=>$pay->errCode,'errMsg'=>$pay->errMsg);
-		}
-		*/
-		$config = load_payment('wx_bar',$product_id);
+	function weixin_code($paykey,$payData)
+	{	
+		$config = load_payment('wx_bar');
 		//记录支付日志
 		//payLog();
 		try {
 			$payData['auth_code'] = $paykey;
+			$payData['sub_appid'] =  $config['sub_appid'];
+            $payData['sub_mch_id'] =  $config['sub_mch_id'];
 		    $ret = Charge::run('wx_bar', $config, $payData);
 		} catch (PayException $e) {
-			dump($e);
+			//dump($e);
 		    echo $e->errorMessage();
 		    exit;
 		}
@@ -710,7 +705,7 @@ class OrderController extends ManageBase{
 		if($list['status'] == '1' || $list['status'] == '9' ){
 			$this->erun("该订单已完成排座，或已打印,请从订单管理中查询此订单!");
 		}else{
-			$info = unserialize($list['info']);dump($info);
+			$info = unserialize($list['info']);
 			foreach ($info['data']['area'] as $key => $value) {
 				if($ginfo['num'] == $value['num']){
 					$ginfo['priceid'] = $value['priceid'];

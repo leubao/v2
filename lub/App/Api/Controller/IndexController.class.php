@@ -1087,7 +1087,41 @@ class IndexController extends ApiBase {
       # code...
     }
 
-    
+    function api_topup()
+    {
+
+      $model = new \Think\Model();
+      $model->startTrans();
+      //判断是企业还是个人1企业4个人
+      $crmData = array('cash' => array('exp','cash+'.$cash),'uptime' => time());
+      if($channel == '1'){
+        //渠道商客户
+        $c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
+      }
+      if($channel == '4'){
+        //个人客户
+        $c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$id))->setField($crmData);
+      }
+      //充值成功后，添加一条充值记录
+      $data = array(
+        'cash'    =>  $cash,
+        'user_id' =>  get_user_id(),
+        'crm_id'  =>  $id,
+        'type'    =>  '1',
+        'balance' =>  balance($id,$channel),
+        'tyint'   =>  $channel,//客户类型1企业4个人
+        'remark'  =>  $remark,
+        'createtime'=>  time(),
+      );    
+      $recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
+      if($c_pay && $recharge){
+        $model->commit();//成功则提交
+        $this->srun('充值成功!',array('dialogid'=>'checkcash','closeCurrent'=>true));
+      }else{
+        $model->rollback();//不成功，则回滚
+        $this->erun("充值失败!");
+      }
+    }
     
     
    /*更新订单票型

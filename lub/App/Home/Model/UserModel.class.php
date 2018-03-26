@@ -60,7 +60,7 @@ class UserModel extends RelationModel {
         //强制场景为客户端
         $map['is_scene'] = 3;
         $map['status'] = '1';
-        $uInfo = $this->where($map)->find();
+        $uInfo = $this->where($map)->find();//dump($uInfo);
         if (empty($uInfo)) {
             return false;
         }
@@ -72,7 +72,7 @@ class UserModel extends RelationModel {
         $uInfo['group'] = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement')->find();
         if($uInfo['group']['type'] <> '4'){
             //查询所属商户相关信息
-            $crm = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,agent,f_agents,param')->find();
+            $crm = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,agent,itemid,f_agents,param')->find();
             $param = unserialize($crm['param']);
             unset($crm['param']);
             $uInfo['crm'] = $crm;
@@ -81,8 +81,12 @@ class UserModel extends RelationModel {
             if($crm['agent'] == '1'){
                 
             }
-            $cid = money_map($uInfo['cid']);
-            $uInfo['crm']['cash'] = balance($cid);
+            //判断是否开启多级扣款   开启时 显示自己的授信额度
+            $itemConf = cache('ItemConfig');
+            if(!$itemConf[$crm['itemid']]['1']['level_pay']){
+                $cid = money_map($uInfo['cid']);
+                $uInfo['crm']['cash'] = balance($cid);
+            }
         }
         return $uInfo;
     }

@@ -81,31 +81,35 @@ class PlanModel extends Model{
 			foreach ($data['plan'] as $key => $value) {
 				//判断同一天的越过
 				$plantime = strtotime($value['plantime']);
+				/*
+				
+				判断是否开启单位时间限量 TODO
 				if(!in_array($plantime, $plan_time)){
-					$plan_time[] = strtotime($value['plantime']);
-					$infos = array(
-						'games' => 1,
-						'seat_table' => 'scenic',
-						'template_id'=>1,
-						'quota' =>	$value['quota'],
-						'quotas' =>	$value['quotas'],
-					);
-					$param = $this->plan_param($data['product_id'],'',$data['ticket'],$data['goods'],$data['product_type']);
-					$infoAll = array(
-						'plantime' => $plantime,
-						'product_id' => $data['product_id'],
-						'starttime'	=> strtotime($value['starttime']),
-						'endtime'	=> strtotime($value['endtime']),
-						'product_type' => $data['product_type'],
-						'status'=>'3',
-						'is_sales' => 1,
-						'user_id' => get_user_id(),
-						'createtime' => time(),
-						'param'	=> serialize($param),
-						'encry'	=> genRandomString(6,1),
-					);
-					$info[] = array_merge($infos,$infoAll);
-				}
+					
+				}*/
+				$plan_time[] = strtotime($value['plantime']);
+				$infos = array(
+					'games' => 1,
+					'seat_table' => 'scenic',
+					'template_id'=>1,
+					'quota' =>	$value['quota'],
+					'quotas' =>	$value['quotas'],
+				);
+				$param = $this->plan_param($data['product_id'],'',$data['ticket'],$data['goods'],$data['product_type']);
+				$infoAll = array(
+					'plantime' => $plantime,
+					'product_id' => $data['product_id'],
+					'starttime'	=> strtotime($value['starttime']),
+					'endtime'	=> strtotime($value['endtime']),
+					'product_type' => $data['product_type'],
+					'status'=>'3',
+					'is_sales' => 1,
+					'user_id' => get_user_id(),
+					'createtime' => time(),
+					'param'	=> serialize($param),
+					'encry'	=> genRandomString(6,1),
+				);
+				$info[] = array_merge($infos,$infoAll);
 			}
 		}else{
 			//漂流

@@ -19,7 +19,7 @@ $(function(){
       detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
       detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";
       detail += "<div class='input-group-addon'><a href='javascript:;' class='spin-up' data-spin='up'>+</a></div></div>";
-      detail += "</td><td class='total' id='total_"+ids[1]+"'>"+data_price+"</td><td><a href='javascript:void(0)' onclick='delcart("+ids[1]+")'>删除</a><input id='areaid"+ids[1]+"' value='"+ids[2]+"' name='areaid' type='hidden'></td></tr>";
+      detail += "</td><td class='total' id='total_"+ids[1]+"'>"+data_price+"</td><td><a href='javascript:void(0)' onclick='delcart("+ids[1]+","+ids[2]+")'>删除</a><input id='areaid"+ids[1]+"' value='"+ids[2]+"' name='areaid' type='hidden'></td></tr>";
       $("#cart").append(detail);
     }
     //切换票型的选中状态
@@ -99,10 +99,10 @@ function totalprice(id){
   $("#subtoal").text(totals);        //为“合计”赋值
 }
 /*删除订单信息*/
-function delcart(id){
+function delcart(id1,id2){
   if(confirm("确定要删除此条订单信息吗？")){
-    $("#cart_"+id).remove();//删除
-    totalprice(id);
+    $("#cart_"+id1+"_"+id2).remove();//删除
+    totalprice(id1);
   }
 }
 /*删除已选择*/
@@ -132,7 +132,7 @@ $(function(){
 	    remark = $("#remark").val();
     if($(".contact_input").css("display") == "block"){
 	    vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    vmima = $("#contacts").val();
@@ -151,7 +151,7 @@ $(function(){
 	/*是否开启黑名单*/
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
@@ -161,7 +161,7 @@ $(function(){
 	    	}
 	    }
 	}
-	/*判断身份号码是否正确*/
+	/*判断身份号码是否正确*/console.log(id_card);
 	if(id_card){
 		if(check_idcard(id_card) == false){
 			rstr += "请您正确输入身份证号码，或者不输入!";
@@ -247,7 +247,7 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
@@ -265,7 +265,7 @@ $(function(){
 	}
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
@@ -353,7 +353,7 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();
@@ -371,7 +371,7 @@ $(function(){
 	}
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
@@ -534,7 +534,7 @@ $("#preteam").bind("click",function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
 	      rstr += "手机格式不正确!";
 	    } 
 	    var vmima = $("#contacts").val();

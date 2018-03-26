@@ -15,7 +15,9 @@
       <div class="panel panel-default"> 
         <!-- Default panel contents -->
         <div class="panel-heading"><span class="glyphicon glyphicon-th-list"></span> 代理商列表
+        <?php if(!$action){ ?>
           <div class="btn-group btn-group-xs" style="float:right;"> <a href="{:U('Home/Set/add_channel');}" class="btn btn-success" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>添加</a></div>
+        <?php } ?> 
         </div>
         <div class="panel-body">
           <form class="form-inline" role="form" action="{:U('Home/Set/channel');}" method="post">
@@ -41,7 +43,8 @@
         <!-- Table -->
         <table class="table table-condensed table-hover table-responsive table-bordered table-vcenter">
           <colgroup>
-          <col width="160px">
+          <col>
+          <col>
           <col>
           <col>
           <col>
@@ -53,6 +56,7 @@
               <td align="center">名称</td>
               <td align="center">级别</td>
               <td align="center">联系人</td>
+              <td align="center">余额</td>
               <td align="center">添加时间</td>
               <td align="center">状态</td>
               <td align="center">操作</td>
@@ -64,14 +68,18 @@
                 <td align="center" ><a href="{:U('Home/Set/channel_info',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal">{$vo.name}<span class="glyphicon glyphicon-eye-open"></span></a></td>
                 <td align="center" ><?php echo D('Home/Role')->getRoleIdName($vo['level'])?></td>
                 <td align="center" >{$vo.contacts}</td>
+                <td align="center" >{$vo.cash}</td>
                 <td align="center" >{$vo.create_time|date="Y-m-d h:i",###}</td>
                 <td align="center" ><if condition="$vo['status'] eq 1"><span class="label label-success">启用</span>
                     <else />
                     <span class="label label-danger">禁用</span></if></td>
-                <td align="center"><div  class="btn-group btn-group-xs">
+                <td align="center">
+                  <div class="btn-group btn-group-xs">
                 <a href="{:U('Home/Set/edit_channel',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal" class="btn btn-default"><span class="glyphicon glyphicon-pencil"></span></a>
                 <a href="{:U('Home/User/index',array('cid'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-user"></span></a>
-                <a href="{:U('Home/Set/public_quota_channel',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal" class="btn btn-default"><span class="glyphicon glyphicon-inbox"></span></a><a href="{:U('Home/Set/del_channel',array('id'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></a>
+                <a href="{:U('Home/Set/public_quota_channel',array('id'=>$vo['id']));}" data-toggle="modal" data-target="#myModal" class="btn btn-default"><span class="glyphicon glyphicon-inbox"></span></a>
+ <a href="{:U('Home/Pay/index',array('crm'=>$vo['f_agents'],'type'=>$vo['type'],'id'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-yen"></span></a>
+                <a href="{:U('Home/Set/del_channel',array('id'=>$vo['id']));}" class="btn btn-default"><span class="glyphicon glyphicon-trash"></span></a>
                 </div></td>
               </tr>
             </volist>

@@ -108,7 +108,7 @@ class ProductController extends Base{
 					'pId'	=>	'1',
 					'plan' 	=>	$v['id'],
 					'type'	=>	$pinfo['type'],
-					'name'  =>  "梦里老家演艺小镇",
+					'name'  =>  date('H:i',$v['starttime']),
 				);
 			}
 			if($v['product_type'] == '3'){

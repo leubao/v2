@@ -413,7 +413,7 @@ class Order extends \Libs\System\Service {
 		}
 		//获取订单初始数据
 		$scena = Order::is_scena($scena);
-		return Order::quick_order($info,$scena,$uinfo,2); 
+		return Order::quick_order($info,$scena,$uinfo,2,2); 
 	}
 	/*渠道订单支付
 	* @param $info array 客户端提交数据
@@ -476,7 +476,7 @@ class Order extends \Libs\System\Service {
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}//dump($info);
-		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket']);
+		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
@@ -488,13 +488,12 @@ class Order extends \Libs\System\Service {
 			//error_insert('400003');
 			return false;
 		}
-		//dump($info);//dump($seat);
+		//dump($info);dump($seat);
 		//订单金额校验
 		if(bccomp((float)$info['subtotal'],(float)$seat['money'],2) <> 0){
           	$this->error = '400018 : 金额校验失败';
 			return false;
         }
-		
 		//获取订单号 1代表检票方式1人一票2 一团一票
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
 		$sn = get_order_sn($plan['id'],$printtype);
@@ -523,7 +522,6 @@ class Order extends \Libs\System\Service {
 				return false;
 			}
 		}
-		
 		/*写入订单信息*/
 		$orderData = array(
 			'order_sn' 		=> $sn,
@@ -819,52 +817,103 @@ class Order extends \Libs\System\Service {
 		$quota_num = 0;//默认配额消耗量
 		/*==============================渠道版扣费 start===============================================*/
 		if(in_array($channel,['1','4']) && $is_pay == '2'){
-			if($channel == '1'){
-				//渠道商客户
+			
+			//获取产品信息
+			$product = cache('Product');
+			$product = $product[$plan['product_id']];//dump($product);
+			$itemConf = cache('ItemConfig');
+            if($itemConf[$product['item_id']]['1']['level_pay']){
+				//开启分级扣款
+				
+            	//获取扣款连条
+            	$payLink = crm_level_link($info['channel_id']);
+            	//判断链条中所有人余额充足
+            	//统一扣除订单金额，每天返利
+            	
+            	//渠道商客户
 				$db = M('Crm');
-				//获取扣费条件
-				$cid = money_map($info['channel_id'],$channel);
-			}
-			if($channel == '4'){
-				//个人客户
-				$db = M('User');
-				$cid = $info['guide_id'];
-			}
-			//先消费后记录验证客户余额是否够用
-			$balance = $db->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
-			if($balance){
-				$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
-				if($channel == '1'){
-					//渠道商客户
-					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
-				}
-				if($channel == '4'){
-					//个人客户
-					$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
-				}				
-				$data = array(
-					'cash'		=>	$info['money'],
-					'user_id'	=>	$info['user_id'],
-					'guide_id'	=>	$cid,//TODO  这个貌似没什么意义
-					'addsid'	=>	$info['addsid'],
-					'crm_id'	=>	$cid,
-					'createtime'=>	$createtime,
-					'type'		=>	'2',
-					'order_sn'	=>	$info['order_sn'],
-					'balance'	=>  balance($cid,$channel),
-					'tyint'		=>	$channel,//客户类型1企业4个人
-				);
-				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
-				if($c_pay == false || $c_pay2 == false){
+				$payWhere = [
+					'id'	=>	['in', implode(',',$payLink)],
+					'cash'	=>	['EGT',$info['money']]
+				];
+				$balance = $db->where($payWhere)->field('id')->find();
+				if($balance){
+					$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
+					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(['id'=>['in',implode(',',$payLink)]])->setField($crmData);
+					//TODO 不同级别扣款金额不同
+					foreach ($payLink as $p => $l) {
+						$data[] = array(
+							'cash'		=>	$info['money'],
+							'user_id'	=>	$info['user_id'],
+							'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+							'addsid'	=>	$info['addsid'],
+							'crm_id'	=>	$l,
+							'createtime'=>	$createtime,
+							'type'		=>	'2',
+							'order_sn'	=>	$info['order_sn'],
+							'balance'	=>  balance($l,$channel),
+							'tyint'		=>	$channel,//客户类型1企业4个人
+						);
+					}
+					$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($data);
+					if($c_pay == false || $c_pay2 == false){
+						$model->rollback();//事务回滚
+						$this->error = '400008 : 扣费失败';
+						return false;
+					}
+				}else{
 					$model->rollback();//事务回滚
-					$this->error = '400008 : 扣费失败';
+					$this->error = '400008 : 客户余额不足,或上级余额不足';
 					return false;
 				}
 			}else{
-				//error_insert('400008');
-				$model->rollback();//事务回滚
-				$this->error = '400008 : 客户余额不足';
-				return false;
+				if($channel == '1'){
+					//渠道商客户
+					$db = M('Crm');
+					//获取扣费条件
+					$cid = money_map($info['channel_id'],$channel);
+				}
+				if($channel == '4'){
+					//个人客户
+					$db = M('User');
+					$cid = $info['guide_id'];
+				}
+				//先消费后记录验证客户余额是否够用
+				$balance = $db->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
+				if($balance){
+					$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
+					if($channel == '1'){
+						//渠道商客户
+						$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+					}
+					if($channel == '4'){
+						//个人客户
+						$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
+					}				
+					$data = array(
+						'cash'		=>	$info['money'],
+						'user_id'	=>	$info['user_id'],
+						'guide_id'	=>	$cid,//TODO  这个貌似没什么意义
+						'addsid'	=>	$info['addsid'],
+						'crm_id'	=>	$cid,
+						'createtime'=>	$createtime,
+						'type'		=>	'2',
+						'order_sn'	=>	$info['order_sn'],
+						'balance'	=>  balance($cid,$channel),
+						'tyint'		=>	$channel,//客户类型1企业4个人
+					);
+					$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+					if($c_pay == false || $c_pay2 == false){
+						$model->rollback();//事务回滚
+						$this->error = '400008 : 扣费失败';
+						return false;
+					}
+				}else{
+					//error_insert('400008');
+					$model->rollback();//事务回滚
+					$this->error = '400008 : 客户余额不足';
+					return false;
+				}
 			}
 		}
 		/*==============================渠道版扣费 end=================================================*/
@@ -1622,9 +1671,10 @@ class Order extends \Libs\System\Service {
 	*@param $product_id int 产品id
 	*@param $produc_type int 产品类型
 	*@param $child_ticket array 联票子票型
+	*@param $channel int 是否是渠道订单
 	*return $seat 包含座椅区域信息 及座椅数量 
 	*/
-	public function area_group($area,$product_id,$settlement,$product_type,$child_ticket = ''){
+	public function area_group($area,$product_id,$settlement,$product_type,$child_ticket = '',$channel = null){
 		if(empty($area)){$this->error = "门票类型为空,操作终端...";return false;}
 		//$this->error = "门票类型为空,操作终端...";return false;
 		if(!empty($child_ticket)){
@@ -1664,7 +1714,7 @@ class Order extends \Libs\System\Service {
 				$seat['num'] += $seat['area'][$v['priceid']]['num'];
 			}
 			//计算订单金额
-			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement);
+			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement,$channel);
 			if($price != '0'){
 				$child_moeny = $price*$v['num'];
 			}else{
@@ -1686,25 +1736,34 @@ class Order extends \Libs\System\Service {
 	 * @param  int $number     数量
 	 * @param  int $area       区域id 校验区域与价格id是否匹配
 	 * @param  int $product_id 产品id
-	 * @param  int $type 	   1票面价金额2结算价金额
+	 * @param  int $type 	   1票面价金额2结算价金额3结算金额结算有返佣
+	 * @param  int $channel    是否是渠道订单
 	 * @return  订单金额
 	 */
-	private function amount($priceid,$number,$area,$product_id,$type = '1'){
+	private function amount($priceid,$number,$area,$product_id,$type = '1',$channel = null){
 		//获取价格缓存
+		//是否开启多级扣款，开启多级扣款之后结算价会不一样 
+		//判断创建场景是否是渠道版
+		$product = cache('Product');
+		$product = $product[$product_id];
+		$itemConf = cache('ItemConfig');
 		$ticket = F('TicketType'.$product_id);
-		if(empty($ticket)){
-			$this->error = "票型获取失败";
-			return false;
-		}
+		if(empty($ticket)){$this->error = "票型获取失败";return false;}
+
+        if($itemConf[$product['item_id']]['1']['level_pay'] && (int)$channel === (int)2){
+        	$discount = $this->channel_level_price($priceid,$ticket);
+        }else{
+			$discount = $ticket[$priceid]['discount'];/*结算价格*/
+        }
 		$price = $ticket[$priceid]['price'];/*票面价格*/
-		$discount = $ticket[$priceid]['discount'];/*结算价格*/
 		//计算金额
-		if($type == '1'){
+		if((int)$type === (int)1){
 			//票面价计算
 			$money = $price*$number;
 			$poor = 0;//优惠金额
 			$moneys = $money;//票面金额
-		}else{
+		}
+		if((int)$type === (int)2 || (int)$type === (int)3){
 			//结算价计算
 			$money = $discount*$number;
 			$poor = $price - $discount;//优惠金额
@@ -1714,9 +1773,35 @@ class Order extends \Libs\System\Service {
 			'money'	=>	$money,
 			'moneys'=>	$moneys,
 			'poor'	=>	$poor*$number,
-			);
+		);
 		return $data;
 	}
+	/**
+	 * 获取多级扣款的  渠道版专用 
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2018-03-26
+	 * @return   [type]        [description]
+	 */
+	private function channel_level_price($priceid,$ticketList = null){
+		$uinfo = \Home\Service\Partner::getInstance()->getInfo();
+		//读取当前用户的价格政策
+		$ticketLevel = F('TicketLevel');
+		if(!$ticketLevel){
+	        D('Home/TicketLevel')->ticke_level_cache();
+	        $ticketLevel = F('TicketLevel');
+	    }
+	    $itemConf = cache('ItemConfig');
+	    //一级代理商直接显示景区结算价格
+	    if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16){
+	        $ticket = $ticketLevel[$uinfo['crm']['f_agents']];
+			$discount = $ticket[$priceid]['discount'];/*结算价格*/
+	    }else{
+	    	$discount = $ticketList[$priceid]['discount'];
+	    }
+		
+		return $discount;
+	} 
 	/**
 	* 订单场景初始值 
 	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 

@@ -334,11 +334,11 @@ class WorkController extends ManageBase{
 		}else{
 			$map = array(
 				'product_id'=>get_product('id'),
-				'status'=>array('in','5,6'),
-				'plan_id'	=>	['in',normal_plan()]
+				'status'=>array('in','5,6')
 				//'createtime'=>array('GT', strtotime(date("Ymd",time()))),//过滤已过期的订单
 			);
 		}
+		$map['plan_id']	=	['in',normal_plan()];
 		$this->basePage('Order',$map, 'createtime DESC');
 		$this->assign('map',$map)->assign('planname',$planname)->assign('channel',$channel)->assign('channelname',$channelname)->display();
 	}
@@ -373,6 +373,7 @@ class WorkController extends ManageBase{
 			$areaSeat = $order->area_group($newArea,$oinfo['product_id'],$info['param'][0]['settlement'],$oinfo['product_type'],$info['child_ticket']);
 			//更新订单
 			$newInfo = [
+				'plan_id'		=> $pinfo['plan'],
 				'subtotal'		=> $areaSeat['moneys'],
 				'checkin'		=> $info['checkin'],
 				'data'			=> $areaSeat,
@@ -416,7 +417,10 @@ class WorkController extends ManageBase{
 			if($data == false){
 				$this->erun("未找到相应订单...");
 			}else{
+				//获取当前所有可售计划
+				$plan = D('Plan')->where(['status'=>2,'product_id'=>get_product('id')])->field('id,plantime,starttime,games')->select();
 				$this->assign('data',$data['info'])
+					->assign('plan',$plan)
 					->assign('type',$data['info']['product_type'])
 					->assign('area',$data['area'])
 					->assign('ticket',$data['ticket'])
@@ -513,7 +517,7 @@ class WorkController extends ManageBase{
 			//常规根据计划、区域、产品类型获取销售价格
 			if($pinfo['method'] == 'general'){
 				$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1);
-			}//dump($pinfo);
+			}
 			//根据销售计划和产品类型以及可售的票型获取整体销售票型
 			if($pinfo['method'] == 'activity'){
 				//读取当前活动绑定的票型

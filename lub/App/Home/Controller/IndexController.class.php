@@ -24,7 +24,8 @@ class IndexController extends Base{
 		//获取产品区域
 		$list = $this->plan();
 		//查询当前用户可用授信额
-		$uinfo = Partner::getInstance()->getInfo();
+		$uinfo = Partner::getInstance()->getInfo();//dump($uinfo);//dump(crm_level_link($uinfo['cid']));
+		//crm_level_link($uinfo['cid']);
 		if($uinfo['group']['type'] <> '4'){
 			//渠道商
 			$money = Operate::do_read('Crm',0,array('id'=>$uinfo['cid']),'',array('cash'));

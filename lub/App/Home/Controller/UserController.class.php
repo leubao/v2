@@ -238,8 +238,17 @@ class UserController extends Base{
 		}else{
 			
 		}*/
-		//渠道商
-		$cid = money_map($uinfo['cid']);
+		//是否开启多级扣款
+		$item_id = $uinfo['crm']['itemid'];
+		$itemConf = cache('ItemConfig');
+        if($itemConf[$item_id]['1']['level_pay']){
+        	//渠道商
+			$cid = $uinfo['cid'];
+        }else{
+        	//渠道商
+			$cid = money_map($uinfo['cid']);
+        }
+		
 		$money = Operate::do_read('Crm',0,array('id'=>$cid),'',array('cash'));
 		$return = array(
 			'status' => 'ok',

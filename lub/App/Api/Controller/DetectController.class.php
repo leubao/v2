@@ -265,7 +265,7 @@ class DetectController extends Controller{
 	 * */
 	function check(){
 		if(IS_POST){
-			$info = I('post.');
+			$info = I('post.');//load_redis('setex','211221',json_encode($info),'36000');
 			if(Checkin::checkin($info['header'],$info['content'])){
 				echo "1";
 				return true;
