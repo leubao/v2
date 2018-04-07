@@ -25,6 +25,15 @@
     &nbsp;
     <input type="hidden" name="user.id" value="">
     <input type="text" name="user.name" readonly value="" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_user',array('type'=>5,'ifadd'=>2));}" data-group="user" data-width="600" data-height="445" data-title="申请人" placeholder="申请人">
+    <label>&nbsp;状态:</label>
+    <select name="status" data-toggle="selectpicker">
+        <option value="">全部</option>
+        <option value="3" <if condition="$status eq '3'">selected</if>>待审核</option>
+        <option value="1" <if condition="$status eq '1'">selected</if>>提现成功</option>
+        <option value="9" <if condition="$status eq '9'">selected</if>>完结</option>
+        
+        <option value="4" <if condition="$status eq '4'">selected</if>>驳回</option>
+    </select>
     <input type="text" value="" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
     <button type="button" class="showMoreSearch" data-toggle="moresearch" data-name="custom"><i class="fa fa-angle-double-down"></i></button>
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;

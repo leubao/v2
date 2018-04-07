@@ -21,6 +21,12 @@
                           </td>
                         </tr>
                         <tr>
+                          <td width="120px">渠道分级扣款:</td>
+                          <td><input type="radio" name="level_pay" data-toggle="icheck" value="1" <eq name="vo['level_pay']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="level_pay" data-toggle="icheck" value="0" <eq name="vo['level_pay']" value="0"> checked</eq> data-label="关闭">
+                          </td>
+                        </tr>
+                        <tr>
                           <td width="120px">分销补贴方式:</td>
                           <td><input type="radio" name="rebate_pay" value="1" <eq name="vo.rebate_pay" value="1"> checked</eq>> 企业付款到个人
                             <input type="radio" name="rebate_pay" value="2" <eq name="vo.rebate_pay" value="2"> checked</eq>> 微信企业红包</td>

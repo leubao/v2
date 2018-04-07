@@ -89,31 +89,20 @@
             </tr>
             </tbody>
         </table>
-        
         <table class="table table-bordered mt20">
-            <thead>
-                <tr>
-                  <th align="center" width="80">操作</th>
-                  <th align="center">支付方式</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td align='right'>
-                    <input type="radio" name="pay" value="1" checked="">
-                    </td>
-                    <td>现金</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" class="pay" name="pay" value="6"></td>
-                    <td>划卡</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" class="pay" name="pay" value="3"></td>
-                    <td>签单</td>
-                </tr>
-            </tbody>
+            <tr>
+                <td align='right'>支付方式:</td>
+                <td><select class="required" name="pay" id="selectPay" data-toggle="selectpicker">
+                        <option value="1" selected>现金</option>
+                        <option value="6">POS机划卡</option>
+                        <option value="3">签单</option>
+                        <option value="4">支付宝支付</option>
+                        <option value="5">微信支付</option>
+                    </select>
+                </td>
+            </tr>
         </table>
+
         
         <!--提交-->
         <div class="submit_seat"><a href="#" class="btn btn-success" onclick="quick_server();">立即出票</a></div>
@@ -269,7 +258,7 @@ function post_server(){
         guide = '0',
         qditem = '0',
         settlement = {$proconf.settlement},
-        is_pay = $('input[name="pay"]:checked').val(),
+        is_pay = $('#selectPay option:selected').val(),
         length =  $("#quick-price-select tr").length,
         url:'<?php echo U('Item/Order/quickpost',array('type'=>$type));?>'+'&plan='+plan;
     if(length <= 0){

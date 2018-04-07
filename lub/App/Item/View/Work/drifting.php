@@ -49,6 +49,7 @@
             <tbody id="quick-price-select">
             </tbody>
         </table>
+        <!--
         <table class="table table-bordered">
             <thead>
             <tr>
@@ -59,7 +60,7 @@
             <tbody id="child_ticket">
                
             </tbody>
-        </table>
+        </table>-->
         <table class="table table-bordered">
             <tr><td colspan="2" align='right'>合计:</td>
                 <td colspan='3'><strong style='color:red;font-size:18px;' id="quick-total">0.00</strong></td>
@@ -103,28 +104,17 @@
         </table>
        
         <table class="table table-bordered mt20">
-            <thead>
-                <tr>
-                  <th align="center" width="80">操作</th>
-                  <th align="center">支付方式  <button type="button"  data-toggle="collapse" href="#collapseExample" aria-expanded="false" aria-controls="collapseExample"><i class="fa fa-angle-double-down"></i></button></th>
-                </tr>
-            </thead>
-            <tbody class="collapse" id="collapseExample">
-                <tr>
-                    <td align='right' width="80">
-                    <input type="radio" name="pay" value="1" checked="">
-                    </td>
-                    <td>现金</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" class="pay" name="pay" value="6"></td>
-                    <td>划卡</td>
-                </tr>
-                <tr>
-                    <td align='right'><input type="radio" class="pay" name="pay" value="3"></td>
-                    <td>签单</td>
-                </tr>
-            </tbody>
+            <tr>
+                <td align='right'>支付方式:</td>
+                <td><select class="required" name="pay" id="selectPay" data-toggle="selectpicker">
+                        <option value="1" selected>现金</option>
+                        <option value="6">POS机划卡</option>
+                        <option value="3">签单</option>
+                        <option value="4">支付宝支付</option>
+                        <option value="5">微信支付</option>
+                    </select>
+                </td>
+            </tr>
         </table>
         
         <!--提交-->
@@ -147,7 +137,7 @@ $(document).ready(function(){
         $(this).bjuiajax('refreshLayout','quick-price-select');
         //console.log($(this).bjuiajax('refreshLayout','quick-price-select'));
     });
-    /**联票选择器子票型**/
+    /**联票选择器子票型*
     $('#child_ticket').on('click',' .child_ticket',function(){
         var child_fid = $(this).data('fid'),
             child_price = PRODUCT_CONF.settlement == 2 ? $(this).data('discount') : $(this).data('price'),
@@ -176,7 +166,7 @@ $(document).ready(function(){
                 $(this).alertmsg('error','亲,请选择主门票!');
             }
         });
-    });
+    });*/
     //根据配置选择窗口是结算价格结算还是结算价结算
     $('#quick-price').on('click','tr',function(event){
         var trId = $(this).data('id'),
@@ -352,7 +342,7 @@ function quick_server(){
         qditem = '0',
         settlement = PRODUCT_CONF.settlement,
         data = '',
-        is_pay = $('input[name="pay"]:checked').val(),
+        is_pay = $('#selectPay option:selected').val(),
         length =  $("#quick-price-select tr").length,
         url = '<?php echo U('Item/Order/quickpost',array('type'=>$type));?>'+'&plan='+plan;
     if(length <= 0){

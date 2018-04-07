@@ -5,7 +5,14 @@
     <tbody>
       <tr>
         <td width="90px">销售计划</td>
-        <td width="320px">{$data.plan_id|planShow}</td>
+        <td width="320px">
+          <select class="required" name="plan" data-toggle="selectpicker">
+        <volist name="plan" id="vo">
+          <?php $ptime =  $vo['plantime']."-".$vo['games'];?>
+          <option value="{$vo.id}"  <if condition="$vo.id eq $data.plan_id">selected</if>>{$vo.plantime|date="Y-m-d",###} <if condition="$product['type'] eq 1"> 第{$vo.games}场 {$vo.starttime|date="H:i",###}</if>
+          </option>
+        </volist></select>
+        {$data.plan_id|planShow}</td>
         <td width="90px">单号</td>
         <td>{$data.order_sn}</td>
       </tr>

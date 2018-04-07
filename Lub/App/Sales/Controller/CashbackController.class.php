@@ -20,12 +20,19 @@ class CashbackController extends ManageBase{
     }
     //提现列表
     function index(){
-        $ginfo = I('get.');
-        if(!empty($ginfo['id'])){
-            $map['user_id'] = $ginfo['id'];
+        $sn = I('sn');
+        $user_id = I('user_id');
+        $status = I('status');
+        if(!empty($sn)){$map['sn'] =  array('like','%'.$sn.'%');}
+        if(!empty($status)){
+            $map['status'] = $status;
+        }
+        if(!empty($user_id)){$map['user_id'] = $user_id;}
+        if(empty($user_id) && empty($status) && empty($sn)){
+            $map['status'] = 3;
         }
 		$this->basePage('Cash',$map,array('id'=>'DESC'));
-		$this->assign('ginfo',$ginfo)->display();
+		$this->assign('ginfo',$ginfo)->assign('status',$status)->display();
     }
     //提现审核
     function back(){
@@ -41,11 +48,11 @@ class CashbackController extends ManageBase{
                 if(empty($itemCof)){$this->erun("商户配置信息获取失败,请重新登录...");}//dump($itemCof);
                 //微信企业付款
                 if($itemCof['rebate_pay'] == '1'){
-                    $postData = $this->pay_red($info,$product);
+                    $postData = $this->pay_transfer($info,$product);
                     /*发起支付*/
-                    $config = load_payment('wx_transfer',$product['id']);
+                    $config = load_payment('wx_transfer');
                     try {
-                        $return = Transfer::run('wx_transfer', $config, $data);
+                        $return = Transfer::run('wx_transfer', $config, $postData);
                     } catch (PayException $e) {
                         load_redis('set','fkhs',serialize($e));
                         $this->erun("ERROR:".$e->errorMessage().$return['err_code']);
@@ -59,10 +66,10 @@ class CashbackController extends ManageBase{
                         error_insert($return['err_code']);
                         $this->erun("ERROR:".$return['return_msg'].$return['err_code'].$return['err_code_des']);
                     }
-                }dump($info);
+                }
                 //微信普通红包
                 if($itemCof['rebate_pay'] == '2'){
-                    //注意200的限额
+                    /*注意200的限额,根据模板设置金额
                     if($info['money'] > 200){
                         //大于200拆分多个红包
                         $redNum = 1;
@@ -86,7 +93,8 @@ class CashbackController extends ManageBase{
                         }
                     }else{
                         $postData = $this->pay_red($info,$itemCof);
-                    }
+                    }*/
+                    $postData = $this->pay_red($info,$itemCof);
                     $this->pay_red_susess($info);
                     $this->srun("红包创建成功,等待领取...",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
                 }
@@ -180,9 +188,11 @@ class CashbackController extends ManageBase{
         //读取红包模板
         //dump($itemCof);
         $redTpl = D('RedTpl')->where(['id'=>$itemCof['red_tpl']])->field('create_time,user_id,id,status',true)->find();
+        
         if(empty($redTpl)){
             $this->erun('未找到红包模板,请设置');
         }
+        $config = load_payment('wx_red');
         $postData = [
             'mch_billno'        =>  $info['sn'],//商户订单号
             'send_name'         =>  $redTpl['send_name'],//商户名称
@@ -193,10 +203,12 @@ class CashbackController extends ManageBase{
             'client_ip'         =>  get_client_ip(),//Ip地址
             'act_name'          =>  $redTpl['act_name'],//"利润分享计划",//活动名称
             'remark'            =>  $redTpl['remark'],//'感谢参与'.$product['name'].'利润分享计划！',//备注
-            'scene_id'          =>  $redTpl['scene_id']
+            'scene_id'          =>  $redTpl['scene_id'],
+            'sub_appid'         =>  $config['sub_appid'],
+            'sub_mch_id'        =>  $config['sub_mch_id']
         ];
 
-        $config = load_payment('wx_red');
+        //dump($config);
         try {
             $ret = Red::run('wx_red', $config, $postData);
         } catch (PayException $e) {

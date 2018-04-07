@@ -55,7 +55,6 @@
         layer.msg('扫码失败...');
         return false;
       }
-      alert(is_pay != '4');
       if(is_pay == '1' || is_pay == '3' || is_pay == '6'){
         layer.msg('请选择微信支付或支付宝支付...');
         return false;

@@ -658,7 +658,6 @@ class IndexController extends ManageBase{
     }
     /*
     *授信额导出
-	*
     */
    function export_credit(){
    		$ginfo = I('get.');
@@ -700,5 +699,5 @@ class IndexController extends ManageBase{
    		return \Libs\Service\Exports::getExcel($filename,$headArr,$data);
    		exit;
     }
-
+    
 }

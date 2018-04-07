@@ -18,8 +18,8 @@
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">所属商户:</label>
-    <input type="hidden" name="channel.id" value="{$data.crm_id}">
-    <input type="text" name="channel.name" disabled value="{$data.crm_id|crmName}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel');}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
+    <input type="hidden" name="crm.id" value="{$data.crm_id}">
+    <input type="text" name="crm.name" disabled value="{$data.crm_id|crmName}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel');}" data-group="crm" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">应用描述:</label>

@@ -376,6 +376,7 @@ class FinancialController extends ManageBase{
 		$this->assign('data',$data)
 			->assign('map',$map)
 			->assign('ticket_id',$ticket_id)
+			->assign('channel_id',$channel_id)
 			->assign('ticket_name',I('ticket_name'))
 			->assign('channel_name',I('channel_name'))
 			->assign('export_map',$export_map)

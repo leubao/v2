@@ -64,7 +64,7 @@ class UserModel extends Model {
         //密码验证
         if (!empty($password) && $this->hashPassword($password, $userInfo['verify']) != $userInfo['password']) {
             return false;
-        }
+        }//dump($userInfo);
         return $userInfo;
     }
     /**

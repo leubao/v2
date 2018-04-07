@@ -455,7 +455,7 @@ class Order extends \Libs\System\Service {
 			//场次已停止销售
 			$this->error = '400005 : 销售计划已暂停销售...';
 			return false;
-		}
+		}dump($info);
 		$return = $this->quick_order($info,$scena,$uinfo,$is_seat,$channel);
 		//dump($this->error);
 		//dump($return);
@@ -476,7 +476,7 @@ class Order extends \Libs\System\Service {
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}//dump($info);
-		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);
+		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($channel);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
@@ -1712,7 +1712,7 @@ class Order extends \Libs\System\Service {
 					'num'=>$v['num'],
 				);
 				$seat['num'] += $seat['area'][$v['priceid']]['num'];
-			}
+			}//dump($settlement);
 			//计算订单金额
 			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement,$channel);
 			if($price != '0'){
@@ -1749,12 +1749,13 @@ class Order extends \Libs\System\Service {
 		$itemConf = cache('ItemConfig');
 		$ticket = F('TicketType'.$product_id);
 		if(empty($ticket)){$this->error = "票型获取失败";return false;}
-
-        if($itemConf[$product['item_id']]['1']['level_pay'] && (int)$channel === (int)2){
+		//(int)$channel === (int)2
+        if($itemConf[$product['item_id']]['1']['level_pay'] && in_array($channel,['1','2','4'])){
         	$discount = $this->channel_level_price($priceid,$ticket);
         }else{
 			$discount = $ticket[$priceid]['discount'];/*结算价格*/
-        }
+        }//dump($itemConf[$product['item_id']]['1']['level_pay']);
+        //dump($type);
 		$price = $ticket[$priceid]['price'];/*票面价格*/
 		//计算金额
 		if((int)$type === (int)1){
@@ -1773,7 +1774,7 @@ class Order extends \Libs\System\Service {
 			'money'	=>	$money,
 			'moneys'=>	$moneys,
 			'poor'	=>	$poor*$number,
-		);
+		);//dump($data);
 		return $data;
 	}
 	/**
