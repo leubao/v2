@@ -28,16 +28,32 @@
                 <option value="1" data-area="buy">买赠</option>
                 <option value="2" data-area="first">首单免</option>
                 <option value="3" data-area="area">限制区域销售</option>
+                <option value="4" data-area="team">组团销售</option>
               </select>
             </td>
         </tr>
-        
+        <tr>
+            <td>参与范围:</td>
+            <td><select name="scope" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1">开启</option>
+                <option value="0" selected>关闭</option>
+              </select>
+              <span class="remark">限制渠道商参与</span>
+            </td>
+            <td>实名制入园:</td><td>
+              <select name="real" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1">开启</option>
+                <option value="0" selected>关闭</option>
+              </select>
+              <span class="remark">下单时需要输入身份证</span>
+            </td>
+        </tr>
         <tr>
             <td>排序:</td><td><input type="text" name="sort" value="0" size="15"></td>
             <td>状态:</td><td>
               <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
                 <option value="">状态</option>
-                <option value="1">启用</option>
+                <option value="1" selected>启用</option>
                 <option value="0">禁用</option>
             </select></td>
         </tr>
@@ -56,14 +72,13 @@
             <td><input type="checkbox" name="area[{$vo.id}]" value="{$vo.id}"> {$vo.id|areaName} 
             买: <input type="text" name="num[{$vo.id}]" value="" data-rule="digits" size="5"> 
               <input type="hidden" name="ticket_num_{$vo.id}.id" value="{$ticket_id}">
-              <input type="text" name="ticket_num_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket_num_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">
+              <input type="text" name="ticket_num_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>0));}" data-group="ticket_num_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">
+
             赠送: <input type="text" name="nums[{$vo.id}]" value="" data-rule="digits" size="5">
               <input type="hidden" name="ticket_nums_{$vo.id}.id" value="{$ticket_id}">
-              <input type="text" name="ticket_nums_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket_nums_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"></td>
-            <td>数量: <input type="text" name="quota[{$vo.id}]" value="" data-rule="digits" size="5">
-            <input name="seat[{$vo.id}]" id="seat_{$vo.id}" type="hidden" value="">
-            </td>
-            <td><a href="{:U('Item/Activity/row_seat',array('area'=>$vo['id']));}" data-toggle="dialog" data-mask="true" data-max="true" data-id="activity_seat">指定区域</a></td>
+              <input type="text" name="ticket_nums_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>0));}" data-group="ticket_nums_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"></td>
+
+            
         </tr>
         </volist>
       </tbody>
@@ -90,6 +105,21 @@
         </tbody>
       </table>
     </div>
+    <!--组团销售-->
+    <div id="team" style="display: none;">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="" size="15"></td>
+          </tr>
+          <tr>
+            <td>可售票型:</td>
+            <td colspan="3"><input type="hidden" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
   <input name="product_id" value="{$product_id}" type="hidden">
   <div class="bjui-pageFooter">
@@ -97,7 +127,7 @@
       <li><button type="button" class="btn-close" data-icon="close">取消</button></li>
       <li><button type="submit" class="btn-default" data-icon="save">保存</button></li>
     </ul>
-  </div
+  </div>
 </form>
 <script type="text/javascript">
 $(document).ready(function() {

@@ -20,7 +20,7 @@ class PromotionsController extends ManageBase{
 			'product_id'	=>	get_product('id'), 
 			'status'		=>	1
 		];
-		$list = D('Activity')->where($map)->field('id,title,starttime,endtime,remark')->select();
+		$list = D('Activity')->where($map)->field('id,title,type,starttime,endtime,remark')->select();
 		$this->assign('data',$list)->display();
 	}
 	//活动操作页面

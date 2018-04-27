@@ -1890,6 +1890,7 @@ function crmName($param,$type=NULL){
                 if(in_array($va['id'],$param['ticket'])){
                     $va['area_num'] = $area_num;
                     $va['area_nums']= $area_nums;
+                    $va['area_id'] = 0;
                     //判断是否开启多级扣款 TODO  后期优化 指定票型ID时，使用景区指定价格
                     if((int)$scene === (int)2){
                         //获取当前用户

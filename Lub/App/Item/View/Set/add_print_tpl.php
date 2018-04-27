@@ -6,12 +6,6 @@
     <input type="text" name="title" class="form-control required" data-rule="required;" size="40" placeholder="名称">
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">产品:</label>
-    <volist name="product" id="vo">
-      <input type="checkbox" name="product[]" value="{$vo.id}"> {$vo.name}<br>
-    </volist>
-  </div>
-  <div class="form-group">
     <label class="col-sm-2 control-label">模板数据:</label>
     <textarea name="info" class="form-control" rows="20" size="40"></textarea>
   </div>

@@ -476,7 +476,7 @@ class Order extends \Libs\System\Service {
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}//dump($info);
-		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($channel);
+		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
@@ -578,40 +578,108 @@ class Order extends \Libs\System\Service {
 		}
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
-		//扣除授信额度
-		if($channel == '1' && $info['pay'] == '2'){
-			//获取扣费条件
-			$cid = money_map($info['channel_id']);
-			//先消费后记录
-			//$c_pay = $model->table(C('DB_PREFIX').'crm')->where(array('id'=>$cid))->setDec('cash',$info['money']);
-			//验证客户余额是否够用
-			$balance = M('Crm')->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
-			if($balance){
-				$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
-				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
-				$data = array(
-					'cash'		=>	$info['money'],
-					'user_id'	=>	$info['user_id'],
-					'crm_id'	=>	$cid,
-					'createtime'=>	$createtime,
-					'type'		=>	'2',
-					'order_sn'	=>	$info['order_sn'],
-					'balance'	=>  balance($cid),
-				);
-				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
-				if($c_pay == false || $c_pay2 == false){
-					error_insert('400008');
+		/*==============================渠道版扣费 start===============================================*/
+		if(in_array($channel,['1','4']) && $is_pay == '2'){
+			
+			//获取产品信息
+			$product = cache('Product');
+			$product = $product[$plan['product_id']];//dump($product);
+			$itemConf = cache('ItemConfig');
+            if($itemConf[$product['item_id']]['1']['level_pay']){
+				//开启分级扣款
+				
+            	//获取扣款连条
+            	$payLink = crm_level_link($info['channel_id']);
+            	//判断链条中所有人余额充足
+            	//统一扣除订单金额，每天返利
+            	
+            	//渠道商客户
+				$db = M('Crm');
+				$payWhere = [
+					'id'	=>	['in', implode(',',$payLink)],
+					'cash'	=>	['EGT',$info['money']]
+				];
+				$balance = $db->where($payWhere)->field('id')->find();
+				if($balance){
+					$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
+					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(['id'=>['in',implode(',',$payLink)]])->setField($crmData);
+					//TODO 不同级别扣款金额不同
+					foreach ($payLink as $p => $l) {
+						$data[] = array(
+							'cash'		=>	$info['money'],
+							'user_id'	=>	$info['user_id'],
+							'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+							'addsid'	=>	$info['addsid'],
+							'crm_id'	=>	$l,
+							'createtime'=>	$createtime,
+							'type'		=>	'2',
+							'order_sn'	=>	$info['order_sn'],
+							'balance'	=>  balance($l,$channel),
+							'tyint'		=>	$channel,//客户类型1企业4个人
+						);
+					}
+					$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($data);
+					if($c_pay == false || $c_pay2 == false){
+						$model->rollback();//事务回滚
+						$this->error = '400008 : 扣费失败';
+						return false;
+					}
+				}else{
 					$model->rollback();//事务回滚
+					$this->error = '400008 : 客户余额不足,或上级余额不足';
 					return false;
 				}
 			}else{
-				error_insert('400008');
-				$model->rollback();//事务回滚
-				return false;
+				if($channel == '1'){
+					//渠道商客户
+					$db = M('Crm');
+					//获取扣费条件
+					$cid = money_map($info['channel_id'],$channel);
+				}
+				if($channel == '4'){
+					//个人客户
+					$db = M('User');
+					$cid = $info['guide_id'];
+				}
+				//先消费后记录验证客户余额是否够用
+				$balance = $db->where(array('id'=>$cid,'cash'=>array('EGT',$info['money'])))->field('id')->find();
+				if($balance){
+					$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
+					if($channel == '1'){
+						//渠道商客户
+						$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+					}
+					if($channel == '4'){
+						//个人客户
+						$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
+					}				
+					$data = array(
+						'cash'		=>	$info['money'],
+						'user_id'	=>	$info['user_id'],
+						'guide_id'	=>	$cid,//TODO  这个貌似没什么意义
+						'addsid'	=>	$info['addsid'],
+						'crm_id'	=>	$cid,
+						'createtime'=>	$createtime,
+						'type'		=>	'2',
+						'order_sn'	=>	$info['order_sn'],
+						'balance'	=>  balance($cid,$channel),
+						'tyint'		=>	$channel,//客户类型1企业4个人
+					);
+					$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+					if($c_pay == false || $c_pay2 == false){
+						$model->rollback();//事务回滚
+						$this->error = '400008 : 扣费失败';
+						return false;
+					}
+				}else{
+					//error_insert('400008');
+					$model->rollback();//事务回滚
+					$this->error = '400008 : 客户余额不足';
+					return false;
+				}
 			}
-		}else{
-			//网银支付记录支付记录
 		}
+		/*==============================渠道版扣费 end=================================================*/
 		$ticketType = F('TicketType'.$plan['product_id']);
 		//构造打印数据
 		//$dataList = Order::create_print($info['order_sn'],$info['info']['data']['area'],$plan);
@@ -620,7 +688,7 @@ class Order extends \Libs\System\Service {
 		}else{
 			$table = 'drifting';
 		}
-		$map = array('plan_id' => $info['plan_id'],'status'=>'0');//dump($info);
+		$map = array('plan_id' => $info['plan_id'],'status'=>'0');
 		foreach ($info['info']['data']['area'] as $key => $value) {
 			/*判断是否联合售票*/
 			if(!empty($info['info']['child_ticket'])){
@@ -667,6 +735,7 @@ class Order extends \Libs\System\Service {
 					'ciphertext' => genRandomString(),
 					'price_id'   =>	$value['priceid'],
 					'sale' => serialize($param),
+					'idcard' => $value['idcard'],
 					'status' => '2',
 					'createtime' => $createtime,
 				);
@@ -680,7 +749,7 @@ class Order extends \Libs\System\Service {
 		//批量新增数据
 		$state = $model->table(C('DB_PREFIX').$table)->where($map)->limit($value['num'])->lock(true)->addAll($printList);
 		//获取售票信息
-		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id')->select();
+		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id,idcard')->select();
 		foreach ($saleList as $ks => $vs) {
 			$sale[$ks] = unserialize($vs['sale']);
 			$dataList[] = array(
@@ -693,6 +762,13 @@ class Order extends \Libs\System\Service {
 					'plan_id' => $info['plan_id'],
 					'child_ticket' => arr2string($child_t,'priceid'),
 				);
+			//统计身份证号
+			$idcard[] = [
+				'plan_id'		=>	$info['plan_id'],
+				'order_sn'		=>	$info['order_sn'],
+				'idcard'		=>	$vs['idcard'],
+				'activity_id'	=>	$info['info']['param'][0]['activity']
+			];
 		}
 		//是否为团队订单 
 		if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8'){
@@ -753,7 +829,18 @@ class Order extends \Libs\System\Service {
 				}
 			}
 		}
+		//判断活动属性 todo 读取活动属性
 		
+		if(!empty($info['info']['param'][0]['activity'])){
+			$real = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->getField('real');
+			if($real){
+				$is_print = 1;
+				$msgTpl = 8;//后期短信模板动态配置
+				//写入身份证号
+				D('IdcardLog')->addAll($idcard);
+			}
+		}
+
 		//更新订单详情
 		//重新组合订单详情  增加座位信息  与选做订单详情一至
 		$newData = array('subtotal'	=> $info['info']['subtotal'],'checkin'	=> $info['info']['checkin'],'data' => $dataList,'crm' => $info['info']['crm'],'pay' => $is_pay ? $is_pay : $info['info']['pay'],'param'	=> $info['info']['param'],'child_ticket'=>$child_t);
@@ -1035,10 +1122,13 @@ class Order extends \Libs\System\Service {
 			
 			//判断活动属性 todo 读取活动属性
 			if(!empty($oInfo['param'][0]['activity'])){
-				$is_print = 1;
-				$msgTpl = 8;//后期短信模板动态配置
-				//写入身份证号
-				D('IdcardLog')->addAll($idcard);
+				$real = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->getField('real');
+				if($real){
+					$is_print = 1;
+					$msgTpl = 8;//后期短信模板动态配置
+					//写入身份证号
+					D('IdcardLog')->addAll($idcard);
+				}
 			}
 			//重新组合订单详情  增加座位信息  与选做订单详情一至
 			$newData = array('subtotal'	=> $oInfo['subtotal'],'checkin'	=> $oInfo['checkin'],'data' => $seatData,'crm' => $oInfo['crm'],'pay' => $is_pay ? $is_pay : $oInfo['pay'],'param'	=> $oInfo['param']);
@@ -1059,28 +1149,6 @@ class Order extends \Libs\System\Service {
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
 				if($proconf['quota'] == '1' && $quota_num > 0){
 					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$info['type']);
-					/*判断销售类型?.
-					if(in_array($info['type'],array('2','4'))){
-						$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
-					}else{
-						//TODO  全员营销的配额
-						//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
-					}
-					/*
-					switch ($info['type']) {
-						case '2':
-							//常规渠道
-							$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
-							break;
-						case '4':
-							//政企渠道
-							$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
-							break;
-						case '8':
-							//全员销售
-							$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id']);
-							break;
-					}*/
 					if($up_quota == '400'){
 						//error_insert('400012');
 						$model->rollback();
@@ -1776,7 +1844,7 @@ class Order extends \Libs\System\Service {
 			}	
 		}
 		/*重新组合区域*/
-		foreach($area as $k=>$v){
+		foreach($area as $k=>$v){//dump($v);
 			if($product_type == '1'){
 				/*相同区域相同票型合并
 				$seat['area'][$v['areaId']]['seat'][$k] = array(
@@ -1799,12 +1867,25 @@ class Order extends \Libs\System\Service {
 				$seat['num'] += $seat['area'][$v['priceid']]['num'];
 			}else{
 				//景区、漂流
-				$seat['area'][$v['priceid']] = array(
-					'priceid'=>$v['priceid'],
-					'price'=>$v['price'],
-					'num'=>$v['num'],
-				);
-				$seat['num'] += $seat['area'][$v['priceid']]['num'];
+				if(empty($v['idcard'])){
+					$seat['area'][$v['priceid']] = array(
+						'priceid'=>$v['priceid'],
+						'price'=>$v['price'],
+						'num'=>$v['num'],
+						'idcard'=> $v['idcard']
+					);
+					$seat['num'] += $seat['area'][$v['priceid']]['num'];
+				}else{
+					$seat['area'][] = array(
+						'priceid'=>$v['priceid'],
+						'price'=>$v['price'],
+						'num'=>$v['num'],
+						'idcard'=> $v['idcard']
+					);
+					$seat['num'] += $v['num'];
+				}
+				
+				
 			}//dump($settlement);
 			//计算订单金额
 			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement,$channel);
@@ -1890,6 +1971,10 @@ class Order extends \Libs\System\Service {
 	    if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16){
 	        $ticket = $ticketLevel[$uinfo['crm']['f_agents']];
 			$discount = $ticket[$priceid]['discount'];/*结算价格*/
+			//如果没有设置   直接读取景区分销价
+			if(empty($discount)){
+				$discount = $ticketList[$priceid]['discount'];
+			}
 	    }else{
 	    	$discount = $ticketList[$priceid]['discount'];
 	    }

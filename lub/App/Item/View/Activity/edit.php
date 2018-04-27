@@ -21,6 +21,22 @@
           </td>
         </tr>
         <tr>
+            <td>参与范围:</td>
+            <td><select name="scope" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1" <if condition="$data['scope'] eq 1">selected</if>>开启</option>
+                <option value="0" <if condition="$data['scope'] eq 0">selected</if>>关闭</option>
+              </select>
+              <span class="remark">限制渠道商参与</span>
+            </td>
+            <td>实名制入园:</td><td>
+              <select name="real" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1" <if condition="$data['real'] eq 1">selected</if>>开启</option>
+                <option value="0" <if condition="$data['real'] eq 0">selected</if>>关闭</option>
+              </select>
+              <span class="remark">下单时需要输入身份证</span>
+            </td>
+        </tr>
+        <tr>
             <td>排序:</td><td><input type="text" name="sort" value="{$data.sort}" size="15"></td>
             <td>状态:</td><td>
               <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
@@ -34,6 +50,21 @@
         </tr>
       </tbody>
     </table>
+    <if condition="$data['type'] eq '4'">
+        <table class="table table-striped table-bordered">
+          <tbody>
+            <tr>
+              <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="{$data.param.info.number}" size="15"></td>
+            </tr>
+            <tr>
+              <td>可售票型:</td>
+              <td colspan="3"><input type="hidden" name="ticket.id" value="{$data.param.info.ticket}">
+      <input type="text" name="ticket.name" readonly value="{$ticket_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+            </tr>
+          </tbody>
+        </table>
+      
+    </if>
     <if condition="$data['type'] eq '3'">
       <table class="table table-striped table-bordered">
         <tbody>

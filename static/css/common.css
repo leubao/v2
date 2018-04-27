@@ -83,7 +83,7 @@
 	list-style: disc outside;
 }
 /*说明*/
-.remark{color: #efefef;font-size: 13px;margin-left: 10px;}
+.remark{color: #777879;font-size: 12px;margin-left: 8px;}
 /*重新定义bootstrap*/
 .page-header{margin-top: 15px;}
 /*备注*/
