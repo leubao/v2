@@ -119,4 +119,14 @@ class IndexController extends Base{
 		$this->assign('uinfo',$uInfo);
 		return $list;
 	}
+	//拉取区域
+	public function public_get_area()
+	{
+		$area = F('Province');
+		if(empty($area)){
+			D('Item/Province')->province_cache();
+			$area = F('Province');
+		}//dump(json_encode($area));
+		die(json_encode($area));
+	}
 }

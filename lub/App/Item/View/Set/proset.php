@@ -198,6 +198,13 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">打印客源地:</td>
+                                <td>
+                                <input type="radio" name="print_to_guest" data-toggle="icheck" value="1" <eq name="vo['print_to_guest']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="print_to_guest" data-toggle="icheck" value="2" <eq name="vo['print_to_guest']" value="0"> checked</eq> data-label="关闭">
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">默认出票方式:</td>
                                 <td>
                                 <input type="radio" name="print_type" data-toggle="icheck" value="1" <eq name="vo['print_type']" value="1"> checked</eq> data-label="一人一票&nbsp;">
@@ -263,6 +270,14 @@
                           <td width="120px">团队预约:</td>
                           <td>
                           <input type="text" name="channel_pre_team" value="{$vo.channel_pre_team}" size="10"><span class="remark">0为不限制,1为提前一天</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">客源地:</td>
+                          <td>
+                          <input type="radio" name="tourists" data-toggle="icheck" value="0" <eq name="vo['tourists']" value="0"> checked</eq> data-label="关闭&nbsp;">
+                          <input type="radio" name="tourists" data-toggle="icheck" value="1" <eq name="vo['tourists']" value="1"> checked</eq> data-label="省级客源地&nbsp;">
+                          <input type="radio" name="tourists" data-toggle="icheck" value="2" <eq name="vo['tourists']" value="2"> checked</eq> data-label="市级客源地&nbsp;">
                           </td>
                         </tr>
                       </tbody>

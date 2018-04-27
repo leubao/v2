@@ -24,7 +24,9 @@
             <tr>
                 <th width="25">No.</th>
                 <th>票型名称</th>
-                <th>描述</th>
+                <th>票型价格</th>
+                <th>结算价格</th>
+                <th>类型</th>
                 <th width="28"><input type="checkbox" class="checkboxCtrl" data-group="ids" data-toggle="icheck"></th>
                 <th width="74" align="center">操作</th>
             </tr>
@@ -34,7 +36,9 @@
                 <tr>
                     <td>{$i}</td>
                     <td>{$vo.name}</td>
-                    <td></td>
+                    <td>{$vo.price}</td>
+                    <td>{$vo.discount}</td>
+                    <td>{$vo.type|ticket_type}</td>
                     <td><input type="checkbox" name="ids" data-toggle="icheck" value="{id:'{$vo.id}', name:'{$vo.name}'}"></td>
                     <td align="center"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.name}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></td>
                 </tr>               
@@ -47,7 +51,9 @@
             <tr>
                 <th width="25">No.</th>
                 <th>票型名称</th>
-                <th>描述</th>
+                <th>票型价格</th>
+                <th>结算价格</th>
+                <th>类型</th>
                 <th width="74" align="center">操作</th>
             </tr>
         </thead>
@@ -56,7 +62,9 @@
                 <tr>
                     <td>{$i}</td>
                     <td>{$vo.name}</td>
-                    <td></td>
+                    <td>{$vo.price}</td>
+                    <td>{$vo.discount}</td>
+                    <td>{$vo.type|ticket_type}</td>
                     <td align="center"><a href="javascript:;" data-toggle="lookupback" data-args="{id:'{$vo.id}', name:'{$vo.name}'}" class="btn btn-blue" title="选择本项" data-icon="check">选择</a></td>
                 </tr>               
             </volist>

@@ -35,12 +35,19 @@ class PromotionsController extends ManageBase{
 		}
 		//根据活动类型加载
 		switch ($info['type']) {
+			case '1':
+				$idcard = $info['param']['info']['card'];
+				$this->assign('idcard',json_encode($idcard));
+				$this->assign('type','1');
+				$tempate = 'buy';
+				break;
 			case '3':
 				$idcard = $info['param']['info']['card'];
 				$this->assign('idcard',json_encode($idcard));
 				$this->assign('type','1');
 				$tempate = 'area_sale';
 				break;
+
 			default:
 				break;
 		}

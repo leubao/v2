@@ -20,9 +20,12 @@
     &nbsp;
     <input type="hidden" name="plan.id" value="{$plan_id}">
     <input type="text" name="plan.name" readonly value="{$plan_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_date_plan',array('ifadd'=>1));}" data-group="plan" data-width="600" data-height="445" data-title="销售计划(场次)" placeholder="销售计划(场次)">
-    <input type="text" value="" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
-  	<input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
-    <input type="radio" name="type" data-toggle="icheck" value="2" <if condition="$type eq '2'"> checked="checked"</if> data-label="汇总">
+    <input type="text" value="" name="sn" class="form-control" size="10" placeholder="单号">
+    &nbsp;
+    <select class="required" name="type" data-toggle="selectpicker">
+      <option value="1" <if condition="$type eq '1'">selected</if>>明细</option>
+      <option value="2" <if condition="$type eq '2'">selected</if>>汇总</option>
+    </select>&nbsp;
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">

@@ -11,14 +11,16 @@
     <label>至</label>
     <input type="text" size="11" name="endtime" data-toggle="datepicker"  value="{$endtime}">
     &nbsp;
-  	<input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
-    <input type="radio" name="type" data-toggle="icheck" value="2" <if condition="$type eq '2'"> checked="checked"</if> data-label="汇总">
+    <select class="required" name="type" data-toggle="selectpicker">
+      <option value="1" <if condition="$type eq '1'">selected</if>>明细</option>
+      <option value="2" <if condition="$type eq '2'">selected</if>>汇总</option>
+    </select>
+    &nbsp;
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">
         <a type="button" class="btn btn-default" onclick="$(this).navtab('refresh');" data-placement="left" data-toggle="tooltip" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>
         <a type="button" class="btn btn-primary" href="{:U('Report/Exprot/export_execl',$export_map);}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出数据吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
-
     </div>
   </div>
   <!--检索条件 e-->

@@ -22,8 +22,17 @@
         <option value="5" <if condition="$industry eq '5'">selected</if>>住宿</option>
         <option value="6" <if condition="$industry eq '6'">selected</if>>其它</option>
     </select>
-  	<input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
-    <input type="radio" name="type" data-toggle="icheck" value="2" <if condition="$type eq '2'"> checked="checked"</if> data-label="汇总">
+  	&nbsp;
+    <select class="required" name="type" data-toggle="selectpicker">
+      <option value="1" <if condition="$type eq '1'">selected</if>>明细</option>
+      <option value="2" <if condition="$type eq '2'">selected</if>>汇总</option>
+    </select>
+    &nbsp;
+    <select class="required" name="type" data-toggle="selectpicker">
+      <option value="1" <if condition="$type eq '1'">selected</if>>结算价核算</option>
+      <option value="2" <if condition="$type eq '2'">selected</if>>净收入核算</option>
+    </select>
+    &nbsp;
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">

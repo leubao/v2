@@ -45,7 +45,7 @@ function printTicket(sn,planid){
 					/*打印设置部分*/
 					CreateFullBill(this);
 					/*设置连续打印*/
-					LODOP.SET_PRINT_PAGESIZE(2,550,1660,"USER");
+					LODOP.SET_PRINT_PAGESIZE(2,1000,1800,"USER");
 					LODOP.SET_PRINT_MODE("POS_BASEON_PAPER",true);
 					LODOP. PRINT();	
 					/*关闭当前弹窗*/
@@ -62,52 +62,51 @@ function printTicket(sn,planid){
 /*打印页面控制*/
 function CreateFullBill(data) {
 	LODOP=getLodop(); 
-	
-	LODOP.ADD_PRINT_TEXT(2,400,152,28,"演出时间:");
+	//LODOP.SET_PRINT_MODE("PRINT_NOCOLLATE",1);
+	LODOP.ADD_PRINT_TEXT(17,469,66,30,"日期:");
+	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+	LODOP.ADD_PRINT_TEXT(17,530,145,25,data.plantime);
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(51,400,65,28,"票价:");
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
+
+	LODOP.ADD_PRINT_TEXT(50,469,66,30,"票价：");
+	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+	LODOP.ADD_PRINT_TEXT(50,530,125,25,data.price+"元");
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(75,400,65,28,"区域:");
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
+
+
+	LODOP.ADD_PRINT_TEXT(80,469,66,30,"人数:");
+	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+    LODOP.ADD_PRINT_TEXT(80,530,100,25,data.number);
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(98,400,65,28,"座位:");
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
+	LODOP.ADD_PRINT_TEXT(110,469,66,30,"票类:");
+	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
+	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+	LODOP.ADD_PRINT_TEXT(110,530,112,25,data.priceName);
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(28,400,177,28,data.plantime);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
-	LODOP.ADD_PRINT_TEXT(50,450,108,28,data.price+"元");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
-	LODOP.ADD_PRINT_TEXT(78,450,110,28,data.area);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
-	LODOP.ADD_PRINT_TEXT(100,450,112,28,data.seat);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",11);
-	LODOP.ADD_PRINT_BARCODE(120,440,100,100,"QRCode",data.sn);
+	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
+
+
+	LODOP.ADD_PRINT_BARCODE(137,497,100,100,"QRCode",data.sn);
 	LODOP.SET_PRINT_STYLEA(0,"FontSize",127);
 	LODOP.SET_PRINT_STYLEA(0,"ShowBarText",0);
 	LODOP.SET_PRINT_STYLEA(0,"GroundColor","#FFFFFF");
 	LODOP.SET_PRINT_STYLEA(0,"QRCodeErrorLevel","H");
-	LODOP.ADD_PRINT_TEXT(18,565,71,59,data.plantime);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",6);
-	LODOP.ADD_PRINT_TEXT(80,565,49,59,data.area);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",6);
-	LODOP.ADD_PRINT_TEXT(144,565,60,59,data.seat);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",6);
-	/*
-	LODOP.ADD_PRINT_TEXT(154,3,152,28,"演出时间:");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(207,2,70,28,"票价：");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(237,3,70,30,"区域:");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	LODOP.ADD_PRINT_TEXT(267,3,70,30,"座位:");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	LODOP.ADD_PRINT_TEXT(184,3,191,20,"data.plantime");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(207,63,108,28,"data.price+元");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(237,63,100,28,"data.area");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.ADD_PRINT_TEXT(267,63,112,28,"data.seat");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);*/
 
+	//LODOP.ADD_PRINT_TEXT(232,491,143,23,data.remark);
+	LODOP.ADD_PRINT_TEXT(232,491,143,23,data.sns);
 	var type = data.remark_type;
 	switch(type){
 		case '1':
@@ -116,7 +115,7 @@ function CreateFullBill(data) {
 			LODOP.ADD_PRINT_TEXT(72,431,172,40,"高铁免票转赠无效");
 			LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
 			LODOP.SET_PRINT_STYLEA(0,"FontSize",20);
-	
+			LODOP.SET_PRINT_STYLEA(0,"Bold",1);
 			break;
 		case '2':
 			/*市民票*/
@@ -124,7 +123,7 @@ function CreateFullBill(data) {
 			LODOP.ADD_PRINT_TEXT(72,431,172,40,"高铁优惠半价票");
 			LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
 			LODOP.SET_PRINT_STYLEA(0,"FontSize",20);
-	
+			LODOP.SET_PRINT_STYLEA(0,"Bold",1);
 			break;
 	}
 	}

@@ -15,28 +15,7 @@
       <div class="panel panel-default"> 
         <!-- Default panel contents -->
         <div class="panel-heading"><span class="glyphicon glyphicon-th-list"></span> 促销活动</div>
-        <div class="panel-body">
-          <form class="form-inline" role="form" action="{:U('Home/User/index');}" method="post">
-            <div class="form-group">
-              <input size="16" type="text" value="" readonly class="form-control form_date" name="start_time">
-            </div>
-            <div class="form-group">
-              <div class="input-group">
-                <div class="input-group-addon">至</div>
-                <input size="16" type="text" value="" readonly class="form-control form_date" name="end_time">
-              </div>
-            </div>
-            <div class="form-group">
-              <select class="form-control" name="status">
-                <option value="">状态</option>
-                <option value="1">启用</option>
-                <option value="0">停用</option>
-              </select>
-            </div>
-            <input type="hidden" name="cid" value="{$cid}"/>
-            <button type="submit" class="btn btn-default">查询</button>
-          </form>
-        </div>
+        
         <!-- Table -->
         <table class="table table-condensed table-hover table-responsive table-bordered table-vcenter">
           <colgroup>

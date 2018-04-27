@@ -320,6 +320,7 @@
 <script type="text/javascript">
 var selectdate;
 var type = {$data['type']},
+    real = {$data['real']},
     product = {$data['product_id']};
 $(function() {
     empty_cart_ticket();

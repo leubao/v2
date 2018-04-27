@@ -28,7 +28,7 @@
       <td>经办人/审核员</td>
       <td>{$data.userid|userName}</td>
       <td>收款人</td>
-      <td>{$data.user_id|userName}</td> 
+      <td>{$data.user_id|userName} <a href="{:U('Sales/Cashback/public_check_backe',array('sn'=>$data['sn']));}" data-toggle="dialog" data-width="700" data-height="500" data-id="uinfo">{$data.sn}</a></td> 
     </tr>
     <tr>
       <td>备注1</td>

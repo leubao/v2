@@ -14,9 +14,12 @@
           <td>补贴金额:</td><td><input type="text" name="rebate" value="" data-rule="required" size="15"></td>
         </tr>
         <tr>
-          <td>结算价格:</td><td>
-            <input type="text" name="discount" value="" data-rule="required" size="15"></td>
-          <td>票型类型:</td><td>
+          <td>结算价格:</td>
+          <td>
+            <input type="text" name="discount" value="" data-rule="required" size="15">
+          </td>
+          <td>票型类型:</td>
+          <td>
             <select name="type" class="required" data-toggle="selectpicker" data-rule="required">
               <option value="">请选择</option>
               <option value="1">散客票</option>
@@ -24,7 +27,23 @@
               <option value="3">散客、团队票</option>
               <option value="4">政企票</option>
               <option value="5">活动票</option>
-            </select></td>
+              <option value="6">儿童票</option>
+              <option value="7">老人票</option>
+              <option value="8">军人票</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td>收入价格:</td>
+          <td>
+            <input type="text" name="income" value="" data-rule="required" size="15">
+            <span class="remark">财务净收入</span>
+          </td>
+          <td>销售奖金:</td>
+          <td>
+            <input type="text" name="bonus" value="" data-rule="required" size="15">
+            <span class="remark">渠道商销售奖金</span>
+          </td>
         </tr>
         <tr>
           <td>票型特权:</td>

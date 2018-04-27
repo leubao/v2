@@ -673,7 +673,6 @@ class SetController extends ManageBase{
 						$this->erun('请先删除作废数据，再执行此项操作', array('tabid'=>$this->menuid.MODULE_NAME));
 					  }else{
 					  	$stat = \Libs\Service\Report::report($datetime,$product_id);
-					  	//dump($stat);
 					  	if($stat == '200'){
 							$this->srun('生成成功', array('tabid'=>$this->menuid.MODULE_NAME));
 						  }else{
@@ -776,18 +775,15 @@ class SetController extends ManageBase{
 			$data = [
 				'title'		=>	$pinfo['title'],
 				'info'		=>	$pinfo['info'],
-				'product'	=>	implode(',', I('post.post')),
+				'product'	=>	get_product('id'),
 				'status'	=>	1
 			];
-
 			if(D('Printer')->add($data)){
 				$this->srun('新增成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun("添加失败！");
 			}
 		}else{
-			$product = D('Product')->where(['status'=>1])->field('id,name')->select();
-			$this->assign('product',$product);
 			$this->display();
 		}
 	}
@@ -799,7 +795,6 @@ class SetController extends ManageBase{
 			$data = [
 				'title'		=>	$pinfo['title'],
 				'info'		=>	$pinfo['info'],
-				'product'	=>	implode(',', I('post.post')),
 				'status'	=>	1
 			];
 			$status = D('Printer')->where(['id'=>$pinfo['id']])->save($data);
@@ -812,8 +807,6 @@ class SetController extends ManageBase{
 			$id = I('get.id',0,intval);
 			if(!empty($id)){
 				$info = D('Printer')->where(['id'=>$pinfo['id']])->find();
-				$product = D('Product')->where(['status'=>1])->field('id,name')->select();
-				$this->assign('product',$product);
 				$this->assign("data",$info);
 				$this->display();
 			}else{
@@ -827,6 +820,73 @@ class SetController extends ManageBase{
 		$id = I('get.id',0,intval);
 		if(!empty($id)){
 			$del = D('Printer')->delete($id);
+			if($del){
+				$this->srun('删除成功',array('tabid'=>$this->menuid.MODULE_NAME));
+			}else{
+				$this->erun('删除失败!');
+			}
+		}else{
+			$this->erun('参数错误!');
+		}
+	}
+	//设置销售区域
+	public function seale_area()
+	{
+		$this->basePage('SealeArea');
+		$this->display();
+	}
+	//新增销售区域
+	public function add_seale_area()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			$data = [
+				'title'		=>	$pinfo['title'],
+				'idcard'	=>	$pinfo['idcard'],
+				'status'	=>	1
+			];
+			if(D('SealeArea')->add($data)){
+				$this->srun('新增成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun("添加失败！");
+			}
+		}else{
+			$this->display();
+		}
+	}
+	//编辑销售区域
+	public function edit_seale_area()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			$data = [
+				'title'		=>	$pinfo['title'],
+				'idcard'	=>	$pinfo['idcard'],
+				'status'	=>	1
+			];
+			$status = D('SealeArea')->where(['id'=>$pinfo['id']])->save($data);
+			if($status){
+				$this->srun('更新成功',array('tabid'=>$this->menuid.MODULE_NAME));
+			}else{
+				$this->erun('更新失败!');
+			}
+		}else{
+			$id = I('get.id',0,intval);
+			if(!empty($id)){
+				$info = D('SealeArea')->where(['id'=>$pinfo['id']])->find();
+				$this->assign("data",$info);
+				$this->display();
+			}else{
+				$this->erun('参数错误!');
+			}
+		}
+	}
+	//删除销售区域
+	public function del_seale_area()
+	{
+		$id = I('get.id',0,intval);
+		if(!empty($id)){
+			$del = D('SealeArea')->delete($id);
 			if($del){
 				$this->srun('删除成功',array('tabid'=>$this->menuid.MODULE_NAME));
 			}else{

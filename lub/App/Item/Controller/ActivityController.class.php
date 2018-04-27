@@ -22,14 +22,13 @@ class ActivityController extends ManageBase{
 
 	 //活动列表
 	 function index(){
-	 	$this->basePage('Activity');
+	 	$this->basePage('Activity','','id DESC');
 	 	$this->display();
 	 }
 	 //新建活动
 	 function add(){
 	 	if(IS_POST){
-	 		$pinfo = I('post.');	
-	 		//dump($pinfo);
+	 		$pinfo = I('post.');
 	 		//TODO  活动类型多样化之后.....  买赠
 	 		if($pinfo['type'] == '1'){
 	 			foreach ($pinfo['area'] as $key => $value) {
@@ -39,8 +38,8 @@ class ActivityController extends ManageBase{
 						'nums'=>$pinfo['nums'][$value],
 						'price'=>$pinfo['ticket_num_'.$value.'_id'],
 						'prices'=>$pinfo['ticket_nums_'.$value.'_id'],
-						'quota'=>$pinfo['quota'][$value],
-						'seat'=>$pinfo['seat'][$value]
+						//'quota'=>$pinfo['quota'][$value],
+						//'seat'=>$pinfo['seat'][$value]
 					);
 		 		}
 	 		}
@@ -65,12 +64,19 @@ class ActivityController extends ManageBase{
 	 			$info['voucher'] = $pinfo['voucher'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		//组团销售
+	 		if($pinfo['type'] == '4'){
+	 			$info['number'] = $pinfo['number'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);
 	 		$data = array(
 	 			'title'	=>	$pinfo['title'],
 	 			'type'	=>	$pinfo['type'],
+	 			'scope'	=>	$pinfo['scope'],
+	 			'real'	=>	$pinfo['real'],
 	 			'product_id' => $pinfo['product_id'],
 	 			'starttime' => strtotime($pinfo['starttime']),
 	 			'endtime'	=> strtotime($pinfo['endtime']),
@@ -105,7 +111,48 @@ class ActivityController extends ManageBase{
 			}
 	 	}
 	 }
-
+	 //限制参与渠道商
+	 public function public_up_scope_channel()
+	 {
+	 	if(IS_POST){
+	 		$pinfo = I('post.');
+	 		$actinfo = $this->get_activity($pinfo['id']);
+	 		foreach ($pinfo['channel'] as $k => $v) {
+ 				if(!empty($v['name'])){
+	 				if($v['scope']){
+	 					$scope['ginseng'][] = $v['name'];
+	 				}else{
+	 					$scope['dont'][] = $v['name'];
+	 				}
+ 				}
+ 			}
+	 		if($pinfo['type'] == '3'){
+	 			$info['card'] = $actinfo['param']['info']['card'];
+	 			$info['voucher'] = $actinfo['param']['info']['voucher'];
+	 			$info['ticket'] = $actinfo['param']['info']['ticket'];
+	 		}
+	 		//组团销售
+	 		if($pinfo['type'] == '4'){
+	 			$info['number'] = $pinfo['number'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			
+	 		}
+	 		$info['scope'] = $scope;//参与范围
+	 		$param = array(
+	 			'info' =>  $info,
+	 		);
+	 		if(D('Item/Activity')->where(['id'=>$pinfo['id']])->setField('param',json_encode($param))){
+	 			$this->srun("更新成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+	 		}else{
+	 			$this->erun("更新失败!");
+	 		}
+	 	}else{
+	 		//读取渠道商
+	 		$ginfo = I('get.');
+	 		$info = $this->get_activity($ginfo['id']);
+	 		$this->assign('data',$info)->display();
+	 	}
+	 }
 	 //活动购买流程》》》拉取获取页面》》》读取所有活动场次》》加载参与活动的场次和价格》》》客户下单》》按照预定活动规则进行金额计算
 	 //支付订单金额 》》排座
 	 
@@ -116,6 +163,7 @@ class ActivityController extends ManageBase{
 	 	$model = D('Item/Activity');
 	 	if(IS_POST){
 	 		$pinfo = I('post.');
+
 	 		//限定区域销售
 	 		if($pinfo['type'] == '3'){
 	 			$card = explode('|',trim($pinfo['card']));
@@ -123,12 +171,26 @@ class ActivityController extends ManageBase{
 	 			$info['voucher'] = $pinfo['voucher'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		//组团销售
+	 		if($pinfo['type'] == '4'){
+
+	 			$info['number'] = $pinfo['number'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
+	 		//开启范围
+	 		if($pinfo['scope']){
+	 			$actinfo = $this->get_activity($pinfo['id']);
+	 			$info['scope'] = $actinfo['param']['info']['scope'];
+	 		}
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);
+	 		
 	 		$data = array(
 	 			'id'	=>	$pinfo['id'],
 	 			'title'	=>	$pinfo['title'],
+	 			'scope'	=>	$pinfo['scope'],
+	 			'real'	=>	$pinfo['real'],
 	 			'starttime' => strtotime($pinfo['starttime']),
 	 			'endtime'	=> strtotime($pinfo['endtime']),
 	 			'status'	=> $pinfo['status'],
@@ -155,6 +217,19 @@ class ActivityController extends ManageBase{
 	 			$this->assign('ticket_name',$ticket_name);
 	 			$this->assign('card',$card);
 	 		}
+	 		//组团销售
+	 		if($info['type'] == '4'){
+	 			$ticket = explode(',',$info['param']['info']['ticket']);
+	 			foreach ($ticket as $k => $v) {
+	 				$name[] = ticketName($v,1);
+	 			}
+	 			$ticket_name = implode(',',$name);//dump($ticket);
+	 			$this->assign('ticket_name',$ticket_name);
+
+	 			//$info['number'] = $pinfo['number'];
+	 			//$info['ticket'] = $pinfo['ticket_id'];
+
+	 		}//dump($info);
 	 		$this->assign('data',$info)->display();
 	 	}
 	 }

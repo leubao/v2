@@ -51,9 +51,14 @@
         </tr>
         <tr>
           <td>团队信息</td>
-          <td colspan="3">团号:{$param.0.teamno}; 车牌号:{$param.0.car}; 导游:{$crm.0.contact}; 联系电话:{$crm.0.phone};<if condition="!empty($param['0']['teamtype'])">
-          [ 团队类型: {$param.0.teamtype|teamtype} ] 
-        </if></td>
+          <td colspan="3">团号:{$param.0.teamno}; 车牌号:{$param.0.car}; 导游:{$crm.0.contact}; 联系电话:{$crm.0.phone};
+            <if condition="!empty($param['0']['teamtype'])">
+            [ 团队类型: {$param.0.teamtype|teamtype} ] 
+            </if>
+            <if condition="!empty($param['0']['tour'])">
+            [ 客源地:  {$param.0.tour|provinces} ]
+            </if>
+        </td>
         </tr>
       </tbody>
     </table>

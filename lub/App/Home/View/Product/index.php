@@ -377,6 +377,7 @@
 /*根据座位区域，显示相关票型*/
 var type = {$info['type']},
     plan = {$plan['id']},
+    real = 0,
     product = {$info['productid']};
 function showtype(t){
   var id1    = t.id.split("_");

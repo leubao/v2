@@ -8,7 +8,7 @@ class CrmModel extends Model{
 	//缓存渠道商
 	function crm_cache(){
         $Config = cache("Config");
-        $list = $this->where(array('status'=>1))->field('id,name,groupid,f_agents,level,phone')->select();
+        $list = $this->where(array('status'=>1))->field('id,name,groupid,itemid,f_agents,level,phone')->select();
         $cache = array();
         foreach ($list as $rs) {
         	//一级渠道商单独缓存

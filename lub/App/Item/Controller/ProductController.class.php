@@ -223,6 +223,8 @@ class ProductController extends ManageBase{
 				'price'=>I('post.single_price'),
 				'single_id'=>I('post.single_id'),
 				'scene'=>implode(',', I('post.scene')),
+				'bonus'=>I('post.bonus'),
+				'income'=>I('post.income'),
 				'param'=>serialize(array('quota'=>$param['quota'],'ticket_print'=>$param['ticket_print'],'ticket_print_custom'=>$param['ticket_print_custom'],'present'=>$param['present'])),
 				);
 			if(Operate::do_add('TicketType',$data)){

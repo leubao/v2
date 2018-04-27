@@ -21,8 +21,31 @@ class PromotionsController extends Base{
 		$map = [
 			'status'	=>	1
 		];
-		$list = D('Activity')->where($map)->field('id,product_id,title,starttime,endtime,remark')->select();
-		$this->assign('data',$list)->display();
+		$map['_string']="FIND_IN_SET(2,is_scene)";
+		$list = D('Activity')->where($map)->field('id,scope,product_id,title,starttime,endtime,remark,param')->select();
+		$uinfo = Partner::getInstance()->getInfo();
+		$cid = money_map($uinfo['cid']);
+		//根据当前用户判断是否可参加当前活动
+		foreach ($list as $k => $v) {
+			$param = json_decode($v['param'],true);
+			if($v['scope']){
+				if(!empty($param['info']['scope']['ginseng'])){
+					//启用
+					if(in_array($cid,$param['info']['scope']['ginseng'])){
+						$lists[] = $v;
+					}
+				}
+				if(!empty($param['info']['scope']['dont'])){
+					//禁用
+					if(!in_array($cid,$param['info']['scope']['dont'])){
+						$lists[] = $v;
+					}
+				}
+			}else{
+				$lists[] = $v;
+			}
+		}
+		$this->assign('data',$lists)->display();
 	}
 	//活动操作页面
 	public function work()
@@ -43,12 +66,16 @@ class PromotionsController extends Base{
 				$this->assign('type','1');
 				$tempate = 'area_sale';
 				break;
+			case '4':
+				$this->assign('number',$info['param']['number']);
+				$tempate = 'team';
+				break;
 			default:
 				break;
 		}
 		$this->public_info_conf();
 		//售票类型
-		$pinfo = I('get.');//dump($idcard);
+		$pinfo = I('get.');
 		$today = date('Y-m-d');
 		$this->assign('today',$today)
 			->assign('data',$info)

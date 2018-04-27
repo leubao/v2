@@ -23,7 +23,23 @@
               <option value="2" <if condition="$data['type'] eq 2">selected</if>>团队票</option>
               <option value="3" <if condition="$data['type'] eq 3">selected</if>>散客、团队票</option>
               <option value="4" <if condition="$data['type'] eq 4">selected</if>>政企渠道票</option>
+              <option value="5" <if condition="$data['type'] eq 5">selected</if>>活动票</option>
+              <option value="6" <if condition="$data['type'] eq 6">selected</if>>儿童票</option>
+              <option value="7" <if condition="$data['type'] eq 7">selected</if>>优惠票</option>
+              <option value="8" <if condition="$data['type'] eq 8">selected</if>>军人票</option>
             </select></td>
+        </tr>
+        <tr>
+          <td>收入价格:</td>
+          <td>
+            <input type="text" name="income" value="{$data.income}" disabled size="15">
+            <span class="remark">财务净收入</span>
+          </td>
+          <td>销售奖金:</td>
+          <td>
+            <input type="text" name="bonus" value="{$data.bonus}" disabled size="15">
+            <span class="remark">渠道商销售奖金</span>
+          </td>
         </tr>
         <tr>
           <td>票型特权:</td>

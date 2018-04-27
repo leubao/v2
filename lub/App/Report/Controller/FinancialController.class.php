@@ -9,7 +9,7 @@
 namespace Report\Controller;
 use Common\Controller\ManageBase;
 use Libs\Service\Operate;
-use Libs\Service\Report;
+use Libs\Service\ItemReport as Report;
 class FinancialController extends ManageBase{
 	protected function _initialize() {
 		parent::_initialize();
@@ -19,6 +19,7 @@ class FinancialController extends ManageBase{
 		$starttime = I('starttime') ? I('starttime') : date('Y-m-d',time());
 		$type = I('type') ? I('type') : '2';
 		$work = I('work') ? I('work') : '1';
+		$is_check = I('is_check') ? I('is_check') : '1';
 		$priceid = I('ticket_id');
 		$price_name = I('ticket_name');
 		if(empty($starttime)){$this->erun('参数错误');}
@@ -50,13 +51,13 @@ class FinancialController extends ManageBase{
 			//根据计划汇总
 			//$plan_fold = Report::plan_fold($list);
 			//根据票型汇总
-			$ticket_fold = Report::day_fold($list);
+			$ticket_fold = Report::day_fold($list,$work,$is_check);
 			//用于报表模板导出
 			S('Today'.get_user_id(),$ticket_fold);
 			//退票记录 TODO
 			$this->assign('data',$ticket_fold);
 		}
-		$this->assign('type',$type)->assign('work',$work)->assign('export_map',$export_map)
+		$this->assign('type',$type)->assign('work',$work)->assign('is_check',$is_check)->assign('export_map',$export_map)
 			->display();
 	}
 
@@ -69,6 +70,7 @@ class FinancialController extends ManageBase{
 	    $priceid = I('ticket_type');
 	    $channel = I('channel_id');
 	    $channelname = I('channel_name');
+	    $is_check = I('is_check') ? I('is_check') : '1';
 	    //传递条件
 	    $this->assign('starttime',$start_time);
         $this->assign('endtime',$end_time);
@@ -91,35 +93,37 @@ class FinancialController extends ManageBase{
         //按照客户分组来统计报表 TODO 政企订单不计算在内
         $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
-        //G('begin');
+        G('begin');//createtime,
         $db = D('ReportData');
 		$map['product_id'] = $this->pid;
-		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,createtime,region,pay,type,plantime,games,user_id,status',true)->select();
-		
-		
-		if($this->procof['agent'] == '1'){
-			//开启代理商制度，时执行
-			$list = Report::level_fold($list);
+		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,region,pay,type,plantime,games,user_id,status',true)->select();//echo count($list)."<br>";
+		if(!empty($list)){
+			if($this->procof['agent'] == '1'){
+				//开启代理商制度，时执行
+				$list = Report::level_fold($list);
+			}
+			//echo count($list)."<br>";
+			if($type == '1'){
+				//根据计划汇总
+			//	$plan_fold = Report::plan_fold($list);
+				//根据票型汇总
+				//$list = Report::channel_ticket_fold($plan_fold,$map['datetime'],$channel);
+				$list = Report::channel_plan_fold($list,$is_check);
+			}else{
+				$list = Report::channel_fold($list,$is_check);
+				
+			}
+			G('end');
+			echo G('begin','end').'s';
+			echo G('begin','end','m').'kb';
+			$export_map['report'] = 'channel';
+			$export_map['type']	= $type;
+			S('ChannelReport'.get_user_id(),$list);
+			//加载当前产品配置 TODO
+			$this->assign('data',$list)->assign('export_map',$export_map);
 		}
-		//echo count($list);
-		if($type == '1'){
-			//根据计划汇总
-		//	$plan_fold = Report::plan_fold($list);
-			//根据票型汇总
-			//$list = Report::channel_ticket_fold($plan_fold,$map['datetime'],$channel);
-			$list = Report::channel_plan_fold($list);
-		}else{
-			$list = Report::channel_fold($list);
-			
-		}
-		//G('end');
-		//echo G('begin','end').'s';
-		//echo G('begin','end','m').'kb';
-		$export_map['report'] = 'channel';
-		$export_map['type']	= $type;
-		S('ChannelReport'.get_user_id(),$list);
-		//加载当前产品配置 TODO
-		$this->assign('data',$list)->assign('export_map',$export_map)->assign('type',$type)->assign('product_id',$map['product_id'])->display();
+		
+		$this->assign('type',$type)->assign('product_id',$map['product_id'])->assign('is_check',$is_check)->display();
 	}
 	/**
 	 * 渠道返佣计算
@@ -327,6 +331,7 @@ class FinancialController extends ManageBase{
 		$endtime = I('endtime') ? I('endtime') : date('Y-m-d');
 		$ticket_id = I('ticket_id');
 		$channel = I('channel_id');
+		$is_check = I('is_check') ? I('is_check') : '1';
 		$export_map['datetime'] = $starttime.'-'.$endtime;
 	    //传递条件
 	    $this->assign('starttime',$starttime);
@@ -354,15 +359,21 @@ class FinancialController extends ManageBase{
         $list = $db->where($map)->field('price,price_id,number,subsidy,discount')->select();
         foreach ($list as $k => $v) {
             $data['price'][$v['price_id']]['name'] = $price[$v['price_id']]['name'];
+            if((int)$is_check === 1){
+            	$discount = $price[$v['price_id']]['discount'];
+            }
+            if((int)$is_check === 2){
+            	$discount = $price[$v['price_id']]['income'];
+            }
             $data['price'][$v['price_id']]['price'] = $price[$v['price_id']]['price'];
-            $data['price'][$v['price_id']]['discount'] = $price[$v['price_id']]['discount'];
+            $data['price'][$v['price_id']]['discount'] = $discount;
         	$data['price'][$v['price_id']]['number'] += $v['number'];
         	$data['price'][$v['price_id']]['money'] += $v['price']*$v['number'];
-        	$data['price'][$v['price_id']]['moneys'] += $v['discount']*$v['number'];
+        	$data['price'][$v['price_id']]['moneys'] += $discount*$v['number'];
         	$data['price'][$v['price_id']]['rebate'] += $v['subsidy'];
         	$data['info']['number'] += $v['number'];
 		    $data['info']['money']  += $v['price']*$v['number'];
-		    $data['info']['moneys']	+= $v['discount']*$v['number'];
+		    $data['info']['moneys']	+= $discount*$v['number'];
 		    $data['info']['rebate'] += $v['subsidy'];
         }
         sort($data['price']);
@@ -380,6 +391,7 @@ class FinancialController extends ManageBase{
 			->assign('ticket_name',I('ticket_name'))
 			->assign('channel_name',I('channel_name'))
 			->assign('export_map',$export_map)
+			->assign('is_check',$is_check)
 			->assign('product_id',$map['product_id'])
 			->display();
 	}

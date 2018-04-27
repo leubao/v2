@@ -58,12 +58,13 @@
                 <input type="radio" name="contact_option" id="contact1" checked onclick="$('.contact_select').css('display','block'),$('.contact_input').css('display','none');">常用联系人
                 <input type="radio" name="contact_option" id="contact2" onclick="$('.contact_select').css('display','none'),$('.contact_input').css('display','block');">设置联系人
             </div>
-            <div class="form-group"><select class="form-control" name="tourists" id="tourists">
-              <option value="">请选择客源地</option>
-              <volist name="tour" id="vo">
-                <option value="{$vo.id}">{$vo.name}</option>
-              </volist>  
-            </select></div>
+            <div class="form-group cityList">
+              <select class="form-control province" name="tourists" id="tourists">
+              </select>
+              <select class="form-control city" name="city" id="citys">
+                <option value="">客源地</option> 
+              </select>
+            </div>
           </li>
           <li class="list-group-item contact_select">            
             <select class="form-control" name="contact" id="contact">
@@ -206,28 +207,6 @@
                 <button type="button" class="btn btn-success" id="webpay">立即支付</button>
               </form>
             </div>
-             <!--
-            <div class="tab-pane" id="firm">
-              <ul>
-                <li>
-                  <input id="bank-ccb-enterprise" type="radio" name="bank" value="CCBBTB" hidefocus="" checked="checked">
-                  <label for="bank-ccb-enterprise" class="bank-ccb"></label>
-                </li>
-                <li>
-                  <input id="bank-abchina-enterprise" type="radio" name="bank" value="ABCBTB" hidefocus="">
-                  <label for="bank-abchina-enterprise" class="bank-abchina"></label>
-                </li>
-                <li>
-                  <input id="bank-spdb-enterprise" type="radio" name="bank" value="SPDBB2B" hidefocus="">
-                  <label for="bank-spdb-enterprise" class="bank-spdb"></label>
-                </li>
-                <li>
-                  <input id="bank-icbc-enterprise" type="radio" name="bank" value="ICBCBTB" hidefocus="">
-                  <label for="bank-icbc-enterprise" class="bank-icbc"></label>
-                </li>
-              </ul>
-              <button type="button" class="btn btn-success">立即支付</button>
-            </div>-->
             <else />
             <div class="tab-pane active" id="ious">
             <p></p>
@@ -383,7 +362,8 @@
 <script src="{$config_siteurl}static/home/js/cart.js?=<?php echo  rand(100,999);?>"></script>
 <script type="text/javascript">
 var type = {$info['type']},
-    product = {$info['productid']};
+    product = {$info['productid']},
+    real = 0;
 /*网银支付*/
 $('#webpay').click(function(){
     $("#pay_money").val($("#tomoney").val()); //订单金额

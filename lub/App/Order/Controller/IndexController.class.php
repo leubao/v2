@@ -70,7 +70,7 @@ class IndexController extends ManageBase {
 	   			'user'		=>	userName($v['user_id'],1,1),
 	   			'status'	=>	order_status($v['status'],1),
 	   			'datetime'	=>	date('Y-m-d H:i:s',$v['createtime']),
-	   			);
+	   		);
    		}
    		$headArr = array(
    			'sn'		=>	'订单号',
@@ -215,7 +215,7 @@ class IndexController extends ManageBase {
 		$info = $model->where($map)->field('id,order_sn,user_id,plan_id,product_id,type,number,money,guide_id,channel_id,phone,take,status,createtime')->relation(true)->find();
 		$detail = unserialize($info['info']);
 		foreach ($detail['data'] as $k => $v) {
-			$tic[$v['areaId']][$v['priceid']]['areaId']	=	$v['areaId'];
+			$tic[$v['areaId']][$v['priceid']]['areaId']	= $v['areaId'];
 			$tic[$v['areaId']][$v['priceid']]['priceid'] = $v['priceid'];
 			$tic[$v['areaId']][$v['priceid']]['price'] = $v['price'];
 			$tic[$v['areaId']][$v['priceid']]['number'] += 1;

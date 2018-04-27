@@ -263,7 +263,7 @@ class IndexController extends ManageBase{
 				'settlement'=> $pinfo['settlement'],
 				'status' => $pinfo['status'],
 				'price_group' => implode(',',$pinfo['price_group']),
-				);
+			);
 
 			$up = D("CrmGroup")->save($data);
 			if($up != false){
@@ -367,7 +367,8 @@ class IndexController extends ManageBase{
 			$data["cid"]     = I("get.cid") != "" ?I("get.cid"):$_POST["cid"];//客户id
 			$ginfo = I('get.');
 			/*显示相关的角色id TODO*/
-			$map['parentid'] = $this->config['channel_role_id'];
+			$config = cache("Config");
+			$map['parentid'] = $config['channel_role_id'];
 			$map['is_scene'] =3;$map['status'] = 1;
 			$role = M("Role")->where($map)->field('id,name')->select();	
 			$this->assign("ginfo",$ginfo)->assign('role',$role)->display();
@@ -388,7 +389,8 @@ class IndexController extends ManageBase{
 				$this->erun('参数错误!');
 			}
 			/*显示相关的角色id TODO*/
-			$map['parentid'] = $this->config['channel_role_id'];
+			$config = cache("Config");
+			$map['parentid'] = $config['channel_role_id'];
 			$map['is_scene'] =3;$map['status'] = 1;
 			$role = M("Role")->where($map)->field('id,name')->select();	
 			$data = M('User')->where(array('id'=>$id))->find();

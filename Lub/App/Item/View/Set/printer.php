@@ -13,8 +13,8 @@
     <thead>
       <tr>
         <th width="50">编号</th>
-        <th align="center" width="80">名称</th>
-        <th align="center">适用产品</th>
+        <th align="center">名称</th>
+        <th align="center" width="120">适用产品</th>
         <th align="center">状态</th>
       </tr>
     </thead>
@@ -23,7 +23,7 @@
       <tr data-id="{$vo.id}">
         <td>{$i}</td>
         <td align="center">{$vo.title}</td>
-        <td align="center">{$vo.product}</td>
+        <td align="center">{$vo.product|product_name}</td>
         <td align="center">{$vo.status|status}</td>
        </tr>
     </volist>

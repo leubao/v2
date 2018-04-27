@@ -30,8 +30,8 @@
         <option value="">全部</option>
         <option value="3" <if condition="$status eq '3'">selected</if>>待审核</option>
         <option value="1" <if condition="$status eq '1'">selected</if>>提现成功</option>
+        <option value="5" <if condition="$status eq '5'">selected</if>>发放中</option>
         <option value="9" <if condition="$status eq '9'">selected</if>>完结</option>
-        
         <option value="4" <if condition="$status eq '4'">selected</if>>驳回</option>
     </select>
     <input type="text" value="" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
@@ -58,7 +58,7 @@
       </tr>
     </thead>
     <tbody id="cash-list">
-    <volist name="data" id="vo">
+      <volist name="data" id="vo">
       <tr data-id="{$vo.id}" data-money="{$vo.money}">
         <td align="center"><a data-toggle="dialog" href="{:U('Sales/Cashback/public_cashinfo',array('sn'=>$vo['sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.sn}</a></td>
         <td align="center">{$vo['user_id']|userName}</td>
@@ -69,7 +69,7 @@
         <td align="center">{$vo['remark']}</td>
         <td align="center">{$vo['status']|pay_cash_back_status}</td>
        </tr>
-    </volist>
+      </volist>
      <tr>
      <td></td>
      <td></td>

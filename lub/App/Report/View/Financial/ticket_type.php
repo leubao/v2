@@ -17,6 +17,12 @@
     &nbsp;
     <input type="hidden" name="ticket.id" value="{$ticket_id}">
     <input type="text" name="ticket.name" readonly value="{$ticket_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">
+    &nbsp;
+    <select class="required" name="is_check" data-toggle="selectpicker">
+      <option value="1" <if condition="$is_check eq '1'">selected</if>>结算价核算</option>
+      <option value="2" <if condition="$is_check eq '2'">selected</if>>净收入核算</option>
+    </select>
+    &nbsp;
   	<button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">

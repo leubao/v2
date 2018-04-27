@@ -67,6 +67,25 @@
         </ul>
       </div>
     </div>
+    <!---->
+    <div class="widget-box widget-gray-box">
+      <div class="widget-box-content widget-store-overview">
+        <ul>
+          <li>
+            <p>今日入园</p>
+            <a href="">{$totup.today_garden}</a>
+          </li>
+          <li>
+            <p>今日待入园</p>
+            <a href="">{$totup.today_pre_garden}</a>
+          </li>
+           <li>
+            <p>昨日入园</p>
+            <a href="">{$totup.yesterday}</a>
+          </li>
+        </ul>
+      </div>
+    </div>
     <div class="widget-box widget-gray-box">
       <div class="widget-box-content widget-store-overview">
         <ul>

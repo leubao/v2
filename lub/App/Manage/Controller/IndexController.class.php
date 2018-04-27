@@ -66,13 +66,26 @@ class IndexController extends ManageBase {
         $people_count = D('ReportData')->where(['status'=>1])->sum('number');
         //历史累计场次
         $plan_count = D('Plan')->where(['status'=>4])->count();
+        //今日入园
+        //景区
+        $today_garden = D('Scenic')->where(['plan_id' => ['in', $normal],'status'=>['in','99']])->sum('number');
+        $today_pre_garden = D('Scenic')->where(['plan_id' => ['in', $normal],'status'=>['in','2']])->sum('number');
+        //昨日入园人数
+        $plantime = strtotime(date("Y-m-d",strtotime("-1 day")));
+        $planList = D('Plan')->where(['plantime'=>$plantime])->field('id')->select();
+        $plan_id = arr2string($planList,'id');
+        $yesterday = D('Scenic')->where(['plan_id' => ['in', $plan_id],'status'=>['in','99']])->cache('yesterday',36000)->sum('number');
+
         $totup = [
             'normal_plan'       =>  count(explode(',',$normal)),//可售场次
             'pre_order_count'   =>  $pre_order_count,
             'pre_order_sum'     =>  $pre_order_sum,
             'people_count'      =>  $people_count,
             'plan_count'        =>  $plan_count,
-            'today_count'       =>  $today_count
+            'today_count'       =>  $today_count,
+            'today_garden'      =>  $today_garden,
+            'today_pre_garden'  =>  $today_pre_garden,
+            'yesterday'         =>  $yesterday
         ];
         $this->assign('totup',$totup);
         //商户配置，是否开启年卡

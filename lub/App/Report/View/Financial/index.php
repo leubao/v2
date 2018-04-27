@@ -15,8 +15,15 @@
       <option value="3" <if condition="$work eq '3'">selected</if>>仅含工作票</option>
     </select>
     &nbsp;
-    <input type="radio" name="type" data-toggle="icheck" value="1" <if condition="$type eq '1'"> checked="checked"</if> data-label="明细&nbsp;">
-    <input type="radio" name="type" data-toggle="icheck" value="2" <if condition="$type eq '2'"> checked="checked"</if> data-label="汇总">
+    <select class="required" name="type" data-toggle="selectpicker">
+      <option value="1" <if condition="$type eq '1'">selected</if>>明细</option>
+      <option value="2" <if condition="$type eq '2'">selected</if>>汇总</option>
+    </select>
+    &nbsp;
+    <select class="required" name="is_check" data-toggle="selectpicker">
+      <option value="1" <if condition="$is_check eq '1'">selected</if>>结算价核算</option>
+      <option value="2" <if condition="$is_check eq '2'">selected</if>>净收入核算</option>
+    </select>
     &nbsp;
     <input type="hidden" name="ticket.id" value="{$ticket_id}">
     <input type="text" name="ticket.name" readonly value="{$ticket_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">

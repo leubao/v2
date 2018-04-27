@@ -70,6 +70,7 @@ class ProductController extends Base{
 		$this->assign('plantime',$plantime)->assign('info',$ginfo)->assign('data',$data)->display();
 	}
 	/**
+	 * 
 	 * 根据日期拉取销售计划
 	 */
 	function get_date_plan(){
@@ -175,17 +176,18 @@ class ProductController extends Base{
 			//读取当前活动绑定的票型
 			$where = [
 				'status'	=>	'1',
-				'_string'   =>  "FIND_IN_SET(1,is_scene)",
+				'_string'   =>  "FIND_IN_SET(2,is_scene)",
 				'id'		=>	$pinfo['actid']
 			];
-			$param = D('Activity')->where($where)->getField('param');
+			$param = D('Activity')->where($where)->getField('param');//dump($param);
 			$param = json_decode($param,true);
-			//dump($param['info']['ticket']);
-			$ticket = explode(',',$param['info']['ticket']);
+			
+			$ticket = explode(',',$param['info']['ticket']);//dump($ticket);
+			
 			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale'],$ticket);
 		}
 
-
+		//dump($price);
 
 		$return = array(
 			'statusCode' => '200',
@@ -300,7 +302,10 @@ class ProductController extends Base{
 			\Libs\Service\Quota::check_quota($plan_id,$productid,$uinfo['cid']);
 		}
 		$list = Operate::do_read('CommonContact',1,$map);
-		$this->assign('tour',F('Province'))->assign("list",$list)->assign('uinfo',$uinfo);
+		//判断是否限制区域销售 根据当前用户判定
+		//1、当前商户信息
+		//2、是否加载限制区域
+		$this->assign("list",$list)->assign('uinfo',$uinfo);
 	}
 	/*状态验证*/
 	function checkstatus(){

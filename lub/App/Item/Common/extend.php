@@ -14,6 +14,15 @@ function activity_type($param,$type = null)
 		case '1':
 			$return = "买赠";
 			break;
+		case '2':
+			$return = "首单免";
+			break;
+		case '3':
+			$return = "限制区域销售";
+			break;
+		case '4':
+			$return = "组团销售";
+			break;
 	}
 	if($type){
 		return $return;

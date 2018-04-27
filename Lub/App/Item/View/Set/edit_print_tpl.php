@@ -7,9 +7,7 @@
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">产品:</label>
-    <volist name="product" id="vo">
-      <input type="checkbox" name="product[]" value="{$vo.id}" <if condition="in_array($vo.id,explode(',',$data['product']))">checked</if>> {$vo.title}<br>
-    </volist>
+   {$data['product']|product_name}
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">模板数据:</label>

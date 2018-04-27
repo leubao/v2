@@ -377,6 +377,7 @@ function quick_server(){
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
     postData = 'info={"subtotal":'+parseFloat($('#quick-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"child_ticket":['+child_ticket+'],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+    $(this).navtab('refresh','119Item');
     post_server(postData,url,'work_quick');
 }
 </script>

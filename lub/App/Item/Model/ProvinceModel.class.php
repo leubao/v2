@@ -19,8 +19,26 @@ class ProvinceModel extends Model{
             return false;
         }
         $cache = array();
-        foreach ($data as $rs) {
-        	$cache[$rs['id']] = $rs;
+        foreach ($data as $o => $e) {
+            if($e['fid'] > 0){
+               $city[$e['fid']][$e['id']] = $e; 
+            }
+        }
+        foreach ($data as $o => $rs) {
+            
+            if($rs['fid'] == 0){
+                if(empty($city[$rs['id']])){
+                    $city[$rs['id']][$rs['id']] = [
+                        'id'  => $rs['id'],
+                        'name'=> $rs['name']
+                    ];
+                }
+                $cache[$rs['id']] = [
+                    'id'  => $rs['id'],
+                    'name'=> $rs['name'],
+                    'city'=> $city[$rs['id']]
+                ];
+            }
         }
         F('Province', $cache);
         return true;

@@ -192,16 +192,23 @@ class OrderController extends ManageBase{
 	            $start = date('H:i',strtotime("$end -30 minute"));
 	            $info_field = $start .'-'. $end;
 	        }
+	        //dump($oinfo);
+	        //打印客源地 TODO
+	        if($this->procof['print_to_guest'] == '1'){
+	        	
+	        	$oParam = unserialize($oinfo['info']);
+	        	$guest_area = '';
+	        }
 			//判断是否是单一票型 
 			foreach ($list as $k=>$v){
 				$num[$v['price_id']]['number'] += 1;
-				$sale = unserialize($v['sale']);//dump($sale);
-				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."^".date('Y')."^#";
+				$sale = unserialize($v['sale']);
+				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."&".$oinfo['id']."^#";
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
 					'games'			=>	$sale['games'],
-					'plantime'		=>	planShow($ginfo['plan_id'],1,2),
+					'plantime'		=>	date('Y-m-d',$plan['plantime']),//planShow($ginfo['plan_id'],1,2),
 					'starttime'     =>  date('H:i',$plan['starttime']),
 					'endtime'		=>	date('H:i',$plan['endtime']),
 					'price'			=>	$sale['price'],
@@ -212,6 +219,7 @@ class OrderController extends ManageBase{
 					'sns'			=>	$ginfo['sn'],
 					'user'			=>	$info_user,
 					'number'		=>	$num[$v['price_id']]['number'],
+					'guest_area'	=>	$guest_area
 				);
 			}
 		}
