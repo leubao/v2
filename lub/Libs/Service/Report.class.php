@@ -595,19 +595,32 @@ class Report{
 		//只能显示当前产品的报表
 		$product_id = get_product('id');
 		foreach ($data as $k => $valu) {
+			//根据是否开启多级扣款，开启多级扣款时按照级别显示结算价
+			//判断级别，查询价格
+			$priceid = $valu['price_id'];
+			//1、获取当前渠道商信息
+			$crm = F('Crm');
+			$crm = $crm[$valu['channel_id']];
+			//2、
+			$itemConf = cache('ItemConfig');
+			if($itemConf[$crm['itemid']]['1']['level_pay']){
+	        	$discount = Report::channel_level_price($priceid,$ticket);
+	        }else{
+				$discount = $valu['discount'];/*结算价格*/
+	        }//$discount = $valu['discount'];
 			if($work == '1'){
 				//含工作票统计
 				$num[$valu['price_id']]['num'] += $valu['number'];
 				$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
 				if(empty($product_id)){$product_id = $valu['product_id'];}
-				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
+				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id,$discount);
 				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 						'product_id'=> $product_id,
 						'plan_id' 	=> $valu['plan_id'], 
 					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
-	  					'discount' 	=> $valu['discount'],
+	  					'discount' 	=> $discount,//当开启多级扣款时，这里根据当前渠道商级别进行展示
 	  					'number'	=> $num[$valu['price_id']]['num'],
 	  					'money'		=> $money['money'],
 	  					'moneys'	=> $money['moneys'],
@@ -618,14 +631,14 @@ class Report{
 					//不含工作票统计
 					$num[$valu['price_id']]['num'] += $valu['number'];
 					$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
-					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
+					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id,$discount);
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $product_id,
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
-		  					'discount' 	=> $valu['discount'],
+		  					'discount' 	=> $discount,
 		  					'number'	=> $num[$valu['price_id']]['num'],
 		  					'money'		=> $money['money'],
 		  					'moneys'	=> $money['moneys'],
@@ -637,14 +650,14 @@ class Report{
 					//不含工作票统计
 					$num[$valu['price_id']]['num'] += $valu['number'];
 					$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
-					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id);
+					$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id,$discount);
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $product_id,
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
-		  					'discount' 	=> $valu['discount'],
+		  					'discount' 	=> $discount,
 		  					'number'	=> $num[$valu['price_id']]['num'],
 		  					'money'		=> $money['money'],
 		  					'moneys'	=> $money['moneys'],
@@ -666,6 +679,32 @@ class Report{
 		$datas['tic_num'] = count($datas['price']);
 		return $datas;
 	}
+	/**
+	 * 获取多级扣款的  渠道版专用 
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2018-03-26
+	 * @return   [type]        [description]
+	 */
+	private function channel_level_price($priceid,$ticketList = null){
+		$uinfo = \Home\Service\Partner::getInstance()->getInfo();
+		//读取当前用户的价格政策
+		$ticketLevel = F('TicketLevel');
+		if(!$ticketLevel){
+	        D('Home/TicketLevel')->ticke_level_cache();
+	        $ticketLevel = F('TicketLevel');
+	    }
+	    $itemConf = cache('ItemConfig');
+	    //一级代理商直接显示景区结算价格
+	    if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16){
+	        $ticket = $ticketLevel[$uinfo['crm']['f_agents']];
+			$discount = $ticket[$priceid]['discount'];/*结算价格*/
+	    }else{
+	    	$discount = $ticketList[$priceid]['discount'];
+	    }
+		
+		return $discount;
+	} 
 	/*
 	* 分场次按场景、票型汇总
 	*/
@@ -694,8 +733,8 @@ class Report{
 					'datetime'=>$datetime,
 					'status'=>1,
 					'addsid' => 2,
+					'channel_id'=>['in',agent_channel($channel_id,2)]
 				);
-				$map['channel_id'] = array('in',agent_channel($channel_id,2));
 				$datas[$key][$channel_id]['plan'] = $key;
 				$datas[$key][$channel_id]['channel'] = $channel_id;
 				$datas[$key][$channel_id]['number'] = M('ReportData')->where($map)->sum('number');
@@ -897,11 +936,14 @@ class Report{
  	*@param $price_id 票型ID
  	*return $money float 金额
  	*/
- 	function settlement($nums,$price_id,$product_id){
+ 	function settlement($nums,$price_id,$product_id,$discount = ''){
  		$ticketType = F("TicketType".$product_id);
+ 		if(empty($discount)){
+ 			$discount = $ticketType[$price_id]['discount'];
+ 		}
  		$data = array(
  				'money' => $nums * $ticketType[$price_id]['price'],
- 				'moneys'=> $nums * $ticketType[$price_id]['discount'],
+ 				'moneys'=> $nums * $discount,
  				'rebate'=> $nums * $ticketType[$price_id]['rebate'],
  			) ;
  		return $data;

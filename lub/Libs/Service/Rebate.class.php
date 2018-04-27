@@ -56,6 +56,17 @@ class Rebate extends \Libs\System\Service {
 				error_insert('400018');
 				return false;
 			}
+			//是否开启多级扣款
+			$itemConfig = cache('ItemConfig');
+
+			if($itemConfig[$itemid]['1']['level']){
+				//获取扣款链接
+				$payLink = crm_level_link($info['channel_id']);
+				//逐级计算返利
+				foreach ($payLink as $k => $v) {
+					$crm =  
+				}
+			}
 			//判断是否是底价结算
 			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
 				if($crmInfo['group']['type'] == '4'){
@@ -220,7 +231,13 @@ class Rebate extends \Libs\System\Service {
 		}
 		return $return;
 	}
+	/**
+	 * 多级扣款，多级返利
+	 */
+	function rebate_level(){
+		//判断当前订单下单客户，构造扣款链，根据扣款连上的人读取票价和扣款差价，计算最终返利金额
 
+	}
 	/*渠道返利
 	@param $info array 团队订单信息
 	@param $user_id int 操作员id 计划任务执行 时是 1 admin

@@ -9,7 +9,7 @@
 namespace Libs\Service;
 class Encry extends \Libs\System\Service {
 	/*
-	订单号加密 新规则
+	订单号加密 新规则 
     @param $plan_id int 计划id
 	@param $sn int 订单号 
 	@param $encry int 每日加密常量

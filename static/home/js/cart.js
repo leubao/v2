@@ -11,25 +11,42 @@ $(function(){
     var id  = this.id;
     var ids = id.split("_");
     //订单信息中显示票型、价格等信息
-    if($("#cart_"+ids[1]+"_"+ids[2]).length <= 0){
-      var obj = $(this);
-      var data_name  = obj.find("td").eq(0).text();
-      var data_price = obj.find("td").eq(1).text();
-      detail = "<tr id='cart_"+ids[1]+"_"+ids[2]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
-      detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
-      detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";
-      detail += "<div class='input-group-addon'><a href='javascript:;' class='spin-up' data-spin='up'>+</a></div></div>";
-      detail += "</td><td class='total' id='total_"+ids[1]+"'>"+data_price+"</td><td><a href='javascript:void(0)' onclick='delcart("+ids[1]+","+ids[2]+")'>删除</a><input id='areaid"+ids[1]+"' value='"+ids[2]+"' name='areaid' type='hidden'></td></tr>";
-      $("#cart").append(detail);
-    }
+	var obj = $(this);
+	var data_name  = obj.find("td").eq(0).text();
+	var data_price = obj.find("td").eq(1).text();
+	console.log(real);
+	//获取指定值
+	if(real){
+		//开启实名制
+		detail = "<tr data-price="+data_price+" data-priceid="+obj.data('id')+" data-area="+obj.data('area')+"><td>"+data_name+"</td><td>"+data_price+"</td>";
+		detail += "<td>1</td>";
+		detail += "<td><input type='text' class='form-control idcard' name='card_"+ids[1]+"' value='' size='18'></td>";
+		detail += "<td><a href='javascript:void(0)' onclick='delRow(this);'>删除</a></td></tr>";
+	}else{
+		//非实名制
+		if($("#cart_"+ids[1]+"_"+ids[2]).length <= 0){
+	      detail = "<tr id='cart_"+ids[1]+"_"+ids[2]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
+	      detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
+	      detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";
+	      detail += "<div class='input-group-addon'><a href='javascript:;' class='spin-up' data-spin='up'>+</a></div></div>";
+	      detail += "</td><td class='total' id='total_"+ids[1]+"'>"+data_price+"</td><td><a href='javascript:void(0)' onclick='delcart("+ids[1]+","+ids[2]+")'>删除</a><input id='areaid"+ids[1]+"' value='"+ids[2]+"' name='areaid' type='hidden'></td></tr>";
+	    }
+	}
+	$("#cart").append(detail);
     //切换票型的选中状态
     $('.tro').each(function () {
       $(this).attr("class","tro");
     });
     $(this).attr("class","tro active");
-    totalprice(ids[1]);
+
+    if(real){
+    	$("#subtoal").html(total());
+    }else{
+    	totalprice(ids[1]);
+    }
   });
-  //活动选中票型
+
+  //非实名制
   $("body").on("click",".acttro",function(){
   	var ids = Array();
     var id  = this.id;
@@ -38,11 +55,24 @@ $(function(){
 	var obj = $(this);
 	var data_name  = obj.find("td").eq(0).text();
 	var data_price = obj.find("td").eq(1).text();
-
-	detail = "<tr data-price="+data_price+" data-priceid="+obj.data('id')+" data-area="+obj.data('area')+"><td>"+data_name+"</td><td>"+data_price+"</td>";
-	detail += "<td>1</td>";
-	detail += "<td><input type='text' class='form-control idcard' name='card_"+ids[1]+"' value='' size='18'></td>";
-	detail += "<td><a href='javascript:void(0)' onclick='delRow(this);'>删除</a></td></tr>";
+	console.log(real);
+	//获取指定值
+	if(real){
+		//开启实名制
+		detail = "<tr data-price="+data_price+" data-priceid="+obj.data('id')+" data-area="+obj.data('area')+"><td>"+data_name+"</td><td>"+data_price+"</td>";
+		detail += "<td>1</td>";
+		detail += "<td><input type='text' class='form-control idcard' name='card_"+ids[1]+"' value='' size='18'></td>";
+		detail += "<td><a href='javascript:void(0)' onclick='delRow(this);'>删除</a></td></tr>";
+	}else{
+		//非实名制
+		if($("#cart_"+ids[1]+"_"+ids[2]).length <= 0){
+	      detail = "<tr id='cart_"+ids[1]+"_"+ids[2]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
+	      detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
+	      detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";
+	      detail += "<div class='input-group-addon'><a href='javascript:;' class='spin-up' data-spin='up'>+</a></div></div>";
+	      detail += "</td><td class='total' id='total_"+ids[1]+"'>"+data_price+"</td><td><a href='javascript:void(0)' onclick='delcart("+ids[1]+","+ids[2]+")'>删除</a><input id='areaid"+ids[1]+"' value='"+ids[2]+"' name='areaid' type='hidden'></td></tr>";
+	    }
+	}
 	$("#cart").append(detail);
     
     //切换票型的选中状态
@@ -50,7 +80,8 @@ $(function(){
       $(this).attr("class","acttro");
     });
     $(this).attr("class","acttro active");
-    $("#subtoal").html(total());
+    totalprice(ids[1]);
+    //$("#subtoal").html(total());
   });
   //订单中点击向上箭头
   $("body").on("click",".spin-up",function(){
@@ -81,48 +112,7 @@ $(function(){
       }       
     }
     totalprice(ids[1]);  //总价
-  });  
-});
-/*计算当前已选择的票型数量*/
-
-/*计算合计与小计*/
-function totalprice(id){
-  var num   = $("input[name=qnum_"+id+"]").val();
-  var price = parseFloat($("#price_"+id).text()).toFixed(2);
-  var totalprice = parseFloat(parseInt(num)*price).toFixed(2);
-  $("#total_"+id).text(totalprice);   //为每个票型订单详情后的小计赋值
-  var totals = 0;
-  $(".total").each(function(){
-    totals += Number($(this).html());
   });
-  var totals = parseFloat(totals).toFixed(2);
-  $("#subtoal").text(totals);        //为“合计”赋值
-}
-/*删除订单信息*/
-function delcart(id1,id2){
-  if(confirm("确定要删除此条订单信息吗？")){
-    $("#cart_"+id1+"_"+id2).remove();//删除
-    totalprice(id1);
-  }
-}
-/*删除已选择*/
-function delRow(rows){
-    $(rows).parent("td").parent("tr").remove();
-    $("#subtoal").html(total());/*合计*/
-    //$("#kcash_quick").val(total());/*更新收款方式*/
-}
-function total(){
-    var sum = 0;
-    $("#cart tr").each(function(i){
-        var _val = parseFloat($(this).data("price"));
-        sum += _val;
-        console.log(_val);
-    });
-    return sum.toFixed(2);
-}
-/**zj**/
-/*立即出票*/
-$(function(){
   $("#print").bind("click",function(){
   	var rstr = "",
 	    vmima = "",
@@ -131,10 +121,10 @@ $(function(){
 	    id_card = $("#id_card").val(),
 	    remark = $("#remark").val();
     if($(".contact_input").css("display") == "block"){
-	    vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
-	      rstr += "手机格式不正确!";
-	    } 
+	    vMobile = $("#phone").val(); 
+	    if(!checkPhone(vMobile)){
+	    	rstr += "手机格式不正确!";
+	    }
 	    vmima = $("#contacts").val();
 	    if (vmima == '') {
 	        rstr += "姓名不能为空!";
@@ -151,9 +141,10 @@ $(function(){
 	/*是否开启黑名单*/
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
-	      layer.msg("导游手机号码不正确!");
-	      return false;
+
+		if(!checkPhone(guide_black)){
+	    	layer.msg("导游手机号码不正确!");
+	      	return false;
 	    }else{
 	    	if(black(guide_black)){
 	    		layer.msg("抱歉,该导游已被系统列入黑名单，请联系管理员!");
@@ -161,15 +152,31 @@ $(function(){
 	    	}
 	    }
 	}
-	/*判断身份号码是否正确*/console.log(id_card);
+	/*判断身份号码是否正确*/
 	if(id_card){
 		if(check_idcard(id_card) == false){
 			rstr += "请您正确输入身份证号码，或者不输入!";
 		}
 	}
 	/*客源地判断*/
+	//判断客源地是否必须
 	var tour = $("#tourists").val();
-	if(!tour){ tour = '1';}
+	var city = $("#citys").val();
+	switch(PRO_CONF.tourists){
+		case 0:
+		  //关闭默认北京东城区
+		  tour = '1'; city = '35';
+		  break;
+		case 1:
+		  //省级
+		  if(!tour){ rstr += "请选择客源地!";}
+		  city = '35';
+		  break;
+		case 2:
+		  if(!tour && !city){ rstr += "请选择客源地!";}
+		  break;
+	}
+	
 	if(!remark){ remark = "空.."; }
     if(rstr !=""){
       layer.msg(rstr);
@@ -186,7 +193,7 @@ $(function(){
 
          return false;
        }
-       $("#kselect tr").each(function(i){
+      $("#kselect tr").each(function(i){
        if(i != 0 ){
        		var fg  = i <= length ? ',':' ';/*判断是否增加分割符*/
       	 	var ids = this.id.split("_");
@@ -209,7 +216,7 @@ $(function(){
       			  var itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客 导游的id*/
       			  var checkinT = 1;
       			  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-      			  param = '{"tour":'+tour+',"remark":"'+remark+'","id_card":"'+id_card+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
+      			  param = '{"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","id_card":"'+id_card+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
       			  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}'; 
       			  /*提交到服务器*/
       			  $.ajax({
@@ -247,9 +254,9 @@ $(function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
-	      rstr += "手机格式不正确!";
-	    } 
+	    if(!checkPhone(vMobile)){
+	    	rstr += "手机格式不正确!";
+	    }
 	    var vmima = $("#contacts").val();
 	    if (vmima == '') {
 	        rstr += "姓名不能为空!";
@@ -265,9 +272,9 @@ $(function(){
 	}
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
-	      layer.msg("导游手机号码不正确!");
-	      return false;
+	    if(!checkPhone(guide_black)){
+	    	layer.msg("导游手机号码不正确!");
+	        return false;
 	    }else{
 	    	if(black(guide_black)){
 	    		layer.msg("抱歉,该导游已被系统列入黑名单，请联系管理员!");
@@ -283,7 +290,21 @@ $(function(){
 	}
 	/*客源地判断*/
 	var tour = $("#tourists").val();
-	if(!tour){tour = '1';}
+	var city = $("#citys").val();
+	switch(PRO_CONF.tourists){
+		case 0:
+		  //关闭默认北京东城区
+		  tour = '1'; city = '35';
+		  break;
+		case 1:
+		  //省级
+		  if(!tour){ rstr += "请选择客源地!";}
+		  city = '35';
+		  break;
+		case 2:
+		  if(!tour && !city){ rstr += "请选择客源地!";}
+		  break;
+	}
 	if(!remark){
 		remark = "空..";
 	}
@@ -316,7 +337,7 @@ $(function(){
 			  pre	= 1,
 			  param = "";/*付款但不排座*/
 		  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-		  param = '{"pre":'+pre+',"tour":'+tour+',"remark":"'+remark+'","id_card":"'+id_card+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		  param = '{"pre":'+pre+',"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","id_card":"'+id_card+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
 		  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
 		
 		  /*提交到服务器*/
@@ -345,17 +366,18 @@ $(function(){
 	        return false;
         }
 	}	  
- });
- //政企预定  不付款  窗口手动排座
- $("#gov").bind("click",function(){
+  });
+  //政企预定  不付款  窗口手动排座
+  $("#gov").bind("click",function(){
 	var rstr = "",
 		plan = $('#planID').val(),
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
+	    if(!checkPhone(vMobile)){
 	      rstr += "手机格式不正确!";
-	    } 
+	    }
+
 	    var vmima = $("#contacts").val();
 	    if (vmima == '') {
 	        rstr += "姓名不能为空!";
@@ -371,7 +393,7 @@ $(function(){
 	}
 	if(PRO_CONF.black == '1'){
 		var guide_black = $("#guide_black").val();
-	    if (!guide_black.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
+	    if(!checkPhone(guide_black)){
 	      layer.msg("导游手机号码不正确!");
 	      return false;
 	    }else{
@@ -383,7 +405,21 @@ $(function(){
 	}
 	/*客源地判断*/
 	var tour = $("#tourists").val();
-	if(!tour){tour = '1';}
+	var city = $("#citys").val();
+	switch(PRO_CONF.tourists){
+		case 0:
+		  //关闭默认北京东城区
+		  tour = '1'; city = '35';
+		  break;
+		case 1:
+		  //省级
+		  if(!tour){ rstr += "请选择客源地!";}
+		  city = '35';
+		  break;
+		case 2:
+		  if(!tour && !city){ rstr += "请选择客源地!";}
+		  break;
+	}
 	if(!remark){remark = "空";}
     if(rstr != ""){
       layer.msg(rstr);
@@ -423,7 +459,7 @@ $(function(){
 					gov	= 1,
 					param = "";/*付款但不排座*/
 					crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-					param = '{"pre":'+pre+',"gov":'+gov+',"tour":'+tour+',"remark":"'+remark+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
+					param = '{"pre":'+pre+',"gov":'+gov+',"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
 				var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
 				/*提交到服务器*/
 				$.ajax({
@@ -534,9 +570,10 @@ $("#preteam").bind("click",function(){
 		remark = $("#remark").val();
     if($(".contact_input").css("display")=="block"){
 	    var vMobile = $("#phone").val();
-	    if (!vMobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
+	    if(!checkPhone(vMobile)){
 	      rstr += "手机格式不正确!";
 	    } 
+
 	    var vmima = $("#contacts").val();
 	    if (vmima == '') {
 	        rstr += "姓名不能为空!";
@@ -549,8 +586,23 @@ $("#preteam").bind("click",function(){
 			rstr += "取票人不能为空!";
 		}
 	}
+	
 	var tour = $("#tourists").val();
-	if(!tour){ rstr += "请选择客源地!";}
+	var city = $("#citys").val();
+	switch(PRO_CONF.tourists){
+		case 0:
+		  //关闭默认北京东城区
+		  tour = '1'; city = '35';
+		  break;
+		case 1:
+		  //省级
+		  if(!tour){ rstr += "请选择客源地!";}
+		  city = '35';
+		  break;
+		case 2:
+		  if(!tour && !city){ rstr += "请选择客源地!";}
+		  break;
+	}
 	if(car == ''){
 		rstr += "车牌号不能为空!";
 	}
@@ -587,7 +639,7 @@ $("#preteam").bind("click",function(){
 			  pre	= 1,
 			  param = "";/*付款但不排座*/
 		  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","tour":'+tour+',"teamtype":"'+teamtype+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		  param = '{"pre":'+pre+',"remark":"'+remark+'","car":"'+car+'","tour":'+tour+',"city":'+city+',"teamtype":"'+teamtype+'","settlement":"'+USER_INFO.group.settlement+'"}';
 		  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
 		
 		  /*提交到服务器*/
@@ -677,8 +729,45 @@ $("#guidesearch").bind("click",function(){
 	  }
 	  $("#chooseguide").html(content);
 	});  
+}); 
 });
-})
+/*计算当前已选择的票型数量*/
+
+/*计算合计与小计*/
+function totalprice(id){
+  var num   = $("input[name=qnum_"+id+"]").val();
+  var price = parseFloat($("#price_"+id).text()).toFixed(2);
+  var totalprice = parseFloat(parseInt(num)*price).toFixed(2);
+  $("#total_"+id).text(totalprice);   //为每个票型订单详情后的小计赋值
+  var totals = 0;
+  $(".total").each(function(){
+    totals += Number($(this).html());
+  });
+  var totals = parseFloat(totals).toFixed(2);
+  $("#subtoal").text(totals);        //为“合计”赋值
+}
+/*删除订单信息*/
+function delcart(id1,id2){
+  if(confirm("确定要删除此条订单信息吗？")){
+    $("#cart_"+id1+"_"+id2).remove();//删除
+    totalprice(id1);
+  }
+}
+/*删除已选择*/
+function delRow(rows){
+    $(rows).parent("td").parent("tr").remove();
+    $("#subtoal").html(total());/*合计*/
+    //$("#kcash_quick").val(total());/*更新收款方式*/
+}
+function total(){
+    var sum = 0;
+    $("#cart tr").each(function(i){
+        var _val = parseFloat($(this).data("price"));
+        sum += _val;
+        console.log(_val);
+    });
+    return sum.toFixed(2);
+}
 /*导游查找结果带回*/
 function guideback(id,name){
   $("#myModal4").modal('hide');  //隐藏导游查找弹出框
@@ -694,10 +783,51 @@ function money(){
     }
   });
 }
+/*省市联动*/
+$('.cityList').each(function() {
+	var url = "index.php?g=Home&m=Index&a=public_get_area";
+    var areaJson;
+    var temp_html = "<option value=''>客源地</option>";
+    var oProvince = $(this).find(".province");
+    var oCity = $(this).find(".city");
+    //初始化省
+    var province = function(){
+        $.each(areaJson,function(i,province){
+            temp_html+="<option value='"+province.id+"'>"+province.name+"</option>";
+        });
+        oProvince.html(temp_html);
+    };
+    //赋值市
+    var city = function(){
+        temp_html = ""; 
+        var n = oProvince.get(0).selectedIndex;
+        $.each(areaJson[n].city,function(i,c){
+            temp_html+="<option value='"+c.id+"'>"+c.name+"</option>";
+        });
+        oCity.html(temp_html);
+    };
+    //选择省改变市
+    oProvince.change(function(){
+        city();
+    });
+    //获取json数据
+    $.getJSON(url,function(data){
+        areaJson = data;
+        province();
+    });
+});
 /*刷新页面，恢复初始值*/
 function newPage(){
 	$('.qk').val("");
 	window.location.reload();
+}
+/*手机号正确校验*/
+function checkPhone(mobile) {
+	if (mobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
+		return true;
+	} else {
+		return false;
+	}
 }
 /*黑名单校验*/
 function black(phone){

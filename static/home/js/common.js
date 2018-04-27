@@ -62,7 +62,7 @@ function getprice(plan,type,tooltype){
     $("#planID").val(plan);
     $.post(url, data, function(rdata) {
         if(rdata.statusCode == '200'){
-           if(rdata.price != null){
+           if(rdata.price != null){ 
                 $(rdata.price).each(function(idx,ticket){
                     if(USER_INFO.group.settlement == '1'){
                         show_price = ticket.price;
@@ -125,11 +125,27 @@ function getActivtyPrice(plan,actid,type) {
                         }else{
                             show_price = ticket.discount;
                         }
-                        content += "<tr id='tro_"+ticket.id+"_"+ticket.area_id+"' class='acttro' data-id='"+ticket.id+"' data-area='"+ticket.area_id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                        if(type == '1'){
+                          content += "<tr id='tro_"+ticket.id+"_"+ticket.area_id+"' class='acttro' data-id='"+ticket.id+"' data-area='"+ticket.area_id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                                 +"<td align='center'>["+ticket.area+"]"+ticket.name+"</td>"
                                 +"<td>"+show_price+"</td>"
                                 +"<td align='center'>"+ticket.area_num+"</td>"
                                 +"</tr>";
+                        }
+                        if(type == '2'){
+                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                                +"<td align='center'>"+ticket.name+"</td>"
+                                +"<td>"+show_price+"</td>"
+                                +"<td align='center'>"+ticket.area_num+"</td>"
+                                +"</tr>";
+                        }
+                        if(type == '3'){
+                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                                +"<td align='center'>"+ticket.name+"</td>"
+                                +"<td>"+show_price+"</td>"
+                                +"<td align='center'>"+ticket.area_num+"</td>"
+                                +"</tr>";
+                        }
                         
                         
                     });

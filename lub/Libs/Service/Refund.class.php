@@ -461,36 +461,56 @@ class Refund extends \Libs\System\Service {
 			if($channel == '1'){
 				//渠道商客户
 				$db = M('Crm');
-				//获取扣费条件
-				$cid = money_map($info['channel_id'],$channel);
-			}
+
+				//判断是否开启多级扣款
+				$crm = F('Crm');
+				$crm = $crm[$info['channel_id']];
+				$itemConf = cache('ItemConfig');
+
+				if($itemConf[$crm['itemid']]['1']['level_pay']){
+					//开启多级扣款
+					//获取扣款连条
+            		$payLink = crm_level_link($info['channel_id']);
+				}else{
+					//获取扣费条件
+					$payLink = money_map($info['channel_id'],$channel);
+				}
+			}//dump($payLink);
 			if($channel == '4'){
 				//个人客户
 				$db = M('User');
-				$cid = $info['guide_id'];
+				$payLink = $info['guide_id'];
 			}
+			$backMap = [
+				'id'	=>	['in',implode(',',$payLink)]
+			];
 			$crmData = array('cash' => array('exp','cash+'.$money_back),'uptime' => time());
+
 			if($channel == '1'){
 				//渠道商客户
-				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+				$c_pay = $model->table(C('DB_PREFIX')."crm")->where($backMap)->setField($crmData);
 			}
 			if($channel == '4'){
 				//个人客户
-				$c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$cid))->setField($crmData);
-			}				
-			$data = array(
-				'cash'		=>	$money_back,
-				'user_id'	=>	$info['user_id'],
-				'guide_id'	=>	$cid,//TODO  这个貌似没什么意义
-				'addsid'	=>	$info['addsid'],
-				'crm_id'	=>	$cid,
-				'createtime'=>	$createtime,
-				'type'		=>	'4',
-				'order_sn'	=>	$info['order_sn'],
-				'balance'	=>  balance($cid,$channel),
-				'tyint'		=>	$channel,//客户类型1企业4个人
-			);
-			$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+				$c_pay = $model->table(C('DB_PREFIX')."user")->where($backMap)->setField($crmData);
+			}
+			//TODO 不同级别扣款金额不同
+			foreach ($payLink as $p => $l) {
+				$recharge[] = array(
+					'cash'		=>	$money_back,
+					'user_id'	=>	$info['user_id'],
+					'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+					'addsid'	=>	$info['addsid'],
+					'crm_id'	=>	$l,
+					'createtime'=>	$createtime,
+					'type'		=>	'4',
+					'order_sn'	=>	$info['order_sn'],
+					'balance'	=>  balance($l,$channel),
+					'tyint'		=>	$channel,//客户类型1企业4个人
+				);
+			}
+			$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($recharge);
+			
 			if($c_pay == false || $c_pay2 == false){
 				error_insert('400008');
 				$model->rollback();//事务回滚
@@ -578,6 +598,15 @@ class Refund extends \Libs\System\Service {
 			return false;
 		}	
 	}
+	/*
+	//多级扣款情况下 多级返款 且是渠道订单 且是渠道版订单
+	if($itemConfg[$itemid]['1']['level'] && ){
+		//判断当前用户
+		//判断级别
+		//确定扣款金额
+	}else{
+
+	}*/
 	/*
 	* 检测是否存在已检票的座位
 	* @param $table string 座位表名称
@@ -711,7 +740,6 @@ class Refund extends \Libs\System\Service {
 	function check_child_ticket($price_id,$child_ticket,$type){
 		$child_ticket_array = explode(',', $price_id);
 		foreach ($child_ticket_array as $k => $v) {
-
 			if(in_array($type,array('81','83','91'))){
 				$unset_moeny += $child_ticket[$v]['discount'];
 			}else{

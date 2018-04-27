@@ -786,14 +786,16 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
  * @param $sub 是否开启子商户
  * @param $define 是否采用默认配置
  */
-function load_payment($pay = ''){
+function load_payment($pay = '',$itemid = ''){
     //获取收银配置
-    $itemCof = get_item_conf('2');
+    $itemCof = get_item_conf('2',$itemid);
     //微信支付
     if(stripos($pay, 'wx') !== false){
         $config = cache('Config');
         $domain = $config['siteurl'];
-        $itemid = get_item('id');
+        if(empty($itemid)){
+            $itemid = get_item('id');
+        }
         $options = [
             'use_sandbox'       => false,// 是否使用 微信支付仿真测试系统
             'submch'            => true,//是否开启微信服务商

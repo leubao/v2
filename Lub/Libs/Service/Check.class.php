@@ -104,6 +104,72 @@ class Check{
 
     }
     /**
+     * 轮询红包返利情况
+     */ 
+    public function check_red()
+    {
+    	$status = load_redis('get','redChek');
+    	if($status){
+    		//5分钟轮询一次
+    		die();
+    	}
+    	$ln = load_redis('lsize','red_list');
+		if($ln > 0){
+			$itemid = 12;
+			$config = load_payment('wx_red',$itemid);
+			$list = load_redis('lrange','red_list',0,-1);
+			foreach ($list as $k => $v) {
+	            $data = [
+	                'mch_billno' => $v,
+	                'bill_type'  => 'MCHT',
+	                'sub_appid'  =>  $config['sub_appid'],
+	                'sub_mch_id' =>  $config['sub_mch_id']
+	            ];
+	            $ret = Query::run('wx_red', $config, $data);
+	            try {
+	                $ret = Query::run('wx_red', $config, $data);
+	                if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
+	                	//多个红包部分领取的情况 TODO
+	                	$db = D('red_list');
+	                	//读取日志
+	                	$redLog = $db->where(['red_sn'=>$ret["mch_billno"]])->field('rebate_sn,red_sn')->find();
+		                //发放成功，已领取
+		                if($ret['status'] === 'RECEIVED'){
+		                    M('Cash')->where(array('sn'=>$ret["mch_billno"]))->setField(['status'=>1,'uptime'=>time()]);
+		                    $upLog = [
+		                    	'status'		=>	9,
+		                    	'update_time'	=>	time(),
+		                    ];
+		                }
+		                //已退款或发放失败
+		                if(in_array($ret['status'],['FAILED','REFUND'])){
+		                    M('Cash')->where(array('sn'=>$ret["mch_billno"]))->setField(['status'=>3,'uptime'=>time()]);
+		                    $upLog = [
+		                    	'status'		=>	5,
+		                    	'update_time'	=>	time(),
+		                    ];
+		                }
+		                //更新日志
+		                $map = [
+		                	'rebate_sn'	=>	$redLog['rebate_sn'],
+		                	'red_sn'	=>	$ret["mch_billno"]
+		                ];
+		              	$db->where($map)->save($upLog);
+		                //未领取  或者发放中  都继续写入查询中
+		                if(in_array($ret['status'], ['SENDING','SENT','RFUND_ING'])){
+		                    load_redis('lpush','red_list',$ret["mch_billno"]);
+		                }
+		            }
+		            load_redis('setex','redChek','1',300);
+	            } catch (PayException $e) {
+	                error_insert($e->errorMessage());
+	                $this->erun("ERROR:".$e->errorMessage());
+	                exit;
+	            }
+			}
+		}
+    }
+    /**
      * 检查已过期的场次，是否有过正常销售，未有正常销售的场次将直接删除(将状态标记为-1)
      */
     function check_plan(){
