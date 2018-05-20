@@ -945,6 +945,7 @@ class WorkController extends ManageBase{
 			 $this->erun('查询条件不能为空');
 			}
 		}
+		$product_id = get_product('id');
 		if($pinfo['type'] == '1'){
 			//座位号查订单
 			$map = array(
@@ -952,7 +953,7 @@ class WorkController extends ManageBase{
 			);
 			$plan_info = F('Plan_'.$pinfo['plan']);
 			if(empty($plan_info)){
-				$plan_info = M('Plan')->where(array('id'=>$pinfo['plan']))->find();
+				$plan_info = M('Plan')->where(array('id'=>$pinfo['plan'],'product_id'=>$product_id))->find();
 			}
 			$info = M(ucwords($plan_info['seat_table']))->where($map)->find();
 		}
@@ -967,7 +968,7 @@ class WorkController extends ManageBase{
 			);
 			$plan_info = F('Plan_'.$pinfo['plan']);
 			if(empty($plan_info)){
-				$plan_info = M('Plan')->where(array('id'=>$pinfo['plan']))->find();
+				$plan_info = M('Plan')->where(array('id'=>$pinfo['plan'],'product_id'=>$product_id))->find();
 			}
 			$info = M(ucwords($plan_info['seat_table']))->where($map)->find();
 		}
@@ -984,7 +985,7 @@ class WorkController extends ManageBase{
 		}
 		//读取销售计划 过期的两天 和当前未过期的全部
 		$plantime = strtotime(" -2 day ",strtotime(date('Y-m-d')));
-		$plan = M('Plan')->where(array('plantime'=>array('egt',$plantime)))->order('plantime ASC')->select();
+		$plan = M('Plan')->where(array('plantime'=>array('egt',$plantime),'product_id'=>$product_id))->order('plantime ASC')->select();
 		$this->assign('data',$data)
 			->assign('plan',$plan)
 			->assign('area',$area)

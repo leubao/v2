@@ -17,14 +17,14 @@ class Refund extends \Libs\System\Service {
 	 * @param $area_id int 区域ID
 	 * @param $seat_id string 座位号 TODO多个座位一起退 
 	 * @param $poundage int 手续费
-	 * @param $scena int 创建场景 1窗口退票 2 整场退票 3自动退单 4批量退指定座位 5 api申请退款 
+	 * @param $scena int 创建场景 1窗口退票 2 整场退票 3自动退单 4批量退指定座位 5 api申请退款 6 系统自动完成订单取消
 	 * */
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
 		//$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
 		$info = D('Item/Order')->where(['order_sn'=>$sn])->relation(true)->find();
 		if(empty($sn) || empty($info)){
-			error_insert('400410');return false;
+			error_insert('4004101');return false;
 		}
 		//获取所属计划
 		$plan = F('Plan_'.$info['plan_id']);
@@ -281,6 +281,9 @@ class Refund extends \Libs\System\Service {
 		$cost = 0;//手续费
 		$sn = $info['order_sn'];
 		$child_moeny = 0;
+		if(empty($user_id)){
+			$user_id = get_user_id();
+		}
 		//81 团队无返利结算价格退款有座位  82 团队无返利票面价格退款无座位
 		// 83删除返利 按票面价退款有座位 91 按结算价格退款 有座位 92 无座位置
 		/*=============判定系统是整单退 还是个别退===============*/
@@ -313,6 +316,7 @@ class Refund extends \Libs\System\Service {
 					if(Refund::check_seat($plan['seat_table'],$sn) != false){
 						$map = array('order_sn'=>$sn,'status'=>array('notin','99'));
 					}else{
+						echo "string";
 						error_insert('400015');
 						$model->rollback();return false;
 					}
@@ -345,7 +349,7 @@ class Refund extends \Libs\System\Service {
 				if($income == false){echo "15";
 					$model->rollback();return false;
 				}
-			}else{//echo "16";
+			}else{echo "16";
 				$model->rollback();return false;
 			}
 		}
@@ -511,7 +515,7 @@ class Refund extends \Libs\System\Service {
 			}
 			$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($recharge);
 			
-			if($c_pay == false || $c_pay2 == false){
+			if($c_pay == false || $c_pay2 == false){echo "st2ing";
 				error_insert('400008');
 				$model->rollback();//事务回滚
 				return false;
@@ -529,7 +533,7 @@ class Refund extends \Libs\System\Service {
 			$refund_data = array(
 				'createtime'	=>  $createtime,
 				'order_sn'		=>	$sn,
-				'applicant'		=>	get_user_id(),
+				'applicant'		=>	$user_id,
 				'crm_id'		=>	$info['channel_id'] ? $info['channel_id'] : '0',
 				'plan_id'		=>	$info['plan_id'],
 				'param'			=>	'',
@@ -545,7 +549,7 @@ class Refund extends \Libs\System\Service {
 				'poundage_type'	=>	'1',
 				'against_reason'=>	'',
 				'order_status'	=>	$info['status'],
-				'user_id'		=>	get_user_id(),
+				'user_id'		=>	$user_id,
 			);
 			$refund = $model->table(C('DB_PREFIX').'ticket_refund')->add($refund_data);
 		}else{
@@ -558,7 +562,7 @@ class Refund extends \Libs\System\Service {
 				'updatetime'	=>	$createtime,
 				'status'		=>	'3',
 				'against_reason'=>  $ginfo['against_reason'],
-				'user_id'		=>	get_user_id(),
+				'user_id'		=>	$user_id,
 			);
 			$refund = $model->table(C('DB_PREFIX').'ticket_refund')->where(array('order_sn'=>$sn))->save($refund_data);
 		}

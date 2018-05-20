@@ -11,6 +11,7 @@ use Common\Controller\Base;
 use Home\Service\Partner;
 use Libs\Service\Operate;
 use Libs\Org\Pay;
+use Payment\Client\Charge;
 class PayController extends Base{
     //订单支付
     public function index() {
@@ -248,6 +249,20 @@ class PayController extends Base{
             if(empty($crmid) || empty($channel)){$this->error("参数错误，请重新选择商户!");}
             //查询当前客户分组
             $this->assign("cid",$crmid)->assign('channel',$channel);
+            $this->display();
+        }
+    }
+    //网银充值
+    function recharge()
+    {
+        if(IS_POST){
+            try {
+                $url = Charge::run('', $wxConfig, $payData);
+            } catch (PayException $e) {
+                echo $e->errorMessage();
+                exit;
+            }
+        }else{
             $this->display();
         }
     }

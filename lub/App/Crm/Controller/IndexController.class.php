@@ -69,21 +69,37 @@ class IndexController extends ManageBase{
 	 */
 	function add(){
 		if(IS_POST){
-			$data["itemid"]      = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
-			$data["product_id"]  = get_product('id');
-			$data["create_time"] = time();
-			$data["salesman"]    = $_POST["user_id"];
-			$data['param']	=	serialize(array(
-				'print' => I('post.prints'),
-				'rebate' => I('post.rebate'),
-				));
-			$add = Operate::do_add("Crm",$data);
-			if($add){
-				D('Crm/Crm')->crm_cache();
-				$this->srun('新增成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
+			$model = D('Crm/Crm');
+			$pinfo = I('post.');
+			$param = [
+				'print'  => $pinfo['prints'],
+				'rebate' => $pinfo['rebate'],
+				'refund' => $pinfo['refund'],
+				'ispay'  => implode(',',$pinfo['isPay'])
+			];
+			$data = [
+				'itemid'	=>	\Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE'),
+				'product_id'=>  get_product('id'),
+				'salesman'  =>  I('user_id'),
+				'name'		=>	$pinfo['name'],
+				'address'	=>	$pinfo['address'],
+				'contacts'	=>	$pinfo['contacts'],
+				'phone'		=>	$pinfo['phone'],
+				'status'	=>	$pinfo['status'],
+				'groupid'	=>	$pinfo['groupid'],
+				'type'		=>  $pinfo['type'],
+				'param'		=>	json_encode($param),
+			];
+			if($model->create($data)){
+				$result = $model->add(); // 写入数据到数据库 
+    			if($result){
+        			$this->srun('新增成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
+    			}else{
+    				$this->erun('新增失败!');
+    			}
 			}else{
 				$this->erun('新增失败!');
-			}			
+			}
 		}else{
 			$groupid = I('groupid');//客户分组id
 			$type = I('type');
@@ -129,27 +145,46 @@ class IndexController extends ManageBase{
 	 */
 	function edit(){
 		if(IS_POST){
-			$info = I('post.');
-			$param	=	serialize(array(
-				'prints' => $info['prints'],
-				'rebate' => $info['rebate'],
-				));
-			$data = array_merge($info,array('salesman'=>$_POST["orgLookup_ids"],'param'=>$param));
-			$model = D('Crm');
-			$up = $model->save($data);
-			
-			//更新所有二级及二级员工的分组属性
-			//读取关系链接
-			$channel_agents_id = agent_channel($info['id'],2);
-			$model->where(array('id'=>array('in',$channel_agents_id)))->setField('groupid',$info['groupid']);
-			//更新商户下所有员工所属的分组
-			$user_up = M('User')->where(array('cid'=>array('in',$channel_agents_id)))->setField('groupid',$info['groupid']);
-			if($up != false){
-				$model->crm_cache();
-				$this->srun('修改成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
+			$model = D('Crm/Crm');
+			$pinfo = I('post.');
+			$param = [
+				'print'  => $pinfo['prints'],
+				'rebate' => $pinfo['rebate'],
+				'refund' => $pinfo['refund'],
+				'ispay'  => implode(',',$pinfo['isPay'])
+			];
+
+			$data = [
+				'salesman'  =>  I('user_id'),
+				'name'		=>	$pinfo['name'],
+				'address'	=>	$pinfo['address'],
+				'contacts'	=>	$pinfo['contacts'],
+				'phone'		=>	$pinfo['phone'],
+				'status'	=>	$pinfo['status'],
+				'groupid'	=>	$pinfo['groupid'],
+				'type'		=>  $pinfo['type'],
+				'param'		=>	json_encode($param),
+				'uptime'	=>	time()
+			];
+			if($model->token(false)->create($data)){
+				$result = $model->where(['id'=>$pinfo['id']])->save(); // 写入数据到数据库
+    			if($result){
+    				//更新所有二级及二级员工的分组属性
+					//读取关系链接
+					$channel_agents_id = agent_channel($pinfo['id'],2);
+					if(!empty($channel_agents_id)){
+						$model->where(array('id'=>array('in',$channel_agents_id)))->setField(['groupid'=>$pinfo['groupid'],'param'=>$data['param']]);
+						//更新商户下所有员工所属的分组
+						$user_up = M('User')->where(array('cid'=>array('in',$channel_agents_id)))->setField('groupid',$pinfo['groupid']);
+					}
+        			$this->srun('更新成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
+    			}else{
+    				$this->erun('更新失败!'.$model->getError());
+    			}
 			}else{
-				$this->erun('修改失败!');
+				$this->erun('更新失败!'.$model->getError());
 			}
+			
 		}else{
 			$id = I('id');
 			$type = I('type');
@@ -158,7 +193,7 @@ class IndexController extends ManageBase{
 			$level = Operate::do_read('Role',1,array('parentid'=>$this->config['channel_role_id'],'is_scene'=>3,'status'=>1),array('id'=>DESC));//dump();
 			$group = F('CrmGroup');
 			$list = Operate::do_read('Crm',0,array('id'=>$id));
-			$list['param'] = unserialize($list['param']);
+			$list['param'] = json_decode($list['param'],true);
 			$this->assign("level",$level)
 				->assign('group',$group)
 				->assign('type',$type)
@@ -422,6 +457,7 @@ class IndexController extends ManageBase{
 		$crm_id = I('id');//商户id
 		$type = I('type') ? I('type') : '0';
 		$channel = I('get.channel');
+		$scope = I('scope') ? I('scope') : '1';
 		if(empty($crm_id) || empty($channel)){$this->erun("参数错误!");}
 		/*查询条件START*/
 		$start_time = I("starttime");
@@ -443,14 +479,30 @@ class IndexController extends ManageBase{
         if(!empty($type)){
         	$where['type'] = $type;
         }
+        //是否只显示一级
+        switch ($scope) {
+        	case '1':
+        		$where["crm_id"] = array('in',agent_channel($crm_id));
+        		break;
+        	case '2':
+        		$where["crm_id"] = $crm_id;
+        		break;
+        	case '3':
+        		$crmid = getChannel($crm_id);
+        		$where["crm_id"] = ['in',arr2string($crmid,'id')];
+        		break;
+        	case '4':
+        		$crmid = getChannel($crm_id);
+        		$where["crm_id"] = ['in',arr2string($crmid,'id')];
+        		break;
+        }
         if($channel == '4'){
         	$where["crm_id"] = $crm_id;
-        }else{
-        	$where["crm_id"] = array('in',agent_channel($crm_id));
         }
 		$this->basePage('CrmRecharge',$where,'id DESC');
 		$this->assign("cid",$crm_id)
 			->assign("type",$type)
+			->assign('scope',$scope)
 			->display();
 	}
 
@@ -471,6 +523,7 @@ class IndexController extends ManageBase{
 			if($channel == '1'){
 				//渠道商客户
 				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
+
 			}
 			if($channel == '4'){
 				//个人客户
@@ -663,7 +716,7 @@ class IndexController extends ManageBase{
     */
    function export_credit(){
    		$ginfo = I('get.');
-   		$where['crm_id'] = array('in',agent_channel($ginfo['id']));
+   		$crm_id = $ginfo['id'];
    		if(!empty($ginfo['type'])){
    			$where['type'] = $ginfo['type'];
    		}
@@ -672,7 +725,27 @@ class IndexController extends ManageBase{
             $end_time = strtotime($ginfo['endtime']) + 86399;
             $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
         }
-
+        //是否只显示一级
+        switch ($ginfo['scope']) {
+        	case '1':
+        		$where["crm_id"] = array('in',agent_channel($crm_id));
+        		break;
+        	case '2':
+        		$where["crm_id"] = $crm_id;
+        		break;
+        	case '3':
+        		$crmid = getChannel($crm_id);
+        		$where["crm_id"] = ['in',arr2string($crmid,'id')];
+        		break;
+        	case '4':
+        		$crmid = getChannel($crm_id);
+        		$where["crm_id"] = ['in',arr2string($crmid,'id')];
+        		break;
+        }
+        if($channel == '4'){
+        	$where["crm_id"] = $crm_id;
+        }
+        //dump($where);
    		$list = M('CrmRecharge')->where($where)->order('createtime DESC')->select();
    		foreach ($list as $k => $v) {
    			$data[] = array(

@@ -174,10 +174,24 @@ class Order extends \Libs\System\Service {
 			'take'			=> $info['crm'][0]['contact'],
 			'activity'		=> $info['param'][0]['activity'],//活动标记
 		);
-		$newInfo = array('subtotal'	=> $info['subtotal'],'type'=>$info['type'],'checkin'=> $info['checkin'],'sub_type'=>$info['sub_type'],'num'=>$info['num'],'data' => $seatData,'crm' => $info['crm'],'pay' => $info['param'][0]['is_pay'] ? $info['param'][0]['is_pay'] : '1','param'=> $info['param']);
-
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
-		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($newInfo)));
+		$newInfo = [
+			'oid'=>$state,
+			'order_sn' => $sn,
+			'remark' =>	$info['param'][0]['remark'],
+			'info' => serialize([
+				'subtotal'	=> $info['subtotal'],
+				'type'=>$info['type'],
+				'checkin'=> $info['checkin'],
+				'sub_type'=>$info['sub_type'],
+				'num'=>$info['num'],
+				'data' => $seatData,
+				'crm' => $info['crm'],
+				'pay' => $info['param'][0]['is_pay'] ? $info['param'][0]['is_pay'] : '1',
+				'param'=> $info['param']
+			])
+		];
+		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add($newInfo);
 		/*记录售票员操作日志*/
 		if($flag && $state && $oinfo){
 			$model->commit();//提交事务
@@ -591,6 +605,7 @@ class Order extends \Libs\System\Service {
             	//获取扣款连条
             	$payLink = crm_level_link($info['channel_id']);
             	//判断链条中所有人余额充足
+            	
             	//统一扣除订单金额，每天返利
             	
             	//渠道商客户
@@ -599,8 +614,8 @@ class Order extends \Libs\System\Service {
 					'id'	=>	['in', implode(',',$payLink)],
 					'cash'	=>	['EGT',$info['money']]
 				];
-				$balance = $db->where($payWhere)->field('id')->find();
-				if($balance){
+				$balanceCount = $db->where($payWhere)->field('id')->count();
+				if((int)$balanceCount === (int)count($payLink)){
 					$crmData = array('cash' => array('exp','cash-'.$info['money']),'uptime' => time());
 					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(['id'=>['in',implode(',',$payLink)]])->setField($crmData);
 					//TODO 不同级别扣款金额不同
@@ -678,6 +693,17 @@ class Order extends \Libs\System\Service {
 					return false;
 				}
 			}
+		}elseif(in_array($channel,['1','4'])){
+			//判断是否有权限使用其它支付方式
+			
+			//读取信息
+			$crm = F('Crm');
+			$crm = $crm[$info['info']['crm'][0]['qditem']];
+			if(!in_array('2',explode(',',$crm['param']['ispay']))){
+				$model->rollback();//事务回滚
+				$this->error = '400008 : 未被支持的支付方式';
+				return false;
+			}
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		$ticketType = F('TicketType'.$plan['product_id']);
@@ -746,8 +772,14 @@ class Order extends \Libs\System\Service {
 				$msg = $info['number']."张";
 			}
 		}
+		//判断门票数据是否一致
+		if((int)count($printList) <> (int)$info['number']){
+			$model->rollback();//事务回滚
+			$this->error = '400018 : 出票失败';
+			return false;
+		}
 		//批量新增数据
-		$state = $model->table(C('DB_PREFIX').$table)->where($map)->limit($value['num'])->lock(true)->addAll($printList);
+		$state = $model->table(C('DB_PREFIX').$table)->where($map)->lock(true)->addAll($printList);
 		//获取售票信息
 		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id,idcard')->select();
 		foreach ($saleList as $ks => $vs) {
@@ -846,7 +878,7 @@ class Order extends \Libs\System\Service {
 		$newData = array('subtotal'	=> $info['info']['subtotal'],'checkin'	=> $info['info']['checkin'],'data' => $dataList,'crm' => $info['info']['crm'],'pay' => $is_pay ? $is_pay : $info['info']['pay'],'param'	=> $info['info']['param'],'child_ticket'=>$child_t);
 		$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->setField('info',serialize($newData));
 		//改变订单状态
-		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField('status','1');
+		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(['status'=>'1','pay'=>$newData['pay']]);
 		if($state && $status){
 			$model->commit();//提交事务
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
@@ -859,6 +891,14 @@ class Order extends \Libs\System\Service {
 					Sms::order_msg($msgs,1);
 				}
 			}
+			//设置低金额报警 
+			if(empty($cid) && $newData['pay'] == '2'){
+				$checkCrm =  end($payLink);
+			}else{
+				$checkCrm = $cid;
+			}
+			\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
+
 			return $info['order_sn'];
 		}else{
 			error_insert('400006');
@@ -949,6 +989,7 @@ class Order extends \Libs\System\Service {
 					$db = M('Crm');
 					//获取扣费条件
 					$cid = money_map($info['channel_id'],$channel);
+					\Libs\Service\Kpi::if_money_low($product['item_id'],$cid,$info['money']);
 				}
 				if($channel == '4'){
 					//个人客户
@@ -1201,11 +1242,20 @@ class Order extends \Libs\System\Service {
 				//根据支付方式选择短信模板 
 				$pay = $is_pay ? $is_pay : $oInfo['pay'];
 				if($pay == '1' || $pay == '3'){
-					Sms::order_msg($msgs,6);
+					//Sms::order_msg($msgs,6);
 				}else{
-					Sms::order_msg($msgs,$msgTpl);
+					//Sms::order_msg($msgs,$msgTpl);
 				}
 			}
+
+			//设置低金额报警 
+			if(empty($cid) && $newData['pay'] == '2'){
+				$checkCrm =  end($payLink);
+			}else{
+				$checkCrm = $cid;
+			}
+			\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
+
 			return $info['order_sn'];
 		}else{
 			//dump($flag);dump($flags);dump($state);dump($in_team);dump($up_quota);dump($pre);
@@ -1872,7 +1922,7 @@ class Order extends \Libs\System\Service {
 						'priceid'=>$v['priceid'],
 						'price'=>$v['price'],
 						'num'=>$v['num'],
-						'idcard'=> $v['idcard']
+						'idcard'=> ''
 					);
 					$seat['num'] += $seat['area'][$v['priceid']]['num'];
 				}else{

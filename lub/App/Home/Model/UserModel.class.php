@@ -73,7 +73,7 @@ class UserModel extends RelationModel {
         if($uInfo['group']['type'] <> '4'){
             //查询所属商户相关信息
             $crm = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,agent,itemid,f_agents,param')->find();
-            $param = unserialize($crm['param']);
+            $param = json_decode($crm['param'],true);
             unset($crm['param']);
             $uInfo['crm'] = $crm;
             $uInfo['param'] = $param;

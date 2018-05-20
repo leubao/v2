@@ -170,7 +170,7 @@ class SetController extends Base{
 		if(IS_POST){
 			$uInfo = Partner::getInstance()->getInfo();
 			//判断新增级别
-			$tlevel = M('Crm')->where(array('id'=>$uInfo['cid']))->field('agent,level')->find();
+			$tlevel = M('Crm')->where(array('id'=>$uInfo['cid']))->field('agent,level,param')->find();
 
 			if($tlevel['level'] == $this->config['level_1']){
 				$level = $this->config['level_2'];
@@ -185,6 +185,7 @@ class SetController extends Base{
 				'itemid'	=> $uInfo['item_id'],
 				'level'		=> $level,
 				'agent'		=> $tlevel['agent'],
+				'param'		=> $tlevel['param']
 			);
 
 			//$status = D('Crm')->add($pinfo);

@@ -163,20 +163,19 @@ $(function(){
 	var tour = $("#tourists").val();
 	var city = $("#citys").val();
 	switch(PRO_CONF.tourists){
-		case 0:
+		case '0':
 		  //关闭默认北京东城区
 		  tour = '1'; city = '35';
 		  break;
-		case 1:
+		case '1':
 		  //省级
 		  if(!tour){ rstr += "请选择客源地!";}
 		  city = '35';
 		  break;
-		case 2:
+		case '2':
 		  if(!tour && !city){ rstr += "请选择客源地!";}
 		  break;
 	}
-	
 	if(!remark){ remark = "空.."; }
     if(rstr !=""){
       layer.msg(rstr);
@@ -292,16 +291,16 @@ $(function(){
 	var tour = $("#tourists").val();
 	var city = $("#citys").val();
 	switch(PRO_CONF.tourists){
-		case 0:
+		case '0':
 		  //关闭默认北京东城区
 		  tour = '1'; city = '35';
 		  break;
-		case 1:
+		case '1':
 		  //省级
 		  if(!tour){ rstr += "请选择客源地!";}
 		  city = '35';
 		  break;
-		case 2:
+		case '2':
 		  if(!tour && !city){ rstr += "请选择客源地!";}
 		  break;
 	}
@@ -407,16 +406,16 @@ $(function(){
 	var tour = $("#tourists").val();
 	var city = $("#citys").val();
 	switch(PRO_CONF.tourists){
-		case 0:
+		case '0':
 		  //关闭默认北京东城区
 		  tour = '1'; city = '35';
 		  break;
-		case 1:
+		case '1':
 		  //省级
 		  if(!tour){ rstr += "请选择客源地!";}
 		  city = '35';
 		  break;
-		case 2:
+		case '2':
 		  if(!tour && !city){ rstr += "请选择客源地!";}
 		  break;
 	}
@@ -590,19 +589,20 @@ $("#preteam").bind("click",function(){
 	var tour = $("#tourists").val();
 	var city = $("#citys").val();
 	switch(PRO_CONF.tourists){
-		case 0:
+		case '0':
 		  //关闭默认北京东城区
 		  tour = '1'; city = '35';
 		  break;
-		case 1:
+		case '1':
 		  //省级
 		  if(!tour){ rstr += "请选择客源地!";}
 		  city = '35';
 		  break;
-		case 2:
+		case '2':
 		  if(!tour && !city){ rstr += "请选择客源地!";}
 		  break;
 	}
+
 	if(car == ''){
 		rstr += "车牌号不能为空!";
 	}

@@ -39,6 +39,7 @@ class OrderController extends Base{
         $this->assign('start_time',$start_time)
         	->assign('end_time',$end_time)->assign('datetype',$datetype);
 		$uinfo = Partner::getInstance()->getInfo();
+
         if($uinfo['groupid'] == '3'){
         	$where =  ['channel_id' =>	$uinfo['cid']];
         }else{
@@ -169,7 +170,7 @@ class OrderController extends Base{
 			$pinfo = $_POST['info'];
 			$info = json_decode($pinfo,true);
 			$oinfo = Operate::do_read('Order',0,array('order_sn'=>$info['sn']),'','',true);
-			if(empty($info) || empty($oinfo)){echo json_encode(array('statusCode' => '300'));}
+			if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300')));}
 			//@印象大红袍
 			/*if($oinfo['status'] == '5'){
 				$status = Order::pay_no_seat($info,$oinfo);

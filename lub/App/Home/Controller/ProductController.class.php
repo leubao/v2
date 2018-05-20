@@ -56,6 +56,7 @@ class ProductController extends Base{
 			 ->assign('area',unserialize($plan['param']))
 			 ->assign('info',$ginfo)
 		     ->assign('group',$uInfo)
+		     ->assign('tour',F('Province'))
 		     ->display();
 	}
 	/*景区售票*/
@@ -187,8 +188,7 @@ class ProductController extends Base{
 			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale'],$ticket);
 		}
 
-		//dump($price);
-
+		
 		$return = array(
 			'statusCode' => '200',
 			'price'		 =>	$price,

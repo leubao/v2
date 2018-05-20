@@ -14,7 +14,7 @@ class Kpi{
 	/**
 	 * 判断是否处于最低额，发送短信通知
 	 * $money 当前余额
-	 */
+	 
 	function if_money_low($money = '',$product_id = '', $crm_id = ''){
 		//查询返利金额
 		//查询账户最低余额
@@ -58,18 +58,34 @@ class Kpi{
 			}
 		}
 		return true;
+	}*/
+	function if_money_low($item_id = '', $crm_id = '', $money = ''){
+		//判断是否开启余额报警
+		$itemConf = cache('ItemConfig');
+		if($itemConf[$item_id]['1']['if_money_low']){
+			//读取配置
+			$money_low = $itemConf[$item_id]['1']['money_low'];
+			if($money_low > $money){
+				Kpi::kpi_to_mgs($crm_id,$money_low);
+			}else{
+				return true;
+			}
+		}else{
+			return true;
+		}
+		
 	}
 	//发送提醒短信
-	function kpi_to_mgs($crm_id = '')
+	function kpi_to_mgs($crm_id,$money)
 	{	
 		if($crm_id){
-			$crm = F('Crm');
-			$crminfo = $crm[$crm_id];
+			$crminfo = D('Crm')->where(['id'=>$crm_id])->field('name,cash,phone')->find();
 			//发送警告,切记录时间
 			$info = [
-				'title'	=>	$crminfo['name'],
-				'money'	=>	$kpimoney['money_low'],
-				'phone'	=>	$crminfo['phone'],
+				'title'	 =>	$crminfo['name'],
+				'money'	 =>	$money,
+				'moneys' => $crminfo['cash'],
+				'phone'	 =>	$crminfo['phone'],
 			];
 			\Libs\Service\Sms::order_msg($info,'11');
 		}
