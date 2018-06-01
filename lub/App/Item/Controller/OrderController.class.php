@@ -97,6 +97,21 @@ class OrderController extends ManageBase{
 				if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
 					$this->erun("订单状态不允许此项操作!");
 				}else{
+					//加载当前打印模板 活动订单的打印模板
+					if(!empty($ginfo['act'])){
+						//获取活动指定打印模板
+						$actPrint = D('Activity')->where(['id'=>$ginfo['act']])->getField('print_tpl');
+						if(empty($actPrint)){$actPrint = $this->procof['print_tpl'];}
+					}else{
+						//读取默认模板
+						$actPrint = $this->procof['print_tpl'];
+					}
+					//读取模板渲染
+					$printTpl = D('Printer')->where(['id'=>$actPrint])->find();
+					if(empty($printTpl)){
+						$this->erun("未找到打印模板!");
+					}
+					$this->assign('printTpl',$printTpl);
 					//传递参数
 					$this->assign('data',$ginfo);
 					if($order_type['status'] == '9'){

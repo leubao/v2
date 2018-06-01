@@ -23,7 +23,8 @@
   <table data-toggle="tablefixed" data-width="100%" data-nowrap="true">
     <thead>
       <tr>
-        <th width="50">编号</th>
+        <th width="50">序号</th>
+        <th align="center">编号</th>
         <th align="center">票型名称</th>
         <th align="center">所属分组</th>
         <th align="center">票型价格</th>
@@ -37,6 +38,7 @@
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
         <td>{$i}</td>
+        <td align="center">{$vo.id}</td>
         <td align="center">{$vo.name}</td>
         <td align="center">{$vo.group_id|groupName}</td>
         <td align="center">{$vo.price} </td>

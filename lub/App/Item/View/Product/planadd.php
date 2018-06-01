@@ -1,3 +1,6 @@
+<style type="text/css" media="screen">
+  .batch{display: none;}
+</style>
 <form class="form-horizontal" action="{:U('Item/Product/planadd',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
   <div class="bjui-pageContent">
   <if condition="$pinfo['type'] eq '1' ">
@@ -71,6 +74,46 @@
       </div>
     </div>
   <elseif condition="$pinfo['type'] eq '2'" />
+    <div class="form-group">
+      <label class="col-sm-2 control-label">添加方式:</label>
+      <input type="radio" name="addType" value="one" checked>  逐条添加
+      <input type="radio" name="addType" value="batch">  批量添加
+    </div>
+    <!--批量新增-->
+    <div class="batch" style="display: none;">
+    <table class="table table-striped table-bordered">
+      <tbody>
+        <tr>
+          <td colspan="2"><label for="j_dialog_operation" class="control-label x90">销售日期:</label>
+            <input type="text" data-toggle="datepicker" name="plantime" class="required batch" value="{$plantime}" data-rule="required"> 至 <input type="text" data-toggle="datepicker" name="plantimes" class="required batch" value="" disabled data-rule="required">
+          </td>
+        </tr>
+        <tr>
+          <td><label for="j_dialog_operation" class="control-label x90">开园时间:</label>
+            <input type="text" class="batch" data-toggle="datepicker" data-pattern='HH:mm:ss' name="starttime" value="{$proconf.plan_start_time}"></td>
+          <td><label for="j_dialog_operation" class="control-label x90">闭园时间:</label>
+            <input type="text" class="batch" data-toggle="datepicker" data-pattern='HH:mm:ss' name="endtime" value="{$proconf.plan_end_time}"></td>
+        </tr>
+        <tr>
+          <td><label for="j_dialog_operation" class="control-label x90">销售配额:</label>
+            <input type="text" name="quotas" class="batch" disabled data-rule="required" value="{$proconf.quotas}" size="5">
+          </td>
+          <td><label for="j_dialog_operation" class="control-label x90">渠道配额:</label>
+            <input type="text" name="quota" class="batch" disabled data-rule="required" value="{$proconf.quota}" size="5">
+          </td>
+        </tr>
+        <tr>
+          <td colspan="2">
+            <label for="j_dialog_operation" class="control-label x90">开始售票:</label>
+            <input class="batch" type="radio" name="start" value="1" checked disabled>  是
+            <input class="batch" type="radio" name="start" value="0" disabled>  否
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    </div>
+    <!--单条新增-->
+    <div class="one">
     <table id="tabledit2" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
             <thead>
                 <tr data-idname="plan[#index#][id]">
@@ -89,7 +132,8 @@
               
             </tbody>
     </table>
-
+    </div>
+  
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingTwo">
@@ -209,6 +253,19 @@
   </div>
 </form>
 <script type="text/javascript">
+
+$('input[type=radio][name=addType]').change(function() {
+    if (this.value == 'batch') {
+      $('.batch').attr('disabled',false);
+      $('.batch').css('display','block')
+      $('.one').css('display','none')
+    }
+    else if (this.value == 'one') {
+      $('.batch').attr('disabled',true);
+      $('.batch').css('display','none')
+      $('.one').css('display','block')
+    }
+});
 //自动有效日期
 $(document).on('afterchange.bjui.datepicker', '.j_custom_issuedate', function(e, data) {
     var pattern = 'yyyy-MM-dd'

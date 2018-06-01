@@ -100,7 +100,7 @@ class ConfigController extends ManageBase {
                 $error = $this->Config->getError();
                 $this->error($error ? $error : "高级配置更新失败！");
             }
-        } else {
+        } else { 
             $addition = include COMMON_PATH . 'Conf/addition.php';
             if (empty($addition) || !is_array($addition)) {
                 $addition = array();

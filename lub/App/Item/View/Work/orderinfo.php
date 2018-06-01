@@ -130,15 +130,44 @@
   </tbody>
   </table>
   <else/>
-  <div class="mt20 scenic_ticket">
-    <volist name="ticket" id="vo">
-      <if condition="$vo['status'] eq '2'">
-      <span class="label label-success">{$vo.ciphertext}</span> 
-      <elseif condition="$vo['status'] eq '9'" />
-       <span class="label label-danger">{$vo.ciphertext}</span> 
-      </if>
+  <table class="table table-bordered table-hover mb25">
+  <thead>
+    <tr>
+      <th>编号</th>
+      <th>票型</th>
+      <th>票面单价</th>
+      <th>结算单价</th>
+      <th>票号</th>
+      <th>订单号/状态/打印次数/更新时间</th>
+    </tr>
+  </thead>
+  <tbody><?php if(empty($data['info']['data']['area'])){ ?>
+
+    <volist name="data['info']['data']" id="vo">
+      <tr>
+        <td>{$i}</td>
+        <td>{$vo.priceid|ticketName}</td>
+        <td>{$vo.price}</td>
+        <td>{$vo.discount}</td>
+        <td>{$vo.ciphertext}</td>
+        <td>{$vo.id|seatOrder=$vo['plan_id'],$vo['areaId']}</td>
+      </tr>
     </volist>
-  </div>
+    <?php } if(!empty($data['info']['data']['area'])){ ?>
+      <volist name="data['info']['data']['area']" id="vo">
+        <tr>
+          <td>{$i}</td>
+          <td></td>
+          <td></td>
+          <td>{$vo.price}</td>
+          <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+      </volist>
+    <?php } ?>
+  </tbody>
+  </table>
   </if>
 </div>
 <input type="hidden" value="{$data.order_sn}" name="sn"></input>

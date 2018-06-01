@@ -6,6 +6,7 @@
           <ul class="nav nav-tabs nav-stacked">
               <li  class="active"><a data-toggle="tab" href="#paytab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  微信支付</a></li>
               <li class=""><a data-toggle="tab" href="#paytab-5" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  支付宝支付</a></li>
+              <li class=""><a data-toggle="tab" href="#paytab-6" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  建设银行</a></li>
           </ul>
           <div class="tabs-content">
               <div id="paytab-4" class="tab-pane active">
@@ -97,6 +98,44 @@
                                             data-on-upload-success="doc_upload_success"
                                             data-icon="cloud-upload"></div>
                                   
+                              </td>
+                            </tr>
+                          </tbody>
+                          </table>
+                        </div>
+                      </fieldset>
+                  </div>
+              </div>
+              <div id="paytab-6" class="tab-pane">
+                  <div class="panel-body">
+                      <fieldset style="height:100%;">
+                        <legend>建设银行</legend>
+                        <div style="height:94%; overflow:hidden;">
+                          <table class="table  table-bordered">
+                          <tbody>
+                            <tr>
+                              <td width="120px">商户柜台代码:</td>
+                              <td><input type="text" name="ccb_posid" class="form-control" value="{$vo.ccb_posid}" size="20" placeholder="商户柜台代码">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">商户代码:</td>
+                              <td><input type="text" name="ccb_merchantid" class="form-control" value="{$vo.ccb_merchantid}" size="20" placeholder="商户代码">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">分行代码:</td>
+                              <td><input type="text" name="ccb_branchid" class="form-control" value="{$vo.ccb_branchid}" size="20" placeholder="分行代码">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">交易码:</td>
+                              <td><input type="text" name="ccb_txcode" class="form-control" value="{$vo.ccb_txcode}" size="20" placeholder="交易码">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">公钥后30位:</td>
+                              <td><input type="text" name="ccb_pub" class="form-control" value="{$vo.ccb_pub}" size="40" placeholder="公钥后30位">
                               </td>
                             </tr>
                           </tbody>

@@ -14,7 +14,10 @@
     <div class="col-lg-12">
       <div class="panel panel-default"> 
         <!-- Default panel contents -->
-        <div class="panel-heading"><span class="glyphicon glyphicon-th-list"></span> 授信额充值      <div class="btn-group btn-group-xs" style="float:right;"> <a href="{:U('Home/Pay/to_up_cash');}" class="btn btn-success" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>充值</a></div></div>
+        <div class="panel-heading"><span class="glyphicon glyphicon-th-list"></span> 授信额充值      <div class="btn-group btn-group-xs" style="float:right;"> 
+          <a href="{:U('Home/Pay/recharge');}" class="btn btn-success" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>网银充值</a>
+          <a href="{:U('Home/Pay/to_up_cash');}" class="btn btn-success" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>充值</a>
+        </div></div>
         <div class="panel-body">
           <form class="form-inline" role="form" action="{:U('Home/Report/index');}" method="post">
             <div class="form-group">

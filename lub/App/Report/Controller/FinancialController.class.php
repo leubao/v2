@@ -285,6 +285,7 @@ class FinancialController extends ManageBase{
 	    $type = I('type') ? I('type') : '1';
 	    $crm_id = I('channel_id');
 	    $types = I('types');
+	    $scope = I('scope');
 	    //传递条件
 	    $this->assign('starttime',$starttime);
         $this->assign('endtime',$endtime);
@@ -303,6 +304,20 @@ class FinancialController extends ManageBase{
         }
         if(!empty($crm_id)){
         	$map['crm_id'] = array('in',$crm_id);
+        }else{
+        	switch ($scope) {
+	        	case '2':
+	        		$map['crm_id'] = ['in',channel_level(16)];
+	        		break;
+	        	case '3':
+	        		$crmid = getChannel($crm_id);
+	        		$map['crm_id'] = ['in',channel_level(17)];
+	        		break;
+	        	case '4':
+	        		$crmid = getChannel($crm_id);
+	        		$map['crm_id'] = ['in',channel_level(18)];
+	        		break;
+	        }
         }
         if($type == '1'){
         	if(!empty($types)){
@@ -321,6 +336,7 @@ class FinancialController extends ManageBase{
         $export_map['report'] = 'top_up';
 		$this->assign('planname',I('plan_name'))
 			->assign('channel_name',I('channel_name'))
+			->assign('scope',$scope)
 			->assign('type',$type)->assign('map',$map)->assign('channel_id',$crm_id)->assign('export_map',$export_map)->display();
 	}
 	/**

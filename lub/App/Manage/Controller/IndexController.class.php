@@ -291,10 +291,21 @@ class IndexController extends ManageBase {
                 $this->assign("name",$_POST["name"]);
             }
         }
-        $map['product_id'] = get_product('id');
+        //是否限制产品
+        $pid = I('get.pid');
+        $ifpro = I('get.ifpro');//1为不限制
+        if(empty($ifpro)){
+            if(!empty($pid)){
+                $map['product_id'] = $pid;
+            }else{
+                $map['product_id'] = get_product('id');
+            }
+        }
+        
+        
         $ifadd = I('ifadd');
         $this->basePage('TicketType',$map,array('id'=>'DESC','status'=>'DESC'),10);
-        $this->assign("ifadd",$ifadd)
+        $this->assign("ifadd",$ifadd)->assign('pid',$pid)->assign('ifpro',$ifpro)
             ->display();
     }
     //获取单票

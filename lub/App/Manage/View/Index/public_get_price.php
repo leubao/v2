@@ -1,9 +1,11 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageHeader">
-    <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Manage/Index/public_get_price',array('ifadd'=>$ifadd));}" method="post">
+    <form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Manage/Index/public_get_price',array('ifadd'=>$ifadd,'ifpro'=>$ifpro,'pid'=>$pid));}" method="post">
         <input type="hidden" name="pageCurrent" value="{$currentPage}" />
         <input type="hidden" name="pageSize" value="{$numPerPage}" />
         <input type="hidden" name="ifadd" value="{$ifadd}" />
+        <input type="hidden" name="ifpro" value="{$ifpro}" />
+        <input type="hidden" name="pid" value="{$pid}" />
         <div class="bjui-searchBar">
             <label>名称：</label><input type="text" value="" name="name" size="10" />&nbsp;
             <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;

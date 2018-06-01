@@ -72,6 +72,7 @@
 </div>
 <input type="hidden" name="sn" value="{$data.order_sn}" />
 <input type="hidden" name="id" value="{$data.id}" />
+<input type="hidden" name="plan" value="{$data.plan_id}"/>
 <div class="bjui-pageFooter">
   <ul>
     <li>

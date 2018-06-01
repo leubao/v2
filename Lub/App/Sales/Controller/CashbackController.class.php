@@ -171,7 +171,15 @@ class CashbackController extends ManageBase{
                 }
                 //已退款或发放失败
                 if(in_array($ret['status'],['FAILED','REFUND'])){
-                    M('Cash')->where(array('sn'=>$ret["mch_billno"]))->setField(['status'=>3,'uptime'=>time()]);
+                    //更新新的单号 remark
+                    $info = M('Cash')->where(['sn'=>$ret["mch_billno"]])->field('id,remark')->find();
+                    $up = [
+                        'status'    =>  3,
+                        'uptime'    =>  time(),
+                        'sn'        =>  get_order_sn($info['id']),
+                        'remark'    =>  $info['remark'].'历史单号:'.$ret["mch_billno"]
+                    ];
+                    M('Cash')->where(array('id'=>$info['id']))->setField($up);
                 }
                 //未领取  或者发放中  都继续写入查询中
                 if(in_array($ret['status'], ['SENDING','SENT','RFUND_ING'])){

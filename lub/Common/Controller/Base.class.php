@@ -10,6 +10,7 @@ namespace Common\Controller;
 use Home\Service\Partner;
 use Home\Service\RBAC;
 use Libs\Service\Operate;
+use Libs\Service\ReturnCode;
 define('IN_HOME', true);
 class Base extends LubTMP {
 
@@ -35,7 +36,9 @@ class Base extends LubTMP {
         //验证登录
         $this->competence();
         $product = I('get.productid',0,intval);
+        //dump(D("Home/Menu")->getMenuList());
         $this->assign("SUBMENU_CONFIG", json_encode(D("Home/Menu")->getMenuList()));
+        $this->assign('menu',D("Home/Menu")->getMenuList());
         $this->assign('USER_INFO', json_encode($this->senuInfo()));
         $this->assign('PRO_CONF',json_encode($this->pro_conf($product)));
         $this->assign('proconf',$this->pro_conf($product));
@@ -179,6 +182,29 @@ class Base extends LubTMP {
         } else {  
             return false;  
         }
+    }
+    /**
+     * @param string $code
+     * @param array $data
+     * @param string $msg
+     * @return array
+     */
+    static public function showReturnCode($status = false, $code = '1002', $data = [], $count = '', $msg = '')
+    {
+        $return_data = [
+            'status' => $status,
+            'code' => '0',
+            'msg' => '未定义消息',
+            'count'=> $code == 0 ? $count : 0,
+            'data' => $code == 0 ? $data : []
+        ];
+        $return_data['code'] = $code;
+        if(!empty($msg)){
+            $return_data['msg'] = $msg;
+        }else if (isset(ReturnCode::$return_code[$code]) ) {
+            $return_data['msg'] = ReturnCode::$return_code[$code];
+        }
+        return json_encode($return_data);
     }
     function checkSubstrs($list,$str){
         $flag = false;

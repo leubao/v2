@@ -6,7 +6,7 @@
     <a type="button" class="btn btn-success" href="{:U('Crm/Index/recharge',array('id'=>$cid,'channel'=>$channel,'groupid'=>$groupid));}" data-toggle="dialog" data-id="crm_recharge" data-mask="true"><i class="fa fa-plus"></i> 充值</a> 
     <a type="button" class="btn btn-danger" href="{:U('Crm/Index/refund',array('id'=>$cid,'channel'=>$channel,'groupid'=>$groupid));}" data-toggle="dialog" data-id="crm_refund" data-mask="true"><i class="fa fa-pencil"></i> 退款</a>
     
-    <a type="button" class="btn btn-primary" href="{:U('Crm/Index/export_credit');}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出订单信息吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
+    <a type="button" class="btn btn-primary" href="{:U('Crm/Index/export_credit',array('id'=>$cid,'channel'=>$channel,'scope'=>$scope,'type'=>$type,'starttime'=>$starttime,'endtime'=>$endtime));}" data-type='get' data-toggle="doexport" data-confirm-msg="确定要根据当前条件导出订单信息吗？"><i class="fa fa-file-excel-o"> 导出Execl</i></a>
   </div>
   <!--帮助 说明--> 
   <div class="btn-group f-right" role="group"> <a type="button" class="btn btn-default" data-placement="bottom" data-toggle="tooltip" onclick="$(this).dialog('refresh');" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>
@@ -32,7 +32,15 @@
         <option value="2" <eq name="type" value="2"> selected</eq>>消费</option>
         <option value="3" <eq name="type" value="3"> selected</eq>>补贴</option>
         <option value="4" <eq name="type" value="4"> selected</eq>>退票</option>
-        <option value="4" <eq name="type" value="5"> selected</eq>>退款</option>
+        <option value="5" <eq name="type" value="5"> selected</eq>>退款</option>
+      </select>
+      &nbsp;
+      <label>范围:</label>
+      <select name="scope" data-toggle="selectpicker">
+        <option value="1" <eq name="scope" value="1"> selected</eq>>全部</option>
+        <option value="2" <eq name="scope" value="2"> selected</eq>>一级商户</option>
+        <option value="3" <eq name="scope" value="3"> selected</eq>>二级商户</option>
+        <option value="4" <eq name="scope" value="4"> selected</eq>>三级商户</option>
       </select>
       &nbsp;
       <button type="submit" class="btn-default" data-icon="search">查询</button>

@@ -106,9 +106,10 @@ class MenuModel extends Model {
                 if ($a['parameter']) {
                     $fu = "?" . $a['parameter'];
                 }
+                $url = $name.'/'.$controller.'/'.$action;
                 //dump($fu);
                 //TODO 临时解决首页链接加参数之后404的问题
-                if($id == '240'){
+                if($url == 'Home/Index/index'){
                 	$array = array(
 	                    "icon" => "",
 	                    "id" => $id,
@@ -127,8 +128,6 @@ class MenuModel extends Model {
 	                    "url" => U("{$name}/{$controller}/{$action}{$fu}", array('menuid' => $id)),
 	                );
                 }
-                
-                //$ret[$id . $name] = $array;
                 $ret[$id] = $array;
                 $child = $this->getTree($a['id'], $id, $Level);
                 //由于后台管理界面只支持三层，超出的不层级的不显示

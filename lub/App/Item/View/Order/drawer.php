@@ -43,9 +43,9 @@ function printTicket(sn,planid){
 			if(data.status == '1'){
 				$.each(selSeat,function(){
 					/*打印设置部分*/
-					CreateFullBill(this);
+					CreateFullBill(this,type);
 					/*设置连续打印*/
-					LODOP.SET_PRINT_PAGESIZE(2,1000,1800,"USER");
+					LODOP.SET_PRINT_PAGESIZE(2,{$printTpl.width},{$printTpl.height},"USER");
 					LODOP.SET_PRINT_MODE("POS_BASEON_PAPER",true);
 					LODOP. PRINT();	
 					/*关闭当前弹窗*/
@@ -60,73 +60,10 @@ function printTicket(sn,planid){
 
 	}
 /*打印页面控制*/
-function CreateFullBill(data) {
+function CreateFullBill(data,type) {
 	LODOP=getLodop(); 
-	//LODOP.SET_PRINT_MODE("PRINT_NOCOLLATE",1);
-	LODOP.ADD_PRINT_TEXT(17,469,66,30,"日期:");
-	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-	LODOP.ADD_PRINT_TEXT(17,530,145,25,data.plantime);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-
-
-	LODOP.ADD_PRINT_TEXT(50,469,66,30,"票价：");
-	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-	LODOP.ADD_PRINT_TEXT(50,530,125,25,data.price+"元");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-
-
-
-	LODOP.ADD_PRINT_TEXT(80,469,66,30,"人数:");
-	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-    LODOP.ADD_PRINT_TEXT(80,530,100,25,data.number);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-
-	LODOP.ADD_PRINT_TEXT(110,469,66,30,"票类:");
-	LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",13);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-	LODOP.ADD_PRINT_TEXT(110,530,112,25,data.priceName);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",12);
-	LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-
-
-	LODOP.ADD_PRINT_BARCODE(137,497,100,100,"QRCode",data.sn);
-	LODOP.SET_PRINT_STYLEA(0,"FontSize",127);
-	LODOP.SET_PRINT_STYLEA(0,"ShowBarText",0);
-	LODOP.SET_PRINT_STYLEA(0,"GroundColor","#FFFFFF");
-	LODOP.SET_PRINT_STYLEA(0,"QRCodeErrorLevel","H");
-
-	//LODOP.ADD_PRINT_TEXT(232,491,143,23,data.remark);
-	LODOP.ADD_PRINT_TEXT(232,491,143,23,data.sns);
-	var type = data.remark_type;
-	switch(type){
-		case '1':
-			/*市民票*/
-			LODOP.ADD_PRINT_RECT(60,416,180,50,0,2);
-			LODOP.ADD_PRINT_TEXT(72,431,172,40,"高铁免票转赠无效");
-			LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-			LODOP.SET_PRINT_STYLEA(0,"FontSize",20);
-			LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-			break;
-		case '2':
-			/*市民票*/
-			LODOP.ADD_PRINT_RECT(60,416,180,50,0,2);
-			LODOP.ADD_PRINT_TEXT(72,431,172,40,"高铁优惠半价票");
-			LODOP.SET_PRINT_STYLEA(0,"FontName","黑体");
-			LODOP.SET_PRINT_STYLEA(0,"FontSize",20);
-			LODOP.SET_PRINT_STYLEA(0,"Bold",1);
-			break;
-	}
-	}
+	{$printTpl.info}
+}
 </script>
 </body>
 </html>

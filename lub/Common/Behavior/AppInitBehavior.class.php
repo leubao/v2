@@ -59,7 +59,7 @@ class AppInitBehavior {
         define("LUB_APPNAME", C("LUB_APPNAME"));
         //MODULE_ALLOW_LIST配置
        // $moduleList = cache('Module');
-        $moduleAllowList = array('Manage','Item', 'Home', 'Api', 'Cloud', 'Order', 'Crm', 'Wechat', 'Cron', 'Report','Apps','Sales');
+        $moduleAllowList = array('Manage','Item', 'Home', 'Api', 'Cloud', 'Order', 'Crm', 'Wechat', 'Cron', 'Report','Apps','Sales','Channel');
         /*
         foreach ($moduleList as $rs) {
             if ($rs['disabled']) {

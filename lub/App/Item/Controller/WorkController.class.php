@@ -455,9 +455,8 @@ class WorkController extends ManageBase{
 			}else{
 				
 				$info = $data['info'];
-				//dump($data['info']);
 				//生成打印URl
-				$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2);
+				$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2,$info['activity']);
 				$this->assign('data',$info)
 					->assign('type',$info['product_type'])
 					->assign('area',$data['area'])
@@ -1011,6 +1010,184 @@ class WorkController extends ManageBase{
 		$this->assign('data',$seat)
 			->assign('sale',unserialize($seat['sale']))
 			->display();
+	}
+	/**
+	 * @DateTime 2018-05-31
+	 * 转单，景区综合套票时，遇到退单边的情况，需要手动补充差价，按单门票转换
+	 */
+	function turn_single(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			$priceid = I('ticket_id');
+			//读取要转的票型，结合销售计划转换
+			$plan = F('Plan_'.$pinfo['plan']);
+			if(empty($plan)){
+				$this->erun("销售计划");
+			}
+			if((int)$priceid === (int)$pinfo['old_ticket']){
+				$this->erun("不能转换为相同票型");
+			}
+			
+			try{ 
+				$model = new Model();
+				$model->startTrans();
+				$createtime = time();
+				$ticketType = F('TicketType'.$plan['product_id']);
+				//读取订单历史内容
+				$oinfo = D('OrderData')->where(['order_sn'=>$pinfo['sn']])->getField('info');
+				$oinfo = unserialize($oinfo);
+				$map = [
+					'plan_id'  => $pinfo['plan'],
+					'order_sn' => $pinfo['sn'],
+					'price_id' => $pinfo['old_ticket']	
+				];
+				//获取列表
+				$list = D($plan['seat_table'])->where($map)->limit($pinfo['number'])->field('id,price_id,sale')->select();
+				$hTicket = $ticketType[$pinfo['old_ticket']];
+				$nTicket = $ticketType[$priceid];
+				if($hTicket['product_id'] <> $nTicket['product_id']){
+					$model->rollback();
+					$this->erun("暂不支持不同票型间的装换");
+					return false;
+				}
+				//读取活动
+				$ainfo = D('Activity')->where(['id'=>$pinfo['act']])->field('id,type,param')->find();
+				$aparam = json_decode($ainfo['param'],true);
+
+				foreach ($list as $k => $v) {
+					$hSale = unserialize($v['sale']);
+					$remark = print_remark($nTicket['remark'],$plan['product_id']);
+					$sale = [
+						'plantime'	=>	$hSale['plantime'],
+						'games'		=>	$hSale['games'],
+						'product_name'=>$aparam['info']['price']['name'],
+						'priceid'=>$priceid,
+						/*
+						'priceName' =>	$aparam['info']['price']['name'],
+						'price'		=>	$aparam['info']['price']['price'],
+						'discount'	=>	$aparam['info']['price']['discount'],*/
+
+						'priceName' =>	$aparam['info']['price']['name'],
+						'price'		=>	$nTicket['price'],
+						'discount'	=>	$nTicket['discount'],
+						'remark_type' => $remark['remark_type'],
+						'remark'=>$remark['remark'],
+					];
+					$updata[$v['id']] = [
+						'id'	=>	$v['id'],
+						'sale'	=>	$sale
+					];
+					$up = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(['id'=>$v['id']])->setField(['sale'=>serialize($sale),'price_id'=>$priceid]);
+					if(!$up){
+						$model->rollback();//事务回滚
+						$this->erun("票型更新失败");
+						return false;
+					}
+				}
+				//计算新金额
+				$nMoney = $nTicket['discount']*$pinfo['number'];
+				$hMoney = $hTicket['discount']*$pinfo['number'];
+
+				$cMoney = abs((int)$nMoney - (int)$hMoney);
+				if($cMoney <> 0){
+					//读取该笔订单扣款记录，主要是获取扣款条件
+					$oPayMap = D('CrmRecharge')->where(['order_sn'=>$pinfo['sn'],'type'=>2])->field('crm_id')->select();
+					$oPayMapId = array_unique(array_column($oPayMap,'crm_id'));
+					if($nMoney > $hMoney){
+						//扣款操作
+						$crmData = array('cash' => array('exp','cash-'.$cMoney),'uptime' => $createtime);
+						$money = $oinfo['subtotal']+$cMoney;
+						$payType = 2;
+					}else{
+						//返款操作
+						$crmData = array('cash' => array('exp','cash+'.$cMoney),'uptime' => $createtime);
+						$money = $oinfo['subtotal']-$cMoney;
+						$payType = 4;
+					}
+					
+					$c_pay = $model->table(C('DB_PREFIX')."crm")->where(['id'=>['in',implode(',',$oPayMapId)]])->setField($crmData);
+					//TODO 不同级别扣款金额不同
+					foreach ($oPayMapId as $p => $l) {
+						$data[] = array(
+							'cash'		=>	$cMoney,
+							'user_id'	=>	get_user_id('id'),
+							'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+							'addsid'	=>	1,
+							'crm_id'	=>	$l,
+							'createtime'=>	$createtime,
+							'type'		=>	$payType,
+							'order_sn'	=>	$pinfo['sn'],
+							'balance'	=>  balance($l,1),
+							'tyint'		=>	1,//客户类型1企业4个人
+							'remark'	=> '换票差价'
+						);
+					}
+					$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($data);
+					if($c_pay == false || $c_pay2 == false){
+						$model->rollback();//事务回滚
+						$this->erun("资金操作失败");
+						return false;
+					}
+				}
+				foreach ($oinfo['data'] as $ke => $va) {
+					$upTicket = $updata[$va['id']];
+					if($upTicket){
+						//dump($upTicket);
+						$dataList[] = [
+							'ciphertext' => $va['ciphertext'],
+					        'priceid' => $priceid,
+					        'price' => $upTicket['sale']['price'],
+					        'discount' => $upTicket['sale']['discount'],
+					        'id' => $va['id'],
+					        'idcard' => $va['idcard'],
+					        'plan_id' => $va['plan_id'],
+					        'child_ticket' => $va['child_ticket']
+						]; 
+
+					}else{
+						$dataList[] = $va;
+					}
+					$upTicket = '';
+				}
+				//更新订单列表的内容
+				$newData = [
+					'subtotal'	=> $money,
+					'checkin'	=> $oinfo['checkin'],
+					'data' 		=> $dataList,
+					'crm' 		=> $oinfo['crm'],
+					'pay' => $oinfo['pay'],
+					'param'	=> $oinfo['param'],
+					'child_ticket'=>$oinfo['child_ticket']
+				];
+				$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$pinfo['sn']))->setField('info',serialize($newData));
+				//改变订单状态
+				$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$pinfo['sn']))->setField(['money'=>$money,'uptime'=>$createtime]);
+				
+				if($o_status && $status){
+					$model->commit();
+					$this->srun('办理成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				}else{
+					$this->erun("转换失败!");
+				}
+			}catch(Exception $e){ 
+				$this->erun("转换失败:".$e);
+			}
+			
+		}else{
+			//列出订单门票详情
+			$ginfo = I('get.');
+			if(!empty($ginfo['sn'])){
+				$oinfo = D('OrderData')->where(['order_sn'=>$ginfo['sn']])->field('order_sn,info')->find();
+				$oinfo['info'] = unserialize($oinfo['info']);
+				foreach ($oinfo['info']['data'] as $k => $v) {
+					$v['title'] = ticketName($v['priceid'],1);
+					$ticket[$v['priceid']] = $v;
+				}
+				$this->assign('oinfo',$oinfo)->assign('sn',$ginfo['sn'])->assign('ticket',$ticket)->assign('activity',$oinfo['info']['param'][0]['activity']);
+			}
+			
+			$this->display();
+		}
 	}
 	//年卡办理
 	function year_card(){

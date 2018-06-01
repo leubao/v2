@@ -53,7 +53,7 @@ body {
 <body>
 <div class="container">
   <div class="col-md-4 col-xs-12 col-md-offset-4">
-	<h3 class="title">极地海洋公园渠道预订系统</h3>
+  	<h3 class="title">清龙瀑布渠道预订系统</h3>
     <form class="form-signin" role="form" action="{:U('Home/Public/tologin');}" method="post">
   	  <input type="hidden" name="type" value="1">
       <input type="text" class="form-control" name="username" placeholder="用户名或手机号码" required autofocus>

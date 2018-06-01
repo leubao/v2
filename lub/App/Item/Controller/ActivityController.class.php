@@ -69,6 +69,22 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		//多产品套票
+	 		if($pinfo['type'] == '5'){
+	 			//判断是否选择
+	 			foreach ($pinfo['product'] as $k => $v) {
+	 				$packages[] = [
+	 					'product'	=>	$v,//产品ID
+	 					'ticket'	=>	$pinfo['ticket_'.$v],//打包的票型ID
+	 				];
+	 			}
+	 			$info['packages'] = $packages;
+	 			$info['price'] = [
+	 				'name'	=>	$pinfo['price_name'],
+	 				'price' =>  $pinfo['price'],
+	 				'discount' => $pinfo['discount']
+	 			];
+	 		}
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);
@@ -96,13 +112,15 @@ class ActivityController extends ManageBase{
 				//产品信息
 				$pinfo = M('Product')->where(array('id'=>$product_id))->find();
 				//判断产品类型
-				if($pinfo['type'] == '2'){
-					//景区3
-				}else{
+				if($pinfo['type'] == '1'){
 					//剧院 座椅区域信息
 					$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->select();
 					$this->assign('seat',$seat);
 				}
+				$prolist = M('Product')->where(['status'=>1])->field('id,name')->select();
+				$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
+				$this->assign('printer',$printer);
+				$this->assign('prolist',$prolist);
 				$this->assign('product_id',$product_id)
 				     ->assign('pinfo',$pinfo)
 					 ->display();

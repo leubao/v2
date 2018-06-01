@@ -27,6 +27,20 @@ class PlanModel extends Model{
 			$endtime = strtotime($data['endtime']);
 			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$data['games'])){return false;}
 		}
+		if(in_array($data['product_type'],['2','3'])){
+			//批量新增
+			if($data['addType'] == 'batch'){
+				$list = getDateFromRange($data['plantime'],$data['plantimes']);
+				foreach ($list as $k => $v) {
+					$plan[] = [
+						'plantime' =>	$v,
+						'quota'	   =>	$data['quota'],
+						'quotas'   =>	$data['quotas']
+					];
+				}
+				$data['plan'] = $plan;
+			}
+		}
 		$info = $this->structure_data($data,$plantime,$starttime,$endtime);
 		if(count($info) == 1){
 			$planid = $this->add($info['0']);
@@ -77,6 +91,11 @@ class PlanModel extends Model{
 			);
 			$info[] = array_merge($infos,$infoAll);
 		}elseif($data['product_type'] == '2'){
+			if($data['start']){
+				$status = '2';
+			}else{
+				$status = '3';
+			}
 			//景区
 			foreach ($data['plan'] as $key => $value) {
 				//判断同一天的越过
@@ -100,7 +119,7 @@ class PlanModel extends Model{
 					'starttime'	=> strtotime($value['starttime']),
 					'endtime'	=> strtotime($value['endtime']),
 					'product_type' => $data['product_type'],
-					'status' => '3',
+					'status' => $status,
 					'is_sales' => 1,
 					'user_id' => get_user_id(),
 					'createtime' => time(),

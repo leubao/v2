@@ -41,8 +41,8 @@
         <td>{$data.level}</td>
       </tr>
       <tr>
-        <td>QQ</td>
-        <td></td>
+        <td>编号</td>
+        <td>{$data.incode}</td>
         <td>邮箱</td>
         <td></td>
       </tr>

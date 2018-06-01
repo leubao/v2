@@ -17,14 +17,6 @@
     <input type="text" name="address" class="form-control required" data-rule="required;" size="40" placeholder="地址">
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">银行账号:</label>
-    <input type="text" name="bank_account" class="form-control required" data-rule="required;" size="40" placeholder="银行账号">
-  </div>
-  <div class="form-group">
-    <label class="col-sm-2 control-label">开户行:</label>
-    <input type="text" name="bank" class="form-control required" data-rule="required;" size="40" placeholder="开户行">
-  </div>
-  <div class="form-group">
     <label class="col-sm-2 control-label">联系人:</label>
     <input type="text" name="contacts" class="form-control required" data-rule="required;" size="25" placeholder="联系人">
   </div>
@@ -50,22 +42,26 @@
   </select>
   </div>
   <div class="form-group">
-    <label class="col-sm-2 control-label">状态:</label>
-    <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
-	    <option value="">状态</option>
-	    <option value="1" selected>启用</option>
-	    <option value="0">禁用</option>
-	</select>
-  </div>
-  <div class="form-group">
     <label class="col-sm-2 control-label">门票打印:</label>
     <input type="radio" name="prints" data-toggle="icheck" value="1" <eq name="vo['prints']" value="1"> checked</eq> data-label="开启&nbsp;">
     <input type="radio" name="prints" data-toggle="icheck" value="0" <eq name="vo['prints']" value="0"> checked</eq> data-label="关闭">
   </div>
+
   <div class="form-group">
     <label class="col-sm-2 control-label">补贴方式:</label>
     <input type="radio" name="agent" data-toggle="icheck" value="1" <eq name="vo['rebate']" value="1"> checked</eq> data-label="授信额&nbsp;">
     <input type="radio" name="agent" data-toggle="icheck" value="2" <eq name="vo['rebate']" value="2"> checked</eq> data-label="现金">
+  </div>
+   <div class="form-group">
+    <label class="col-sm-2 control-label">支付方式:</label>
+    <input type="checkbox" name="isPay" data-toggle="icheck" value="1" <eq name="vo['isPay']" value="1"> checked</eq> data-label="授信额&nbsp;">
+    <input type="checkbox" name="isPay" data-toggle="icheck" value="2" <eq name="vo['isPay']" value="2"> checked</eq> data-label="窗口支付&nbsp;">
+    <input type="checkbox" name="isPay" data-toggle="icheck" value="3" <eq name="vo['isPay']" value="3"> checked</eq> data-label="在线支付">
+  </div>
+  <div class="form-group">
+    <label class="col-sm-2 control-label">退票审核:</label>
+    <input type="radio" name="refund" data-toggle="icheck" value="1" <eq name="vo['refund']" value="1"> checked</eq> data-label="无审核&nbsp;">
+    <input type="radio" name="refund" data-toggle="icheck" value="2" <eq name="vo['refund']" value="2"> checked</eq> data-label="审核">
   </div>
 </div>
 <input type="hidden" name="groupid" value="{$groupid}">

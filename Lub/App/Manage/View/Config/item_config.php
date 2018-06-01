@@ -27,6 +27,15 @@
                           </td>
                         </tr>
                         <tr>
+                          <td width="120px">低授信额告警:</td>
+                          <td><input type="radio" name="if_money_low" value="1" <eq name="vo.if_money_low" value="1"> checked</eq>> 开启
+                            <input type="radio" name="if_money_low" value="0" <eq name="vo.if_money_low" value="0"> checked</eq>> 关闭</td>
+                        </tr>
+                        <tr>
+                          <td width="120px">告警金额:</td>
+                          <td><input type="text" name="money_low" value="{$vo.money_low}" size="40"></td>
+                        </tr>
+                        <tr>
                           <td width="120px">分销补贴方式:</td>
                           <td><input type="radio" name="rebate_pay" value="1" <eq name="vo.rebate_pay" value="1"> checked</eq>> 企业付款到个人
                             <input type="radio" name="rebate_pay" value="2" <eq name="vo.rebate_pay" value="2"> checked</eq>> 微信企业红包</td>

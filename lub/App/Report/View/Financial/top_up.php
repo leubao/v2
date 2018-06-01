@@ -11,7 +11,14 @@
     <label>至</label>
     <input type="text" size="11" name="endtime" data-toggle="datepicker"  value="{$endtime}">
     &nbsp;
-   
+   <label>范围:</label>
+      <select name="scope" data-toggle="selectpicker">
+        <option value="1" <eq name="scope" value="1"> selected</eq>>全部</option>
+        <option value="2" <eq name="scope" value="2"> selected</eq>>一级商户</option>
+        <option value="3" <eq name="scope" value="3"> selected</eq>>二级商户</option>
+        <option value="4" <eq name="scope" value="4"> selected</eq>>三级商户</option>
+      </select>
+    &nbsp;
     <input type="hidden" name="channel.id" value="{$channel_id}">
     <input type="text" name="channel.name" readonly value="{$channel_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel',array('ifadd'=>2));}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
     &nbsp;
@@ -25,6 +32,7 @@
          <option value="5"  <if condition="$map['type'] eq '5'">selected</if>>提现</option>
       </select>
   	&nbsp;
+    
     <select class="required" name="type" data-toggle="selectpicker">
       <option value="1" <if condition="$type eq '1'">selected</if>>明细</option>
       <option value="2" <if condition="$type eq '2'">selected</if>>汇总</option>

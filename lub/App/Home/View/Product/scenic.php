@@ -169,7 +169,12 @@
           <ul class="nav nav-tabs" role="tablist">
           <if condition="$uinfo['groupid'] neq '3'">
             <li class="active"><a href="#balance" role="tab" data-toggle="tab">余额支付</a></li>
+            <if condition="in_array('2',explode(',',$uinfo['param']['ispay']))">
+            <li><a href="#window" role="tab" data-toggle="tab">窗口现付</a></li>
+            </if>
+            <if condition="in_array('3',explode(',',$uinfo['param']['ispay']))">
             <li><a href="#silver" role="tab" data-toggle="tab">个人网银</a></li>
+            </if>
             <!-- 
             <li><a href="#firm" role="tab" data-toggle="tab">企业网银</a></li>
             -->
@@ -193,7 +198,20 @@
               
               <button type="button" class="btn btn-success" id="balancePay" data-loading-text="正在提交..." data-toggle="modal">立即支付</button>
             </div>
-           
+            <if condition="in_array('2',explode(',',$uinfo['param']['ispay']))">
+            <div class="tab-pane" id="window">
+              <div class="form-group">
+                <label class="radio-inline">
+                    <input type="radio" name="pay_type" id="pay_type" value="1" checked> 现金支付
+                 </label>
+                 <div class="form-group">
+                 </div>
+                 <input type="radio" name="seat_type" id="seat_type" value="1" checked>
+                 <button type="button" class="btn btn-success" id="govPay" data-loading-text="正在提交..." data-toggle="modal">立即预订</button>
+              </div>
+            </div>
+            </if>
+            <if condition="in_array('3',explode(',',$uinfo['param']['ispay']))">
             <div class="tab-pane" id="silver">
               <form action="{:U('Home/Pay/index')}" method="post" target="_blank" id="form-pay">
                 <input type="hidden" id="pay_money" name="money" value="" readonly>
@@ -207,6 +225,7 @@
                 <button type="button" class="btn btn-success" id="webpay">立即支付</button>
               </form>
             </div>
+            </if>
             <else />
             <div class="tab-pane active" id="ious">
             <p></p>

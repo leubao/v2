@@ -48,12 +48,148 @@ class SharingController extends Controller {
     //微信支付手动查询
     public function pay_status()
     {
-        //14770962598
+        //$time = strtotime('20180301');
+       // D('TeamOrder')->where(['createtime'=>['gt',$time]])->delete();
+        /**
+        $list = D('Order')->where(['createtime'=>['gt',$time]])->field('id')->select();
+        foreach ($list as $key => $value) {
+            D('Order')->where(['id'=>$value['id']])->delete();
+            D('OrderData')->where(['oid'=>$value['id']])->delete();
+        }**/
+        $work = 'a:8:{s:5:"appid";s:5:"14127";s:6:"appkey";s:32:"df50da2a0ac925733f739dd9b4aa34c5";s:4:"plan";s:3:"287";s:2:"sn";s:32:"e63c9fbebe7c834d40a60df3eac279c2";s:5:"money";s:4:"0.10";s:5:"oinfo";a:1:{i:0;a:4:{s:5:"price";s:4:"0.10";s:6:"areaId";s:2:"10";s:7:"priceid";s:3:"115";s:3:"num";s:1:"1";}}s:3:"crm";a:2:{s:5:"phone";s:11:"18631451216";s:7:"contact";s:6:"周靖";}s:5:"param";a:1:{s:6:"remark";s:8:"官网PC";}}';
+        $return = unserialize($work);
+        dump($return);
+    }
+    /**
+     * 系统更新
+     * http://ticket.leubao.com/api.php?m=Sharing&a=upsystem
+     */
+    function upsystem(){
+        //更新产品识别码
+        $plist = D('Product')->field('id,createtime')->select();
+        foreach ($plist as $k => $v) {
+           $idCode = getGoodsNumber($v['id'],date('Ymd',$v['createtime']));
+           D('Product')->where(['id'=>$v['id']])->setField('idCode',$idCode);
+        }
+        //更新商户识别码
+        $clist = D('Crm')->field('id,create_time')->select();
+        foreach ($clist as $k => $v) {
+           $incode = date('Ymd',$v['create_time']).str_pad($v['id'],4,mt_rand(1, 999999), STR_PAD_LEFT);
+           D('Crm')->where(['id'=>$v['id']])->setField('incode',$incode);
+        }
     }
     public function rebate()
     {   
-        D('Cash')->where(['status'=>3,'datetime'=>'20180324'])->setField('status',1);
-        $list = D('Cash')->where(['status'=>3,'datetime'=>'20180325'])->field('openid,money')->select();
+        /************crm param json 转换 start**********/
+        $list = D('Crm')->field('id,param,f_agents')->select();
+        foreach ($list as $k => $v) {
+           $param = unserialize($v['param']);
+           if(!empty($param)){
+                D('Crm')->where(['id'=>$v['id']])->setField('param',json_encode($param));
+           }else{
+                //读取父及设置参数
+                $tlevel = M('Crm')->where(array('id'=>$v['f_agents']))->field('param')->find();
+                D('Crm')->where(['id'=>$v['id']])->setField('param',$tlevel['param']);
+           }
+          
+        }
+        /************crm param json 转换 end**********/
+        /*
+        $h = D('CrmRecharge')->where(['crm_id'=>3,'type'=>2])->sum('cash');
+        dump($h);
+        $c = D('CrmRecharge')->where(['crm_id'=>3,'type'=>1])->sum('cash');
+        dump($c);
+        $r = D('CrmRecharge')->where(['crm_id'=>3,'type'=>5])->sum('cash');
+        dump($r);
+
+        $payLink = crm_level_link(43);
+        //判断链条中所有人余额充足
+        
+        //统一扣除订单金额，每天返利
+        $info['money'] = '99';
+        //渠道商客户
+        $db = M('Crm');
+        $payWhere = [
+            'id'    =>  ['in', implode(',',$payLink)],
+            'cash'  =>  ['EGT',$info['money']]
+        ];
+        $balanceCount = $db->where($payWhere)->field('id')->count();
+        
+        if((int)$balanceCount === (int)count($payLink)){
+            echo count($payLink).'bak';
+        }else{
+            echo $balanceCount;
+        }*/
+        //$crm = D('Crm')->where(array('id'=>['in',implode(',',['1','43'])],'cash'=>array('EGT',$info['money'])))->field('id')->count();
+        //dump($crm);
+        /*
+        $url = 'https://www.iesdouyin.com/share/video/6533460370089053448/';  //这儿填页面地址
+        $info=file_get_contents($url);
+        //preg_match('|<title>(.*?)<\/title>|i',$info,$m);
+        //echo $m[1];
+        dump($info);
+        //preg_match_all('|<script>(.*?)<\/script>|i',$info,$m);
+        //dump($m);var data = 
+        //preg_match_all("/(?<=contacts\":)\s*\[\s*\{(.*?)\]/", $info, $matches);
+        preg_match('/var data = "(\d+)"/',$info,$m);
+        dump($m);
+        //session('user','12');
+        //dump(session('user'));
+
+        //$provinces = json_decode($b,true);
+        $province = D('province')->select();
+        foreach ($province as $o => $e) {
+            if($e['fid'] > 0){
+               $city[$e['fid']][$e['id']] = $e; 
+            }
+            
+            /*
+            $data[] = [
+                'id'  => $e['id'],
+                'name'=> $e['name'],
+                'city'=> $city
+            ]; *
+        }
+        foreach ($province as $o => $e) {
+
+            if($e['fid'] == 0){
+                if(empty($city[$e['id']])){
+                    echo "string";
+                    $city[$e['id']] = [
+                        'id'  => $e['id'],
+                        'name'=> $e['name']
+                    ];
+                }
+                $data[$e['id']] = [
+                    'id'  => $e['id'],
+                    'name'=> $e['name'],
+                    'city'=> $city[$e['id']]
+                ];
+            }
+        }
+        /*dump($f);
+        foreach ($provinces['provinces'] as $key => $value) {
+            
+            foreach ($value['city'] as $k => $v) {
+                $fid = $f[$value['id']];//dump($fid);
+                $data[] = [
+                    'countries' => 1,
+                    'fid'  => $fid['id'],  
+                    'code' => $v['id'],
+                    'name' => $v['name']
+                ];
+            }
+            
+        }*/
+        //D('province')->addAll($data);
+        //dump($data);//dump($city);
+       // dump(json_decode($b,true));
+
+
+
+        /*
+        D('Cash')->where(['status'=>3,'datetime'=>'20180408'])->setField('status',1);
+        $list = D('Cash')->where(['status'=>3,'datetime'=>'20180409'])->field('openid,money')->select();
         foreach ($list as $key => $value) {
             if((int)$value['money'] > 200){
                 //大于200拆分多个红包
@@ -82,6 +218,6 @@ class SharingController extends Controller {
             }
             $mon += $value['money'];
         }
-        echo $mon;
+        echo $mon;*/
     }
 }

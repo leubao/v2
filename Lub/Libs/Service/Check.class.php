@@ -8,6 +8,7 @@
 // +----------------------------------------------------------------------
 namespace Libs\Service;
 use Common\Model\Model;
+use Payment\Client\Query;
 class Check{
 	/**
 	 * 补贴报表
@@ -41,6 +42,7 @@ class Check{
 			}
 		}
 		load_redis('set','check_rebate',date('Y/m/d H:i:s')."||".$count);
+		return true;
 	}
 	//退票订单 返款情况、补贴情况
 	function check_refund(){
@@ -143,7 +145,15 @@ class Check{
 		                }
 		                //已退款或发放失败
 		                if(in_array($ret['status'],['FAILED','REFUND'])){
-		                    M('Cash')->where(array('sn'=>$ret["mch_billno"]))->setField(['status'=>3,'uptime'=>time()]);
+		                    //更新新的单号 remark
+		                    $info = M('Cash')->where(['sn'=>$ret["mch_billno"]])->field('id,remark')->find();
+		                    $up = [
+		                        'status'    =>  3,
+		                        'uptime'    =>  time(),
+		                        'sn'        =>  get_order_sn($info['id']),
+		                        'remark'    =>  $info['remark'].'历史单号:'.$ret["mch_billno"]
+		                    ];
+		                    M('Cash')->where(array('id'=>$info['id']))->setField($up);
 		                    $upLog = [
 		                    	'status'		=>	5,
 		                    	'update_time'	=>	time(),

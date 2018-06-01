@@ -25,7 +25,7 @@
 </div>
 
 <div class="bjui-pageContent tableContent" id="w_channel_less_print">
-<div class="visible-print-block">
+<div class="visible-print-block w900">
     <h3 align="center">渠道商退减统计</h3>
     <span class="pull-left mb10">统计日期：{$starttime} 至 {$endtime}</span>
     <span class="pull-right mb10">打印时间:<?php echo date('Y年m月d日 H:i:s');?></span>
@@ -35,24 +35,17 @@
   <tr>
     <th align="center" width="40px">编号</th>
     <th align="center" width="100px">渠道商名称</th>
-    <th align="center" width="70px">核减订单数</th>
-    <th align="center" width="70px">累计核减数</th>
-    <th align="center" width="40px">退单数</th>
-    <th align="center" width="90px">退减比</th>
+    <th align="center" width="70px">数量</th>
     <th width="90px" align="center">备注</th>
   </thead>
   <tbody>
-  <volist name="data" id="vo">
-  <tr>
-    <td align="center">{$i}</td>
-    <td align="center">{$vo.channel_id|crmName}</td>
-    <td align="center">{$vo.subtract}</td>
-    <td align="center">{$vo.number}</td>
-    <td align="center">{$vo.refund}</td>
-    <td align="center">{$vo.ratio}%</td>
-    
-    <td></td>
-  </tr>
+  <volist name="data" id="vo">     
+      <tr>
+        <td align="center">{$i}</td>
+        <td align="center">{$vo.crm_id|crmName}</td>
+        <td align="center">{$vo.number}</td>
+        <td></td>
+      </tr>
   </volist>
   </tbody>
 </table>

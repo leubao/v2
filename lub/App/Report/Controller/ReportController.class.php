@@ -306,10 +306,29 @@ class ReportController extends ManageBase{
         if (!empty($start_time) && !empty($end_time)) {
             $start_time = strtotime($start_time);
             $end_time = strtotime($end_time);
-            $map['createtime'] = $maps['createtime'] =array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
-            //查询所有一级渠道商
-			$product_id = get_product('id');
+            $map['createtime'] = $maps['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+			$maps['status'] = array('in','1,3');
+			//$maps['product_id'] = get_product('id');
+			$list = M('TicketRefund')->where($maps)->field('id,number,crm_id,plan_id')->select();
+			/*foreach ($list as $k => $v) {
+				$data[$v['plan_id']][] = $v;
+				$data[$v['plan_id']][$v['crm_id']] = [
+					'crm_id'	=>	$v['crm_id'],
+					'plan_id'	=>	$v['plan_id'],
+					'number'	=>	$data[$v['plan_id']][$v['crm_id']]['number'] + $v['number']
+				];
+				$data[$v['plan_id']]['number'] = count($data[$v['plan_id']]);
+			}*/
+			foreach ($list as $k => $v) {
+				$data[$v['crm_id']] = [
+					'crm_id'	=>	$v['crm_id'],
+					'plan_id'	=>	$v['plan_id'],
+					'number'	=>	$data[$v['crm_id']]['number'] + $v['number']
+				];
+			}
+			/*
 			$crm = F('Crm_level'.$product_id);
+			
 			foreach ($crm as $key => $value) {
 				//根据一级渠道商查询旗下所有渠道商
 				$map['channel_id'] = $maps['crm_id'] = array('in',agent_channel($value['id'],2));
@@ -317,10 +336,10 @@ class ReportController extends ManageBase{
 				//查询每个渠道商 退单数 和核减数
 				//操作过核减的订单数
 				$channel_id = $value['id'];
-				$subtract = M('Order')->where($map)->count();//dump($map);
+				$subtract = M('Order')->where($map)->count();dump($map);
 				$number = M('Order')->where($map)->sum('subtract_num');
 				$maps['status'] = array('in','1,3');
-				//退单数
+				/*退单数
 				$refund	= M('TicketRefund')->where($maps)->count();
 				if(!empty($subtract) || !empty($number) || !empty($refund)){
 					$info[$value['id']] = array(
@@ -331,9 +350,9 @@ class ReportController extends ManageBase{
 						'ratio'			=> round(100*($subtract/$refund),2),
 					);
 				}
-			}
+			}*/
         }
-		$this->assign('data',$info)->display();
+		$this->assign('data',$data)->display();
 	}
 	//出票员报表
 	function drawer_report(){

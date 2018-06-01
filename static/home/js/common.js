@@ -146,7 +146,13 @@ function getActivtyPrice(plan,actid,type) {
                                 +"<td align='center'>"+ticket.area_num+"</td>"
                                 +"</tr>";
                         }
-                        
+                        if(type == '5'){
+                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                                +"<td align='center'>"+ticket.name+"</td>"
+                                +"<td>"+show_price+"</td>"
+                                +"<td align='center'>"+ticket.area_num+"</td>"
+                                +"</tr>";
+                        }
                         
                     });
                     $("#tro").html(content); 

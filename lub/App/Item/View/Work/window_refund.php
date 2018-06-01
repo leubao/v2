@@ -7,7 +7,6 @@
     <div class="bjui-searchBar">
       <label>订单号:</label>
       <input type="text" value="{$sn}" name="sn" class="form-control" size="20" placeholder="单号">
-      
       &nbsp;
       <button type="submit" class="btn-default" data-icon="search">查询</button>
       &nbsp; <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a></div>
@@ -97,12 +96,12 @@
     <tbody id="refund_seat">
       <volist name="data['info']['data']" id="vo">
         <tr data-id="{$vo['id']}">
-          <td><input type="checkbox" name="ids" data-toggle="icheck" data-title="票号{$vo['ciphertext']}" data-area="{$vo['priceid']}" value="{$vo['id']}"></td>
+          <td><input type="checkbox" name="ids" data-toggle="icheck" data-title="票号{$vo['ciphertext']}" data-area="{$vo['priceid']}" value="{$vo['id']}" data-plan="{$vo['plan_id']}"></td>
           <td align="center">{$vo['ciphertext']}</td>
           <td align="center">{$vo['priceid']|ticketName}</td>
           <td align="right">{$vo['price']}</td>
           <td align="right">{$vo['discount']}</td>
-          <td align="center">{$vo.id|seatOrder=$data['plan_id']}</td>
+          <td align="center">{$vo.id|seatOrder=$vo['plan_id']}</td>
         </tr>
 
         <if condition="!empty($data['info']['child_ticket'])">
@@ -140,7 +139,7 @@
 </form>
 <script type="text/javascript">
   $('#refund_all').click(function(){
-    var urls = "{:U('Item/Work/refunds',array('sn'=>$data['order_sn'],'order'=>1,'menuid'=>$menuid));}";
+    var urls = "{:U('Item/Work/refunds',array('sn'=>$data['order_sn'],'order'=>1,'plan'=>$data['plan_id'],'menuid'=>$menuid));}";
     $.ajax({
       type:"get",
       url:urls,
@@ -170,8 +169,9 @@
             /*提交退票请求 TODO   循环速度太快  提示信息不清楚*/
               var area = $(this).data('area'),
                   seat = $(this).val(),
-                  title = $(this).data('title'),
-                  urls = "{:U('Item/Work/refunds',array('sn'=>$data['order_sn'],'order'=>3,'menuid'=>$menuid));}&seatid="+seat+"&area="+area;
+                  title = $(this).data('title')
+                  plan = $(this).data('plan'),
+                  urls = "{:U('Item/Work/refunds',array('sn'=>$data['order_sn'],'order'=>3,'menuid'=>$menuid));}&seatid="+seat+"&area="+area+"&plan="+plan;
               $.ajax({
                 type:"get",
                 url:urls,

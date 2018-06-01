@@ -29,18 +29,6 @@
             <option value="3" <if condition="$data['type'] eq 3">selected</if>>类型3</option>
           </select>(选填内容,不是导游可不填)        
         </div>
-        <!-- <div class="unit">
-          <label>识别ID：</label>
-          <input type="text" name="identifyid" size="30" maxlength="20" class="required" value="{$data.identifyid}"/>        
-        </div>            
-        <div class="unit">
-          <label>银行账号：</label>
-          <input type="text" name="bank_account" size="30" maxlength="20" class="required number" value="{$data.bank_account}"/>
-        </div>
-        <div class="unit">
-          <label>开户银行：</label>
-          <input type="text" name="bank" size="30" maxlength="20" value="{$data.bank}"/>
-        </div> -->
         <div class="unit">
           <label>微信：</label>
           <input type="text" name="wechat" size="30" maxlength="20" value="{$data.wechat}"/>

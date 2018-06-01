@@ -17,19 +17,25 @@ class Refund extends \Libs\System\Service {
 	 * @param $area_id int 区域ID
 	 * @param $seat_id string 座位号 TODO多个座位一起退 
 	 * @param $poundage int 手续费
-	 * @param $scena int 创建场景 1窗口退票 2 整场退票 3自动退单 4批量退指定座位 5 api申请退款 6 系统自动完成订单取消
+	 * @param $scena int 创建场景 1窗口退票 2 整场退票 3自动退单 4批量退指定座位 5 api申请退款 6 系统自动完成订单取消 7多产品退单
 	 * */
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
-		//$info = Operate::do_read('Order',0,array('order_sn'=>$sn),'','',true);
+		$plan_id = (int)$ginfo['plan'];
 		$info = D('Item/Order')->where(['order_sn'=>$sn])->relation(true)->find();
-		if(empty($sn) || empty($info)){
+		if(!empty($info['activity']) && (int)$type === 1){
+			$atype = D('Activity')->where(['id'=>$info['activity']])->getField('type');
+			if((int)$atype === 5){
+				$type = 7;
+			}
+		}
+		if(empty($sn) || empty($info) || empty($plan_id)){
 			error_insert('4004101');return false;
 		}
 		//获取所属计划
-		$plan = F('Plan_'.$info['plan_id']);
+		$plan = F('Plan_'.$plan_id);
 		if(empty($plan)){
-			$plan = M('Plan')->where(array('id'=>$info['plan_id']))->find();
+			$plan = M('Plan')->where(array('id'=>$plan_id))->find();
 		}
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']][1];
@@ -54,7 +60,7 @@ class Refund extends \Libs\System\Service {
 			$sub_type = $info['sub_type'];
 		}
 		//判别订单类型
-		$if_order_type = Refund::if_order_type($info['type'],$info['status'],$info['product_id'],$channel_id,$sub_type);
+		$if_order_type = Refund::if_order_type($info['type'],$info['status'],$info['product_id'],$channel_id,$sub_type);//dump($type);
 		//判断场景
 		switch ($scena) {
 			case '1':
@@ -74,6 +80,10 @@ class Refund extends \Libs\System\Service {
 						break;
 					case '5':
 						return Refund::child_back($if_order_type,$info,$plan,$poundage,$ginfo['fid'],$ginfo['priceid'], '');
+						break;
+					case '7':
+						//多景区整单退票
+						return Refund::pack_back($if_order_type,$info,$plan,$poundage,'','','');
 						break;
 				}
 				break;
@@ -98,6 +108,232 @@ class Refund extends \Libs\System\Service {
 						break;
 				}
 				break;
+		}
+	}
+	/*套票整单退票*/
+	static function pack_back($type,$info,$plan,$poundage = '',$area_id = null, $seat_id = null, $user_id = null,$tract = '')
+	{
+		//分产品退
+		$model = new Model();
+		$model->startTrans();
+		$createtime = time();
+		$seas = unserialize($info['info']);//获取订单内的座椅
+		$counts = count($seas['data']);//统计门票张数
+		$cost = 0;//手续费
+		$unit = 1;//退单类型 1 整单2个别
+		$sn = $info['order_sn'];
+		$child_moeny = 0;
+		$subtotal = $info['money'];
+		$sn = $info['order_sn'];
+		if(empty($user_id)){
+			$user_id = get_user_id();
+		}
+		if($counts > 1){
+			if(!empty($area_id) && !empty($seat_id)){
+				$unit = 2;
+			}else{
+				$unit = 1;
+			}
+		}else{
+			$unit = 1;
+		}
+		/********处理手续费问题*****/
+		if($poundage <> '1'){//有手续费
+			$cost = Refund::cost($poundage,$info['money']);
+			if($cost > 0){
+				//若有手续费，则应在额外收益表中增加一条数据
+				$income_info = array(
+					"plan_id"	 => $info['plan_id'],
+					"money" 	 => $cost,
+					"type"  	 => 1,
+					"channel_id" => $info['channel_id'],
+					'userid' 	 => $info['user_id'],
+					"createtime" => $createtime,
+					"order_sn" 	 => $info["order_sn"],
+					"user_id"    => get_user_id(),
+					'product_id' => $info['product_id'],
+				);
+				$income = $model->table(C('DB_PREFIX')."other_income")->add($income_info);
+				if($income == false){echo "15";
+					$model->rollback();return false;
+				}
+			}else{echo "16";
+				$model->rollback();return false;
+			}
+		}
+		//返回金额
+		$money_back = $subtotal-$cost;
+		//获取销售计划的数据
+		foreach ($seas['data'] as $k => $v) {
+			$ticket[$v['priceid']] = $v;
+		}
+		foreach ($ticket as $key => $value) {
+			$plan = F('Plan_'.$value['plan_id']);
+			if(empty($plan)){
+				$plan = M('Plan')->where(array('id'=>$value['plan_id']))->find();
+			}
+			//有门票
+			$data = array('status'=>'0','sale'=> '','idcard'=>'','order_sn'=> '0','price_id'=>'0');
+			//整单退 判断是否存在已检票的座位
+			if($tract == '2'){
+				//整场退票时  已检票的门票也退
+				$map = array('order_sn'=>$sn);
+			}else{
+				if(Refund::check_seat($plan['seat_table'],$sn) != false){
+					$map = array('order_sn'=>$sn,'status'=>array('notin','99'));
+				}else{
+					echo "string";
+					error_insert('400015');
+					$model->rollback();return false;
+				}
+			}
+			$up = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
+			if($up == false){
+				error_insert('400410');
+				$model->rollback();return false;
+			}
+		}
+		//获取订单支付方式
+		if($info['pay'] == '2'){
+			//区分是个人还是企业
+			if(in_array($info['type'],['8','9'])){
+				$channel = '4';
+			}else{
+				$channel = '1';
+			}
+			if($channel == '1'){
+				//渠道商客户
+				$db = M('Crm');
+				//判断是否开启多级扣款
+				$crm = F('Crm');
+				$crm = $crm[$info['channel_id']];
+				$itemConf = cache('ItemConfig');
+
+				if($itemConf[$crm['itemid']]['1']['level_pay']){
+					//开启多级扣款
+					//获取扣款连条
+            		$payLink = crm_level_link($info['channel_id']);
+				}else{
+					//获取扣费条件
+					$payLink = money_map($info['channel_id'],$channel);
+				}
+			}//dump($payLink);
+			if($channel == '4'){
+				//个人客户
+				$db = M('User');
+				$payLink = $info['guide_id'];
+			}
+			if(is_array($payLink)){
+				$backMap = [
+					'id'	=>	['in',implode(',',$payLink)]
+				];
+			}else{
+				$backMap = [
+					'id'	=> $payLink
+				];
+			}
+			$crmData = array('cash' => array('exp','cash+'.$money_back),'uptime' => time());
+
+			if($channel == '1'){
+				//渠道商客户
+				$c_pay = $model->table(C('DB_PREFIX')."crm")->where($backMap)->setField($crmData);
+			}
+			if($channel == '4'){
+				//个人客户
+				$c_pay = $model->table(C('DB_PREFIX')."user")->where($backMap)->setField($crmData);
+			}
+			if(is_array($payLink)){
+				//TODO 不同级别扣款金额不同
+				foreach ($payLink as $p => $l) {
+					$recharge[] = array(
+						'cash'		=>	$money_back,
+						'user_id'	=>	$info['user_id'],
+						'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+						'addsid'	=>	$info['addsid'],
+						'crm_id'	=>	$l,
+						'createtime'=>	$createtime,
+						'type'		=>	'4',
+						'order_sn'	=>	$info['order_sn'],
+						'balance'	=>  balance($l,$channel),
+						'tyint'		=>	$channel,//客户类型1企业4个人
+					);
+				}
+				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($recharge);
+			}else{
+				$recharge = array(
+					'cash'		=>	$money_back,
+					'user_id'	=>	$info['user_id'],
+					'guide_id'	=>	$payLink,//TODO  这个貌似没什么意义
+					'addsid'	=>	$info['addsid'],
+					'crm_id'	=>	$payLink,
+					'createtime'=>	$createtime,
+					'type'		=>	'4',
+					'order_sn'	=>	$info['order_sn'],
+					'balance'	=>  balance($payLink,$channel),
+					'tyint'		=>	$channel,//客户类型1企业4个人
+				);
+				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($recharge);
+			}
+			if($c_pay == false || $c_pay2 == false){
+				error_insert('400008');
+				$model->rollback();//事务回滚
+				return false;
+			}
+			
+			
+			if($c_pay == false || $c_pay2 == false){echo "st2ing";
+				error_insert('400008');
+				$model->rollback();//事务回滚
+				return false;
+			}
+		}
+		if($info['status'] <> '7'){
+			$refund_data = array(
+				'createtime'	=>  $createtime,
+				'order_sn'		=>	$sn,
+				'applicant'		=>	$user_id,
+				'crm_id'		=>	$info['channel_id'] ? $info['channel_id'] : '0',
+				'plan_id'		=>	$info['plan_id'],
+				'param'			=>	'',
+				'money'			=>	$info['money'],
+				'reason'		=>	$info['status'] == '1' ? "窗口退票" : "渠道取消订单",
+				'status'		=>	'3',
+				're_money'		=>	$subtotal,
+				're_type'		=>	$info['type'] <> 1 ? 1:2,
+				'launch'		=>	'1',
+				'number'		=>	$unit == 1 ? $counts : 1,
+				'updatetime'	=> 	$createtime,
+				'poundage'		=> 	'0',
+				'poundage_type'	=>	'1',
+				'against_reason'=>	'',
+				'order_status'	=>	$info['status'],
+				'user_id'		=>	$user_id,
+			);
+			$refund = $model->table(C('DB_PREFIX').'ticket_refund')->add($refund_data);
+		}else{
+			//渠道取消订单
+			$refund_data = array(
+				'poundage'		=>	$poundage,
+				're_money'		=>	$subtotal,
+				'number'		=>	$counts,
+				'poundage_type'	=>	'1',
+				'updatetime'	=>	$createtime,
+				'status'		=>	'3',
+				'against_reason'=>  $ginfo['against_reason'],
+				'user_id'		=>	$user_id,
+			);
+			$refund = $model->table(C('DB_PREFIX').'ticket_refund')->where(array('order_sn'=>$sn))->save($refund_data);
+		}
+		$ordeData =array('uptime'=>$createtime,'status'=>0,'number'=>0,'money'=>'0.00');
+		$order = $model->table(C('DB_PREFIX'). 'order')->where(array('order_sn'=>$sn))->save($ordeData);
+		$order_data = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$sn))->save(array('info' => serialize($newData)));
+		//dump($up);dump($order);dump($refund);dump($order_data);
+		if($order && $refund && $order_data){
+			$model->commit();//提交事务
+			return true;
+		}else{
+			$model->rollback();//事务回滚
+			return false;
 		}
 	}
 	/**
@@ -325,7 +561,8 @@ class Refund extends \Libs\System\Service {
 			$up = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
 			if($up == false){
 				error_insert('400410');
-				$model->rollback();return false;}
+				$model->rollback();return false;
+			}
 		}else{
 			//无座位
 		}
@@ -436,26 +673,6 @@ class Refund extends \Libs\System\Service {
 		/*=============处理退款===============*/
 		//获取订单支付方式
 		if($info['pay'] == '2'){
-			/*授信额  TODO 个人 退款
-			$cid = money_map($info['channel_id']);//获取扣费条件
-			$crmData = array('cash' => array('exp','cash+'.$money_back),'uptime' => time());
-			$c_pay_return = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
-			$data = array(
-				'cash'		=>	$money_back,
-				'user_id'	=>	get_user_id(),
-				'crm_id'	=>	$cid,
-				'createtime'=>	$createtime,
-				'type'		=>	'4',
-				'order_sn'	=>	$info['order_sn'],
-				'balance'	=>  balance($cid),
-			);
-			$c_pay_return2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
-			if($c_pay_return == false || $c_pay_return2 == false || $in_team == false){
-				error_insert("400016");
-				$model->rollback();//事务回滚
-				return false;
-			}
-			*/
 			//区分是个人还是企业
 			if(in_array($info['type'],['8','9'])){
 				$channel = '4';
@@ -485,9 +702,15 @@ class Refund extends \Libs\System\Service {
 				$db = M('User');
 				$payLink = $info['guide_id'];
 			}
-			$backMap = [
-				'id'	=>	['in',implode(',',$payLink)]
-			];
+			if(is_array($payLink)){
+				$backMap = [
+					'id'	=>	['in',implode(',',$payLink)]
+				];
+			}else{
+				$backMap = [
+					'id'	=> $payLink
+				];
+			}
 			$crmData = array('cash' => array('exp','cash+'.$money_back),'uptime' => time());
 
 			if($channel == '1'){
@@ -499,23 +722,38 @@ class Refund extends \Libs\System\Service {
 				$c_pay = $model->table(C('DB_PREFIX')."user")->where($backMap)->setField($crmData);
 			}
 			//TODO 不同级别扣款金额不同
-			foreach ($payLink as $p => $l) {
-				$recharge[] = array(
+			if(is_array($payLink)){
+				foreach ($payLink as $p => $l) {
+					$recharge[] = array(
+						'cash'		=>	$money_back,
+						'user_id'	=>	$info['user_id'],
+						'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+						'addsid'	=>	$info['addsid'],
+						'crm_id'	=>	$l,
+						'createtime'=>	$createtime,
+						'type'		=>	'4',
+						'order_sn'	=>	$info['order_sn'],
+						'balance'	=>  balance($l,$channel),
+						'tyint'		=>	$channel,//客户类型1企业4个人
+					);
+				}
+				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($recharge);
+			}else{
+				$recharge = array(
 					'cash'		=>	$money_back,
 					'user_id'	=>	$info['user_id'],
-					'guide_id'	=>	$l,//TODO  这个貌似没什么意义
+					'guide_id'	=>	$payLink,//TODO  这个貌似没什么意义
 					'addsid'	=>	$info['addsid'],
-					'crm_id'	=>	$l,
+					'crm_id'	=>	$payLink,
 					'createtime'=>	$createtime,
 					'type'		=>	'4',
 					'order_sn'	=>	$info['order_sn'],
-					'balance'	=>  balance($l,$channel),
+					'balance'	=>  balance($payLink,$channel),
 					'tyint'		=>	$channel,//客户类型1企业4个人
 				);
+				$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($recharge);
 			}
-			$c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->addAll($recharge);
-			
-			if($c_pay == false || $c_pay2 == false){echo "st2ing";
+			if($c_pay == false || $c_pay2 == false){
 				error_insert('400008');
 				$model->rollback();//事务回滚
 				return false;

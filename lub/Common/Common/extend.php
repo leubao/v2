@@ -291,7 +291,7 @@ function seatShow($param,$type=NULL){
 * @param $plan_id 计划id
 * @param $areaid 区域ID
 */
-function seatOrder($param,$plan_id,$area_id = '',$type = NULL){
+function seatOrder($param, $plan_id, $area_id = '', $type = NULL){
     if(!empty($param) && !empty($plan_id)){
         $plan = F('Plan_'.$plan_id);
         if(empty($plan)){
@@ -1141,9 +1141,9 @@ function crmName($param,$type=NULL){
      * @param $level int 代理商级别
      */
     function channel($channel_id,$level){
-        $Config = cache("Config");
+        //$Config = cache("Config");
         switch ($level){
-            case $Config['level_1'] :
+            case '16' :
                 //一级渠道商
                 //获取一级渠道商所有人员ID
                 $u_1 = $channel_id;
@@ -1163,11 +1163,11 @@ function crmName($param,$type=NULL){
                 }
                 return $arr_map;
                 break;
-            case $Config['level_2'] :
+            case '17' :
                 //二级级渠道商
                 $u_2 = $channel_id;
                 $u_3 = M('Crm')->where(array('f_agents'=>$channel_id,'status'=>1))->field('id')->select();
-                $arr_map_3 = implode(',',array_column($u_1,'id'));//转换为一维数组
+                $arr_map_3 = implode(',',array_column($u_3,'id'));//转换为一维数组
                 if(empty($arr_map_3)){
                     $arr_map = $u_2;
                 }else{
@@ -1175,7 +1175,7 @@ function crmName($param,$type=NULL){
                 }
                 return $arr_map;
                 break;
-            case $Config['level_3'] :
+            case '18' :
                 //三级渠道商  获取二级的上一级ID  
                 $arr_map = $channel_id;
                 return $arr_map;
@@ -1221,6 +1221,18 @@ function crmName($param,$type=NULL){
                 return $user;
                 break;
         }
+    }
+    /**
+     * @Company  承德乐游宝软件开发有限公司
+     * @Author   zhoujing      <zhoujing@leubao.com>
+     * @DateTime 2018-05-02
+     * @param    int        $channel_id           获取指定渠道商下级
+     * @return   获取下级代理商
+     */
+    function getChild($channel_id)
+    {
+        $crmid = M('Crm')->where(['f_agents'=>$channel_id])->field('id')->select();
+        return $crmid;
     }
     /**
      * 根据级别查询所属级别的渠道商
@@ -1488,22 +1500,23 @@ function crmName($param,$type=NULL){
      * @param  int $status 是否可用
      * @return TODO 获取列表
      */
-    function get_date_plan($date,$games = '1',$status = '',$product_id,$type = '1'){
+    function get_date_plan($date, $games = '1', $status = '', $product_id = '', $type = '1'){
         $datetime = strtotime($date);
         //构造条件
         $map = array();
         $map['plantime'] = $datetime;
-        $map['product_id'] = $product_id;
+        if(!empty($product_id)){
+            $map['product_id'] = $product_id;
+        }
         if(!empty($status)){
-             $map['status']  =  $status;
+            $map['status'] = $status;
         }
         if($type == '1'){
             $plan = M('Plan')->where($map)->field('id')->select();
         }else{
-            $map['games']   =   $games;
+            $map['games'] = $games;
             $plan = M('Plan')->where($map)->field('id')->find(); 
         }
-        
         return $plan;
     }
     /**
@@ -2107,19 +2120,19 @@ function pay_pattern($chane){
     }
 }
 //订单售票
-function print_buttn_show($type,$pay,$sn,$plan_id,$money,$view = '1'){
+function print_buttn_show($type,$pay,$sn,$plan_id,$money,$view = '1',$act = 0){
     if(in_array($pay, array('1','3')) && $type == '6' && check_collection_pay($sn) && $money > 0){
         $title = "网银支付";
         $width = '600';
         $height = '400';
         $pageId = 'payment';
-        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'money'=>$money,'order_type'=>3));
+        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'money'=>$money,'order_type'=>3,'act'=>$act));
     }else{
         $pageId = 'print';
         $width = '213';
         $height = '208';
         $title = '门票打印';
-        $url = U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan_id));
+        $url = U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan_id,'act'=>$act));
     }
     if($view == '2'){
         //return 返回

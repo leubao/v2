@@ -144,13 +144,15 @@ class OrderController extends Base{
 		$info = $_POST['info'];
 		$uInfo = \Home\Service\Partner::getInstance()->getInfo();
 		$order = new Order();
+		//活动订单 套票
+		$ginfo = I('get.act');
 		//根据当前用户所属分组类型进行区分是政企还是企业或个人
 		if($uInfo['group']['type'] == '3'){
 			//政企
-			$sn = $order->channel($info,26,$uInfo);
+			$sn = $order->channel($info,26,$uInfo,(int)$ginfo['act']);
 		}else{
-			//个人或企业
-			$sn = $order->channel($info,22,$uInfo);
+			//个人或企业 
+			$sn = $order->channel($info,22,$uInfo,(int)$ginfo['act']);
 		}
 		if($sn != false){
 			$return = array('statusCode' => '200','sn'=>$sn);

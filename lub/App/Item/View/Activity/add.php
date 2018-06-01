@@ -29,6 +29,7 @@
                 <option value="2" data-area="first">首单免</option>
                 <option value="3" data-area="area">限制区域销售</option>
                 <option value="4" data-area="team">组团销售</option>
+                <option value="5" data-area="more">多产品套票销售</option>
               </select>
             </td>
         </tr>
@@ -47,6 +48,19 @@
               </select>
               <span class="remark">下单时需要输入身份证</span>
             </td>
+        </tr>
+        <tr>
+            <td>打印模板:</td>
+            <td>
+              <select name="print_tpl" data-toggle="selectpicker">
+                  <option value="">打印模板</option>
+                  <volist name="printer" id='pri'>
+                    <option value="{$pri.id}">{$pri.title}</option>
+                  </volist>
+                </select>
+            </td>
+            <td></td><td>
+              </td>
         </tr>
         <tr>
             <td>排序:</td><td><input type="text" name="sort" value="0" size="15"></td>
@@ -117,6 +131,32 @@
             <td colspan="3"><input type="hidden" name="ticket.id" value="">
     <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
+        </tbody>
+      </table>
+    </div>
+    <!--多产品套票-->
+    <div id="more" style="display: none;">
+
+      <table class="table table-striped table-bordered">
+          <tbody>
+            <tr>
+              <td>票型名称：</td>
+              <td><input type="text" name="price_name" value="">
+                销售价格
+                <input type="text" name="price" value="">
+                结算价格
+                <input type="text" name="discount" value="">
+              </td>
+            </tr>
+          <volist name="prolist" id="vo"> 
+          <tr>
+              <td>活动产品：</td>
+              <td><input type="checkbox" name="product[]" value="{$vo.id}"> {$vo.name} 
+              参与票型
+                <input type="text" name="ticket_{$vo.id}" value="{$ticket_id}">
+              </td>
+           </tr>
+          </volist>
         </tbody>
       </table>
     </div>

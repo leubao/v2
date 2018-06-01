@@ -169,7 +169,8 @@
       <h5>打印插件 : <a href="http://ticket.leubao.com/d/print_32.exe" target="_blank">32位</a>　|
       <a href="http://ticket.leubao.com/d/print_64.exe" target="_blank">64位</a></h5>
       <h5>打印机驱动 : <a href="http://ticket.leubao.com/d/TOSHIBA_TEC_7.3.exe" target="_blank">东芝（TOSHIBA)B-EX4T1-GS14驱动</a></h5>
-      <h5>浏览器 : <a href="http://chrome.360.cn/" target="_blank">推荐360急速浏览器</a></h5>  
+      <h5>浏览器 : <a href="http://chrome.360.cn/" target="_blank">推荐360急速浏览器</a></h5>
+      <h5><a href="javascript:CheckIsInstall();">打印控件测试</a> | <a href="">打印测试</a></h5>
     </div>     
     <div class="alert alert-success" role="alert" style="margin:0 0 5px; padding:5px 15px;">
       <strong>手册及其它</strong>
@@ -187,9 +188,21 @@
       <br><span class="label label-default">测试 & 推广：</span> <a href="#">@Jack Yuan （成都锦杨）</a>
       <br><span class="label label-default">测试 & 试用：</span> <a href="#">@管书清 （小小正能量）</a>
     </div>
-  -->
+    -->
   </div>
 </div>
 <script>
-
+function CheckIsInstall() {
+  try{ 
+    var LODOP=getLodop(); 
+    if (LODOP.VERSION) {
+       if (LODOP.CVERSION)
+       alert("打印控件安装正常!\n 云控件版本:"+LODOP.CVERSION+"(本地控件版本"+LODOP.VERSION+")"); 
+       else
+       alert("本机已成功安装了打印控件！\n 版本号:"+LODOP.VERSION); 
+    };
+   }catch(err){ 
+    alert("未找到打印控件,请下载安装,安装完成后请重启浏览器..."); 
+   } 
+}; 
 </script>

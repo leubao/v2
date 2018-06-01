@@ -173,6 +173,19 @@ class TrustController extends LubTMP {
 		\Libs\Service\Rebate::ajax_rebate_order();
 		return true;
 	}
+	/**
+	 * 校验返利
+	 */
+	function check_rebate(){
+		$ln = load_redis('lsize','PreOrder');
+		for ($i=0; $i < $ln; $i++) { 
+			dump(\Libs\Service\Rebate::ajax_rebate_order());
+		}
+		dump($ln);
+		$where['type'] = array('in','2,4,8,9');$where['status']=array('in','1,9,7,8');
+		//\Libs\Service\Check::check_rebate($where,2);
+		//return \Libs\Service\Check::check_rebate();
+	}
 	/*校验程序*/
 	function check()
 	{
@@ -182,7 +195,7 @@ class TrustController extends LubTMP {
 			if (!empty($pinfo['start_time']) && !empty($pinfo['end_time'])) {
 	            $start_time = strtotime($pinfo['start_time']);
 	            $end_time = strtotime($pinfo['end_time']) + 86399;
-	            $where['logintime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+	            $where['createtime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
 	        }
 	        $where['type'] = array('in','2,4,8,9');$where['status']=array('in','1,9,7,8');
 			\Libs\Service\Check::check_rebate($where,2);
@@ -192,6 +205,8 @@ class TrustController extends LubTMP {
 			\Libs\Service\Check::check_rebate();
 			//校验微信支付排座情况
 			\Libs\Service\Check::check_pay_order_seat();
+			//校验微信返利的情况
+			\Libs\Service\Check::check_red();
 			return true;	
 		}
 	}

@@ -137,6 +137,9 @@ class SetController extends ManageBase{
 			//获取价格政策
 			$pricegroup = D('TicketGroup')->where(array('status'=>1))->field('id,name')->select();
 			$this->assign("vo",$config)->assign('pricegroup',$pricegroup)->assign('prono',$proNo);
+			//获取打印模板
+			$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
+			$this->assign('printer',$printer);
 			$this->display();
 		}
 	}
@@ -772,9 +775,12 @@ class SetController extends ManageBase{
 	{
 		if(IS_POST){
 			$pinfo = I('post.');
+			$print = $_POST['info'];
 			$data = [
 				'title'		=>	$pinfo['title'],
-				'info'		=>	$pinfo['info'],
+				'width'		=>	$pinfo['width'],
+				'height'    =>  $pinfo['height'],
+				'info'		=>	$print,
 				'product'	=>	get_product('id'),
 				'status'	=>	1
 			];
@@ -792,10 +798,13 @@ class SetController extends ManageBase{
 	{
 		if(IS_POST){
 			$pinfo = I('post.');
+			$print = $_POST['info'];
 			$data = [
 				'title'		=>	$pinfo['title'],
-				'info'		=>	$pinfo['info'],
-				'status'	=>	1
+				'info'		=>	$print,
+				'width'		=>	$pinfo['width'],
+				'height'    =>  $pinfo['height'],
+				'status'	=>	$pinfo['status']
 			];
 			$status = D('Printer')->where(['id'=>$pinfo['id']])->save($data);
 			if($status){
@@ -806,7 +815,8 @@ class SetController extends ManageBase{
 		}else{
 			$id = I('get.id',0,intval);
 			if(!empty($id)){
-				$info = D('Printer')->where(['id'=>$pinfo['id']])->find();
+				$info = D('Printer')->where(['id'=>$id])->find();
+				//dump($info);
 				$this->assign("data",$info);
 				$this->display();
 			}else{

@@ -161,7 +161,6 @@ class ProductController extends Base{
 		$price_group  = $this->crm_price_group($uInfo['groupid'],$plan['product_id']);
 		/*
 		//根据分组加载价格
-		
 		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,$pinfo['sale']);
 		*/
 		//根据区域加载门票
@@ -180,12 +179,27 @@ class ProductController extends Base{
 				'_string'   =>  "FIND_IN_SET(2,is_scene)",
 				'id'		=>	$pinfo['actid']
 			];
-			$param = D('Activity')->where($where)->getField('param');//dump($param);
-			$param = json_decode($param,true);
+			$ainfo = D('Activity')->where($where)->field('id,type,param')->find();
+			$param = json_decode($ainfo['param'],true);
+			//在套票时直接加载活动中的价格
+			if((int)$ainfo['type'] === 5){
+				//判断活动的产品类型TODO
+				$number = D('Drifting')->where(['plan_id'=>$pinfo['plan']])->count();
+                //获取当前可售数量 TODO 目前不支持票面价和结算价
+                $area_num = $plan['quotas'] - $number;
+				$price = [
+					'id'		=>	$ainfo['id'],
+					'name'		=>	$param['info']['price']['name'],
+					'area_num' 	=>	$area_num, 
+					'area_nums' =>	$number,
+					'price'		=>	$param['info']['price']['price'],
+					'discount'	=>	$param['info']['price']['discount'],
+				];
+			}else{
+				$ticket = explode(',',$param['info']['ticket']);
+				$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale'],$ticket);
+			}
 			
-			$ticket = explode(',',$param['info']['ticket']);//dump($ticket);
-			
-			$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale'],$ticket);
 		}
 
 		

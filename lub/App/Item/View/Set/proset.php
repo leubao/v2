@@ -171,6 +171,18 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">默认打印模板:</td>
+                                <td>
+                                  
+                                  <select name="print_tpl" data-toggle="selectpicker">
+                                    <option value="">打印模板</option>
+                                    <volist name="printer" id='pri'>
+                                      <option value="{$pri.id}" <if condition="$vo['print_tpl'] eq $pri['id']">selected</if>>{$pri.title}</option>
+                                    </volist>
+                                  </select>
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">打印出票员:</td>
                                 <td><input type="radio" name="print_user" data-toggle="icheck" value="1" <eq name="vo['print_user']" value="1"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="print_user" data-toggle="icheck" value="0" <eq name="vo['print_user']" value="0"> checked</eq> data-label="关闭">

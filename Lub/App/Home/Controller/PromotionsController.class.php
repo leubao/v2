@@ -70,6 +70,10 @@ class PromotionsController extends Base{
 				$this->assign('number',$info['param']['number']);
 				$tempate = 'team';
 				break;
+			case '5':
+				//套票
+				$tempate = 'pack';
+				break;
 			default:
 				break;
 		}
@@ -83,6 +87,46 @@ class PromotionsController extends Base{
 			->assign('product',$this->product);
 		//读取相关配置
 		$this->display($tempate);
+	}
+	//加载活动票型
+	function public_get_act_price(){
+		//活动ID
+		$ginfo = I('get.');
+		$info = D('Activity')->where(['id'=>$ginfo['id']])->field('param')->find();
+		$param = json_decode($info['param'],true);
+		//读取活动票型
+		$plan = F('Plan_'.$ginfo['planid']);
+		if(empty($plan)){
+			$return =  array(
+				'statusCode' => 400,
+				'msg'	=>	'未找到销售计划'
+			);
+			die(json_encode($return));
+		}
+		$where = array('plan_id'=>$ginfo['planid'],'product_id'=>$plan['product_id'],'status'=>array('in','2,99,66'));
+		$number = D('Scenic')->where($where)->count();
+        $area_num = $plan['quotas'] - $number;
+        $area_nums = $number;
+		$price = [
+			'title'		=>	$param['title'],
+			'price'		=>	$param['price'],
+			'discount'	=>	$param['discount'],
+			'area_id'   =>  0,
+			'area_num'	=>	$area_num,
+			'area_nums' =>  $area_nums
+		];
+		//组合返回
+		$return =  array(
+			'statusCode' => 200,
+			'price' =>$price,
+		);
+		die(json_encode($return));
+	}
+	//多景区联票下单
+	public function actOrder()
+	{
+		//重新组合数据
+		
 	}
 	//校验活动是否正在进行时
 	public function check_active($info)

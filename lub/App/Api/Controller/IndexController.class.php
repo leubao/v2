@@ -1053,9 +1053,9 @@ class IndexController extends ApiBase {
           'app_sn'    =>  $pinfo['sn'],
           'data'      =>  $pinfo['oinfo'],
           'crm'       =>  array('0'=>array('guide'=>$appInfo['id'],'qditem'=>$appInfo['crm_id'],'phone'=>$pinfo['crm']['phone'],'contact'=>$pinfo['crm']['contact'])),
-          'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'])),
+          'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'],'settlement'=>$appInfo['group']['settlement'])),
         );
-        //dump($pinfo['param']);
+       // dump($appInfo);
         return $info;
     }
 
@@ -1064,7 +1064,7 @@ class IndexController extends ApiBase {
         $plan = F('Plan_'.$pinfo['plan']);
         //重组座位
         $seat = Order::area_group($pinfo['oinfo'],$plan['product_id'],$appInfo['group']['settlement']);
-        
+        dump($seat);
         $ticketType = F("TicketType".$plan['product_id']);
         foreach ($seat['area'] as $k => $v) {
           foreach ($v['seat'] as $ke => $va) {
