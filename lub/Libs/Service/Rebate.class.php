@@ -18,12 +18,11 @@ class Rebate extends \Libs\System\Service {
 		//读取队列中未处理订单
 		//判断队列是否存在数据
 		$ln = load_redis('lsize','PreOrder');
-		load_redis('set','ajax_rebate_order_time',date('Y-m-d H:i:s').'&&'.$ln);
-		if($ln > 0){
+		$sn = (int)$ln > 0 ? load_redis('rPop','PreOrder') : 0;
+		load_redis('lpush','ajax_rebate_order_time',date('Y-m-d H:i:s').'&&'.$ln.'&&'.$sn);
+		if((int)$ln > 0){
 			$fenrun = false;
 			//获取队列中最后一个元素，且移除
-			$sn = load_redis('rPop','PreOrder');
-
 			$map = array(
 				'order_sn' => $sn,
 	        	'status' => array('in','1,6,7,9'),
@@ -56,7 +55,7 @@ class Rebate extends \Libs\System\Service {
 				error_insert('400018');
 				return false;
 			}
-			//是否开启多级扣款
+			/*是否开启多级扣款
 			$itemConfig = cache('ItemConfig');
 
 			if($itemConfig[$itemid]['1']['level']){
@@ -66,7 +65,7 @@ class Rebate extends \Libs\System\Service {
 				foreach ($payLink as $k => $v) {
 					$crm =  
 				}
-			}
+			}*/
 			//判断是否是底价结算
 			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
 				if($crmInfo['group']['type'] == '4'){
@@ -163,6 +162,11 @@ class Rebate extends \Libs\System\Service {
 			//读取当前在五分钟内所有团队订单   团队订单分为渠道订单和分销订单
 		}
 		//是否开启分销
+		//日志清理 超过1000条，开始删除最早的300条
+		$size = load_redis('lsize','ajax_rebate_order_time');
+		if((int)$size > 1000){
+
+		}
 	}
 	function full(){
 

@@ -23,8 +23,10 @@ class PlanModel extends Model{
         $plantime = strtotime($data['plantime']);
 		//判断场次是否已存在
 		if($data['product_type'] == '1'){
-			$starttime = strtotime($data['starttime']);
-			$endtime = strtotime($data['endtime']);
+			$starttime = $data['plantime'].' '.$data['starttime'];
+			$starttime = strtotime($starttime);
+			$endtime = $data['plantime'].' '.$data['endtime'];
+			$endtime = strtotime($endtime);
 			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$data['games'])){return false;}
 		}
 		if(in_array($data['product_type'],['2','3'])){

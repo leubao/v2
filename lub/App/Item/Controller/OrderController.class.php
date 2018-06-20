@@ -308,7 +308,7 @@ class OrderController extends ManageBase{
 					'rel'	 => 'page1',
 					'title'	=> '门票打印',
 					'popup'	=>	'dialog',
-					'forward' => U('Item/Order/drawer',array('sn'=>$pinfo['sn'],'plan_id'=>$pinfo['plan_id'],'user'=>$user['id'])),
+					'forward' => U('Item/Order/drawer',array('sn'=>$pinfo['sn'],'plan_id'=>$pinfo['plan_id'],'user'=>$user['id'],'act'=>$pinfo['act'])),
 				);
 				die(json_encode($return));
 			}else{
@@ -333,17 +333,17 @@ class OrderController extends ManageBase{
 		$uInfo = \Manage\Service\User::getInstance()->getInfo();//读取当前登录用户信息
 		$type = '6'.$type;
 		$order = new Order();
-		$run = $order->quick($pinfo,$type,$uInfo);
+		$run = $order->quick($pinfo,$type,$uInfo);//dump($run);
 		if($run != false){
 			//支付方式影响返回结果
 			if(in_array($run['is_pay'],array('4','5'))){
-				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>2));
+				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>2,'act'=>$run['act']));
 				$title = "网银支付";
 				$width = '600';
 				$height = '400';
 				$pageId = 'payment';
 			}else{
-				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan));
+				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan,'act'=>$run['act']));
 				$title = "门票打印";
 				$width = '213';
 				$height = '208';

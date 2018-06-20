@@ -78,8 +78,8 @@ class ProductController extends Base{
 		$pinfo = json_decode($_POST['info'],true);
 		$plantime = strtotime($pinfo['plantime']);
 		$pro_conf = $this->pro_conf($pinfo['product']);
-		/*开启预约*/
-		if($pro_conf['channel_pre_team'] > 0){
+		/*开启预约,活动不需要*/
+		if($pro_conf['channel_pre_team'] > 0 && $pinfo['type'] <> 4){
 			//读取可预约日期
 			$pretime = strtotime(date('Ymd',strtotime('+'.$pro_conf['channel_pre_team'].' day')));
 			if($plantime < $pretime){
@@ -296,7 +296,7 @@ class ProductController extends Base{
 			'channel_id'=>	'',
 			'type'		=>	'1',
 		];
-		$this->assign('plantime',$plantime)->assign('info',$ginfo)->assign('data',$data)->display();
+		$this->assign('plantime',$plantime)->assign('info',$ginfo)->assign('data',$data)->assign('tour',F('Province'))->display();
 	}
 	/**
 	 * 渠道售票公共信息

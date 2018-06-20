@@ -19,6 +19,10 @@ use Payment\Client\Query;
 
 
 class IndexController extends ApiBase {
+    function _initialize(){
+      dump("2");
+      parent::_initialize();
+    }
     //获取场次信息
     function api_plan(){
       if(IS_POST){

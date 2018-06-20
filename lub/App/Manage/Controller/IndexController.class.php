@@ -4,6 +4,9 @@ namespace Manage\Controller;
 use Common\Controller\ManageBase;
 use Manage\Service\User;
 class IndexController extends ManageBase {
+    protected function _initialize(){
+        parent::_initialize();
+    }
     public function index() {
         if (IS_AJAX) {return true;}
         $this->inits();

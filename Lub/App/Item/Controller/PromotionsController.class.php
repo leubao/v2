@@ -47,7 +47,11 @@ class PromotionsController extends ManageBase{
 				$this->assign('type','1');
 				$tempate = 'area_sale';
 				break;
-
+			case '5':
+				$idcard = $info['param']['info']['card'];
+				
+				$tempate = 'pack';
+				break;	
 			default:
 				break;
 		}

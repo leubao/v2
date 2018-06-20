@@ -16,7 +16,7 @@ function scenic_drifting_plan(plantime,type,product,actid){
     empty_cart_ticket();
     var postData = 'info={"plantime":"'+plantime+'","type":"'+type+'","product":"'+product+'"}',content = "";
     //切换日期查询场次
-    $.ajax({
+    $.ajax({ 
         type:'POST',
         url:'index.php?g=Home&m=Product&a=get_date_plan',
         data:postData,
@@ -35,8 +35,11 @@ function scenic_drifting_plan(plantime,type,product,actid){
                         if(type == '1'){
                             content += "<li role='presentation'><a href='#' aria-controls='profile' data-id="+item.id+" data-type="+item.type+" role='tab' data-toggle='tab' onclick='getprice("+item.id+","+item.type+",\""+item.tooltype+"\")'>"+item.name+"</a></li>";
                         }
-                        //活动
                         if(type == '3'){
+                            content += "<li role='presentation'><a href='#' aria-controls='profile' data-id="+item.id+" data-type="+item.type+" role='tab' data-toggle='tab' onclick='getprice("+item.id+","+item.type+",\""+item.tooltype+"\")'>"+item.name+"</a></li>";
+                        }
+                        //活动
+                        if(type == '4'){
                             content += "<li role='presentation'><a href='#' aria-controls='profile' data-id="+item.id+" data-type="+item.type+" role='tab' data-toggle='tab' onclick='getActivtyPrice("+item.id+","+actid+","+item.type+",\""+item.tooltype+"\")'>"+item.name+"</a></li>";
                         }
                     });
@@ -146,8 +149,8 @@ function getActivtyPrice(plan,actid,type) {
                                 +"<td align='center'>"+ticket.area_num+"</td>"
                                 +"</tr>";
                         }
-                        if(type == '5'){
-                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                        if(type == '4'){
+                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.area_id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                                 +"<td align='center'>"+ticket.name+"</td>"
                                 +"<td>"+show_price+"</td>"
                                 +"<td align='center'>"+ticket.area_num+"</td>"

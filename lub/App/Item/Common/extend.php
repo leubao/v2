@@ -23,6 +23,12 @@ function activity_type($param,$type = null)
 		case '4':
 			$return = "组团销售";
 			break;
+		case '4':
+			$return = "组团销售";
+			break;
+		case '5':
+			$return = "多产品套票销售";
+			break;
 	}
 	if($type){
 		return $return;

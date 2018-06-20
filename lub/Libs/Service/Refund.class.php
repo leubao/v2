@@ -17,12 +17,16 @@ class Refund extends \Libs\System\Service {
 	 * @param $area_id int 区域ID
 	 * @param $seat_id string 座位号 TODO多个座位一起退 
 	 * @param $poundage int 手续费
-	 * @param $scena int 创建场景 1窗口退票 2 整场退票 3自动退单 4批量退指定座位 5 api申请退款 6 系统自动完成订单取消 7多产品退单
+	 * @param $scena int 创建场景 1窗口退票 2 整场退票 3自动退单 4批量退指定座位 5 api申请退款 6 系统自动完成订单取消 7多产品退单 
 	 * */
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
-		$plan_id = (int)$ginfo['plan'];
 		$info = D('Item/Order')->where(['order_sn'=>$sn])->relation(true)->find();
+		$plan_id = (int)$ginfo['plan'];
+		if(empty($plan_id)){
+			$plan_id = $info['plan_id'];
+		}
+		
 		if(!empty($info['activity']) && (int)$type === 1){
 			$atype = D('Activity')->where(['id'=>$info['activity']])->getField('type');
 			if((int)$atype === 5){

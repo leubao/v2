@@ -14,7 +14,7 @@
   </div>
   <!-- /.modal --> 
 <script src="{$config_siteurl}static/js/layer.js"></script>
-<script src="{$config_siteurl}static/home/js/common.js"></script>
+<script src="{$config_siteurl}static/home/js/common.js?=<?php echo  rand(100,999);?>"></script>
 <script>
 //弹窗每次重新加载
 $("#myModal").on("hidden.bs.modal", function() {$(this).removeData("bs.modal");});

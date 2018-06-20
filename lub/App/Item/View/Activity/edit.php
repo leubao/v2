@@ -21,6 +21,19 @@
           </td>
         </tr>
         <tr>
+            <td>打印模板:</td>
+            <td>
+              <select name="print_tpl" data-toggle="selectpicker">
+                  <option value="">打印模板</option>
+                  <volist name="printer" id='pri'>
+                    <option value="{$pri.id}" <if condition="$data['print_tpl'] eq $pri['id']">selected</if>>{$pri.title}</option>
+                  </volist>
+                </select>
+            </td>
+            <td></td><td>
+              </td>
+        </tr>
+        <tr>
             <td>参与范围:</td>
             <td><select name="scope" class="required" data-toggle="selectpicker" data-rule="required">
                 <option value="1" <if condition="$data['scope'] eq 1">selected</if>>开启</option>

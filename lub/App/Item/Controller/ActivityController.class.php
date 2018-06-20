@@ -99,6 +99,7 @@ class ActivityController extends ManageBase{
 	 			'status'	=> $pinfo['status'],
 	 			'is_scene'	=> implode(',',$pinfo['scene']),
 	 			'param'		=> json_encode($param),
+	 			'print_tpl' => $pinfo['print_tpl'],
 	 			'remark'	=> $pinfo['remark'],
 	 		);
 	 		if(D('Item/Activity')->add($data)){
@@ -214,6 +215,7 @@ class ActivityController extends ManageBase{
 	 			'status'	=> $pinfo['status'],
 	 			'is_scene'	=> implode(',',$pinfo['scene']),
 	 			'param'		=> json_encode($param),
+	 			'print_tpl' => $pinfo['print_tpl'],
 	 			'remark'	=> $pinfo['remark'],
 	 		);
 	 		if(D('Item/Activity')->save($data)){
@@ -248,6 +250,8 @@ class ActivityController extends ManageBase{
 	 			//$info['ticket'] = $pinfo['ticket_id'];
 
 	 		}//dump($info);
+	 		$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
+			$this->assign('printer',$printer);
 	 		$this->assign('data',$info)->display();
 	 	}
 	 }

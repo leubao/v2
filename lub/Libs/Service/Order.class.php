@@ -353,7 +353,7 @@ class Order extends \Libs\System\Service {
 		if(in_array($info['param'][0]['is_pay'],array('4','5'))){$is_seat = '2';}else{$is_seat = '1';}
 		$sn = Order::quick_order($info,$scena,$uinfo,$is_seat);
 		if($sn != false){
-			$sn = array('sn' => $sn,'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
+			$sn = array('sn' => $sn['order_sn'],'act'=>$sn['act'],'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
 		}
 		return $sn;
 	}
@@ -481,9 +481,8 @@ class Order extends \Libs\System\Service {
 			//场次已停止销售
 			$this->error = '400005 : 销售计划已暂停销售...';
 			return false;
-		}dump($info);
+		}
 		$return = $this->quick_order($info,$scena,$uinfo,$is_seat,$channel);
-		//dump($this->error);
 		//dump($return);
 		if($return != false){
 			M('ApiOrder')->add(array('app_sn'=>$info['app_sn'],'order_sn'=>$return));
@@ -850,13 +849,19 @@ class Order extends \Libs\System\Service {
 		//判断活动属性 todo 读取活动属性
 		
 		if(!empty($info['info']['param'][0]['activity'])){
-			$real = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->getField('real');
-			if($real){
+			$actInfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('real,param')->find();
+			$actParam = json_decode($actInfo['param'],true);
+			if($actInfo['real'] && $actParam['info']['voucher'] == 'card'){
 				$is_print = 1;
 				$msgTpl = 8;//后期短信模板动态配置
 				//写入身份证号
 				D('IdcardLog')->addAll($idcard);
-			}
+			}else{
+				$is_print = 0;
+				$msgTpl = 8;
+				//写入身份证号
+				D('IdcardLog')->addAll($idcard);
+			}	
 		}
 
 		//更新订单详情
@@ -868,14 +873,14 @@ class Order extends \Libs\System\Service {
 		if($state && $status){
 			$model->commit();//提交事务
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
-			    /*发送成功短信
+			    /*发送成功短信*/
 				if($proconf['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
 				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
 				}else{
 					Sms::order_msg($msgs,1);
-				}*/
+				}
 			}
 			//设置低金额报警 
 			if(empty($cid) && $newData['pay'] == '2'){
@@ -914,7 +919,6 @@ class Order extends \Libs\System\Service {
 			//error_insert('400003');
 			return false;
 		}
-		//dump($info);dump($seat);
 		//订单金额校验
 		if(bccomp((float)$info['subtotal'],(float)$seat['money'],2) <> 0){
           	$this->error = '400018 : 金额校验失败';
@@ -977,7 +981,7 @@ class Order extends \Libs\System\Service {
 					$status = $this->quickSeat($seat,$order_info,$info['sub_type'],$channel,$is_seat,$scena['pay']);
 				}else{
 					$status = $this->quickScenic($order_info,$plan);
-				}//dump($status);
+				}
 				return $status;
 			}else{
 				return $sn;
@@ -1485,10 +1489,10 @@ class Order extends \Libs\System\Service {
 					$quota_num += $va['num'];
 				}
 				$status[$k] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
+				//echo $model->table(C('DB_PREFIX').$plan['seat_table'])->_sql();
 				/*以下代码用于校验*/
 				$money = $money+$ticketType[$v['priceid']]['discount']*$v['num'];
 				if(empty($status[$k])){
-					//error_insert('400009');
 					$model->rollback();//事务回滚
 					$this->error = '400009 : 排座失败';
 					return false;
@@ -1509,7 +1513,16 @@ class Order extends \Libs\System\Service {
 				if($proconf['ticket_sms']){$msg = $msg.$ticketType[$v['priceid']]['name'].$v['num']."张";}
 	
 				//按区域发送短信
-				if($proconf['area_sms']){$msg = $msg.areaName($v['areaId'],1).$v['num']."张";}
+				if($proconf['area_sms']){
+					$areaSms[$v['areaId']] = [
+						'area' => $v['areaId'],
+						'num'  => $areaSms[$v['areaId']]['num'] + $v['num']
+					];
+				}
+			}
+			//短信
+			foreach ($areaSms as $ke => $va) {
+				$msg = $msg.areaName($va['area'],1).$va['num']."张";
 			}
 			/*座椅信息*/
 			$seatInfo = $model->table(C('DB_PREFIX').$plan['seat_table'])->where(array('order_sn'=>$info['order_sn']))->field('order_sn,area,seat,sale,idcard')->select();
@@ -1575,13 +1588,19 @@ class Order extends \Libs\System\Service {
 			
 			//判断活动属性 todo 读取活动属性
 			if(!empty($oInfo['param'][0]['activity'])){
-				$real = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->getField('real');
-				if($real){
+				$actInfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('real,param')->find();
+				$actParam = json_decode($actInfo['param'],true);
+				if($actInfo['real'] && $actParam['info']['voucher'] == 'card'){
 					$is_print = 1;
 					$msgTpl = 8;//后期短信模板动态配置
 					//写入身份证号
 					D('IdcardLog')->addAll($idcard);
-				}
+				}else{
+					$is_print = 0;
+					$msgTpl = 1;
+					//写入身份证号
+					D('IdcardLog')->addAll($idcard);
+				}	
 			}
 			//重新组合订单详情  增加座位信息  与选做订单详情一至
 			$newData = array('subtotal'	=> $oInfo['subtotal'],'checkin'	=> $oInfo['checkin'],'data' => $seatData,'crm' => $oInfo['crm'],'pay' => $is_pay ? $is_pay : $oInfo['pay'],'param'	=> $oInfo['param']);
@@ -1654,9 +1673,9 @@ class Order extends \Libs\System\Service {
 				//根据支付方式选择短信模板 
 				$pay = $is_pay ? $is_pay : $oInfo['pay'];
 				if($pay == '1' || $pay == '3'){
-					//Sms::order_msg($msgs,6);
+					Sms::order_msg($msgs,6);
 				}else{
-					//Sms::order_msg($msgs,$msgTpl);
+					Sms::order_msg($msgs,$msgTpl);
 				}
 			}
 
@@ -1667,8 +1686,8 @@ class Order extends \Libs\System\Service {
 				$checkCrm = $cid;
 			}
 			\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
-
-			return $info['order_sn'];
+			
+			return ['order_sn' => $info['order_sn'],'act'=> $oInfo['param'][0]['activity']];
 		}else{
 			//dump($flag);dump($flags);dump($state);dump($in_team);dump($up_quota);dump($pre);
 			//error_insert('400013');
@@ -2306,7 +2325,7 @@ class Order extends \Libs\System\Service {
 			}	
 		}
 		/*重新组合区域*/
-		foreach($area as $k=>$v){//dump($v);
+		foreach($area as $k=>$v){
 			if($product_type == '1'){
 				/*相同区域相同票型合并
 				$seat['area'][$v['areaId']]['seat'][$k] = array(
@@ -2319,13 +2338,15 @@ class Order extends \Libs\System\Service {
 				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];
 				$seat['area'][$v['areaId']]['price'] = $v['price'];
 				*/
-				//新未排座情况
-				$seat['area'][$v['priceid']]['areaId'] = $v['areaId'];//票型区域
-				$seat['area'][$v['priceid']]['priceid'] = $v['priceid'];//票型id
-				$seat['area'][$v['priceid']]['price'] = $v['price'];//票型价格
-				$seat['area'][$v['priceid']]['num'] = $v['num'];//票型数量
-				$seat['area'][$v['priceid']]['idcard'] = $v['idcard'];
-				$seat['num'] += $seat['area'][$v['priceid']]['num'];
+				$seat['area'][] = [
+					'areaId' => $v['areaId'],
+					'priceid'=> $v['priceid'],
+					'price'	 => $v['price'],
+					'num'	 =>	$v['num'],
+					'idcard' => $v['idcard']
+				];
+				$seat['num'] += $v['num'];
+				
 			}else{
 				//景区、漂流
 				if(empty($v['idcard'])){

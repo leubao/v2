@@ -27,7 +27,7 @@ class Autoseat extends \Libs\System\Service {
 			$g_num = count($group);
 			//$g_num = $g_num > 50 ? 50 : $g_num;
 			//判断是否可存在可售区域座椅
-			for($i = 0; $i<$g_num; $i++){
+			for($i = 0; $i < $g_num; $i++){
 				$nums = Autoseat::go_num($group[$i],$table,$area);
 				if((int)$nums >= (int)$num){
 					//当前分组满足需要 返回分组id
@@ -39,7 +39,7 @@ class Autoseat extends \Libs\System\Service {
 			}
 			//未找到单个满足条件的分组  连续查询多个分组
 			if(empty($g_id)){
-				for ($ii=0; $ii<$g_num; $ii++) { 
+				for ($ii = 0; $ii < $g_num; $ii++) { 
 					$groups = $group[$ii].','.$groups;
 					//最后一次循环自动加上未分组的座椅
 					if($ii == $g_num){

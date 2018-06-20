@@ -39,8 +39,13 @@ function printTicket(sn,planid){
             layer.msg('服务器请求超时，请检查网络...');
         },
 		success:function(data){
-			var selSeat = eval(data.info);/*返回的座位信息*/
+			
+			if(data.status == '300'){
+				//订单收款
+            	$(this).dialog({id:data.pageid, url:''+data.forwardUrl+'', title:data.title,width:data.width,height:data.height,resizable:false,maxable:false,mask:true});
+			}
 			if(data.status == '1'){
+				var selSeat = eval(data.info);/*返回的座位信息*/
 				$.each(selSeat,function(){
 					/*打印设置部分*/
 					CreateFullBill(this,type);
@@ -51,7 +56,8 @@ function printTicket(sn,planid){
 					/*关闭当前弹窗*/
 					$(this).dialog('close','print');
 				});
-			}else{
+			}
+			if(data.status != '1' && data.status != '300'){
 				$(this).alertmsg('error',data.message);
 				$(this).dialog('close','print');
 			}

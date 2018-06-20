@@ -10,10 +10,13 @@ namespace Api\Controller;
 use Common\Controller\LubTMP;
 use Libs\Service\Api;
 use Libs\Service\Order;
+use Libs\Service\Refund;
 use Libs\Service\Operate;
 class TrustController extends LubTMP {
 	//信任地址验证
 	function _initialize(){
+		
+		parent::_initialize();
 		/*获取请求的url 
 		$get_url = get_url();
 		//不成功返回错误
@@ -27,7 +30,9 @@ class TrustController extends LubTMP {
 			$this->ajaxReturn($return);
 		}*/
 	}
-	function index(){}
+	function index(){
+		echo "string";
+	}
 	//信任计划获取
 	function get_plan(){
 		$ginfo = I('get.');
@@ -100,6 +105,117 @@ class TrustController extends LubTMP {
 			'msg'	 => 'ok',
 		);
 		$this->ajaxReturn($return);
+	}
+	//阿里智游的订单
+	function alizhiyou_order()
+	{
+		$info = I('post.info');
+		$uInfo = ['id'=>'-1'];
+		$order = new Order();
+        $sn = $order->orderApi($info,'52',$uInfo);
+        if($sn){
+          $return = array(
+          	'status'=> true,
+            'code'  => 200,
+            'data'  => [
+            	'sn' => $sn,
+            	'seat'  => sn_seat($sn),
+            ],
+            'msg'   => 'OK',
+          );
+        }else{
+          $return = array('status'=>false,'code' => 403,'data'=>'' ,'msg' => $order->error);
+        }
+        die(json_encode($return));
+	}
+	//订单查询
+	function alizhiyou_detail(){
+		$return = array(
+	      	'status'=> true,
+	        'code'  => 200,
+	        'data'  => [
+	        	'sn' => $sn,
+	        	'seat'  => sn_seat($sn),
+	        ],
+	        'msg'   => 'OK',
+	     );
+		die(json_encode($return));
+	}
+	//退单
+	function alizhiyou_refund()
+	{
+		$pinfo = I('post.info');
+		$uInfo = ['id'=>'-1'];
+		$info = D('Item/Order')->where(['order_sn'=>$pinfo['sn']])->relation(true)->find();
+		//增加场次时间判断 开演后就不让提交退单申请
+		if(if_plan($info['plan_id']) == false){
+			$return = array(
+		      	'status'=> false,
+		        'code'  => 300,
+		        'data'  => [
+		        ],
+		        'msg'   => '抱歉，该场次或该订单状态不允许此项操作!',
+		    );
+			die(json_encode($return));
+		}else{
+			$model = new \Think\Model();
+			$model->startTrans();
+			if($info["status"] == '1' || $info["status"] == '5'){
+				//在lub_ticket_refund表中添加一条数据,记录申请
+				$data = array(
+					"createtime" => time(),
+					"order_sn"   => $ginfo["sn"],
+					"applicant"  => '-1',
+					"crm_id"     => $info["channel_id"],
+					"plan_id"    => $info["plan_id"],
+					"reason"     => $pinfo['reason'],//退单原因
+					"re_type"    => 5,//api接口
+					"status"     => 1,
+					"money"      => $info["money"],
+					"launch"     => 2,
+					"order_status" => '1'
+				);
+				$add = $model->table(C('DB_PREFIX')."ticket_refund")->add($data);
+				//修改lub_order表的status字段
+				$order_info = array(
+					"id" => $info["id"],
+					"status"   => $info['status'] == '1' ? '7' : '8',
+				);
+				$up = $model->table(C('DB_PREFIX')."order")->save($order_info);
+				
+				if($add && $up){
+					$model->commit();//成功则提交
+					$return = array(
+				      	'status'=> true,
+				        'code'  => 200,
+				        'data'  => [
+				        ],
+				        'msg'   => '抱歉，退单申请成功,等待确认!',
+				    );
+					die(json_encode($return));
+				}else{
+					$model->rollback();//不成功，则回滚
+					$return = array(
+				      	'status'=> false,
+				        'code'  => 300,
+				        'data'  => [
+				        ],
+				        'msg'   => '抱歉，退单申请失败!',
+				    );
+					die(json_encode($return));		
+				}				
+			}else{
+				$return = array(
+			      	'status'=> false,
+			        'code'  => 300,
+			        'data'  => [
+			        ],
+			        'msg'   => '抱歉，该场次或该订单状态不允许此项操作!',
+			    );
+				die(json_encode($return));				
+			}
+		}
+
 	}
 	/*下单*/
 	function insert_order(){

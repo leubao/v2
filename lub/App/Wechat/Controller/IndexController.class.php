@@ -36,10 +36,9 @@ class IndexController extends LubTMP {
         }else{
             session('pid',$this->pid);
         }
-        load_redis('set','userss',serialize(session('user')));
         //加载产品配置信息
         $proconf = get_proconf($this->pid,2);
-        $script = &  load_wechat('Script',$this->pid,1);
+        $script = & load_wechat('Script',$this->pid,1);
         //获取JsApi使用签名，通常这里只需要传 $url参数  
         //设置统一分享链接
         $options = $script->getJsSign(U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$this->user)));

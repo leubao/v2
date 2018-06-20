@@ -99,7 +99,10 @@ function product_name($param,$type=NULL){
  * @param $param int 操作员ID
  */
 function userName($param,$scene = '1',$type=NULL){
-    if(!empty($param)){
+    if($param == '0'){
+        $name = '阿里智游';
+    }
+    if(!empty($param) && $param > 0){
         switch ($scene) {
             case '1':
                 $table = 'User';
@@ -116,8 +119,6 @@ function userName($param,$scene = '1',$type=NULL){
                 break;
         }
         $name = M($table)->where(array('id'=>$param))->getField($field);
-    }else{
-        $name = "未知";
     }
     if($type){
         return $name ? $name : "未知";
@@ -1473,7 +1474,7 @@ function crmName($param,$type=NULL){
             if($time == '00'){
                 $time = '24'.date('i');
             }else{
-                $time = date('Hi');
+                $time = date('Hi',time());
             }
         }
         $plantime = date('Ymd',$plan['plantime']);

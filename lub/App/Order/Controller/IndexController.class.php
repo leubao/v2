@@ -190,8 +190,10 @@ class IndexController extends ManageBase {
 	        if(!empty($status)){$export_map['status'] = $status;$map['status'] = array('in',$status);}
 	        if(!empty($type)){$map['type'] = $type;}
 	        if(!empty($pay)){$map['pay'] = $pay;}
+	        
+	        $map['product_id'] = get_product('id');
         }
-        $map['product_id'] = get_product('id');
+        
         $return = [
         	'map'	=>	$map,
         	'export'=>	$export_map

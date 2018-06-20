@@ -328,7 +328,8 @@
 <script type="text/javascript">
 
 var type = {$info['type']},
-    product = {$info['productid']};
+    product = {$info['productid']},
+    real = 0;
 /*网银支付*/
 $('#webpay').click(function(){
     $("#pay_money").val($("#tomoney").val()); //订单金额
