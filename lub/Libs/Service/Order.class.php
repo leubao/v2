@@ -404,7 +404,7 @@ class Order extends \Libs\System\Service {
 	* @param 只有企业客户和全员销售的个人客户允许授信额支付
 	*/
 	function mobile_seat($info,$oinfo,$channel_type = '2'){
-		//获取座位区域信息
+		/*获取座位区域信息
 		$param = unserialize($oinfo['info']);
 		$seat = $param['data'];
 		//判断订单类型 pay_type seat_type
@@ -415,6 +415,30 @@ class Order extends \Libs\System\Service {
 			$info['seat_type'] = '2';
 		}
 		$status = Order::quickSeat($seat,$oinfo,'',$channel_type,$info['seat_type'],$info['pay_type']);
+		return $status;*/
+
+		//获取座位区域信息
+		$param = unserialize($oinfo['info']);
+		$seat = $param['data'];//dump($param);
+		//判断订单类型 pay_type seat_type
+		//是否是预订单  政府的单子可选择手动排座还是自动排座 其它预定的单子默认手动排座
+		if($param['param'][0]['pre'] == '1' && $param['param'][0]['gov'] == '1'){
+			$info['seat_type'] = $info['seat_type'];
+		}elseif($param['param'][0]['pre'] == '1'){
+			$info['seat_type'] = '2';
+		}
+		if($oinfo['product_type'] == '1'){
+			//剧场
+			$status = Order::quickSeat($seat,$oinfo,'',$channel_type,$info['seat_type'],$info['pay_type']);
+		}else{
+			//景区漂流 套票
+			if((int)$param['param'][0]['atype'] === 5){
+				$status = Order::packTicket($oinfo,'','',1,$info['pay_type']);
+			}else{
+				$status = Order::quickScenic($oinfo,'','',1,$info['pay_type']);
+			}
+			
+		}
 		return $status;
 	}
 	/**************************************************渠道订单****************************************************/
@@ -485,7 +509,7 @@ class Order extends \Libs\System\Service {
 		$return = $this->quick_order($info,$scena,$uinfo,$is_seat,$channel);
 		//dump($return);
 		if($return != false){
-			M('ApiOrder')->add(array('app_sn'=>$info['app_sn'],'order_sn'=>$return));
+			M('ApiOrder')->add(array('app_sn'=>$info['app_sn'],'order_sn'=>$return['order_sn']));
 		}
 		return $return;
 	}
@@ -1468,7 +1492,7 @@ class Order extends \Libs\System\Service {
 				);
 				/*校验身份证号码是否正确*/
 				$id_card = strtoupper($v['idcard']);
-				if(!empty($id_card)){
+				if(!empty($id_card)  && (int)$info['param'][0]['cert_type'] === 1){
 					if(!checkIdCard($id_card)){
 						$this->error = '400030 : 身份证号码有误...';
 						$model->rollback();
@@ -1670,7 +1694,7 @@ class Order extends \Libs\System\Service {
 			    	$crminfo = Order::crminfo($plan['product_id'],$oInfo['crm'][0]['qditem']);
 			    }
 				$msgs = array('phone'=>$oInfo["crm"][0]['phone'],'title'=>planShows($plan['id']),'num'=>$counts,'remark'=>$msg,'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
-				//根据支付方式选择短信模板 
+				/*根据支付方式选择短信模板 */
 				$pay = $is_pay ? $is_pay : $oInfo['pay'];
 				if($pay == '1' || $pay == '3'){
 					Sms::order_msg($msgs,6);
