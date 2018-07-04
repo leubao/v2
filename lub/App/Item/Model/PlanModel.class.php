@@ -283,6 +283,7 @@ class PlanModel extends Model{
         if($info['product_type'] == '1'){
         	//剧院产品
         	$seattable  = $this->createtable($info['seat_table'],seat);
+
         	if($seattable !== false){
         		//根据计划写入座椅信息
         		//读取座椅信息
@@ -563,13 +564,15 @@ sql;
 				$group_seat[$ke] = unserialize($va['seat']);
 				//按排遍历
 				foreach ($group_seat[$ke] as $ka=>$ve){
-					if(!empty($ve['seat'])){
+					if(!empty($ve['seat']) && in_array($ve['id'],$seat)){
+						
 						$map = array(
 							'area'	=>	$ve['id'],
 							'seat'	=>	array('in',$ve['seat']),
 						);
 						$up_seat = $db->where($map)->setField(array('group'=>$va['id'],'sort'=>$va['sort']));
 						if($up_seat == false){
+
 							error_insert('400113');
 							//删除已创建的计划表 TODO
 							//$this->roll_back($table);
