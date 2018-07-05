@@ -143,9 +143,9 @@ class Report{
 						//当前日期是否已生成
 						foreach ($plan as $k => $v) {
 				    		$map = array(
-								'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
+								'status' 	 => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 								'product_id' => $value['id'],
-								'plan_id' => $v['id'],
+								'plan_id'    => $v['id'],
 							);
 							$status = Report::strip_order($map,$datetime,1);
 				    	}
@@ -187,7 +187,7 @@ class Report{
 				$plan = M('Plan')->where(array('id'=>$value['plan_id']))->field('plantime,games')->find();
 				$general = array(
 					'datetime'	=>	$datetime,	//报表日期时间
-					'product_id'=>	$value['product_id'],
+					'product_id'=>	$value['product_id'],//判断票型对应的产品，多产品联合促销
 					'plantime'	=>	date('Ymd',$plan['plantime']),
 					'games'		=>	$value['product_type'] == '1' ? $plan['games'] : 0,	//场次
 					'order_sn'	=>	$value['order_sn'],	//订单号
@@ -230,6 +230,8 @@ class Report{
  		foreach($seat as $k=>$v){
  			$datalist[$v['priceid']][] = $v;
  		}
+ 		//
+ 		
  		//计算票型内门票数量 以及重组要写入数组
  		$t_type = array_keys($datalist);//获取当前订单的票型
  		for ($i=0; $i < count($datalist); $i++) {
@@ -239,12 +241,14 @@ class Report{
  				}else{
  					$nums[$i] = count(array_filter($datalist[$t_type[$i]]));
  				}
-	 			$money[$i] = Report::settlement($nums[$i],$t_type[$i],$general['product_id']);
+ 				$product = Report::ticket_product($t_type[$i]);
+	 			$money[$i] = Report::settlement($nums[$i],$t_type[$i],$product);
 	 			if($product_type == '1'){
 	 				$area = $datalist[$t_type[$i]][0]['areaId'];
 	 			}else{
 	 				$area = $t_type[$i];
 	 			}
+	 			//读取票型缓存，更新产品ID
 	  			$data[$i] = array(
 	 				'area'		=>	$area,	//区域ID
 					'price_id'	=>	$t_type[$i],//票型ID
@@ -256,6 +260,7 @@ class Report{
 					'subsidy'   =>  $money[$i]['rebate'],  //补贴金额  
 					'region'	=>	$param[0]['tour'] ? $param[0]['tour'] : '0',
 	 			);
+	 			$general['product_id'] = $product;
 	 			$datas[$i] = array_merge($data[$i],$general);
  			}else{
  				//记录异常日志
@@ -270,6 +275,12 @@ class Report{
  			//非计划任务拆解
  			return $datas;
  		}
+ 	}
+ 	//根据票型获取产品ID	
+ 	public function ticket_product($ticket)
+ 	{
+ 		$product = D('TicketType')->where(['id'=>$ticket])->cache(true)->getField('product_id');
+ 		return $product;
  	}
  	/*
 	*数据写入

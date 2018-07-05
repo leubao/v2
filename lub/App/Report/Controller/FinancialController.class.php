@@ -93,10 +93,11 @@ class FinancialController extends ManageBase{
         //按照客户分组来统计报表 TODO 政企订单不计算在内
         $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
-        G('begin');//createtime,
+        G('begin');
         $db = D('ReportData');
 		$map['product_id'] = $this->pid;
-		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,region,pay,type,plantime,games,user_id,status',true)->select();//echo count($list)."<br>";
+		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,region,pay,type,plantime,games,user_id,status,createtime',true)->select();//echo count($list)."<br>";
+		//dump($list);
 		if(!empty($list)){
 			if($this->procof['agent'] == '1'){
 				//开启代理商制度，时执行

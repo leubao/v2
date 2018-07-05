@@ -433,9 +433,9 @@ class Order extends \Libs\System\Service {
 		}else{
 			//景区漂流 套票
 			if((int)$param['param'][0]['atype'] === 5){
-				$status = Order::packTicket($oinfo,'','',1,$info['pay_type']);
+				$status = Order::packTicket($oinfo,'','',$channel_type,$info['pay_type']);
 			}else{
-				$status = Order::quickScenic($oinfo,'','',1,$info['pay_type']);
+				$status = Order::quickScenic($oinfo,'','',$channel_type,$info['pay_type']);
 			}
 			
 		}
@@ -1269,36 +1269,8 @@ class Order extends \Libs\System\Service {
 			}
 			//判断是否是底价结算
 			if($crmInfo['group']['settlement'] == '1' || $crmInfo['group']['settlement'] == '3'){
-				if($crmInfo['group']['type'] == '4'){
-					//当所属分组为个人时，补贴到个人
-					$type = '1';
-				}else{
-					$type = '2';
-				}
-				$teamData = array(
-					'order_sn' 		=> $info['order_sn'],
-					'plan_id' 		=> $info['plan_id'],
-					'subtype'		=> '0',
-					'product_type'	=> $info['product_type'],//产品类型
-					'product_id' 	=> $info['product_id'],
-					'user_id' 		=> $info['user_id'],
-					'money'			=> $rebate,
-					'number'		=> $info['number'],
-					'guide_id'		=> $info['info']['crm'][0]['guide'],
-					'qd_id'			=> $info['info']['crm'][0]['qditem'],
-					'status'		=> '1',
-					'type'			=> $type,//窗口团队时可选择，渠道版时直接为渠道商TODO 渠道版导游登录时
-					'userid'		=> '0',
-					'createtime'	=> $createtime,
-					'uptime'		=> $createtime,
-				);
-				//窗口团队时判断是否是底价结算
-				if($info['type'] == '2' && $proconf['settlement'] == '2'){
-					$in_team = true;
-				}else{
-					$in_team = $model->table(C('DB_PREFIX'). 'team_order')->addAll($teamData);
-					if(!$in_team){error_insert('400017');$model->rollback();return false;}
-				}
+				//存储待处理数据 回头处理多产品分销 TODO
+				//load_redis('lpush','PreOrder',$info['order_sn']);
 			}
 		}
 		//判断活动属性 todo 读取活动属性
@@ -1319,6 +1291,7 @@ class Order extends \Libs\System\Service {
 		$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->setField('info',serialize($newData));
 		//改变订单状态
 		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(['status'=>'1','pay'=>$newData['pay']]);
+		dump($state);dump($status);
 		if($state && $status){
 			$model->commit();//提交事务
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
@@ -1337,7 +1310,7 @@ class Order extends \Libs\System\Service {
 			}else{
 				$checkCrm = $cid;
 			}
-			\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
+			//\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
 
 			return $info['order_sn'];
 		}else{
@@ -2391,6 +2364,10 @@ class Order extends \Libs\System\Service {
 					$seat['num'] += $v['num'];
 				}
 			}//dump($settlement);
+			//TODO 临时解决散客销售底价结算问题
+			if($v['priceid'] == 468){
+				$settlement = 2;
+			}
 			//计算订单金额
 			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement,$channel);
 			if($price != '0'){

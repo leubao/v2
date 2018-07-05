@@ -44,7 +44,7 @@ class Rebate extends \Libs\System\Service {
 				'status' => array('in','1,6,7,9'),
 				'type'  => array('in','2,4,8,9'),
 			);
-			$info = D('Item/Order')->where($map)->relation(true)->find();
+			//$info = D('Item/Order')->where($map)->relation(true)->find();
 			 //判断系统设置是否有存在返利
 			$info['info'] = unserialize($info['info']);
 			//个人允许底价结算,且有返佣
