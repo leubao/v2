@@ -283,7 +283,6 @@ class PlanModel extends Model{
         if($info['product_type'] == '1'){
         	//剧院产品
         	$seattable  = $this->createtable($info['seat_table'],seat);
-
         	if($seattable !== false){
         		//根据计划写入座椅信息
         		//读取座椅信息
@@ -295,36 +294,7 @@ class PlanModel extends Model{
         		}else{
         			$up = $this->where(array('id'=>$planid))->setField('status',3);
 			        if($up){
-			        	//查询所有有效渠道商
-			        	/*$crm = M('Crm')->where(array('status'=>'1','product_id'=>$info['product_id']))->field('id,product_id')->select();
-			        	foreach ($crm as $v){
-			        		$quota_crm[] = array(
-			        			'number'	=>	"0",
-			        			'channel_id' => $v['id'],
-			        			'plan_id'	 => $planid,
-			        			'product_id' => $info['product_id'],
-			        		); 
-			        	}
-			        	$quota_use = M('QuotaUse')->addAll($quota_crm);
-			        	写入智能排座
-			        	$auto = M('AutoSeat')->where(array('status'=>1,'product_id'=>$info['product_id']))->field('id,seat,num')->select();
-			        	foreach ($auto as $va){
-			        		//分区域、分组写入数量
-			        		$va['seat'] = unserialize($va['seat']);
-			        		foreach($va['seat'] as $kk=>$vv){
-			        			if(!empty($vv['num'])){
-			        				$auto_seat[] = array(	
-					        			'product_id'=>	$info['product_id'],	
-					        			'plan_id'	=>	$planid, 
-					        			'group_id'	=>	$va['id'],
-					        			'nums'		=>	$vv['num'],
-					        			'area'		=>	$kk,
-					        		); 
-			        			}
-			        		}
-			        	}
-			        	$auto_group = M('AutoNum')->addAll($auto_seat);
-			        	*/
+			  
 			        	$auto_group =  true;
 			        	$quota_use = true;
 			        	if($quota_use && $auto_group){
@@ -564,16 +534,15 @@ sql;
 				$group_seat[$ke] = unserialize($va['seat']);
 				//按排遍历
 				foreach ($group_seat[$ke] as $ka=>$ve){
-					if(!empty($ve['seat']) && in_array($ve['id'],$seat)){
-						
+					if(!empty($ve['seat'])){
 						$map = array(
 							'area'	=>	$ve['id'],
 							'seat'	=>	array('in',$ve['seat']),
 						);
 						$up_seat = $db->where($map)->setField(array('group'=>$va['id'],'sort'=>$va['sort']));
 						if($up_seat == false){
-
 							error_insert('400113');
+							echo '座位分组规则写入有误';
 							//删除已创建的计划表 TODO
 							//$this->roll_back($table);
 							return false;

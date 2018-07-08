@@ -80,7 +80,8 @@ class SharingController extends Controller {
     }
     public function rebate()
     {   
-        /************crm param json 转换 start**********/
+        echo U('Api/Sharing/seat_auto_group',['plan'=>402]);
+        /************crm param json 转换 start**********
         $list = D('Crm')->field('id,param,f_agents')->select();
         foreach ($list as $k => $v) {
            $param = unserialize($v['param']);
@@ -219,5 +220,40 @@ class SharingController extends Controller {
             $mon += $value['money'];
         }
         echo $mon;*/
+    }
+    public function seat_auto_group()
+    {
+        //写入分组信息
+        $ginfo = I('get.');
+        $plan = D('Plan')->where(['id'=>$ginfo['plan'],'status'=>['in','2,3']])->find();
+        if(empty($plan)){
+            die('销售计划不可用');
+        }
+        $product = D('Product')->where(['id'=>$plan['product_id']])->find();
+        $data = unserialize($plan['param']);
+        $auto_group = implode(',',$data['auto_group']);
+        $group_map = array(
+            'id'    =>  array('in',$auto_group),
+            'status'=>  '1',
+            'product_id'=>get_product('id'),
+            'template_id'=>$product['template_id'],
+        );
+        $group  = M('AutoSeat')->where($group_map)->field('id,sort,seat')->select();
+        foreach ($group as $ke=>$va){
+            $group_seat[$ke] = unserialize($va['seat']);
+            //按排遍历
+            foreach ($group_seat[$ke] as $ka=>$ve){
+                if(!empty($ve['seat'])){
+                    $map = array(
+                        'area'  =>  $ve['id'],
+                        'seat'  =>  array('in',$ve['seat']),
+                    );
+                    $up_seat = D(ucwords($plan['seat_table']))->where($map)->setField(array('group'=>$va['id'],'sort'=>$va['sort']));
+                    if($up_seat == false){
+                        echo '座位分组规则写入有误';
+                    }
+                }   
+            }
+        }
     }
 }

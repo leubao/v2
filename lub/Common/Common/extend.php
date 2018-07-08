@@ -384,6 +384,10 @@ function planShow($param,$stype = 1,$type=NULL){
                 //不显示场次 和结束时间 景区
                 $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
                 break;
+            case '25':
+                //只显示日期
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
+                break;
             case '31':
                 //不显示场次 和结束时间
                 //$name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
@@ -1371,6 +1375,7 @@ function crmName($param,$type=NULL){
                 }
             }
         }
+        
         return $seat;
     }
     /*

@@ -4,7 +4,8 @@ use Think\Model;
 class CrmModel extends Model{
 	 protected $_auto = array (
          array('create_time','time',1,'function'),
-         array('status','1',2),
+         array('status','1'),
+         array('cash','0.00'),
          array('uptime','time',3,'function'), // 对update_time字段在更新的时候写入当前时间戳
      );
 	//缓存渠道商
@@ -28,7 +29,11 @@ class CrmModel extends Model{
 	/**
      * 插入成功后的回调方法
      */
-    protected function _after_insert() {
+    protected function _after_insert($data, $options) {
+        //添加信息后，更新密码字段
+        $this->where(array('id' => $data['id']))->save(array(
+            'incode' => date('Ymd').$data['id'],
+        ));
         $this->crm_cache();
     }
     /**

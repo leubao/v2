@@ -119,7 +119,7 @@ class TrustController extends LubTMP {
             'code'  => 200,
             'data'  => [
             	'sn' => $sn,
-            	'seat'  => sn_seat($sn),
+            	'seat'  => sn_seat($sn['order_sn']),
             ],
             'msg'   => 'OK',
           );
@@ -287,6 +287,9 @@ class TrustController extends LubTMP {
 	/*处理对接数据*/
 	function dealpre(){
 		\Libs\Service\Rebate::ajax_rebate_order();
+		//轮询待发送的模板消息 TODO
+		$tplMsg = new \Wechat\Controller\NotifyController;
+		$tplMsg->fillToMsg();
 		return true;
 	}
 	/**

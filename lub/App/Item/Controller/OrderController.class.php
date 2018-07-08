@@ -219,6 +219,7 @@ class OrderController extends ManageBase{
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);
 				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."&".$oinfo['id']."^#";
+				dump($sale);
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
@@ -227,6 +228,7 @@ class OrderController extends ManageBase{
 					'starttime'     =>  date('H:i',$plan['starttime']),
 					'endtime'		=>	date('H:i',$plan['endtime']),
 					'price'			=>	$sale['price'],
+					'priceName'		=>	$sale['priceName'],
 					'product_name' 	=>	$sale['product_name'],
 					'remark'		=>	$sale['remark'],
 					'remark_type'	=>	$sale['remark_type'],

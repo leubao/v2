@@ -85,20 +85,23 @@ class IndexController extends ManageBase{
 				'address'	=>	$pinfo['address'],
 				'contacts'	=>	$pinfo['contacts'],
 				'phone'		=>	$pinfo['phone'],
-				'status'	=>	$pinfo['status'],
 				'groupid'	=>	$pinfo['groupid'],
 				'type'		=>  $pinfo['type'],
 				'param'		=>	json_encode($param),
+				'level'		=>  '16',
+				'create_time'=> time(),
+				'status'	=>	1
 			];
-			if($model->create($data)){
-				$result = $model->add(); // 写入数据到数据库 
-    			if($result){
-        			$this->srun('新增成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
-    			}else{
-    				$this->erun('新增失败!');
-    			}
+			
+			if($model->token(false)->create($data)){
+				$result = $model->add($data); // 写入数据到数据库 
+				if($result){
+	    			$this->srun('新增成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
+				}else{
+					$this->erun('新增失败!');
+				}
 			}else{
-				$this->erun('新增失败!');
+				$this->erun('新增失败!'.$model->getError());
 			}
 		}else{
 			$groupid = I('groupid');//客户分组id
