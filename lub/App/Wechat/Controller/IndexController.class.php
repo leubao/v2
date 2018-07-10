@@ -36,9 +36,10 @@ class IndexController extends LubTMP {
         }else{
             session('pid',$this->pid);
         }
+        load_redis('set','userss',serialize(session('user')));
         //加载产品配置信息
         $proconf = get_proconf($this->pid,2);
-        $script = & load_wechat('Script',$this->pid,1);
+        $script = &  load_wechat('Script',$this->pid,1);
         //获取JsApi使用签名，通常这里只需要传 $url参数  
         //设置统一分享链接
         $options = $script->getJsSign(U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$this->user)));
@@ -243,7 +244,7 @@ class IndexController extends LubTMP {
      * LubTicket 门票单品购买页面
      */
     function show(){
-        session('user',null);//TODO  生产环境删除
+        //session('user',null);//TODO  生产环境删除
         //判断用户是否登录   检查session 是否为空
         $user = session('user');
         if(empty($user['user']['openid'])){
@@ -748,6 +749,7 @@ class IndexController extends LubTMP {
                     $prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
                     if($prepayid){
                         $options = $pay->createMchPay($prepayid);
+                        //dump($options);
                     }else{
                         // 创建JSAPI签名参数包，这里返回的是数组
                         $this->assign('error',$pay->errMsg.$pay->errCode);
@@ -769,10 +771,69 @@ class IndexController extends LubTMP {
             $order = new Order();
             $sn = $order->mobile($info,$uinfo['user']['scene'],$uinfo['user']);
             if($sn != false){
-               // dump(U('Wechat/Index/order',array('sn'=>$sn,'pid'=>$this->pid)));
                 $return = array(
                     'statusCode' => 200,
                     'url' => U('Wechat/Index/order',array('pid'=>$this->pid,'sn'=>$sn)),
+                ); 
+            }else{
+                $return = array(
+                    'statusCode' => 300,
+                    'url' => '',
+                );  
+            }
+            die(json_encode($return));
+        }else{
+            $info = D('Item/Order')->where(array('order_sn'=>$this->ginfo['sn']))->relation(true)->find();
+            $info['info'] = unserialize($info['info']);
+            $this->wx_init($this->pid);
+            if(in_array($info['status'],array('1','9'))){
+                $this->error("订单状态不允许此项操纵");
+            }else{
+                //根据订单属性判断是否需要加载微信支付 散客和政企通过微信购票
+                if($info['type'] == '1' || $info['type'] == '6' || $info['type'] == '8'){
+                    $user = session('user');
+                    if(empty($user)){
+                       $user = Wticket::tologin($this->ginfo);
+                    }
+                    // 获取预支付ID
+                    if($info['money'] == '0'){
+                       $money = 0.1*100;
+                    }else{
+                       $money = $info['money']*100; 
+                    }
+                    //$money = 1;
+                    $proconf = cache('ProConfig');
+                    $proconf = $proconf[$this->pid][2];
+                    $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
+                    //产品名称
+                    $product_name = product_name($this->pid,1);
+                    $pay = & load_wechat('Pay',$this->pid);
+                    $prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
+                    if($prepayid){
+                        $options = $pay->createMchPay($prepayid);
+                    }else{
+                        // 创建JSAPI签名参数包，这里返回的是数组
+                        $this->assign('error',$pay->errMsg.$pay->errCode);
+                    }
+                    $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
+                }
+            }
+            $this->assign('data',$info)->display();
+        }
+    }
+    //景区订单
+    function scenic_order(){
+        if(IS_POST){
+            //创建订单
+            $info = $_POST['info'];
+            //判断数据的完整性
+            $uinfo = session('user');
+            $order = new Order();
+            $sn = $order->mobile($info,$uinfo['user']['scene'],$uinfo['user']);
+            if($sn != false){
+                $return = array(
+                    'statusCode' => 200,
+                    'url' => U('Wechat/Index/scenic_order',array('pid'=>$this->pid,'sn'=>$sn)),
                 ); 
             }else{
                 $return = array(
@@ -987,28 +1048,85 @@ class IndexController extends LubTMP {
      *       }
      *   }
      * }
-     * 
     */
     function to_tplmsg($info,$product_id){
         $proconf = get_proconf($product_id,2);
         $attach = unserialize($info['attach']);
         $template = array(
             'touser'=>$info['openid'],//指定用户openid
-            'template_id'=>$proconf['wx_tplmsg_order_id'],
-            'url'   =>  U('Wechat/Index/order_info',array('sn' => $info['out_trade_no'])),
+            'template_id'=>'8W2t7l0loiAdTl7l0U7OWb7qZC-keLqi1FRuRQYkNtI',
+            'url'   =>  U('Wechat/Index/scenic_ticket',array('sn' => $info['out_trade_no'])),
             'topcolor'=>"#7B68EE",
             'data'=>array(
                 'first'=>array('value'=>'您好，您的门票订单已预订成功。'."\n"),
-                'OrderID' =>array('value'=>$info['out_trade_no'],'color'=>'#5cb85c'),
-                'PkgName'=>array('value'=>$attach['product_name'],'color'=>'#5cb85c'),
-                'TakeOffDate'=>array('value'=>$attach['plan']."\n",'color'=>'#5cb85c'),
-                'remark'=>array('value'=>$proconf['wx_tplmsg_order_remark']), 
+                'keyword1' =>array('value'=>$info['out_trade_no'],'color'=>'#5cb85c'),
+                'keyword2' =>array('value'=>$attach['product_name'],'color'=>'#5cb85c'),
+                'keyword3' =>array('value'=>$info['out_trade_no'],'color'=>'#5cb85c'),
+                'keyword4' =>array('value'=>$info['number'],'color'=>'#5cb85c'),
+                'keyword5'=>array('value'=>$attach['plan']."\n",'color'=>'#5cb85c'),
+                'remark'=>array('value'=>'欢迎来到《梦里老家》太子惊魂惊悚体验馆,点击立即使用'), 
             )
         );
         $sndMsg = & load_wechat('Receive',$product_id,1);
-
         $res = $sndMsg->sendTemplateMessage($template);
         //TODO  回传模板消息发送状态
+    }
+    public function scenic()
+    {
+        //session('user',null);//TODO  生产环境删除
+        //判断用户是否登录   检查session 是否为空
+        $user = session('user');
+        if(empty($user['user']['openid'])){
+           Wticket::tologin($this->ginfo);
+           $user = session('user');
+        }
+        //dump($user);dump($user);dump($user);dump($user);
+        //判断是否已经在登录
+        $this->check_login(U('Wechat/Index/scenic',array('pid'=>$this->pid,'u'=>$this->user,'param'=>$this->param)));
+        //与数据比对、是否绑定渠道商\
+        //根据当前用户属性  加载价格及座位
+        $plan = Wticket::getplan($this->pid);
+        load_redis('set','goods_info_plan',json_encode($plan));
+        $param = array('pid'=>$this->pid);
+        $goods_info = array_merge($plan,$user);
+        load_redis('set','goods_info',json_encode($goods_info));
+        $this->wx_init($this->pid);
+        session('pid',$this->pid);
+        $urls = Wticket::reg_link($user['user']['id'],$this->pid);
+        //限制单笔订单最大数
+        $this->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
+            ->assign('urls',$urls)->assign('param',$param)->display();
+    }
+    //电子门票
+    function scenic_ticket()
+    {
+        $info = D('Item/Order')->where(array('order_sn'=>$this->ginfo['sn'],'product_id'=>44))->relation(true)->find();
+        $info['info'] = unserialize($info['info']);
+        //区域分类
+        foreach ($info['info']['data'] as $key => $value) {
+            $area[$value['areaId']]['area'] = $value['areaId'];
+            $area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
+        }
+        $this->wx_init($this->pid);
+        $this->assign('data',$info);
+        $this->display();
+    }
+    //核销电子票
+    function check_ticket(){
+        //出票过程
+        $pinfo = I('get.');
+        $updata = ['status'=>9,'uptime'=>time(),'is_print'=>1];
+        $status = D('Order')->where(['order_sn'=>$pinfo['sn'],'status'=>1])->setField($updata);
+        if($status){
+            $return = array('statusCode'=>200);
+        }else{
+            $return = array('statusCode'=>300);
+        }
+        die(json_encode($return)); 
+    }
+    public function map()
+    {
+        $this->display();
     }
     /*微信API 相关处理  后期完善
     文本消息

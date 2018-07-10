@@ -396,7 +396,7 @@ class WechatController extends ManageBase{
         $upload->autoSub   =  false;
         $upload->replace   =  true;//存在同名文件是否是覆盖，默认为false
         $upload->rootPath  =  SITE_PATH.'pay/wxpay/'; // 设置附件上传根目录
-        $upload->savePath  =  get_product('id').'/';
+        $upload->savePath  =  get_item('id').'/';
         $upload->saveName  = '';
         //dump($_FILES['file']);
         // 上传单个文件 

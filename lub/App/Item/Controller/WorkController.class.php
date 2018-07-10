@@ -634,33 +634,34 @@ class WorkController extends ManageBase{
 	function refunds(){
 		$ginfo = I('get.');
 		if(empty($ginfo)){$this->erun("参数错误!");}
-		//退订单所有门票
-		if($ginfo['order'] == '1'){
-			//订单内所有门票全退
-			try {
-			    $ret = Refund::refund($ginfo,1,'','',1,1);
-			    $this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
-			} catch (PayException $e) {
-			    $this->erun($e->errorMessage());
-			    exit;
+		try{
+			$refund = new Refund;
+			switch ((int)$ginfo['order']) {
+				case 1:
+					//退订单所有门票
+					$ret = $refund->refund($ginfo,1,'','',1,1);
+					break;
+				case 3:
+					//退单个座位
+					$ret = $refund->refund($ginfo,2,$ginfo['area'],$ginfo['seatid'],1,1);
+					break;
+				case 5:
+					//退子票 TODO  子票只能单张退
+					$ret = $refund->refund($ginfo,5,$ginfo['area'],$ginfo['seatid'],1,1);
+					break;
+
+				default:
+					$ret = false;//['status'=>false,'msg'=>'未知退票类型']
+					break;
 			}
-		}
-		//退单个座位
-		if($ginfo['order'] == '3'){
-			//退单个座位
-			if(Refund::refund($ginfo,2,$ginfo['area'],$ginfo['seatid'],1,1) != false){
+			if($ret){
 				$this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
 			}else{
-				$this->erun('退票失败!');
-			}		
-		}
-		//退子票 TODO  子票只能单张退
-		if($ginfo['order'] == '5'){
-			if(Refund::refund($ginfo,5,$ginfo['area'],$ginfo['seatid'],1,1) != false){
-				$this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
-			}else{
-				$this->erun('退票失败!');
+				$this->erun('退票失败:'.$refund->error);
 			}
+		}catch (PayException $e) {
+		    $this->erun($e->errorMessage());
+		    exit;
 		}
 	}
 	/**
