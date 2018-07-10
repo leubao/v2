@@ -8,6 +8,8 @@
 // +----------------------------------------------------------------------
 namespace Libs\Service;
 use Common\Model\Model;
+use Payment\Common\PayException;
+use Payment\Client\Refund as wxRefund;
 class Refund extends \Libs\System\Service {
 	
 	/*退票处理
@@ -161,7 +163,7 @@ class Refund extends \Libs\System\Service {
 				if($income == false){echo "15";
 					$model->rollback();return false;
 				}
-			}else{echo "16";
+			}else{
 				$model->rollback();return false;
 			}
 		}
@@ -186,7 +188,6 @@ class Refund extends \Libs\System\Service {
 				if(Refund::check_seat($plan['seat_table'],$sn) != false){
 					$map = array('order_sn'=>$sn,'status'=>array('notin','99'));
 				}else{
-					echo "string";
 					error_insert('400015');
 					$model->rollback();return false;
 				}
@@ -556,16 +557,18 @@ class Refund extends \Libs\System\Service {
 					if(Refund::check_seat($plan['seat_table'],$sn) != false){
 						$map = array('order_sn'=>$sn,'status'=>array('notin','99'));
 					}else{
-						echo "string";
-						error_insert('400015');
-						$model->rollback();return false;
+						$model->rollback();
+						$this->error = '400015:';
+						return false;
 					}
 				}
 			}
 			$up = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
 			if($up == false){
 				error_insert('400410');
-				$model->rollback();return false;
+				$model->rollback();
+				$this->error = '';
+				return false;
 			}
 		}else{
 			//无座位
@@ -765,10 +768,14 @@ class Refund extends \Libs\System\Service {
 		}
 		/*微信支付4支付宝5微信支付*/
 		if($info['pay'] == '5'){
-			Refund::weixin_refund($sn,$info['product_id'],$money_back);
+			$refundPay = Refund::weixin_refund($sn,$info['product_id'],$money_back);
+			if(!$refundPay){
+				$model->rollback();//事务回滚
+				return false;
+			}
 		}
 		if($info['pay'] == '4'){
-			Refund::alipay_refund($sn,$info['product_id'],$money_back);
+			$refundPay = Refund::alipay_refund($sn,$info['product_id'],$money_back);
 		}
 		/*=============处理日志===============*/
 		if($info['status'] <> '7'){
@@ -1028,39 +1035,72 @@ class Refund extends \Libs\System\Service {
 			$model->rollback();//不成功，则回滚
 			$this->erun("返利失败!");
 		}
-	}
+	} 
 	//微信退款
 	function weixin_refund($sn,$product_id,$money){
-		//读取支付日志
+		
+
 		$info = D('Item/Pay')->where(array('order_sn'=>$sn))->find();
-		$pay = & load_wechat('Pay',$product_id);
-		if($money > $info['money']){
-			return false;
-		}
-		$money = $money*100;
+		
+		//$money = $info['money'];//临时
 		$rsn = get_order_sn($product_id);
-		$result = $pay->refund($sn,$info['out_trade_no'],$rsn,$money,$money);
-		// 处理创建结果
-		if($result===FALSE){
-		    //TODO  写入紧急处理错误
-		    //写入待处理事件
-		    load_redis('lpush','WeixinPayRefund',$sn);
-		}else{
-		    // 接口成功的处理
-		    $param = unserialize($info['param']);
-		    $param['refund'] = $result;
-		    $uppaylog = array(
-		    	'status'		=>	4,
-		    	'out_refund_no'	=>	$result['refund_id'],
-		    	'refund_sn'		=>	$result['out_refund_no'],
-		    	'refund_moeny'	=>	$result['cash_refund_fee'],
-		    	'param'			=>  serialize($param),
-		    	'user_id'		=>	get_user_id(),
-		    	'update_time'	=>	time()
-		    );
-            $paylog = D('Item/Pay')->where(array('order_sn'=>$sn))->save($uppaylog);
+	
+		try {
+			$config = load_payment('wx_refund');
+			$data = [
+			    'out_trade_no' => $sn,
+			    'total_fee'  => $info['money'],
+			    'refund_fee' => $money,
+			    'refund_no'  => $rsn,
+			    'refund_account' => 'REFUND_UNSETTLED',// REFUND_RECHARGE:可用余额退款  REFUND_UNSETTLED:未结算资金退款（默认）
+			    'sub_appid'     =>  $config['sub_appid'],
+	            'sub_mch_id'    =>  $config['sub_mch_id']
+			];
+		    $ret = wxRefund::run('wx_refund', $config, $data);
+		    if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
+		    	if($money == $info['money']){
+		    		//全部退款
+				    $param = unserialize($info['param']);
+				    $param['refund'] = $result;
+				    $uppaylog = array(
+				    	'status'		=>	4,
+				    	'out_refund_no'	=>	$result['refund_id'],
+				    	'refund_sn'		=>	$result['out_refund_no'],
+				    	'refund_moeny'	=>	$result['cash_refund_fee'],
+				    	'param'			=>  serialize($param),
+				    	'user_id'		=>	get_user_id(),
+				    	'update_time'	=>	time()
+				    );
+		            $paylog = D('Item/Pay')->where(array('order_sn'=>$sn))->save($uppaylog);
+		    	}else{
+		    		//部分退款
+		    		$pay_log = array(
+				        'out_trade_no' =>   $ret['transaction_id'], 
+				        'money'        =>   $money,
+				        'order_sn'     =>   $sn,
+				        'refund_sn'	   =>	$rsn,
+				        'param'        =>   serialize($ret),
+				        'status'       =>   4,
+				        'type'         =>   2,
+				        'pattern'      =>   2,
+				        'scene'        =>   1,
+				        'create_time'  =>   time(),
+				        'update_time'  =>   time()
+				    );
+    				D('Manage/Pay')->add($pay_log);
+		    	}
+		    	
+	            return true;
+		    }else{
+		    	$this->error = $ret['err_code_des'];
+		    	return false;
+		    }
+		} catch (PayException $e) {
+		    //echo $e->errorMessage();
+		    $this->error = $e->errorMessage();
+		    return false;
+		    exit;
 		}
-		return $result;
 	}
 	//支付宝退款
 	function alipay_refund($sn,$product_id,$money)
