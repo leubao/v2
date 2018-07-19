@@ -660,8 +660,14 @@ class Refund extends \Libs\System\Service {
 		}
 		//返回金额
 		$money_back = $subtotal-$cost+$child_moeny;
+
 		//订单金额
 		$money = $info['money'] - $subtotal - $child_moeny;
+		if($money_back < 0 || $money < 0){
+			$model->rollback();//事务回滚
+			$this->error = "退还金额计算有误,请联系管理员";
+			return false;
+		}
 		/*=============处理返利===============*/
 		if(in_array($type,array('91','92','82','81'))){
 			//无返利
@@ -1055,7 +1061,7 @@ class Refund extends \Libs\System\Service {
 			    'refund_account' => 'REFUND_UNSETTLED',// REFUND_RECHARGE:可用余额退款  REFUND_UNSETTLED:未结算资金退款（默认）
 			    'sub_appid'     =>  $config['sub_appid'],
 	            'sub_mch_id'    =>  $config['sub_mch_id']
-			];
+			];//dump($config);
 		    $ret = wxRefund::run('wx_refund', $config, $data);
 		    if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
 		    	if($money == $info['money']){

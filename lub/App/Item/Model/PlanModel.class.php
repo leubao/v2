@@ -27,17 +27,23 @@ class PlanModel extends Model{
 			$starttime = strtotime($starttime);
 			$endtime = $data['plantime'].' '.$data['endtime'];
 			$endtime = strtotime($endtime);
-			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$data['games'])){return false;}
+			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$data['games'])){
+				return false;
+			}
 		}
 		if(in_array($data['product_type'],['2','3'])){
 			//批量新增
 			if($data['addType'] == 'batch'){
 				$list = getDateFromRange($data['plantime'],$data['plantimes']);
+
 				foreach ($list as $k => $v) {
+					
 					$plan[] = [
 						'plantime' =>	$v,
 						'quota'	   =>	$data['quota'],
-						'quotas'   =>	$data['quotas']
+						'quotas'   =>	$data['quotas'],
+						'starttime'=>	$data['starttime'],
+						'endtime'  =>	$data['endtime']
 					];
 				}
 				$data['plan'] = $plan;
@@ -52,7 +58,7 @@ class PlanModel extends Model{
 		return $planid;
 	}
 	/*构造计划写入数据*/
-	function structure_data($data,$plantime,$starttime,$endtime)
+	function structure_data($data,$plantime,$starttime = '',$endtime = '')
 	{
 		if($data['product_type'] == '1'){
 			//引入销控默认数据
@@ -100,13 +106,8 @@ class PlanModel extends Model{
 			}
 			//景区
 			foreach ($data['plan'] as $key => $value) {
-				//判断同一天的越过
-				$plantime = strtotime($value['plantime']);
-				/*
-				判断是否开启单位时间限量 TODO
-				if(!in_array($plantime, $plan_time)){
-				}*/
-				$plan_time[] = strtotime($value['plantime']);
+				
+				//$plan_time[] = $value['plantime'];
 				$infos = array(
 					'games' => 1,
 					'seat_table' => 'scenic',
@@ -115,11 +116,21 @@ class PlanModel extends Model{
 					'quotas' =>	$value['quotas'],
 				);
 				$param = $this->plan_param($data['product_id'],'',$data['ticket'],$data['goods'],$data['product_type']);
+
+				$plantime = strtotime($value['plantime']);
+				
+				$starttime = $value['plantime'].' '.$value['starttime'];
+				$starttime = strtotime($starttime);
+
+				$endtime = $value['plantime'].' '.$value['endtime'];
+				$endtime = strtotime($endtime);
+
+
 				$infoAll = array(
 					'plantime' 	=> $plantime,
 					'product_id' => $data['product_id'],
-					'starttime'	=> strtotime($value['starttime']),
-					'endtime'	=> strtotime($value['endtime']),
+					'starttime'	=> $starttime,
+					'endtime'	=> $endtime,
 					'product_type' => $data['product_type'],
 					'status' => $status,
 					'is_sales' => 1,
@@ -134,10 +145,15 @@ class PlanModel extends Model{
 			//漂流
 			//批量新增排次
 			foreach ($data['plan'] as $key => $value) {
+				$plantime = strtotime($value['plantime']);
+				$starttime = $value['plantime'].' '.$value['starttime'];
+				$starttime = strtotime($starttime);
+				$endtime = $value['plantime'].' '.$value['endtime'];
+				$endtime = strtotime($endtime);
 				$infos = array(
 					'product_id' => $data['product_id'],
-					'starttime'	=> strtotime($value['starttime']),
-					'endtime'	=> strtotime($value['endtime']),
+					'starttime'	=> $starttime,
+					'endtime'	=> $endtime,
 					'seat_table' => 'drifting',
 					'games'	=>	$value['no'],
 					'quota' =>	$value['quota'],

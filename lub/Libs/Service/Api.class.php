@@ -41,21 +41,36 @@ class Api extends \Libs\System\Service {
         $product = $param['product'];
         $proArr = explode(',', $product);
         foreach ($proArr as $k=>$v){
-            $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname,type')->select();
+            $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname')->select();
             if($list[$v] != false){
-                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC')->field(array('id,plantime,starttime,endtime,games,param,product_id,seat_table'))->select();
+                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->select();
             }
         }
         $list = array_filter($list);
         //重构参数信息 获取票价信息根据场次读取价格分组信息
         foreach ($list as $key => $value) {
+            
             foreach ($value['plan'] as $ke => $valu) {
-                $valu['param'] = area_price(unserialize($valu['param']),$valu['seat_table'],$param['group']['price_group'],$param['scene']);
-                $valu['title'] = planShow($valu['id'],4,1);
-                $valu['product_id'] = $valu['product_id'];
-                $valu['num'] = M(ucwords($valu['seat_table']))->where(array('status'=>array('in','0')))->count();
-                $plan[] = $valu;
+                if((int)$valu['product_type'] === 1){
+                    $valu['param'] = area_price(unserialize($valu['param']),$valu['seat_table'],$param['group']['price_group'],$param['scene']);
+                    $valu['title'] = planShow($valu['id'],4,1);
+                    $valu['product_id'] = $valu['product_id'];
+                    $valu['num'] = M(ucwords($valu['seat_table']))->where(array('status'=>array('in','0')))->count();
+                    $plan[] = $valu;
+                }else{
+                    $where = array('plan_id'=>$valu['id'],'product_id'=>$valu['product_id'],'status'=>array('in','2,99,66'));
+                    $number = D('Scenic')->where($where)->count();
+                    $area_num = $valu['quotas'] - $number;
+                    $area_nums = $number;
+                    //TODO $param['group']['price_group'] 梦里老家  强制为70
+                    $valu['param'] = pullprice($valu['id'],1,0,$param['scene'],'70');
+                    $valu['title'] = planShow($valu['id'],5,1);
+                    $valu['product_id'] = $valu['product_id'];
+                    $valu['num'] = $area_num;
+                    $plan[] = $valu;
+                }  
             }
+            
             $value['plan'] = $plan;
             $info = $value;
         }
