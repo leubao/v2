@@ -522,6 +522,7 @@ class Refund extends \Libs\System\Service {
 		$cost = 0;//手续费
 		$sn = $info['order_sn'];
 		$child_moeny = 0;
+		$recharge = array();
 		if(empty($user_id)){
 			$user_id = get_user_id();
 		}
@@ -700,7 +701,7 @@ class Refund extends \Libs\System\Service {
 				$crm = F('Crm');
 				$crm = $crm[$info['channel_id']];
 				$itemConf = cache('ItemConfig');
-
+				
 				if($itemConf[$crm['itemid']]['1']['level_pay']){
 					//开启多级扣款
 					//获取扣款连条
@@ -709,13 +710,15 @@ class Refund extends \Libs\System\Service {
 					//获取扣费条件
 					$payLink = money_map($info['channel_id'],$channel);
 				}
-			}//dump($payLink);
+			}
 			if($channel == '4'){
 				//个人客户
 				$db = M('User');
 				$payLink = $info['guide_id'];
 			}
+
 			if(is_array($payLink)){
+				$payLink = array_unique($payLink);
 				$backMap = [
 					'id'	=>	['in',implode(',',$payLink)]
 				];
@@ -736,6 +739,8 @@ class Refund extends \Libs\System\Service {
 			}
 			//TODO 不同级别扣款金额不同
 			if(is_array($payLink)){
+				//高并发并发时清空上一次记录值
+				unset($recharge);
 				foreach ($payLink as $p => $l) {
 					$recharge[] = array(
 						'cash'		=>	$money_back,

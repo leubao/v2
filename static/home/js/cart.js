@@ -10,11 +10,12 @@ $(function(){
     var ids = Array();
     var id  = this.id;
     var ids = id.split("_");
+    var detail = '';
     //订单信息中显示票型、价格等信息
 	var obj = $(this);
 	var data_name  = obj.find("td").eq(0).text();
 	var data_price = obj.find("td").eq(1).text();
-	console.log(real);
+	//console.log(real);
 	//获取指定值
 	if(real){
 		//开启实名制
@@ -24,7 +25,7 @@ $(function(){
 		detail += "<td><a href='javascript:void(0)' onclick='delRow(this);'>删除</a></td></tr>";
 	}else{
 		//非实名制
-		if($("#cart_"+ids[1]+"_"+ids[2]).length <= 0){
+		if(parseInt($("#cart_"+ids[1]+"_"+ids[2]).length) === 0){
 	      detail = "<tr id='cart_"+ids[1]+"_"+ids[2]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
 	      detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
 	      detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";
@@ -51,6 +52,7 @@ $(function(){
   	var ids = Array();
     var id  = this.id;
     var ids = id.split("_");
+    var detail = '';
     //订单信息中显示票型、价格等信息
 	var obj = $(this);
 	var data_name  = obj.find("td").eq(0).text();
@@ -65,7 +67,8 @@ $(function(){
 		detail += "<td><a href='javascript:void(0)' onclick='delRow(this);'>删除</a></td></tr>";
 	}else{
 		//非实名制
-		if($("#cart_"+ids[1]+"_"+ids[2]).length <= 0){
+		
+		if(parseInt($("#cart_"+ids[1]+"_"+ids[2]).length) === 0){
 	      detail = "<tr id='cart_"+ids[1]+"_"+ids[2]+"'><td>"+data_name+"</td><td id='price_"+ids[1]+"'>"+data_price+"</td><td>";
 	      detail += "<div class='input-group spinner' data-trigger='spinner'> <div class='input-group-addon'><a href='javascript:;' class='spin-down' data-spin='down'>-</a></div>";
 	      detail += "<input type='text' class='qnum form-control' id='qnum_"+ids[1]+"'' name='qnum_"+ids[1]+"' data-rule='percent' value='1' size='2'>";

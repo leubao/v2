@@ -11,7 +11,7 @@ class Wticket {
         $product = M('Product')->where(array('status'=>1,'id'=>$pid))->field('id')->select();
         $info['product'] = arr2string($product,'id');
         //根据当前用户判断   若为散客  读取配置项  微信的价格政策
-        $user = session('user');
+        $user = session('user');//dump($user);
         $info['group']['price_group'] = $user['user']['pricegroup'];
         $info['scene'] = '4';
         $plan = \Libs\Service\Api::plans($info);
@@ -61,7 +61,7 @@ class Wticket {
         $user['user'] = array(
             'id' => 2,
             'openid' => $openid,
-            'maxnum' => '3',
+            'maxnum' => '1',
             'guide'  => '0',
             'qditem' => '0',
             'scene'  => '41',
@@ -83,7 +83,6 @@ class Wticket {
         $promote = $ginfo['u'];
         $oauth = & load_wechat('Oauth',$ginfo['pid'],1);
         $wxauth = $oauth->getOauthAccessToken($ginfo['code']);
-        //dump($wxauth);
         //新用户写入
         Wticket::add_wx_user($wxauth,$promote,$ginfo['pid']);
         $openid = $ginfo['openid'] ? $ginfo['openid'] : $wxauth['openid'];
@@ -91,6 +90,7 @@ class Wticket {
         session('openid',$openid);
         //写入必要的当前用户信息
         $uinfo = Wticket::get_auto_auth($openid,$promote);
+        load_redis('lpush','xuionf',json_encode($uinfo));
         //Wticket::storage_user($uinfo);
         if(!empty($uinfo['wechat']) && empty($reg)){
             //根据当前登录用户获取支付方式、价格政策、可售数量、单笔订单最大量 30
@@ -138,7 +138,7 @@ class Wticket {
             $proconf = cache('ProConfig');
             $pid = session('pid');
             $proconf = $proconf[$pid][2];
-
+            load_redis('lpush','yuionf',json_encode($uinfo));
             if(!empty($uinfo['id']) && !empty($uinfo['group']['type'])){
                 //二维码推广或分享购买链接
                 switch ($uinfo['group']['type']) {
@@ -167,8 +167,8 @@ class Wticket {
                     'id' => 2,
                     'openid' => $openid,
                     'maxnum' => '30',
-                    'guide'  =>  $uinfo['id'],
-                    'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
+                    'guide'  => $uinfo['id'],
+                    'qditem' => $uinfo['cid'] ? $uinfo['cid']:'0',
                     'scene'  => $scene,
                     'epay'   => $uinfo['group']['settlement'],//结算方式1 票面价结算2 底价结算
                     'channel'=> '0',
@@ -193,7 +193,8 @@ class Wticket {
                     'wxid'   => $uinfo['wechat']['user_id'],
                 );
             }   
-        }        //缓存用户信息
+        }
+        //缓存用户信息
         session('user',$user);
         return true;
     }
@@ -299,22 +300,22 @@ class Wticket {
      */
     function get_auto_auth($open_id = '',$promote = '',$user_id = ''){
         //查询数据库是否已经绑定账号
-        if(empty($open_id)){//error_insert('98');
+        if(empty($open_id)){
             $map = array('user_id'=>$user_id);
-        }else{
+        }else{ 
             $map = array('openid'=>$open_id);
         }
         $winfo = M('WxMember')->where($map)->field('user_id,openid,unionid,channel')->find();
         $db = M('User');
         if(!empty($winfo['user_id']) && $winfo['channel'] == '1'){
             $uInfo = $db->where(array('id'=>$winfo['user_id'],'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
+            //load_redis('lpush','woekd',date('Y-m-d H:i:s').serialize($uInfo));
         }elseif (!empty($promote) && empty($winfo['channel'])) {
-            
             $uInfo = $db->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
-            //load_redis('set','uoo',serialize($uInfo));
+            //load_redis('lpush','uoo',date('Y-m-d H:i:s').serialize($uInfo));
             //$uInfo['promote'] = $promote;//推广标记
         }
-        //load_redis('set','222',$promote.serialize($uInfo));
+        //load_redis('lpush','222',date('Y-m-d H:i:s').'&'.$promote.'&'.$open_id.'&'.serialize($winfo).serialize($uInfo));
         if(!empty($uInfo)){
             //查询所属分组信息
             $uInfo['group'] = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement')->find();
@@ -329,10 +330,10 @@ class Wticket {
             }
             $uInfo['wechat'] = $winfo;
             //load_redis('set','sql',$db->_sql());
-            //load_redis('set','uinfo',serialize($uInfo));
+            //load_redis('lpush','uinfo109',date('Y-m-d H:i:s').serialize($uInfo));
             return $uInfo;
         }else{
-            //load_redis('set','2','221');
+            //load_redis('lpush','2',date('Y-m-d H:i:s').'221');
             //当微信为散客时，默认用户为微信售票
             return '0';
         }
@@ -344,6 +345,7 @@ class Wticket {
             $db = M('WxMember');
             $uinfo = $db->where(array('openid'=>$data['openid']))->find();
             if($uinfo){
+                
                 if($uinfo['user_id']){
                     return '2';
                 }else{

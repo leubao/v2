@@ -247,20 +247,18 @@ class IndexController extends LubTMP {
         //session('user',null);//TODO  生产环境删除
         //判断用户是否登录   检查session 是否为空
         $user = session('user');
-        if(empty($user['user']['openid'])){
+        if(empty($user['user']['openid']) || !empty($this->user)){
            Wticket::tologin($this->ginfo);
            $user = session('user');
         }
-        //dump($user);dump($user);dump($user);dump($user);
+        //dump($user);dump($user);dump($user);dump($user);dump($this->ginfo);
         //判断是否已经在登录
         $this->check_login(U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$this->user,'param'=>$this->param)));
         //与数据比对、是否绑定渠道商\
         //根据当前用户属性  加载价格及座位
         $plan = Wticket::getplan($this->pid);
-        load_redis('set','goods_info_plan',json_encode($plan));
         $param = array('pid'=>$this->pid);
         $goods_info = array_merge($plan,$user);
-        load_redis('set','goods_info',json_encode($goods_info));
         $this->wx_init($this->pid);
         session('pid',$this->pid);
         $urls = Wticket::reg_link($user['user']['id'],$this->pid);
@@ -275,9 +273,7 @@ class IndexController extends LubTMP {
             //session('user',null);
             $oauth = & load_wechat('Oauth',$this->pid,1);
             $urls = $oauth->getOauthRedirect($url, $state, 'snsapi_base');
-            //load_redis('set','check_login',date('Y-m-d H:i:s'));
-            //header("Location:" . $urls);
-            //redirect($urls);
+            load_redis('set','check_login',date('Y-m-d H:i:s'));
             header('location:'. $urls);
         }
     }
@@ -333,8 +329,8 @@ class IndexController extends LubTMP {
         $user = session('user');
         $uid = $user['user']['id'];
         $openid = $user['user']['openid'];
-        $urls = Wticket::reg_link($uid,$this->pid);
-        $base64_image_content = get_up_fxqr($openid);
+        $urls = Wticket::reg_link($uid,$this->pid);//dump($urls);
+        $base64_image_content = get_up_fxqr($openid,$this->pid);
         $this->wx_init($this->pid);
         $this->assign('qr',$base64_image_content)->assign('urls',$urls)->display();
     }

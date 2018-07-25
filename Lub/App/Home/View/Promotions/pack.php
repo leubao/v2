@@ -14,7 +14,8 @@
   <ol class="breadcrumb">
     <li><a href="{:U('Home/Index/index');}">首页</a></li>
     <li><a href="{:U('Home/Index/product');}">售票</a></li>
-    <li class="active">{$data['product_id']|product_name}</li>
+    <li>{$data['product_id']|product_name}</li>
+    <li class="active">[活动]{$data['title']}</li>
   </ol>
   <input type="hidden" id="channel_id" value="{$uinfo['cid']}"/>
   <div class="input-group col-md-5">
@@ -50,7 +51,7 @@
           <h3 class="panel-title"><span class="glyphicon glyphicon-list-alt"></span> 订单信息</h3>
         </div>
         <div class="panel-body">
-          <p>说明：请正确填写游客身份证号码,游客将通过身份证过闸入园！</p>
+          <p>说明：{$data.remark}</p>
         </div>
         <ul class="list-group form-inline">
           <li class="list-group-item">
@@ -59,6 +60,7 @@
                 <input type="radio" name="contact_option" id="contact2" onclick="$('.contact_select').css('display','none'),$('.contact_input').css('display','block');">设置联系人
             </div>
           </li>
+
           <li class="list-group-item contact_select">            
             <select class="form-control" name="contact" id="contact">
               <option value="">常用联系人</option>
@@ -101,8 +103,8 @@
             <tr>
               <td align="center">票型</td>
               <td align="center">单价</td>
-              <td style="width:60px" align="center">数量</td>
-              <td align="center">身份证号</td>
+              <td style="width:120px" align="center">数量</td>
+              <td align="center">小计</td>
               <td align="center">操作</td>
             </tr>
           </thead>
@@ -323,7 +325,7 @@ var type = {$data['type']},
     real = {$data['real']},
     product = {$data['product_id']};
 $(function() {
-    empty_cart_ticket();
+    empty_cart_ticket(); 
     scenic_drifting_plan($("#plantime").val(),'4',{$data['product_id']},{$data.id});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
         selectdate = $('#plantime').val();
@@ -335,11 +337,13 @@ $(function() {
     var rstr = "",
       vmima = "",
       vMobile = "",
-      tour = '1',
-      activety_area = {$idcard},
+      tour = '1', 
+      city = '35',
       activety = {$data.id},
+      id_card = '',
       plan = $('#planID').val(),
       remark = $("#remark").val();
+
     if($(".contact_input").css("display") == "block"){
       vMobile = $("#phone").val();
       if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
@@ -351,12 +355,24 @@ $(function() {
       }
     }else{
       var contact = $("#contact").val();
+      if(contact == ''){
+        rstr += "取票人不能为空!";
+      }
       vMobile = $("#contact").find('option:selected').attr('data-phone');
       vmima = $("#contact").find('option:selected').data('name');
     }
+    /*判断身份号码是否正确*/
+    if(id_card){
+      if(check_idcard(id_card) == false){
+        rstr += "请您正确输入身份证号码，或者不输入!";
+      }
+    }
+    //客源地是否必须
+    
     if(!remark){ remark = "空.."; }
-      if(rstr !=""){
+      if(rstr != ""){
         layer.msg(rstr);
+        return false;
       }else{
         //获取已选择的票型并组合数据
         var 
@@ -369,49 +385,19 @@ $(function() {
             layer.msg("请选择要售出的票型!");
             return false;
          }
-         let idcardList = [];
-         let re = true;
-        $("#cart .idcard").each(function(){
-          //去除空格
-          var idcardThis = $.trim($(this).val());
-          /*若最后是X  则强制更新为大写
-          var endStr = substr(idcardThis.length-1,1);
-          if(){
-
-          }*/
-          //判断身份证是否可用
-          if(!check_idcard(idcardThis)){
-            layer.msg('身份证号'+idcardThis+'有误!');
-            re = false;
-            return false;
-          }else if(!check_idcard_area(idcardThis,activety_area,activety)){
-            layer.msg('身份证号'+idcardThis+'该地区不参加活动或该用户已参加过活动!');
-            re = false;
-            return false;
-          }
-          idcardList.push(idcardThis);
-        });
-        //TODO 循环体内返回中断执行不行
-        if(!re){
-           return false;
-        } 
         $("#cart tr").each(function(i){
-            var fg  = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+            var fg  = i+1 < length ? ',':' ';
             var ids = this.id.split("_");
-            var obj = $(this);
-            var idcard = idcardList[i];
-            toJSONString = toJSONString + '{"areaId":"'+obj.data('area')+'","idcard":"'+idcard+'","priceid":' +obj.data('priceid')+',"price":'+parseFloat(obj.data('price'))+',"num":"1"}'+fg; 
+            nums = parseInt(nums)+parseInt($("#qnum_"+ids[1]).val());
+            toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
         });
-        if(is_array_unique(idcardList)){
-            layer.msg('身份证号码重复!');
-            return false;
-        }
+        
         /*获取支付相关数据 */
         var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
         var itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客 导游的id*/
         var checkinT = 1;
         crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-        param = '{"tour":'+tour+',"remark":"'+remark+'","activity":"'+activety+'","settlement":"'+USER_INFO.group.settlement+'"}';
+        param = '{"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","atype":"'+type+'","id_card":"'+id_card+'","activity":"'+activety+'","settlement":"'+USER_INFO.group.settlement+'"}';
         var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}'; 
         /*提交到服务器*/
         $.ajax({

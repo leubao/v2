@@ -403,27 +403,6 @@ function showtype(t){
          $("#tro").html(content);
       }
   },"json");
-  /*
-  $.get("index.php?g=Home&m=Product&a=quickPrice&areaid="+areaid+"&productid={$info['productid']}", function(data){
-    if(data != 0){
-      var content = "";
-      var result = $.parseJSON(data);
-      $.each(result,function(idx,item){ 
-        var id    = item.id;
-        var name  = item.name;
-        <?php if($uinfo['group']['settlement'] == '1'){?>
-        var price = item.price;
-          content += "<tr id='tro_"+id+"_"+areaid+"' class='tro'><td>"+name+"</td><td>"+price+"</td></tr>";
-          <?php }else{?>
-        var discount = item.discount;
-          content += "<tr id='tro_"+id+"_"+areaid+"' class='tro'><td>"+name+"</td><td>"+discount+"</td></tr>";
-          <?php }?>
-      });
-    }else{
-      var content = "<tr><td colspan='2'>未找到价格政策...</td></tr>";
-    }
-    $("#tro").html(content);
-  });*/
   //确定当前选中的区域为选中的状态
   $('#area a').each(function () {
     $(this).attr("class","list-group-item");

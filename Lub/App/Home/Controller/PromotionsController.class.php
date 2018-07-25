@@ -22,7 +22,7 @@ class PromotionsController extends Base{
 			'status'	=>	1
 		];
 		$map['_string']="FIND_IN_SET(2,is_scene)";
-		$list = D('Activity')->where($map)->field('id,scope,product_id,title,starttime,endtime,remark,param')->select();
+		$list = D('Activity')->where($map)->field('id,scope,product_id,title,starttime,endtime,remark,param')->order('id DESC')->select();
 		$uinfo = Partner::getInstance()->getInfo();
 		$cid = money_map($uinfo['cid']);
 		//根据当前用户判断是否可参加当前活动
@@ -73,6 +73,11 @@ class PromotionsController extends Base{
 			case '5':
 				//套票
 				$tempate = 'pack';
+				break;
+			case '6':
+				//单场限额
+				$this->assign('number',$info['param']['number']);
+				$tempate = 'single';
 				break;
 			default:
 				break;

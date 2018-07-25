@@ -21,7 +21,19 @@ class MenuModel extends Model {
      * @return type
      */
     public function getMenuList() {
-        $data = $this->getTree(0);//dump($data);
+        $data = $this->getTree(0);
+        $home[] = array(
+            "icon" => "",
+            "id" => 240,
+            "name" => "首页",
+            "parent" => 0,
+            "action" => 'index240',
+            "url" => U("home/index/index"),
+        );
+        if(!empty($data)){
+          $data = array_merge($home,$data);  
+        }
+        
         return $data;
     }
 
@@ -110,23 +122,23 @@ class MenuModel extends Model {
                 //dump($fu);
                 //TODO 临时解决首页链接加参数之后404的问题
                 if($url == 'Home/Index/index'){
-                	$array = array(
-	                    "icon" => "",
-	                    "id" => $id,
-	                    "name" => $a['name'],
-	                    "parent" => $parent,
-	                	"action" => $action.$id,
-	                    "url" => U("{$name}/{$controller}/{$action}{$fu}"),
-	                );
+                    /*$array = array(
+                        "icon" => "",
+                        "id" => $id,
+                        "name" => $a['name'],
+                        "parent" => $parent,
+                        "action" => $action.$id,
+                        "url" => U("{$name}/{$controller}/{$action}{$fu}"),
+                    );*/
                 }else{
-                	$array = array(
-	                    "icon" => "",
-	                    "id" => $id,
-	                    "name" => $a['name'],
-	                    "parent" => $parent,
-	                	"action" => $action.$id,
-	                    "url" => U("{$name}/{$controller}/{$action}{$fu}", array('menuid' => $id)),
-	                );
+                    $array = array(
+                        "icon" => "",
+                        "id" => $id,
+                        "name" => $a['name'],
+                        "parent" => $parent,
+                        "action" => $action.$id,
+                        "url" => U("{$name}/{$controller}/{$action}{$fu}", array('menuid' => $id)),
+                    );
                 }
                 $ret[$id] = $array;
                 $child = $this->getTree($a['id'], $id, $Level);

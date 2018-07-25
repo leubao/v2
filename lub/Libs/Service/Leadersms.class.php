@@ -9,8 +9,18 @@
 namespace Libs\Service;
 use Libs\Service\Sms;
 class Leadersms extends \Libs\System\Service {
-	/*发送短信*/
-	function send_sms($plan = null){
+	/*发送短信
+  */
+ /**
+  * @Company  承德乐游宝软件开发有限公司
+  * @Author   zhoujing      <zhoujing@leubao.com>
+  * @DateTime 2018-07-20
+  * @param    array        $plan                 销售计划
+  * @param    int       $type                 1场次结束后统一发送2T+1推送
+  * @param    array     $param   其它辅助参数
+  * @return   [type]                              [description]
+  */
+	function send_sms($plan = null,$type = 1,$param = []){
       $start = '0';
       if(empty($plan)){
         return false;
@@ -26,11 +36,17 @@ class Leadersms extends \Libs\System\Service {
           $start = '1';
           break;
         case '2':
-          //景区
-          $channel = Leadersms::channel($plan['id']);
-          $where = array('status'=>array('in','2,99'),'plan_id'=>$plan['id']);
+          //景区 T+1发送
+          if($type == 2){
+            $channel = Leadersms::channel($plan['plan_id']);
+            $where = array('status'=>array('in','2,99'),'plan_id'=>array('in',$plan['plan_id']));
+            $start = '2';
+          }else{
+            $channel = Leadersms::channel($plan['id']);
+            $where = array('status'=>array('in','2,99'),'plan_id'=>$plan['id']);
+            $start = '1';
+          }
           $type = '10';
-          $start = '1';
           break;
         case '3':
           //判断是否最后一个场次
@@ -51,7 +67,7 @@ class Leadersms extends \Libs\System\Service {
       if($start == '1'){
           $count = M(ucwords($plan['seat_table']))->where($where)->count();
           //获取所有票型
-         if($count != '0'){
+         if($count != 0){
           //获取发送人列表
           $list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
           foreach ($list as $ke => $valu) {
@@ -60,6 +76,20 @@ class Leadersms extends \Libs\System\Service {
            }
          }
       }
+      if($start == '2'){
+        $count = M('Scenic')->where($where)->count();
+        dump($count);
+        if($count != 0){
+          $list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
+
+          foreach ($list as $ke => $valu) {
+              $info = array('phone'=>$valu['phone'],'title'=>$param['today'],'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($param['product_id'],1));
+              dump($info);
+                Sms::order_msg($info,$type);
+           }
+        }
+      }
+
        
 	}
 	//按区域获取已售数

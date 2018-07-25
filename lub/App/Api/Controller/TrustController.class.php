@@ -188,8 +188,7 @@ class TrustController extends LubTMP {
 					$return = array(
 				      	'status'=> true,
 				        'code'  => 200,
-				        'data'  => [
-				        ],
+				        'data'  => [],
 				        'msg'   => '抱歉，退单申请成功,等待确认!',
 				    );
 					die(json_encode($return));
@@ -208,8 +207,7 @@ class TrustController extends LubTMP {
 				$return = array(
 			      	'status'=> false,
 			        'code'  => 300,
-			        'data'  => [
-			        ],
+			        'data'  => [],
 			        'msg'   => '抱歉，该场次或该订单状态不允许此项操作!',
 			    );
 				die(json_encode($return));				

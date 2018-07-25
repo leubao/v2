@@ -41,6 +41,11 @@
                             <input type="radio" name="rebate_pay" value="2" <eq name="vo.rebate_pay" value="2"> checked</eq>> 微信企业红包</td>
                         </tr>
                         <tr>
+                          <td width="120px">运营短信:</td>
+                          <td><input type="radio" name="send_msg" value="1" <eq name="vo.send_msg" value="1"> checked</eq>> 停止销售发送
+                            <input type="radio" name="send_msg" value="2" <eq name="vo.send_msg" value="2"> checked</eq>> T+1发送</td>
+                        </tr>
+                        <tr>
                           <td width="120px">返利红包模板:</td>
                           <td><select name="red_tpl" data-toggle="selectpicker">
                               <option value="">红包模板</option>
@@ -48,7 +53,7 @@
                                 <option value="{$red.id}" <if condition="$vo['red_tpl'] eq $red['id']">selected</if>>{$red.act_name}</option>
                               </volist>
                             </select></td>
-                        </tr>  
+                        </tr> 
                       </tbody>
                       </table>
                       </div>

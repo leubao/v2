@@ -18,21 +18,26 @@ class LubTMPSms {
     	//获取发送人列表
         //$list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
         //根据日期获取销售额
-        $datetime = strtotime(date('Y-m-d'));
-        $plan = M('Plan')->where(array('plantime'=>$datetime))->field('id,seat_table')->select();
-        //构建短信模板
-        foreach ($plan as $key => $value) {
-            send_sms($value['id']);
-            //send_sms($value['id']);
-            /*
-            $count = M(ucwords($value['seat_table']))->where(array('status'=>array('in','2,99')))->count();
-            $area = $this->area($value);
-            $channel = $this->channel($value);
-            //获取所有票型
-            foreach ($list as $ke => $valu) {
-               $info = array('phone'=>$valu['phone'],'title'=>planShows($value['id']),'num'=>$count,'area'=>$area,'channel'=>$channel);
-               Sms::order_msg($info,7);
-            }*/
+        $datetime = strtotime(date('Ymd',strtotime("-1 day")));
+        //读取产品列表
+        $product = M('Product')->where(['status'=>1])->field('id,item_id')->select();
+        $itemConf = cache('ItemConfig');
+        foreach ($product as $key => $value) {
+            
+            if((int)$itemConf[$value['item_id']]['1']['send_msg'] === 2){
+                $map = array('plantime'=>$datetime,'product_id'=>$value['id']);
+                $planList = M('Plan')->where($map)->field('id')->select();
+                $plan_id = arr2string($planList,'id');
+                if(!empty($plan_id)){
+                    $param = [
+                        'day' => date('Y-m-d',$datetime),
+                        'product_id'   =>   $value['id']
+                    ];
+                    $plan = ['product_type'=>2,'plan_id'=>$plan_id];
+                    \Libs\Service\Leadersms::send_sms($plan,2,$param);
+                }
+                
+            }
         }
         
     }

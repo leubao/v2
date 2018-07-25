@@ -72,7 +72,7 @@ class MsgController extends ManageBase {
 				'titp'=> 'error',
 			);
 		}*/
-		if($pre <> '0' || $refund <> '0' || $newOrder <> '0'){
+		if(!empty($info)){
 			$return = array('status' => 'ok','info'=>$info);
 		}else{
 			$return = array('status' => 'no');

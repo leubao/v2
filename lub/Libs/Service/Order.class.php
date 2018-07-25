@@ -451,14 +451,44 @@ class Order extends \Libs\System\Service {
 		}
 		//获取订单初始数据
 		$scena = Order::is_scena($scena);
-		//多产品组合套票
-		if($act === 5){
-			return Order::pack_order($info,$scena,$uinfo,2,2); 
-		}else{
-			return Order::quick_order($info,$scena,$uinfo,2,2); 
+		
+		switch ((int)$act) {
+		 	case 5:
+		 		//多产品组合套票
+		 		return Order::pack_order($info,$scena,$uinfo,2,2,5); 
+		 		break;
+		 	default:
+		 		return Order::quick_order($info,$scena,$uinfo,2,2,$act); 
+		 		break;
+		 } 
+		
+	}
+	/**
+	 * 限制数量销售验证是否可售
+	 */
+	private function limited_order($actid,$plan,int $number)
+	{
+		//读取单场数量
+		$tab = 'act_'.$actid.'_'.$plan;
+		$sku = load_redis('get',$tab);
+		if((int)$sku === 0 && $sku !== false){
+			$this->error = '抱歉,余量不足!';
+			return false;
 		}
-		
-		
+		if($sku !== false){
+			$count = (int)$sku - $number;
+			if($count < 0){
+				$this->error = '抱歉,余量不足!';
+				return false;
+			}
+			return true;
+		}else{
+			$param = M('Activity')->where(['id'=>$actid])->getField('param');
+			$param = json_decode($param,true);
+			$count = (int)$param['info']['number'] - $number;
+			load_redis('set',$tab,$count);
+			return true;
+		}
 	}
 	/*渠道订单支付
 	* @param $info array 客户端提交数据
@@ -489,7 +519,7 @@ class Order extends \Libs\System\Service {
 		}
 		return $status;
 	}
-	/**************************************************API订单****************************************************/
+	/****************************************API订单**************************************************/
 	/*
 	*API订单处理
 	*@param $info array 接口提交数据
@@ -513,7 +543,7 @@ class Order extends \Libs\System\Service {
 		}
 		return $return;
 	}
-	/**************************************************通用处理****************************************************/
+	/************************************通用处理****************************************************/
 	private function pack_order($info, $scena, $uinfo, $is_seat = '1',$channel = null)
 	{
 		//获取销售计划 以基准产品的销售计划为准
@@ -926,11 +956,16 @@ class Order extends \Libs\System\Service {
 	* @param $uinfo 当前用户信息
 	* @param $is_seat 是否立即排座 1 立即排座 2不排做 只返回订单号
 	* @param $channel 是否是团队使用授信额支付 后期窗口出票也可以使用授信额度
+	* @param $actType 活动类型
 	*/
-	private function quick_order($info, $scena, $uinfo, $is_seat = '1',$channel = null){
+	private function quick_order($info, $scena, $uinfo, $is_seat = '1',$channel = null,$actType = ''){
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}//dump($info);
+		//获取订单号 1代表检票方式1人一票2 一团一票
+		$printtype = $info['checkin'] ? $info['checkin'] : 1;
+		$sn = get_order_sn($plan['id'],$printtype);
+
 		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
@@ -940,17 +975,28 @@ class Order extends \Libs\System\Service {
 			}
 		}
 		if($seat == false){
-			//error_insert('400003');
+			$this->error = '400031 : 数据校验失败...';
 			return false;
+		}
+		//活动订单处理
+		if(!empty($info['param'][0]['activity'])){
+			if((int)$actType === 6){
+				if(!Order::limited_order($info['param'][0]['activity'],$info['plan_id'],$seat['num'])){
+					return false;
+				}
+				$afterData = [
+					'number'	=>	$seat['num'],
+					'tab'		=>	'act_'.$info['param'][0]['activity'].'_'.$info['plan_id']
+				];
+				load_redis('setex','limit_order_'.$sn,json_encode($afterData),1800);
+			}
 		}
 		//订单金额校验
 		if(bccomp((float)$info['subtotal'],(float)$seat['money'],2) <> 0){
           	$this->error = '400018 : 金额校验失败';
 			return false;
         }
-		//获取订单号 1代表检票方式1人一票2 一团一票
-		$printtype = $info['checkin'] ? $info['checkin'] : 1;
-		$sn = get_order_sn($plan['id'],$printtype);
+		
 		$model = new Model();
 		$model->startTrans();
 		//写入订单 窗口订单直接写入并完成排座   微信等其它场景只写入订单  支付完成后排座
@@ -998,6 +1044,8 @@ class Order extends \Libs\System\Service {
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($newData),'remark'=>$info['param'][0]['remark']));
 		if($state && $oinfo){
 			$model->commit();//提交事务
+			//设置订单完结有效期
+			load_redis('setex','period_'.$sn,json_encode(array_merge($orderData,$newData)),1800);
 			if($is_seat == '1'){
 				//窗口订单 开始排座 剧场
 				$order_info = D('Item/Order')->where(array('order_sn'=>$sn))->relation(true)->find();
@@ -1291,19 +1339,21 @@ class Order extends \Libs\System\Service {
 		$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->setField('info',serialize($newData));
 		//改变订单状态
 		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(['status'=>'1','pay'=>$newData['pay']]);
-		dump($state);dump($status);
+		//dump($state);dump($status);
 		if($state && $status){
 			$model->commit();//提交事务
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
-			    //发送成功短信
+			    /*发送成功短信
 				if($proconf['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
 				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
 				}else{
 					Sms::order_msg($msgs,1);
-				}
+				}*/
 			}
+			//后置处理
+			Order::afterOrder($info['order_sn']);
 			//设置低金额报警 
 			if(empty($cid) && $newData['pay'] == '2'){
 				$checkCrm =  end($payLink);
@@ -1318,6 +1368,21 @@ class Order extends \Libs\System\Service {
 			$model->rollback();//事务回滚
 			return false;
 		}	
+	}
+	/**
+	 * 订单形成后置处理
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2018-07-23
+	 * @param    int        $sn                   订单号
+	 */
+	public function afterOrder($sn)
+	{
+		//限制数量销售更新余量
+		$limit_order = json_decode(load_redis('get','limit_order_'.$sn),true);
+		load_redis('decrby',$limit_order['tab'],$limit_order['number']);
+		load_redis('delete','limit_order_'.$sn);
+		//删除有效期标记
+		load_redis('delete','period_'.$sn);
 	}
 	/*
 	* 快捷 团队(非排座)  售票  排座
@@ -1670,9 +1735,9 @@ class Order extends \Libs\System\Service {
 				/*根据支付方式选择短信模板 */
 				$pay = $is_pay ? $is_pay : $oInfo['pay'];
 				if($pay == '1' || $pay == '3'){
-					Sms::order_msg($msgs,6);
+					//Sms::order_msg($msgs,6);
 				}else{
-					Sms::order_msg($msgs,$msgTpl);
+					//Sms::order_msg($msgs,$msgTpl);
 				}
 			}
 

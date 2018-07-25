@@ -668,7 +668,7 @@ class OrderController extends ManageBase{
 			}else{
 				$return = array(
 					'statusCode' => '300',
-					'message'	=> 	"排座失败!",
+					'message'	=> 	"排座失败!".$order->error,
 				);
 				$message = "排座失败!";
 				D('Item/Operationlog')->record($message, 300);//记录售票员日报表
@@ -694,7 +694,7 @@ class OrderController extends ManageBase{
 				die(json_encode($return));
 			}else{
 				$list = Operate::do_read('Order',0,$map,'','',true);
-				$info = unserialize($list['info']);//dump($info);
+				$info = unserialize($list['info']);
 				foreach ($info['data']['area'] as $key => $value) {
 					$area[]=array(
 						'area' => $value['areaId'],
@@ -733,8 +733,8 @@ class OrderController extends ManageBase{
 			$info = unserialize($list['info']);
 			foreach ($info['data']['area'] as $key => $value) {
 				if($ginfo['num'] == $value['num']){
-					$ginfo['priceid'] = $value['priceid'];
-					$ginfo['price'] = $value['price'];
+					$ginfo['priceid'] = $value['seat'][0]['priceid'];
+					$ginfo['price'] = $value['seat'][0]['price'];
 				}
 			}
 			//加载座椅

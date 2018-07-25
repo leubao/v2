@@ -29,6 +29,9 @@ function activity_type($param,$type = null)
 		case '5':
 			$return = "多产品套票销售";
 			break;
+		case '6':
+			$return = "限量销售";
+			break;
 	}
 	if($type){
 		return $return;

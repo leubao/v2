@@ -85,6 +85,11 @@ class ActivityController extends ManageBase{
 	 				'discount' => $pinfo['discount']
 	 			];
 	 		}
+	 		if($pinfo['type'] == '6'){
+	 			//单场限额
+	 			$info['number'] = $pinfo['number'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);
@@ -196,6 +201,11 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		if($pinfo['type'] == '6'){
+	 			//单场限额
+	 			$info['number'] = $pinfo['number'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
 	 		//开启范围
 	 		if($pinfo['scope']){
 	 			$actinfo = $this->get_activity($pinfo['id']);
@@ -217,6 +227,7 @@ class ActivityController extends ManageBase{
 	 			'param'		=> json_encode($param),
 	 			'print_tpl' => $pinfo['print_tpl'],
 	 			'remark'	=> $pinfo['remark'],
+	 			'uptime'	=> time()
 	 		);
 	 		if(D('Item/Activity')->save($data)){
 	 			$this->srun("更新成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
@@ -238,7 +249,7 @@ class ActivityController extends ManageBase{
 	 			$this->assign('card',$card);
 	 		}
 	 		//组团销售
-	 		if($info['type'] == '4'){
+	 		if(in_array($info['type'], ['4','6'])){
 	 			$ticket = explode(',',$info['param']['info']['ticket']);
 	 			foreach ($ticket as $k => $v) {
 	 				$name[] = ticketName($v,1);
@@ -249,7 +260,9 @@ class ActivityController extends ManageBase{
 	 			//$info['number'] = $pinfo['number'];
 	 			//$info['ticket'] = $pinfo['ticket_id'];
 
-	 		}//dump($info);
+	 		}
+
+	 		//dump($info);
 	 		$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
 			$this->assign('printer',$printer);
 	 		$this->assign('data',$info)->display();

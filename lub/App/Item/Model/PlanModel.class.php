@@ -50,6 +50,7 @@ class PlanModel extends Model{
 			}
 		}
 		$info = $this->structure_data($data,$plantime,$starttime,$endtime);
+		
 		if(count($info) == 1){
 			$planid = $this->add($info['0']);
 		}else{

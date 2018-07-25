@@ -61,7 +61,10 @@
                 </volist>
                 <td align="center">{$vo['quota']}</td>
                 <td align="center"><a href="{:U('Home/Index/seale',array('plan'=>$plan['id']));}" data-toggle="modal" data-target="#myModal"><?php echo M('QuotaUse')->where(array('plan_id'=>$plan['id'],'channel_id'=>$uinfo['cid']))->getField('number')?></a></td>
-                <td align="center"><a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即出票</a></td>          
+                <td align="center">
+                  <a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即预约</a>
+                  <a href="{:U('Home/Product/pre_order',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即预约</a>
+                </td>    
               </tr>
               <tr>
                 <td align="center"></td>
