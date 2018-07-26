@@ -47,6 +47,7 @@
     <span class="pull-left mb10">统计日期：{$starttime} 至 {$endtime}</span>
     <span class="pull-right mb10">打印时间:<?php echo date('Y年m月d日 H:i:s');?></span>
 </div>
+<?php //dump($data);?>
 <if condition="$type eq '1'">
 <table class="table table-bordered">
   <thead>

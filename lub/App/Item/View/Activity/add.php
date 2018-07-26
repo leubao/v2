@@ -29,6 +29,7 @@
                 <option value="2" data-area="first">首单免</option>
                 <option value="3" data-area="area">限制区域销售</option>
                 <option value="4" data-area="team">组团销售</option>
+                <option value="6" data-area="onePlan">单场限额销售</option>
                 <option value="5" data-area="more">多产品套票销售</option>
               </select>
             </td>
@@ -136,7 +137,6 @@
     </div>
     <!--多产品套票-->
     <div id="more" style="display: none;">
-
       <table class="table table-striped table-bordered">
           <tbody>
             <tr>
@@ -157,6 +157,21 @@
               </td>
            </tr>
           </volist>
+      </tbody>
+      </table>
+    </div>
+    <!--单场限额-->
+    <div id="onePlan" style="display: none;">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>单场票额:</td><td colspan="3"><input type="text" name="number" value="" size="15"></td>
+          </tr>
+          <tr>
+            <td>可售票型:</td>
+            <td colspan="3"><input type="hidden" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
         </tbody>
       </table>
     </div>

@@ -22,7 +22,7 @@
     <input type="hidden" name="channel.id" value="{$channel_id}">
     <input type="text" name="channel.name" readonly value="{$channel_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel',array('ifadd'=>2));}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
     &nbsp;
-    <input type="text" value="" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
+    <input type="text" value="{$map['order_sn']}" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
     <select class="required" name="types" data-toggle="selectpicker" id="top_up_types">
         <option value="">类型</option>
          <option value="1"  <if condition="$map['type'] eq '1'">selected</if>>充值</option>

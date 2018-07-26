@@ -193,13 +193,13 @@ function prompt(){
     url:'<?php echo U("Manage/Msg/prompt");?>', 
     cache:false,  
     dataType:'json',
-    success:function(data){  
-           if(data.status == "ok"){
-              $.each(data.info,function(k,v){
-                msg = [''+v.msg+'<button type="button" class="btn btn-default f-right" data-toggle="navtab" data-id="'+v.tabid+'" data-reload-warn="业务页面已打开，确定要重新载入吗?" data-url="'+v.url+'" data-title="'+v.title+'">立即处理</button>'];
-                toastr[v.titp](msg, v.title);
-              });
-            }
+    success:function(data){
+       if(data.status == "ok"){
+          $.each(data.info,function(k,v){
+            msg = [''+v.msg+'<button type="button" class="btn btn-default f-right" data-toggle="navtab" data-id="'+v.tabid+'" data-reload-warn="业务页面已打开，确定要重新载入吗?" data-url="'+v.url+'" data-title="'+v.title+'">立即处理</button>'];
+            toastr[v.titp](msg, v.title);
+          });
+        }
     },
   });
 }

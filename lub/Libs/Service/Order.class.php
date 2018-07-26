@@ -1343,14 +1343,14 @@ class Order extends \Libs\System\Service {
 		if($state && $status){
 			$model->commit();//提交事务
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
-			    /*发送成功短信
+			    /*发送成功短信*/
 				if($proconf['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
 				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
 				}else{
 					Sms::order_msg($msgs,1);
-				}*/
+				}
 			}
 			//后置处理
 			Order::afterOrder($info['order_sn']);

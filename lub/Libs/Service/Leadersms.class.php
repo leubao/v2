@@ -78,13 +78,11 @@ class Leadersms extends \Libs\System\Service {
       }
       if($start == '2'){
         $count = M('Scenic')->where($where)->count();
-        dump($count);
         if($count != 0){
           $list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
 
           foreach ($list as $ke => $valu) {
-              $info = array('phone'=>$valu['phone'],'title'=>$param['today'],'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($param['product_id'],1));
-              dump($info);
+              $info = array('phone'=>$valu['phone'],'title'=>$param['day'],'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($param['product_id'],1));
                 Sms::order_msg($info,$type);
            }
         }
@@ -110,7 +108,11 @@ class Leadersms extends \Libs\System\Service {
       $info['enter'] = $db->where(array('plan_id'=>array('in',$plan),'type'=>6,'status'=>array('in','1,7,9')))->sum('number');
       //旅行社
       $info['channel'] = $db->where(array('plan_id'=>array('in',$plan),'type'=>4,'status'=>array('in','1,7,9')))->sum('number');
-      $msg = "渠道".$info['channel'].",政企".$info['enter'].",散客".$info['scat'];
+      $scat = $info['scat'] ? $info['scat'] : 0;
+      $enter = $info['enter'] ? $info['enter'] : 0;
+      $channel = $info['channel'] ? $info['channel'] : 0;
+
+      $msg = "渠道".$channel."人,政企".$enter."人,散客".$scat."人";
       return $msg;
   }
 }

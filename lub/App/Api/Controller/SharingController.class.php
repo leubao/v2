@@ -8,6 +8,7 @@
 // +----------------------------------------------------------------------
 namespace Api\Controller;
 use Think\Controller;
+use Common\Model\Model;
 class SharingController extends Controller {
 	//
     public function index(){
@@ -78,9 +79,140 @@ class SharingController extends Controller {
            D('Crm')->where(['id'=>$v['id']])->setField('incode',$incode);
         }
     }
-    public function rebate()
+    //批量重置报表
+    public function all_reset()
+    {
+        $ginfo = I('get.');
+        if(empty($ginfo['type'])){
+            $this->error('指定类型');
+        }
+        //重置日期范围
+        if(isset($ginfo['start']) && !empty($ginfo['start']) && isset($ginfo['end']) && !empty($ginfo['end'])){
+            $dateAll = $this->getDateFromRange($ginfo['start'],$ginfo['end']);
+        }
+        //是否指定产品
+        if(isset($ginfo['pid']) && !empty($ginfo['pid'])){
+            $map['product_id'] = $ginfo['pid'];
+        }
+        foreach ($dateAll as $k => $v) {
+            $map['plantime'] = $v;
+            //dump($map);
+            //查询是否存在数据，存在就删除
+            if($ginfo['type']  == 1){
+                $count = M('ReportData')->where($map)->count();
+                if($count > 0){
+                    //$status = M('ReportData')->where($map)->delete();
+                    dump($status);
+                }else{
+                    echo $v.'删除错误';
+                }
+            }
+            if($ginfo['type']  == 2){
+                $count = M('ReportData')->where($map)->count();
+                dump($count);
+                if($count == 0){
+                    //$stat = \Libs\Service\Report::report($v,$map['product_id']);
+                    dump($seat);
+                }else{
+                    echo $v.'生成错误';
+                }
+            }
+        }
+        
+
+        
+    }
+
+    /**
+     * 获取指定日期段内每一天的日期
+     * @param  Date  $startdate 开始日期
+     * @param  Date  $enddate   结束日期
+     * @return Array
+     */
+    function getDateFromRange($startdate, $enddate){
+
+        $stimestamp = strtotime($startdate);
+        $etimestamp = strtotime($enddate);
+
+        // 计算日期段内有多少天
+        $days = ($etimestamp-$stimestamp)/86400+1;
+
+        // 保存每天日期
+        $date = array();
+
+        for($i=0; $i<$days; $i++){
+            $date[] = date('Ymd', $stimestamp+(86400*$i));
+        }
+
+        return $date;
+    }
+    public function check_refund()
+    {
+        /*校验自动退款错误*/
+        $list = D('TicketRefund')->where(['user_id'=>1])->field('id,order_sn,crm_id')->select();
+        dump($list);
+        foreach ($list as $k => $v) {
+            //判断退款和扣款是否一致
+            $r = D('CrmRecharge')->where(['order_sn'=>$v['order_sn'],'type'=>4])->field('id,crm_id')->select();
+            $flist = array_column($r,'crm_id');
+            dump($r);
+            $payLink = crm_level_link($v['crm_id']);
+            dump($flist);
+            dump($payLink);
+            dump(array_diff($flist, $payLink));
+            $diff = array_diff($flist, $payLink);
+            $cwu = D('CrmRecharge')->where(['order_sn'=>$v['order_sn'],'type'=>4,'crm_id'=>['in',implode(',',$diff)]])->field('id,crm_id,cash')->select();
+            dump($cwu);
+            /*
+            foreach ($cwu as $key => $value) {
+                //返还错误退款
+                $model = new Model();
+                $model->startTrans();
+                $crmData = array('cash' => array('exp','cash-'.$value['cash']),'uptime' => time());
+                $c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$value['crm_id']))->setField($crmData);        
+                $data = array(
+                    'cash'      =>  $value['cash'],
+                    'user_id'   =>  1,
+                    'guide_id'  =>  1,//TODO  这个貌似没什么意义
+                    'addsid'    =>  1,
+                    'crm_id'    =>  $value['crm_id'],
+                    'createtime'=>  time(),
+                    'type'      =>  '2',
+                    'order_sn'  =>  $v['order_sn'],
+                    'balance'   =>  balance($value['crm_id'],1),
+                    'tyint'     =>  1,//客户类型1企业4个人
+                );
+                dump($data);
+                
+                $c_pay2 = $model->table(C('DB_PREFIX').'crm_recharge')->add($data);
+                if($c_pay == false || $c_pay2 == false){
+                    $model->rollback();//事务回滚
+                    echo "string";
+                    return false;
+                }else{
+                    $model->commit();
+                }
+            }
+            */
+        }
+    }
+    public function rebate($sn)
     {   
-        echo U('Api/Sharing/seat_auto_group',['plan'=>402]);
+        
+        /*echo U('Api/Sharing/seat_auto_group',['plan'=>402]);*/
+        /*$sn  = '80710184800385'; 
+        dump($sn); 
+        if(!empty($sn)){
+            $oinfo = D('Item/Order')->where(['order_sn'=>$sn,'status'=>['in',['11','2']]])->relation(true)->find();
+            dump($oinfo);
+            $info = array(
+                        'seat_type' => '1',
+                        'pay_type'  => '5'
+                    );
+                    $order = new \Libs\Service\Order;
+                    $status = $order->mobile_seat($info,$oinfo);
+        }
+        dump($status);
         /************crm param json 转换 start**********
         $list = D('Crm')->field('id,param,f_agents')->select();
         foreach ($list as $k => $v) {

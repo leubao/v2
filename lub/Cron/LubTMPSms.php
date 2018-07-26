@@ -28,9 +28,10 @@ class LubTMPSms {
                 $map = array('plantime'=>$datetime,'product_id'=>$value['id']);
                 $planList = M('Plan')->where($map)->field('id')->select();
                 $plan_id = arr2string($planList,'id');
+                //dump($plan_id);
                 if(!empty($plan_id)){
                     $param = [
-                        'day' => date('Y-m-d',$datetime),
+                        'day' => date('Y年m月d日',$datetime),
                         'product_id'   =>   $value['id']
                     ];
                     $plan = ['product_type'=>2,'plan_id'=>$plan_id];

@@ -140,7 +140,7 @@ class FullController extends ManageBase{
     		$this->erun("参数错误!");
     	}
     	
-        $base64_image_content = get_up_fxqr($ginfo['id']);
+        $base64_image_content = get_up_fxqr($ginfo['id'],$this->pid);
     	$this->assign('qr',$base64_image_content)->assign('id',$ginfo['id'])->display();
         /*
         import('Libs.Util.FileToZip');//引入zip下载类文件FileToZip

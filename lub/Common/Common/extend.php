@@ -1252,13 +1252,12 @@ function crmName($param,$type=NULL){
     //递归查找上级分销商链条
     function crm_level_link($id)
     {
-        static $arr = [];
-        $crm = getChannel($id);
-        
         $arr[] = $id;
-        if($crm['f_agents'] > 0){//dump($crm['f_agents']);
-            crm_level_link($crm['f_agents']);
-        }//dump($arr);
+        $crm = getChannel($id);
+        while ($crm['f_agents'] > 0) {
+            $crm = getChannel($crm['f_agents']);
+            $arr[] = $crm['id'];
+        }
         return $arr;
     }
     //获取单体渠道商信息
@@ -1420,7 +1419,11 @@ function crmName($param,$type=NULL){
         $model = D('Item/Plan');
         //获取要检测的场次
         $list = $model->where(array('status'=>array('in','2,3'),'plantime'=>array('elt',strtotime($datetime))))->select();
+        $itemConf = cache('ItemConfig');
+
         foreach ($list as $k => $v) {
+            $itemid = D('Product')->where(['id'=>$v['product_id']])->cache(true)->getField('item_id');
+            load_redis('set','check_plan',date('Y-m-d H:m:i').'['.$itemConf[$itemid]['1']['send_sms'].']'.json_encode($itemConf));
             //计划日期
             $plantime = date('Ymd',$v['plantime']);
             if($plantime < $datetime){
@@ -1428,7 +1431,9 @@ function crmName($param,$type=NULL){
                 F('Plan_'.$v['id'],NULL);
                 //停用已过期场次
                 $status = $model->where(array('id'=>$v['id']))->setField('status',4);
-                send_sms($v['id']);
+                if((int)$itemConf[$itemid]['1']['send_sms'] === 1){
+                    send_sms($v['id']);
+                }
                 //销毁过期的数据
                 $model->destroyed($v['product_id'],$v['id']);
                 //TODO   写入重要提醒队列 如未取票
@@ -1451,7 +1456,9 @@ function crmName($param,$type=NULL){
                     //停用已过期场次
                     F('Plan_'.$v['id'],NULL);
                     $status = $model->where(array('id'=>$v['id']))->setField('status',4);
-                    send_sms($v['id']);
+                    if((int)$itemConf[$itemid]['1']['send_sms'] === 1){
+                        send_sms($v['id']);
+                    }
                     //销毁过期的数据
                     $model->destroyed($v['product_id'],$v['id']);
                     return $status;
@@ -2049,8 +2056,8 @@ function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
  * @param  [type] $openid openID
  * @return [type]         [description]
  */
-function get_up_fxqr($openid){
-    $pid = get_product('id') ? get_product('id') : '43';
+function get_up_fxqr($openid,$pid){
+    //$pid = get_product('id') ? get_product('id') : '43';
     $model = D('WxMember');
     $info = $model->where(['channel'=>1,'openid'=>$openid])->field('openid,user_id,headimgurl')->find();
     $logo_path = SITE_PATH."d/upload/viplogo/";
@@ -2059,6 +2066,7 @@ function get_up_fxqr($openid){
         if(!$info['headimgurl']){
             $user = & load_wechat('User',$pid,1);
             $result = $user->getUserInfo($openid);
+            dump($result);
             if(!empty($result['headimgurl'])){
                 $model->where(['openid'=>$v['openid']])->setField('headimgurl',$result['headimgurl']);
                 $logo_path = \Libs\Util\Upload::getImage($result['headimgurl'],$logo_path,'u-logo-'.$info['user_id'].'.png');
@@ -2101,6 +2109,7 @@ function payLog($money,$sn,$scene,$type,$pattern,$data){
         'type'         =>   $type,
         'pattern'      =>   $pattern,
         'scene'        =>   $scene,
+        'create_time'  =>   time()
     );
     //快速缓存 缓存有效期300秒
     S('pay'.$sn,'400',300);
