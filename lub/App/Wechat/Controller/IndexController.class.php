@@ -244,7 +244,7 @@ class IndexController extends LubTMP {
      * LubTicket 门票单品购买页面
      */
     function show(){
-        //session('user',null);//TODO  生产环境删除
+        session('user',null);//TODO  生产环境删除
         //判断用户是否登录   检查session 是否为空
         $user = session('user');
         if(empty($user['user']['openid']) || !empty($this->user)){
@@ -262,9 +262,15 @@ class IndexController extends LubTMP {
         $this->wx_init($this->pid);
         session('pid',$this->pid);
         $urls = Wticket::reg_link($user['user']['id'],$this->pid);
+        $produt = D('Product')->where(['id'=>$this->pid])->cache(true)->field('type')->find();
+        if($produt['type'] == 1){
+            $template = 'show';
+        }else{
+            $template = 'scenic';
+        }
         //限制单笔订单最大数
         $this->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
-            ->assign('urls',$urls)->assign('param',$param)->display();
+            ->assign('urls',$urls)->assign('param',$param)->display($template);
     }
     function check_login($url){
         $user = session('user');
@@ -834,7 +840,7 @@ class IndexController extends LubTMP {
             }else{
                 $return = array(
                     'statusCode' => 300,
-                    'url' => '',
+                    'msg' => $order->error,
                 );  
             }
             die(json_encode($return));
@@ -1060,7 +1066,7 @@ class IndexController extends LubTMP {
                 'keyword3' =>array('value'=>$info['out_trade_no'],'color'=>'#5cb85c'),
                 'keyword4' =>array('value'=>$info['number'],'color'=>'#5cb85c'),
                 'keyword5'=>array('value'=>$attach['plan']."\n",'color'=>'#5cb85c'),
-                'remark'=>array('value'=>'欢迎来到《梦里老家》太子惊魂惊悚体验馆,点击立即使用'), 
+                'remark'=>array('value'=>'查看详情'), 
             )
         );
         $sndMsg = & load_wechat('Receive',$product_id,1);

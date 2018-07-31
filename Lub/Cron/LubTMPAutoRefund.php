@@ -19,6 +19,7 @@ class LubTMPAutoRefund {
     		'status'	=>	1,
     		'createtime'=>	['EGT',strtotime('20180401')]
     	];
+        
     	$list = D('ticket_refund')->where($map)->field('id,order_sn as sn,crm_id')->select();
     	$crm = F('Crm');
     	if(empty($crm)){

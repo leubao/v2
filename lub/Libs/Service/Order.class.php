@@ -353,9 +353,14 @@ class Order extends \Libs\System\Service {
 		if(in_array($info['param'][0]['is_pay'],array('4','5'))){$is_seat = '2';}else{$is_seat = '1';}
 		$sn = Order::quick_order($info,$scena,$uinfo,$is_seat);
 		if($sn != false){
-			$sn = array('sn' => $sn['order_sn'],'act'=>$sn['act'],'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
+
+			$return = array('sn' => $sn['order_sn'],'act'=>$sn['act'],'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
+			
+			return $return;
+		}else{
+			return $sn;
 		}
-		return $sn;
+		
 	}
 	/**
 	 * 窗口通过支付宝和微信扫码付款
@@ -961,12 +966,13 @@ class Order extends \Libs\System\Service {
 	private function quick_order($info, $scena, $uinfo, $is_seat = '1',$channel = null,$actType = ''){
 		//获取销售计划
 		$plan = F('Plan_'.$info['plan_id']);
-		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}//dump($info);
+		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
 		//获取订单号 1代表检票方式1人一票2 一团一票
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
 		$sn = get_order_sn($plan['id'],$printtype);
 
 		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
+		load_redis('setex','cs',json_encode($seat).$info['param'][0]['settlement'],2300);
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
@@ -1361,8 +1367,8 @@ class Order extends \Libs\System\Service {
 				$checkCrm = $cid;
 			}
 			//\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
-
-			return $info['order_sn'];
+			return ['order_sn' => $info['order_sn'],'act'=> $oInfo['param'][0]['activity']];
+			//return $info['order_sn'];
 		}else{
 			error_insert('400006');
 			$model->rollback();//事务回滚
@@ -1735,9 +1741,9 @@ class Order extends \Libs\System\Service {
 				/*根据支付方式选择短信模板 */
 				$pay = $is_pay ? $is_pay : $oInfo['pay'];
 				if($pay == '1' || $pay == '3'){
-					//Sms::order_msg($msgs,6);
+					Sms::order_msg($msgs,6);
 				}else{
-					//Sms::order_msg($msgs,$msgTpl);
+					Sms::order_msg($msgs,$msgTpl);
 				}
 			}
 

@@ -90,7 +90,7 @@ class Wticket {
         session('openid',$openid);
         //写入必要的当前用户信息
         $uinfo = Wticket::get_auto_auth($openid,$promote);
-        load_redis('lpush','xuionf',json_encode($uinfo));
+        //load_redis('lpush','xuionf',json_encode($uinfo));
         //Wticket::storage_user($uinfo);
         if(!empty($uinfo['wechat']) && empty($reg)){
             //根据当前登录用户获取支付方式、价格政策、可售数量、单笔订单最大量 30
@@ -138,7 +138,7 @@ class Wticket {
             $proconf = cache('ProConfig');
             $pid = session('pid');
             $proconf = $proconf[$pid][2];
-            load_redis('lpush','yuionf',json_encode($uinfo));
+            //load_redis('lpush','yuionf',json_encode($uinfo));
             if(!empty($uinfo['id']) && !empty($uinfo['group']['type'])){
                 //二维码推广或分享购买链接
                 switch ($uinfo['group']['type']) {
@@ -187,7 +187,7 @@ class Wticket {
                     'guide'  => '0',
                     'qditem' => '0',
                     'scene'  => '41',
-                    'epay'   => '1',//结算方式1 票面价结算2 底价结算
+                    'epay'   => '2',//结算方式1 票面价结算2 底价结算
                     'channel'=> '0',
                     'pricegroup'=>$proconf['wx_price_group'],
                     'wxid'   => $uinfo['wechat']['user_id'],
@@ -200,7 +200,6 @@ class Wticket {
     }
     //存储用户信息
     function storage_user($uinfo){
-        load_redis('set','ppp',serialize($uinfo));
         if(!empty($uinfo['wechat']) && empty($reg)){
             //根据当前登录用户获取支付方式、价格政策、可售数量、单笔订单最大量 30
             //判断是否是政企渠道用户

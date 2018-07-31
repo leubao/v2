@@ -63,7 +63,8 @@ class Api extends \Libs\System\Service {
                     $area_num = $valu['quotas'] - $number;
                     $area_nums = $number;
                     //TODO $param['group']['price_group'] 梦里老家  强制为70
-                    $valu['param'] = pullprice($valu['id'],1,0,$param['scene'],'70');
+                    //dump($param);
+                    $valu['param'] = pullprice($valu['id'],1,0,$param['scene'],$param['group']['price_group']);
                     $valu['title'] = planShow($valu['id'],5,1);
                     $valu['product_id'] = $valu['product_id'];
                     $valu['num'] = $area_num;

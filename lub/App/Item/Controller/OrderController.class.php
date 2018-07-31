@@ -165,11 +165,11 @@ class OrderController extends ManageBase{
 			);
 			die(json_encode($return));
 		}
-		/** 订单状态校验 */
+		/** 订单状态校验 
 		$checkOrder = new CheckStatus();
 		if(!$checkOrder->OrderCheckStatus($ginfo['sn'],2103)){
 			$this->erun($checkOrder->error,array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-		}
+		}*/
 		//更新门票打印状态
 		$model = new Model();
 		$model->startTrans();
@@ -219,7 +219,7 @@ class OrderController extends ManageBase{
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);
 				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."&".$oinfo['id']."^#";
-				dump($sale);
+				
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
@@ -262,7 +262,7 @@ class OrderController extends ManageBase{
 			//记录打印日志
 			print_log($ginfo['sn'],$user,$type,$order_type['channel_id'],'',count($list),1);
 			$model->commit();//提交事务
-			$checkOrder->delMarking($pinfo['sn']);
+			//$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '1',
 				'message' => '订单读取成功!',
@@ -270,10 +270,10 @@ class OrderController extends ManageBase{
 			);
 		}else{
 			$model->rollback();//事务回滚
-			$checkOrder->delMarking($pinfo['sn']);
+			//$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '0',
-				'message' => '订单读取失败!',
+				'message' => '订单读取失败1!',
 				'info'	=>  0,
 			);
 		}
@@ -335,7 +335,7 @@ class OrderController extends ManageBase{
 		$uInfo = \Manage\Service\User::getInstance()->getInfo();//读取当前登录用户信息
 		$type = '6'.$type;
 		$order = new Order();
-		$run = $order->quick($pinfo,$type,$uInfo);//dump($run);
+		$run = $order->quick($pinfo,$type,$uInfo);
 		if($run != false){
 			//支付方式影响返回结果
 			if(in_array($run['is_pay'],array('4','5'))){
