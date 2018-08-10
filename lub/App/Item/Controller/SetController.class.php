@@ -663,7 +663,6 @@ class SetController extends ManageBase{
 					if(empty($map['product_id'])){
 						$this->erun('当前产品无效请刷新页面', array('tabid'=>$this->menuid.MODULE_NAME));
 					}
-					//$map['product_id'] = $this->pid;
 					if($type == '1'){
 					  //删除已生成的数据
 					  $status = M('ReportData')->where($map)->delete();

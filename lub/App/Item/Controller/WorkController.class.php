@@ -1012,6 +1012,87 @@ class WorkController extends ManageBase{
 			->assign('sale',unserialize($seat['sale']))
 			->display();
 	}
+	/*景区门票改签*/
+	public function endorse()
+	{
+		//改签日志
+		if(IS_POST){
+			$pinfo = I('post.');
+			$product = get_product();
+			//获取新的单号
+			$sn = get_order_sn($pinfo['plan']);
+			//新的计划ID
+			//读取原有门票
+			if($product['type'] == 2){
+				$table = 'Scenic';
+			}elseif ($product['type'] == 3) {
+				$table = 'Drifting';
+			}
+			$count = D($table)->where(['order_sn'=>$pinfo['sns'],'status'=>2])->count();
+			if((int)$count > 0){
+				$model = new Model();
+				$model->startTrans();
+				$updata = ['plan_id'=>(int)$pinfo['plan'],'order_sn'=>$sn];
+
+				$scenic = $model->table(C('DB_PREFIX').$table)->where(['order_sn'=>$pinfo['sns'],'status'=>2])->setField($updata);
+				//记录改签日志
+				$log = [
+					'sns'	=>	$pinfo['sns'],
+					'sn'	=>	$pinfo['sn'],
+					'plans' =>  $pinfo['plans'],//历史
+					'plan'	=>	$pinfo['plan'],
+					'number'=>  $pinfo['number'],//原订单门票数
+					'count'	=>	$pinfo['count'],//改签数
+					'user_id' => get_user_id('id'),
+					'createtime'=>time()
+				];
+				$endorse = $model->table(C('DB_PREFIX').'endorse')->add($log);
+				if($scenic && $endorse){
+					$model->commit();//提交事务
+					//是否改变受让人
+					$phone = (int)$pinfo['is_party'] === 2 ? $pinfo['phone'] : D('Order')->where(['order_sn'=>$pinfo['sns']])->getField('phone');
+					$msg 
+					$msgs = array(
+						'phone'	 =>$phone,
+						'title'	 =>planShow($pinfo['plan'],1,2),
+						'remark' =>$msg,
+						'num'	 =>$pinfo['count'],
+						'sn'	 =>$sn,
+						'product'=>$product['title']
+					);
+					\Libs\Service\Sms::order_msg($msgs,1);
+					$this->srun('改签成功...');
+				}else{
+					$model->rollback();//事务回滚
+					$this->erun('改签失败: 改签数据写入失败...');
+				}
+			}else{
+				$this->erun('改签失败: 不存在符合改签条件的门票...');
+			}
+			
+			
+		}else{
+			$ginfo = I('get.');
+			$oinfo = D('Order')->where(['id'=>$ginfo['sn'],'status'=>1])->field('order_sn,number,product_type')->find();
+
+			if(empty($oinfo)){
+				$this->erun('订单状态不允许此项操作....');
+			}
+			if($oinfo['product_type'] == 2){
+				$table = 'Scenic';
+			}elseif ($oinfo['product_type'] == 3) {
+				$table = 'Drifting';
+			}
+
+			$count = D($table)->where(['order_sn'=>$ginfo['sn'],'status'=>2])->count();
+			if((int)$count === 0){
+				D('Order')->where(['id'=>$ginfo['sn']])->setField(['status'=>9,'uptime'=>time()]);
+				$this->erun('订单状态不允许此项操作....');
+			}
+			$this->assign('order',$oinfo)->assign('count',$count)->display();
+		}
+	}
+
 	/**
 	 * @DateTime 2018-05-31
 	 * 转单，景区综合套票时，遇到退单边的情况，需要手动补充差价，按单门票转换
@@ -1190,6 +1271,7 @@ class WorkController extends ManageBase{
 			$this->display();
 		}
 	}
+
 	//年卡办理
 	function year_card(){
 		if(IS_POST){

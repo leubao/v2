@@ -36,7 +36,7 @@ class Api extends \Libs\System\Service {
     * @param $param array 当前APP的全部信息
     * return array  
     */
-    function plans($param = null){
+    function plans($param = null,$uinfo = ''){
         if(empty($param)){return false;}
         $product = $param['product'];
         $proArr = explode(',', $product);
@@ -45,6 +45,11 @@ class Api extends \Libs\System\Service {
             if($list[$v] != false){
                 $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->select();
             }
+        }
+        load_redis('set','2123',json_encode($uinfo));
+        $type = '1';
+        if(isset($uinfo['user']['guide']) && $uinfo['user']['guide'] > 0){
+            $type = '2';
         }
         $list = array_filter($list);
         //重构参数信息 获取票价信息根据场次读取价格分组信息
@@ -63,8 +68,9 @@ class Api extends \Libs\System\Service {
                     $area_num = $valu['quotas'] - $number;
                     $area_nums = $number;
                     //TODO $param['group']['price_group'] 梦里老家  强制为70
-                    //dump($param);
-                    $valu['param'] = pullprice($valu['id'],1,0,$param['scene'],$param['group']['price_group']);
+
+                    $valu['param'] = pullprice($valu['id'],$type,0,$param['scene'],$param['group']['price_group']);
+
                     $valu['title'] = planShow($valu['id'],5,1);
                     $valu['product_id'] = $valu['product_id'];
                     $valu['num'] = $area_num;

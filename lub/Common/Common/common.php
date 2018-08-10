@@ -731,25 +731,23 @@ function get_wechat($product_id = ''){
  */
 function & load_wechat($type = '',$product_id = '',$submch = '') {
     !class_exists('Wechat\Loader', FALSE) && Vendor('Wechat.Loader');
-    static $wechat = array();
+    static $wechat = array(); load_redis('set','ddss1224r',$product_id);
     $index = md5(strtolower($type));
     if (!isset($wechat[$index])) {
         if(!empty($product_id)){
             $proconf = cache('ProConfig');
             $proconf = $proconf[$product_id][2];
-            //Think\Log::record(serialize($proconf),'WARN');
-            //定义微信公众号配置参数（这里是可以从数据库读取的哦）
             $options = array(
                 'token'           => $proconf['wx_token'], // 填写你设定的key
                 'appid'           => $proconf['wx_appid'], // 填写高级调用功能的app id, 请在微信开发模式后台查询
                 'appsecret'       => $proconf['appsecret'], // 填写高级调用功能的密钥
-                'encodingaeskey'  => $proconf['wx_encoding'], // 填写加密用的EncodingAESKey（可选，接口传输选择加密时必需）
+                'encodingaeskey'  => $proconf['wx_encoding'], 
                 'mch_id'          => $proconf['wx_mchid'], // 微信支付，商户ID（可选）
                 'partnerkey'      => $proconf['wx_mchkey'], // 微信支付，密钥（可选）
                 'sub_appid'       => $proconf['wx_sub_appid'], //子APPiD
                 'sub_mch_id'      => $proconf['wx_sub_mch_id'], //子商户ID
-                'ssl_cer'         => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem', // 微信支付，双向证书（可选，操作退款或打款时必需）
-                'ssl_key'         => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem', // 微信支付，双向证书（可选，操作退款或打款时必需）
+                'ssl_cer'         => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_cert.pem',
+                'ssl_key'         => SITE_PATH.'pay/wxpay/'.$product_id.'/apiclient_key.pem',
                 //'cachepath'       => '', // 设置SDK缓存目录（可选，默认位置在Wechat/Cache下，请保证写权限）
             );
             if($submch == '1'){
@@ -856,9 +854,7 @@ function load_redis($apiport,$key,$value = '',$time = ''){
             $return = $redis->set($key,$value);
             break;
         case 'setex':
-            /**
-             * 设置有效期
-             */
+            //设置有效期
             $return = $redis->setex($key, $time, $value);
             break;
         case 'get':

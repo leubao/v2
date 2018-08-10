@@ -103,9 +103,8 @@ class Report{
         if(empty($product_id)){
         	$product = M('Product')->field('id')->select();
         }else{
-			$product = array('id'=>$product_id);
+			$product = array(array('id'=>$product_id));
         }
-        
         //报表生成条件 1 按日期 且包含预定成功 拉取产品列表
         foreach ($product as $key => $value) {
         	$tproconf = $proconf[$value['id']][1];
@@ -179,7 +178,7 @@ class Report{
 	* @param 
 	* return true|false
 	*/
-	function strip_order($map, $datetime, $type = '1'){//dump($map);
+	function strip_order($map, $datetime, $type = '1'){
 		$list = D('Item/Order')->where($map)->relation(true)->select();
 		if(!empty($list)){
 			foreach ($list as $key => $value) {

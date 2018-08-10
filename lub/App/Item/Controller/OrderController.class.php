@@ -207,10 +207,8 @@ class OrderController extends ManageBase{
 	            $start = date('H:i',strtotime("$end -30 minute"));
 	            $info_field = $start .'-'. $end;
 	        }
-	        //dump($oinfo);
 	        //打印客源地 TODO
 	        if($this->procof['print_to_guest'] == '1'){
-	        	
 	        	$oParam = unserialize($oinfo['info']);
 	        	$guest_area = '';
 	        }
@@ -218,7 +216,8 @@ class OrderController extends ManageBase{
 			foreach ($list as $k=>$v){
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);
-				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."&".$oinfo['id']."^#";
+				$print = $v['print'] ? $v['print'] : '1';
+				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],$print,$v['id'])."&".$oinfo['id']."^#";
 				
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
@@ -262,7 +261,6 @@ class OrderController extends ManageBase{
 			//记录打印日志
 			print_log($ginfo['sn'],$user,$type,$order_type['channel_id'],'',count($list),1);
 			$model->commit();//提交事务
-			//$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '1',
 				'message' => '订单读取成功!',
@@ -270,7 +268,6 @@ class OrderController extends ManageBase{
 			);
 		}else{
 			$model->rollback();//事务回滚
-			//$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '0',
 				'message' => '订单读取失败1!',

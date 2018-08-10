@@ -54,6 +54,7 @@ class Encry extends \Libs\System\Service {
         }
         
     }
+
     /*座位号合并
     @param $seat string 座位号
     return int 合并座位号*/

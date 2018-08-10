@@ -11,6 +11,7 @@ use Common\Controller\LubTMP;
 use Wechat\Service\Wticket;
 use \Wechat\WechatReceive;
 use Libs\Service\Order;
+use Payment\Client\Charge;
 class IndexController extends LubTMP {
     /**
      * 微信消息对象
@@ -140,48 +141,7 @@ class IndexController extends LubTMP {
             $return = array('statusCode'=>300);
         }
         die(json_encode($return));
-    }
-    function get_ticket()
-    {
-        $product = array(
-            '1'     =>      '过山车',
-            '2'     =>      '摩天环车',
-            '3'     =>      '冲浪旋艇',
-            '4'     =>      '摩天轮',
-            '5'     =>      '水陆大战',
-            '6'     =>      '欢乐旅行',
-            '7'     =>      '疯狂老鼠',
-            '8'     =>      '飞椅',
-            '9'     =>      '迷你穿梭',
-            '10'    =>      '碰碰船',
-            '11'    =>      '挖掘机',
-            '12'    =>      '逍遥水母',
-            '13'    =>      '升降飞机',
-            '14'    =>      '体能乐园',
-            '15'    =>      '海盗船',
-            '16'    =>      '鬼城',
-            '17'    =>      '旋风骑士',
-            '18'    =>      '弹跳机',
-            '19'    =>      '碰碰车',
-            '20'    =>      '高空飞翔',
-            '21'    =>      '双人飞天',
-            '22'    =>      '嘉年华',
-            '23'    =>      '超级飞碟',
-            '24'    =>      '太空漫步',
-            '25'    =>      '激流勇进',
-            '26'    =>      '转马',
-            '27'    =>      '狂呼',
-            '28'    =>      '迪斯科转盘',
-            '29'    =>      '大摆锤',
-            '30'    =>      '喷球车',
-            '31'    =>      '袋鼠跳',
-            '32'    =>      '手摇船',
-            '33'    =>      '五D影院'
-        );
-        $bh = rand(1,33);
-        return $product[$bh];
-    }
-    //页面初始化
+    }    //页面初始化
     function wx_init($product_id){
         $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' || $_SERVER['SERVER_PORT'] == 443) ? "https://" : "http://";
         $url = "$protocol$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]";
@@ -325,8 +285,11 @@ class IndexController extends LubTMP {
         //加密参数
         $user = session('user');
         $uid = $user['user']['id'];
-        $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id')->limit('10')->order('createtime DESC')->select();
-        $this->wx_init($this->pid);
+        if($uid <> 2){
+           $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id,number')->limit('30')->order('createtime DESC')->select();
+           $this->wx_init($this->pid); 
+        }
+        
         $this->assign('data',$list)->display();
     }
     //推广
@@ -852,7 +815,7 @@ class IndexController extends LubTMP {
                 $this->error("订单状态不允许此项操纵");
             }else{
                 //根据订单属性判断是否需要加载微信支付 散客和政企通过微信购票
-                if($info['type'] == '1' || $info['type'] == '6' || $info['type'] == '8'){
+                
                     $user = session('user');
                     if(empty($user)){
                        $user = Wticket::tologin($this->ginfo);
@@ -869,16 +832,21 @@ class IndexController extends LubTMP {
                     $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
                     $product_name = product_name($this->pid,1);
+                    
                     $pay = & load_wechat('Pay',$this->pid);
                     $prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
+
+                    
+                    
                     if($prepayid){
                         $options = $pay->createMchPay($prepayid);
                     }else{
                         // 创建JSAPI签名参数包，这里返回的是数组
                         $this->assign('error',$pay->errMsg.$pay->errCode);
                     }
+                    load_redis('set','aaaa',json_encode($options).json_encode($prepayid));
                     $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
-                }
+                
             }
             $this->assign('data',$info)->display();
         }
@@ -1057,7 +1025,7 @@ class IndexController extends LubTMP {
         $template = array(
             'touser'=>$info['openid'],//指定用户openid
             'template_id'=>'8W2t7l0loiAdTl7l0U7OWb7qZC-keLqi1FRuRQYkNtI',
-            'url'   =>  U('Wechat/Index/scenic_ticket',array('sn' => $info['out_trade_no'])),
+            'url'   =>  U('Api/Index/ticket',array('sn' => $info['out_trade_no'])),
             'topcolor'=>"#7B68EE",
             'data'=>array(
                 'first'=>array('value'=>'您好，您的门票订单已预订成功。'."\n"),
@@ -1075,23 +1043,21 @@ class IndexController extends LubTMP {
     }
     public function scenic()
     {
-        //session('user',null);//TODO  生产环境删除
+        session('user',null);//TODO  生产环境删除
         //判断用户是否登录   检查session 是否为空
         $user = session('user');
         if(empty($user['user']['openid'])){
            Wticket::tologin($this->ginfo);
            $user = session('user');
         }
-        //dump($user);dump($user);dump($user);dump($user);
         //判断是否已经在登录
         $this->check_login(U('Wechat/Index/scenic',array('pid'=>$this->pid,'u'=>$this->user,'param'=>$this->param)));
         //与数据比对、是否绑定渠道商\
         //根据当前用户属性  加载价格及座位
         $plan = Wticket::getplan($this->pid);
-        load_redis('set','goods_info_plan',json_encode($plan));
         $param = array('pid'=>$this->pid);
         $goods_info = array_merge($plan,$user);
-        load_redis('set','goods_info',json_encode($goods_info));
+        //load_redis('set','goods_info',json_encode($goods_info));
         $this->wx_init($this->pid);
         session('pid',$this->pid);
         $urls = Wticket::reg_link($user['user']['id'],$this->pid);
@@ -1126,71 +1092,128 @@ class IndexController extends LubTMP {
         }
         die(json_encode($return)); 
     }
+    public function coupons()
+    {
+        //判断是否登录
+        $user = session('user');
+        if(empty($user['user']['openid']) || !empty($this->user)){
+           Wticket::tologin($this->ginfo);
+           $user = session('user');
+        }
+        //判断是否已经在登录
+        $this->check_login(U('Wechat/Index/coupons',array('pid'=>$this->pid,'u'=>$this->user,'param'=>$this->param)));
+        //dump($user);
+        //判断是否通过审核
+        if($user['user']['id'] > 2){
+            //判断是否已经有领取
+            $where = [
+                'user_id' => $user['user']['id']
+            ];
+            $info = D('Coupons')->where($where)->find();
+            if(empty($info)){
+                $param =  [
+                        'effective' => [
+                            'start' =>  '',
+                            'end'   =>  '',
+                        ],
+                        'ticket' => [
+                            'ticket'    =>  6,//
+                            'price'     =>  '68',
+                            'discount'  =>  '0'
+                        ]
+                    ];
+                $add = [
+                    'product_id'=>  $this->pid,
+                    'user_id'   =>  $user['user']['id'],
+                    'param'     =>  json_encode($param),
+                    'number'    =>  5,
+                    'create_time'=> time(),
+                    'update_time'=> time(),
+                    'status' => 1
+                ];
+                D('Coupons')->add($add);
+                $info = D('Coupons')->where($where)->find();
+            }
+            if($info['number'] > 0 && $info['status']){
+                $info['param'] = json_decode($info['param']);
+                $this->assign('info',$info);
+            }
+        }
+        $this->assign('user',$user['user'])->display();
+    }
+    public function useticket()
+    {
+        if(IS_POST){
+            //创建订单
+            $pinfo = json_decode($_POST['info'],true);
+            $uinfo = session('user');
+            $count = D('Coupons')->where(['user_id'=>$uinfo['user']['id']])->getField('number');
+            if($count > 0){
+               //读取销售计划
+                $plan = D('Plan')->where(['plantime'=>strtotime($pinfo['plan_id']),'status'=>2])->getField('id');
+                if(empty($plan)){
+                    $return = array(
+                        'statusCode' => 300,
+                        'url' => '',
+                        'msg' => '未找到销售计划'
+                    );
+                    die(json_encode($return));
+                }
+                $pinfo['plan_id'] = $plan;
+                $info = json_encode($pinfo);
+                //判断数据的完整性
+                
+                $order = new Order();
+                $sn = $order->mobile($info,$uinfo['user']['scene'],$uinfo['user'],1);
+                
+                if($sn != false){
+                    D('Coupons')->where(['user_id'=>$uinfo['user']['id']])->setDec('number',$pinfo['number']);
+                    $return = array(
+                        'statusCode' => 200,
+                        'url' => U('Wechat/Index/pay_success',array('sn'=>$sn['order_sn'],'pid'=>$this->pid)),
+                    ); 
+                }else{
+                    $return = array(
+                        'statusCode' => 300,
+                        'url' => '',
+                        'msg' => $order->error
+                    );  
+                }
+                die(json_encode($return)); 
+            }else{
+                
+                $return = array(
+                    'statusCode' => 300,
+                    'url' => U('Wechat/Index/coupons',array('sn'=>$sn,'pid'=>$this->pid)),
+                    'msg' => '体验券已使用'
+                );
+                die(json_encode($return));
+                
+            }
+            
+        }else{
+            $user = session('user');
+            if(empty($user) ){
+               $user = Wticket::tologin($this->ginfo);
+            }
+            $ginfo = I('get.');
+            $where = [
+                'id'    =>  $ginfo['id']
+            ];
+            $goods_info = $user;
+            $info = D('Coupons')->where($where)->find();
+            $info['param'] = json_decode($info['param'],true);
+            $this->assign('info',$info)
+                ->assign('date',date('Y-m-d'))
+                ->assign('mindate',date("Y-m-d",strtotime("-1 day")))
+                ->assign('goods_info',json_encode($goods_info))
+                ->display();
+        }
+        
+
+    }
     public function map()
     {
         $this->display();
-    }
-    /*微信API 相关处理  后期完善
-    文本消息
-    */
-    function _keys($keys){
-        global $wechat;
-        error_insert("111微信被动接口验证失败");
-        // 这里直接原样回复给微信(当然你需要根据业务需求来定制的)
-        return $wechat->text($keys)->reply();
-    }
-    /**
-     * 事件消息
-     * @param  [type] $event [description]
-     * @return [type]        [description]
-     */
-    function _event($event) {
-        global $wechat;
-        switch ($event) {
-            // 粉丝关注事件
-            case 'subscribe':
-               return $wechat->text('欢迎关注公众号dd！')->reply();
-            // 粉丝取消关注
-            case 'unsubscribe':
-                exit("success");
-            // 点击微信菜单的链接
-            case 'click': 
-                return $wechat->text('你点了菜单链接！')->reply();
-            // 微信扫码推事件
-            case 'scancode_push':
-            case 'scancode_waitmsg':
-                    $scanInfo = $wechat->getRev()->getRevScanInfo();
-                    return $wechat->text("你扫码的内容是:{$scanInfo['ScanResult']}")->reply();
-            // 扫码关注公众号事件（一般用来做分销）
-            case 'scan':
-                 return $wechat->text('欢迎关注公众号！')->reply();
-        }
-    }
-    /**
-     * 图片消息
-     * @return [type] [description]
-     
-    function _images(){
-        //global $wechat;
-    　  //$wechat 中有获取图片的方法
-        //return $wechat->text('您发送了一张图片过来')->reply();
-    }*/
-    /**
-     * 位置消息
-     */
-    function _location(){
-
-    }
-    /**
-     * 其它消息
-     */
-    function _default(){
-
-    }
-    /**
-     * 日志
-     */
-    function _logs(){
-
     }
 }

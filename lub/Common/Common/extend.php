@@ -388,6 +388,10 @@ function planShow($param,$stype = 1,$type=NULL){
                 //只显示日期
                 $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
                 break;
+            case '26':
+                //只显示日期
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);;
+                break;
             case '31':
                 //不显示场次 和结束时间
                 //$name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
@@ -399,7 +403,7 @@ function planShow($param,$stype = 1,$type=NULL){
                 break;
             case '22':
                 //短信发送
-                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
+                $name = date('m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
                 break;
             case '32':
                 //不显示场次 和结束时间
@@ -454,14 +458,7 @@ function get_chinese_weekday($datetime){
     $weeklist = array('日', '一', '二', '三', '四', '五', '六');
     return '周' . $weeklist[$weekday];
 }
-/**
- * 获取当天的演出场次
- */
-function get_today_plan(){
-    $today = strtotime(date('Ymd'));
-    $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
-    return $plan;
-}
+
 /*
  * 获取取票人名称
  * @param $param int 操作员ID
@@ -787,7 +784,11 @@ function crmName($param,$type=NULL){
      * @return  string
      */
     function get_order_sn($planid,$checkType = 1,$ticket_type = 1){
-        return substr(date('Ymd'),3).$checkType. $planid. str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+        $sn = load_redis('rPop','sn_library');
+        if(!$sn){
+            $sn = substr(date('Ymd'),3).$checkType. $planid. str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+        }
+        return $sn;
     }
     /**
      * 根据订单号判断订单有效性
@@ -1790,6 +1791,14 @@ function crmName($param,$type=NULL){
         $list = M('Plan')->where(array('status'=>2))->field('id')->select();
         return arr2string($list,'id');
     }
+    /**
+     * 获取当天的演出场次
+     */
+    function get_today_plan(){
+        $today = strtotime(date('Ymd'));
+        $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
+        return $plan;
+    }
     /*通用价格拉取
      * @param $planid 销售计划
      * @param $type int 读取票型类型 1、获取散客票 2、获取团队 3、散客团队 4、获取政企  6、活动票型 9、获取所有票型
@@ -1880,7 +1889,7 @@ function crmName($param,$type=NULL){
         }
         if(!empty($area)){
             $map = array_merge($area,$map);
-        }//dump($map);
+        }
         //获取价格信息
         $tickets = M('TicketType')->where($map)->field('id,name,area,price,discount')->select();
         if($plan['product_type'] == '1' && $seale == '2'){
@@ -1902,7 +1911,7 @@ function crmName($param,$type=NULL){
                         $itemConf = cache('ItemConfig');
                         //一级代理商直接显示景区结算价格 指定票型ID时，使用景区指定价格
                         if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16 && empty($sealeTicket)){
-                            $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];//d//ump($ticket_level);
+                            $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];
                             $va['discount'] = $ticket_level[$va['id']]['discount'];/*结算价格*/
                         }
                     }
@@ -1912,6 +1921,7 @@ function crmName($param,$type=NULL){
                 }
             }
         }else{
+
             foreach ($tickets as $va){
                 if(in_array($va['id'],$param['ticket'])){
                     $va['area_num'] = $area_num;

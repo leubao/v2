@@ -386,7 +386,7 @@ class Order extends \Libs\System\Service {
 	* @param $info array 客户端提交数据
 	* 用户表中默认新增 微信 官网 自助机
 	*/
-	function mobile($pinfo,$scena = null,$uinfo = null){//dump($pinfo);
+	function mobile($pinfo,$scena = null,$uinfo = null,$is_seat = 2){//dump($pinfo);
 		if(empty($pinfo) || empty($scena)){$this->error = '400001 : 数据传递失败,请重试...';return false;}
 		$info = json_decode($pinfo,true);
 		if(empty($info)){$this->error = '400002 : 部分数据丢失,解析失败...';return false;}
@@ -400,7 +400,7 @@ class Order extends \Libs\System\Service {
             check_quota($info['plan_id'],$plan['product_id'],$uinfo['qditem']);
         }*/
         $scena = Order::is_scena($scena);
-		return Order::quick_order($info,$scena,$uinfo,2); 
+		return Order::quick_order($info,$scena,$uinfo,$is_seat); 
 	}
 	/*微信/官网网页订单支付 
 	* @param $info array 客户端提交数据
@@ -770,7 +770,6 @@ class Order extends \Libs\System\Service {
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		
-		//dump($info);
 		$ainfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('id,type,param')->find();
 		$aparam = json_decode($ainfo['param'],true);
 
@@ -972,7 +971,7 @@ class Order extends \Libs\System\Service {
 		$sn = get_order_sn($plan['id'],$printtype);
 
 		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
-		load_redis('setex','cs',json_encode($seat).$info['param'][0]['settlement'],2300);
+		if((int)$seat['num'] > 200){$this->error = "400005 : 单笔订单门票数不能超过200...";return false;}
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
@@ -1351,7 +1350,7 @@ class Order extends \Libs\System\Service {
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
 			    /*发送成功短信*/
 				if($proconf['crm_sms']){$crminfo = Order::crminfo($plan['product_id'],$param['crm'][0]['qditem']);}	
-				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],1,2),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
+				$msgs = array('phone'=>$info['info']['crm'][0]['phone'],'title'=>planShow($plan['id'],2,1),'remark'=>$msg,'num'=>$info['number'],'sn'=>$info['order_sn'],'crminfo'=>$crminfo,'product'=>$plan['product_name']);
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
 				}else{

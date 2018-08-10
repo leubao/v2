@@ -294,16 +294,16 @@ class IndexController extends ManageBase{
 		if(IS_POST){
 			$pinfo = I('post.');
 			$data = array(
-				'id' => $pinfo['id'],
 				'name' => $pinfo['name'],
 				'type' => $pinfo['type'],
 				'privilege' => $pinfo['privilege'],
 				'settlement'=> $pinfo['settlement'],
 				'status' => $pinfo['status'],
 				'price_group' => implode(',',$pinfo['price_group']),
+				'create_time' => time()
 			);
 
-			$up = D("CrmGroup")->save($data);
+			$up = D("CrmGroup")->where(['id'=>$pinfo['id']])->save($data);
 			if($up != false){
 				$this->srun('更新成功!',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{

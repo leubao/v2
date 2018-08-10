@@ -11,10 +11,10 @@ class Wticket {
         $product = M('Product')->where(array('status'=>1,'id'=>$pid))->field('id')->select();
         $info['product'] = arr2string($product,'id');
         //根据当前用户判断   若为散客  读取配置项  微信的价格政策
-        $user = session('user');//dump($user);
+        $user = session('user');
         $info['group']['price_group'] = $user['user']['pricegroup'];
         $info['scene'] = '4';
-        $plan = \Libs\Service\Api::plans($info);
+        $plan = \Libs\Service\Api::plans($info,$user);
         foreach ($plan['plan'] as $key => $value) {
             $plans['plan'][] = array(
                 'title' =>  $value['title'],
@@ -311,16 +311,14 @@ class Wticket {
             //load_redis('lpush','woekd',date('Y-m-d H:i:s').serialize($uInfo));
         }elseif (!empty($promote) && empty($winfo['channel'])) {
             $uInfo = $db->where(array('id'=>$promote,'status'=>'1'))->field('id,nickname,cid,groupid,type')->find();
-            //load_redis('lpush','uoo',date('Y-m-d H:i:s').serialize($uInfo));
             //$uInfo['promote'] = $promote;//推广标记
         }
-        //load_redis('lpush','222',date('Y-m-d H:i:s').'&'.$promote.'&'.$open_id.'&'.serialize($winfo).serialize($uInfo));
         if(!empty($uInfo)){
             //查询所属分组信息
             $uInfo['group'] = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement')->find();
             if($uInfo['group']['type'] == '1'){
                 //查询所属商户相关信息 企业
-                $uInfo['crm'] = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,quota,level,f_agents,agent')->find();
+                $uInfo['crm'] = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,f_agents,agent')->find();
                 if($uInfo['crm']['agent'] == '1'){
                     //开启代理商制度
                     $cid = money_map($uInfo['cid']);
@@ -328,8 +326,6 @@ class Wticket {
                 }
             }
             $uInfo['wechat'] = $winfo;
-            //load_redis('set','sql',$db->_sql());
-            //load_redis('lpush','uinfo109',date('Y-m-d H:i:s').serialize($uInfo));
             return $uInfo;
         }else{
             //load_redis('lpush','2',date('Y-m-d H:i:s').'221');
