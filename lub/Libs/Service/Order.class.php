@@ -2270,6 +2270,7 @@ class Order extends \Libs\System\Service {
 				'order_sn' => $oinfo['order_sn'],
 				'soldtime' => $createtime,
 				'status'   => '2',
+				'price_id' => $v['priceid'],
 				'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 											'area'=>areaName($v['areaId'],1),
 											'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),

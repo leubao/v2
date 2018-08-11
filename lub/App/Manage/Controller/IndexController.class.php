@@ -61,17 +61,17 @@ class IndexController extends ManageBase {
             'plan_id' => ['in', $normal],
             'status'  => ['in', '1']
         ];
-        $pre_order_count = $order->where($map_order)->count();
-        $pre_order_sum = $order->where($map_order)->sum('number');
+        $pre_order_count = $order->where($map_order)->cache('pre_order_count',60)->count();
+        $pre_order_sum = $order->where($map_order)->cache('pre_order_sum',60)->sum('number');
         //今日售出
         $today_count = $order->where(['plan_id' => ['in', $normal],'status'=>['in','1,9']])->sum('number');
         //历史累计人数
-        $people_count = D('ReportData')->where(['status'=>1])->sum('number');
+        $people_count = D('ReportData')->where(['status'=>1])->cache('people_count',60)->sum('number');
         //历史累计场次
-        $plan_count = D('Plan')->where(['status'=>4])->count();
+        $plan_count = D('Plan')->where(['status'=>4])->cache('plan_count',60)->count();
         //今日入园
         //景区
-        $today_garden = D('Scenic')->where(['plan_id' => ['in', $normal],'status'=>['in','99']])->sum('number');
+        //$today_garden = D('Scenic')->where(['plan_id' => ['in', $normal],'status'=>['in','99']])->sum('number');
         $today_pre_garden = D('Scenic')->where(['plan_id' => ['in', $normal],'status'=>['in','2']])->sum('number');
         //昨日入园人数
         $plantime = strtotime(date("Y-m-d",strtotime("-1 day")));
@@ -105,6 +105,15 @@ class IndexController extends ManageBase {
             'year_pre'      =>  $year_pre
         ];
         $this->assign('year',$year);
+    }
+    //当日统计
+    public function today()
+    {
+        $today = arr2string(get_today_plan(),'id');
+
+        //景区
+        $today_garden = D('Scenic')->where(['plan_id' => ['in', $today],'status'=>['in','99']])->sum('number');
+        $today_pre_garden = D('Scenic')->where(['plan_id' => ['in', $today],'status'=>['in','2']])->sum('number');
     }
     //缓存更新
     public function cache() {
