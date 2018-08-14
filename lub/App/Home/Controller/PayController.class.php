@@ -257,13 +257,19 @@ class PayController extends Base{
     {
         if(IS_POST){
             try {
+                $pinfo = I('post.');
+                $payData = [
+                    
+                ];
                 $url = Charge::run('', $wxConfig, $payData);
             } catch (PayException $e) {
                 echo $e->errorMessage();
                 exit;
             }
         }else{
-            $this->display();
+            $uinfo = Partner::getInstance()->getInfo();
+            $crm =  D('Crm')->where(['id'=>$uinfo['cid']])->field('id,cash,name')->find();
+            $this->assign('crm',$crm)->display();
         }
     }
 }

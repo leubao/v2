@@ -1520,6 +1520,16 @@ class Order extends \Libs\System\Service {
 		/*==============================渠道版扣费 end=================================================*/
 		/*==============================自动排座开始 start =============================================*/
 		if($is_seat == '1'){
+			//辅助排座
+			foreach ($seat['aux_seat'] as $s => $a) {
+				//检测是否有足够的座位 TODO   智能排座 判断是否有相同区域不同票型的
+				if(!empty($plan_param['auto_group'])){
+					//不同票型，但相同区域合并
+					$auto[$a['areaId']] = Autoseat::auto_group($plan_param['auto_group'],$a['areaId'],$a['num'],$plan['product_id'],$plan['seat_table']);
+				}else{
+					$auto[$a['areaId']] = "0";
+				}
+			}
 			foreach ($seat['area'] as $k=>$v){
 				//检测是否有足够的座位 TODO   智能排座
 				if(!empty($plan_param['auto_group'])){
@@ -2406,6 +2416,7 @@ class Order extends \Libs\System\Service {
 				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];
 				$seat['area'][$v['areaId']]['price'] = $v['price'];
 				*/
+				//排座
 				$seat['area'][] = [
 					'areaId' => $v['areaId'],
 					'priceid'=> $v['priceid'],
@@ -2413,6 +2424,9 @@ class Order extends \Libs\System\Service {
 					'num'	 =>	$v['num'],
 					'idcard' => $v['idcard']
 				];
+				//辅助排座 按区域归类
+				$seat['aux_seat'][$v['areaId']]['areaId'] = $v['areaId'];
+				$seat['aux_seat'][$v['areaId']]['num'] += $v['num'];
 				$seat['num'] += $v['num'];
 				
 			}else{
