@@ -156,8 +156,8 @@ class ReportController extends ManageBase{
 				foreach ($price as $v) {
 		        	if(in_array($v['id'],$ticket_id)){
 		        		$map['price_id'] = $v['id'];
-		        		(int)$number = $db->where($map)->count();
-			        	if($number <> (int)0){
+		        		(int)$number = $db->where($map)->count('id');
+			        	if($number > (int)0){
 			        		$list[$v['id']] = $v;
 				        	$list[$v['id']]['number'] = $number;
 				        	$list[$v['id']]['money']  = $v['price']*$number;

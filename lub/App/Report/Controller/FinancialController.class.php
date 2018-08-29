@@ -395,7 +395,7 @@ class FinancialController extends ManageBase{
         }
         sort($data['price']);
         //场次汇总 排除销售为0的场次
-        $where = array('plantime'=>array(array('EGT', strtotime($starttime)), array('ELT', strtotime($endtime)), 'AND'),'status'=>['EGT','1']);
+        $where = array('plantime'=>array(array('EGT', strtotime($starttime)), array('ELT', strtotime($endtime)), 'AND'),'status'=>['EGT','1'],'product_id'=>get_product('id'));
         $data['info']['games'] = M('Plan')->where($where)->count();
         
         $export_map['report'] = 'tickets';

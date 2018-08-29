@@ -13,4 +13,4 @@
 <script src="{$config_siteurl}static/home/js/tendina.min.js"></script>
 <!-- 引入自定义样式文件-->
 <link rel="stylesheet" href="{$config_siteurl}static/home/css/core.css">
-<title>{$proconf.iname}  云鹿票务 渠道版  - by LubTMP v1.0</title>
+<title>飞跃武夷7D体验馆  云鹿票务 渠道版  - by LubTMP v1.0</title>

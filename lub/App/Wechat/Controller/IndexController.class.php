@@ -307,6 +307,15 @@ class IndexController extends LubTMP {
     function reg(){
         if(IS_POST){
             $info = json_decode($_POST['info'],true);
+            //校验验证码
+            $code = load_redis('get','phone_'.$info['phone']);
+            if($code <> $info['code']){
+                $return = array(
+                    'statusCode' => 300,
+                    'msg' => $code.'验证码有误...'.$info['code'],
+                ); 
+                die(json_encode($return));
+            }
             $verify = genRandomString();
             $data = array(
                 'username' => $info['phone'],
@@ -323,13 +332,19 @@ class IndexController extends LubTMP {
                 'phone' => $info['phone'],
                 'email'  => '0',
                 'role_id' => '0',
-                'legally' => $info['legally'],
+                'legally' => isset($info['legally']) ? $info['legally'] : 0,
                 'groupid' => $info['group'],
                 "password" => md5($info['password'].md5($verify)),
                 'status' => '3',
             );
             if($info['openid']){
                 $user_id = D('User')->add($data);
+            }else{
+                $return = array(
+                    'statusCode' => 300,
+                    'msg' => '获取授权失败,请退出重试...',
+                );
+                die(json_encode($return));
             }
             if(!empty($user_id)){
                 $userdata = D('UserData')->add(array('user_id'=>$user_id,'wechat'=>'1','industry'=>industry($info['industry'],1)));
@@ -347,7 +362,7 @@ class IndexController extends LubTMP {
             die(json_encode($return));
         }else{
             //判断是否已注册
-            //已注册返回
+            /*已注册返回*/
             Wticket::tologin($this->ginfo);
             $user = session('user');
             if(!$user['user']['openid']){
@@ -1211,6 +1226,41 @@ class IndexController extends LubTMP {
         }
         
 
+    }
+    //短信验证码
+    public function send_code()
+    {
+        if(empty($this->ginfo)){
+            $return = array(
+                'statusCode' => 300
+            );
+            echo json_encode($return);
+            exit; 
+        }
+        $db = M('User');
+        $phone = $db->where(array('phone'=>$this->ginfo['phone']))->find();
+        if($phone){
+            $return = array('statusCode' => 300,'msg'=>'手机号已被注册...'); 
+            die(json_encode($return));
+        }
+        //生成验证码
+        $code = load_redis('get','phone_'.$this->ginfo['phone']);
+        if(empty($code)){
+            $code = genRandomString(4,'1');
+            load_redis('setex','phone_'.$this->ginfo['phone'],$code,1800);
+            //发送短信
+            $info = [
+                'phone' =>  $this->ginfo['phone'],
+                'code'  =>  $code
+            ];
+            \Libs\Service\Sms::order_msg($info,'12');
+        }
+
+        $return = array(
+            'statusCode' => 200,
+            'msg'   =>  'ok'
+        ); 
+        echo json_encode($return);
     }
     public function map()
     {

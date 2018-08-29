@@ -404,7 +404,9 @@ class OrderController extends Base{
 			$oinfo = Operate::do_read('Order',0,array('order_sn'=>$info['sn'],'status'=>'1'),'','',true);
 			//渠道版限定核减时间 TODO
 			$plan = M('Plan')->where(array('id'=>$oinfo['plan_id'],'status'=>'1'))->getField('plantime');
-			$subtract_time = $this->pro_conf[$oinfo['product_id']]['subtract_time'];
+			$proconf = cache('ProConfig');
+        	$proconf = $proconf[$oinfo['product_id']][1];
+			$subtract_time = $proconf['subtract_time'];
 			if(date('Ymd',$plan) == date('Ymd') && date('H:i') >=  $subtract_time || empty($oinfo)){
 				$data = array('statusCode' => 300,'msg' => "超出核减时间，不能进行核减！");
 			}else{

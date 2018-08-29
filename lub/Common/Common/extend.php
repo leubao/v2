@@ -1621,6 +1621,8 @@ function crmName($param,$type=NULL){
         $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
         
         $sn = $code."^#";
+
+        
         //条码号
         if($proconf['barcode'] == '1'){
             $barcode = $data['area'].\Libs\Service\Encry::seat_fold($data['seat']).$plan_id;
@@ -1726,7 +1728,6 @@ function crmName($param,$type=NULL){
      */
     function get_item_conf($param = '1',$item_id = '')
     {
-        
         if(empty($item_id)){
             $item_id = get_item('id');
         }

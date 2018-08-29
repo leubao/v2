@@ -256,12 +256,47 @@ class PayController extends Base{
     function recharge()
     {
         if(IS_POST){
+            
             try {
                 $pinfo = I('post.');
+
+                $money = trim($pinfo['money']);
+                /*
+                if (bccomp($amount, '10000', 2) === -1) {
+                    $this->error('支付金额不能低于 10000 元',U('home/pay/index'));
+                }*/
+                $wxConfig = load_payment('ccb_web',10);
+                $uinfo = Partner::getInstance()->getInfo();
+                $crm =  D('Crm')->where(['id'=>$uinfo['cid']])->field('id,cash,name')->find();
+                $sn = get_order_sn($crm['id']);
                 $payData = [
-                    
+                    'amount'    =>  $money,
+                    'order_no'  =>  $sn,
+                    'txcode'    =>  '520100',
+                    'remark'    =>  $pinfo['remark'],//备注
+                    'remark2'   =>  '',//$crm['name']//备注
                 ];
-                $url = Charge::run('', $wxConfig, $payData);
+                try {
+                    $url = Charge::run('ccb_web', $wxConfig, $payData);
+                    //记录充值日志
+                    $log = [
+                        'tyint'     => '1',
+                        'addsid'    => '2',
+                        'cash'      => $money,
+                        'order_sn'  => $sn,
+                        'crm_id'    => $crm['id'],
+                        'type'      => 1,
+                        'pay'       => '7',
+                        'balance'   => '',
+                        'remark'    => $pinfo['remark'],
+                        'user_id'   => get_user_id('id'),
+                    ];
+                    load_redis('setex','pay_'.$sn,json_encode($log),'4200');
+                } catch (PayException $e) {
+                    echo $e->errorMessage();
+                    exit;
+                }
+                header('Location:' . $url);
             } catch (PayException $e) {
                 echo $e->errorMessage();
                 exit;

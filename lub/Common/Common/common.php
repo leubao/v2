@@ -814,7 +814,17 @@ function load_payment($pay = '',$itemid = ''){
 
             //'redirect_url'      => '',// 如果是h5支付，可以设置该值，返回到指定页面
 
-            'return_raw'        => true,// 在处理回调时，是否直接返回原始数据，默认为true 
+            'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
+        ];
+    }
+    if(stripos($pay,'ccb') !== false){
+        $options = [
+            'merchant_id' => $itemCof['ccb_merchantid'],  //商户代码
+            'branch_id'   => $itemCof['ccb_branchid'],  //分行代码
+            'pos_id'      => $itemCof['ccb_posid'],  //柜台号
+            'txcode'      => $itemCof['ccb_txcode'],
+            'pub_key'     => $itemCof['ccb_pub'],
+            'qupwd'       => $itemCof['ccb_qupwd']
         ];
     }
     return $options;

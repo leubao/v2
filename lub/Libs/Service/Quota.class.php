@@ -14,13 +14,13 @@ class Quota extends \Libs\System\Service {
 	/**
 	 * 查询配额
 	 * @param  int $plan_id    销售计划ID
-	 * @param  int $product_id 产品ID
+	 * @param  int $product 产品ID
 	 * @param  int $crm_id     客户ID
 	 * @param  int $number     数量
 	 * @param  int $salse      销售类型
 	 * @return true|false
 	 */
-	function quota($plan_id, $product_id, $crm_id, $number, $salse = '1')
+	function quota($plan_id, $product, $crm_id, $number, $salse = '1')
 	{
 		//新增销售计划注册销售类型的库存
 		//查询销售类型的库存
@@ -40,35 +40,70 @@ class Quota extends \Libs\System\Service {
 		$today_quota = D('QuotaUse')->where($map)->sum('number');
 		$today_quota = $today_quota+$number;
 		$plan = F('Plan_'.$plan_id);
+		/* 删除单场整体配额限制
 		if($plan['quota'] < $today_quota){
-			return 'false';
+			return false;
 		}else{
-			//获取系统当前时间
-			$today = date('Ymd',time());
-			$plan_day = date('Ymd',$plan['plantime']);
-			if($today == $plan_day && date("H") > 11){
-				return true;
-				//Quota::get_quota($crm['id'],$plan_id,$product);
-			}else{
-				$crm = D('Item/Crm')->where(array('id'=>$crm_id))->field('id,f_agents,level')->relation(true)->find();
-				//判断当前渠道商级别
-				switch ($crm['level']){
-					case $config['level_1'] :
+			
+		}*/
+		$crm = D('Item/Crm')->where(array('id'=>$crm_id))->field('id,f_agents,level')->relation(true)->find();
+		//获取系统当前时间
+		$today = date('Ymd',time());
+		$plan_day = date('Ymd',$plan['plantime']);
+		if($today == $plan_day && date("H") > 11){
+			
+			Quota::get_quota($crm['id'],$plan_id,$product);
+			return true;
+		}else{
+			
+			//判断当前渠道商级别
+			switch ($crm['level']){
+				case $config['level_1'] :
+					//获取当前已经消耗的配额
+					$quota = Quota::get_quota($crm['id'],$plan_id,$product);
+					//进行比对
+					$status = Quota::judge_quota($crm['quota'],$quota,$number);
+					//dump($status);
+					break;
+				case $config['level_2'] :
+					//获取当前已经消耗的配额
+					$quota_level_2 = Quota::get_quota($crm['id'],$plan_id,$product);
+					//进行比对
+					$status_level_2 = Quota::judge_quota($crm['quota'],$quota_level_2,$number);
+					if($status_level_2){
 						//获取当前已经消耗的配额
-						$quota = Quota::get_quota($crm['id'],$plan_id,$product);
+						$quota_level = Quota::get_quota($crm['f_agents'],$plan_id,$product);
+						$quota_level_num = Quota::get_quota_default($crm['f_agents']);
 						//进行比对
-						$status = Quota::judge_quota($crm['quota'],$quota,$number);
-						//dump($status);
-						break;
-					case $config['level_2'] :
+						$status_level = Quota::judge_quota($quota_level_num,$quota_level,$number);
+						if($status_level){
+							$status = true;
+						}else{
+							$status = false;
+						}
+					}else{
+						$status = false;
+					}
+					break;
+				case $config['level_3'] :
+					//三级渠道商  获取二级的上一级ID
+					//$status = Quota::level_3($crm['id'],$crm['f_agents'],$plan_id,$number,$crm,$product);
+					//获取当前已经消耗的配额
+					$quota_level_3 = Quota::get_quota($crm['id'],$plan_id,$product);
+					//进行比对
+					$status_level_3 = Quota::judge_quota($crm['quota'],$quota_level_3,$number);
+					if($status_level_3){
 						//获取当前已经消耗的配额
-						$quota_level_2 = Quota::get_quota($crm['id'],$plan_id,$product);
+						$quota_level_2 = Quota::get_quota($crm['f_agents'],$plan_id,$product);
+						$quota_level_2_num = Quota::get_quota_default($crm['f_agents']);
 						//进行比对
-						$status_level_2 = Quota::judge_quota($crm['quota'],$quota_level_2,$number);
+						$status_level_2 = Quota::judge_quota($quota_level_2_num,$quota_level_2,$number);
 						if($status_level_2){
+							//获取三级顶级渠道商id
 							//获取当前已经消耗的配额
-							$quota_level = Quota::get_quota($crm['f_agents'],$plan_id,$product);
-							$quota_level_num = Quota::get_quota_default($crm['f_agents']);
+							$level_id = money_map($crm['id']);
+							$quota_level = Quota::get_quota($level_id,$plan_id,$product);
+							$quota_level_num = Quota::get_quota_default($level_id);
 							//进行比对
 							$status_level = Quota::judge_quota($quota_level_num,$quota_level,$number);
 							if($status_level){
@@ -79,71 +114,40 @@ class Quota extends \Libs\System\Service {
 						}else{
 							$status = false;
 						}
-						break;
-					case $config['level_3'] :
-						//三级渠道商  获取二级的上一级ID
-						//$status = Quota::level_3($crm['id'],$crm['f_agents'],$plan_id,$number,$crm,$product);
-						//获取当前已经消耗的配额
-						$quota_level_3 = Quota::get_quota($crm['id'],$plan_id,$product);
-						//进行比对
-						$status_level_3 = Quota::judge_quota($crm['quota'],$quota_level_3,$number);
-						if($status_level_3){
-							//获取当前已经消耗的配额
-							$quota_level_2 = Quota::get_quota($crm['f_agents'],$plan_id,$product);
-							$quota_level_2_num = Quota::get_quota_default($crm['f_agents']);
-							//进行比对
-							$status_level_2 = Quota::judge_quota($quota_level_2_num,$quota_level_2,$number);
-							if($status_level_2){
-								//获取三级顶级渠道商id
-								//获取当前已经消耗的配额
-								$level_id = money_map($crm['id']);
-								$quota_level = Quota::get_quota($level_id,$plan_id,$product);
-								$quota_level_num = Quota::get_quota_default($level_id);
-								//进行比对
-								$status_level = Quota::judge_quota($quota_level_num,$quota_level,$number);
-								if($status_level){
-									$status = true;
-								}else{
-									$status = false;
-								}
-							}else{
-								$status = false;
-							}
-						}else{
-							$status = false;
-						}
-						break;
-				}
-				if($status != false){
-					return true;
-				}else{
-					return false;
-				}
+					}else{
+						$status = false;
+					}
+					break;
+			}
+			if($status != false){
+				return true;
+			}else{
+				return false;
 			}
 		}
 	}
 	//根据销售类型查询配额
 	function query_sales_quota($plan_id,$product,$type){
 		//读取类型剩余数据
-		$quota = load_redis('get','pin_'.$product_id.'_'.$planid.'_'.$type);
+		$quota = load_redis('get','pin_'.$product.'_'.$planid.'_'.$type);
 		return $quota;
 	}
 	//更新销售类型销控
 	function up_sales_quota($plan_id,$product,$type,$num,$param = '1'){
 		if($param == '2'){
 			//减少
-			$quota = load_redis('decrby','pin_'.$product_id.'_'.$planid.'_'.$type,$num);
+			$quota = load_redis('decrby','pin_'.$product.'_'.$planid.'_'.$type,$num);
 		}
 		if($param == '1'){
 			//增加
-			$quota = load_redis('incrby','pin_'.$product_id.'_'.$planid.'_'.$type,$num);
+			$quota = load_redis('incrby','pin_'.$product.'_'.$planid.'_'.$type,$num);
 		}
 		return $quota;
 	}
 	//删除销售类型销控
 	function del_sales_quota($plan_id,$product,$type){
 		//读取类型剩余数据
-		$quota = load_redis('get','pin_'.$product_id.'_'.$planid.'_'.$type);
+		$quota = load_redis('get','pin_'.$product.'_'.$planid.'_'.$type);
 		return $quota;
 	}
 	//同步销售类型销控
@@ -157,10 +161,10 @@ class Quota extends \Libs\System\Service {
 	 * @param $number 数量
 	 * @param $crm_id 渠道商ID
 	 * @param $plan_id 计划id
-	 * @param $product_id 产品ID
+	 * @param $product 产品ID
 	 * @param $sale 销售类型 2常规渠道 4政企渠道 8全员销售 9 三级分销
 	 */
-	public function update_quota($number = '', $crm_id = '', $plan_id = '', $product_id = '', $salse = '')
+	public function update_quota($number = '', $crm_id = '', $plan_id = '', $product = '', $salse = '')
 	{
 		$plan = F('Plan_'.$plan_id);
 		$today = date('Ymd',time());
@@ -168,13 +172,13 @@ class Quota extends \Libs\System\Service {
 		if($today == $plan_day && date("H") > 11){
 			return '200';
 		}
-		//判断销售类型是否存在余量
+		/*判断销售类型是否存在余量
 		$salse = self::pin_sales_link($salse);
-		(int)$salse_num = load_redis('decrby','pin_'.$product_id.'_'.$plan_id.'_'.$salse,$number);
+		(int)$salse_num = load_redis('decrby','pin_'.$product.'_'.$plan_id.'_'.$salse,$number);
 		if($salse_num < 0){
 			//$this->error = "销售类型余量不足...";
-			return false;
-		}
+			return '400';
+		}*/
 		//判断是否设置单体限额，目前只有常规渠道和政企渠道需要设置
 		if(in_array($salse,['2','4'])){
 			self::check_quota($plan_id,$plan['product_id'],$crm_id);
@@ -257,9 +261,9 @@ class Quota extends \Libs\System\Service {
 	 * return
 	 * TODO 后期考虑使用缓存
 	 */
-	function get_quota($cid,$plan_id,$product_id){
+	function get_quota($cid,$plan_id,$product){
 		//查询是否标记配额
-		Quota::check_quota($plan_id,$product_id,$cid);
+		Quota::check_quota($plan_id,$product,$cid);
 		$quota = D('QuotaUse')->where(array('channel_id'=>$cid,'plan_id'=>$plan_id,'type'=>'1'))->getField('number');
 		return $quota;
 	}

@@ -851,7 +851,7 @@ class Order extends \Libs\System\Service {
 			if($proconf['quota'] == '1'){
 				if(in_array($info['type'],array('2','4'))){
 					$quota = new \Libs\Service\Quota();
-					$up_quota = $quota->update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id']);
+					$up_quota = $quota->update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id'],$info['type']);
 				}else{
 					//TODO  全员营销的配额
 					//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
@@ -1301,7 +1301,7 @@ class Order extends \Libs\System\Service {
 			if($proconf['quota'] == '1'){
 				if(in_array($info['type'],array('2','4'))){
 					$quota = new \Libs\Service\Quota();
-					$up_quota = $quota->update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id']);
+					$up_quota = $quota->update_quota($quota_num,$info['info']['crm'][0]['qditem'],$info['plan_id'],$info['type']);
 				}else{
 					//TODO  全员营销的配额
 					//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
@@ -1365,9 +1365,7 @@ class Order extends \Libs\System\Service {
 			}else{
 				$checkCrm = $cid;
 			}
-			//\Libs\Service\Kpi::if_money_low($product['item_id'],$checkCrm,$info['money']);
 			return ['order_sn' => $info['order_sn'],'act'=> $oInfo['param'][0]['activity']];
-			//return $info['order_sn'];
 		}else{
 			error_insert('400006');
 			$model->rollback();//事务回滚
@@ -1563,7 +1561,8 @@ class Order extends \Libs\System\Service {
 				);
 				//计算消耗配额的票型 只有团队订单时才执行此项操作 21060118
 				if($info['type'] == '2' || $info['type'] == '4' && $ticketType[$v['priceid']]['param']['quota'] <> '1'){
-					$quota_num += $va['num'];
+
+					$quota_num += $v['num'];
 				}
 				$status[$k] = $model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->limit($v['num'])->lock(true)->save($data);
 				//echo $model->table(C('DB_PREFIX').$plan['seat_table'])->_sql();
@@ -1697,7 +1696,7 @@ class Order extends \Libs\System\Service {
 			if($info['type'] == '2' || $info['type'] == '4' || $info['type'] == '8' || $info['type'] == '9'){
 				/*查询是否开启配额 读取是否存在不消耗配额的票型*/
 				if($proconf['quota'] == '1' && $quota_num > 0){
-					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$info['type']);
+					$up_quota = \Libs\Service\Quota::update_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$plan['product_id'],$info['type']);
 					if($up_quota == '400'){
 						//error_insert('400012');
 						$model->rollback();
