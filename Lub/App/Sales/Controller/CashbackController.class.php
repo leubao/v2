@@ -23,13 +23,27 @@ class CashbackController extends ManageBase{
         $sn = I('sn');
         $user_id = I('user_id');
         $status = I('status');
+        $starttime = I('starttime');
+        $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
+        $this->assign('starttime',$starttime)
+            ->assign('endtime',$endtime);
         if(!empty($sn)){$map['sn'] =  array('like','%'.$sn.'%');}
         if(!empty($status)){
             $map['status'] = $status;
         }
+        if (!empty($starttime) && !empty($endtime)) {
+            $starttime = strtotime($starttime);
+            $endtime = strtotime($endtime) + 86399;
+            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+        }else{
+            //默认显示当天的订单
+            $starttime = strtotime(date("Ymd"));
+            $endtime = $starttime + 86399;
+            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+        }
         if(!empty($user_id)){$map['user_id'] = $user_id;}
         if(empty($user_id) && empty($status) && empty($sn)){
-            $map['status'] = 3;
+            //$map['status'] = 3;
         }
 		$this->basePage('Cash',$map,array('id'=>'DESC'));
 		$this->assign('ginfo',$ginfo)->assign('status',$status)->display();
