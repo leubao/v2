@@ -174,7 +174,7 @@ class BlockController extends ManageBase{
 	//释放座位
 	function release(){
 		$plan = session('plan_kz');
-		$table=ucwords($plan['seat_table']);
+		$table = ucwords($plan['seat_table']);
 		if(IS_POST){
 			$ginfo = I('post.');
 			if($ginfo['type'] == '2'){

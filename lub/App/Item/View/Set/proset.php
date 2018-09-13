@@ -318,20 +318,6 @@
               </div>
               </div>
               <div id="tab-6" class="tab-pane">
-              <script>KindEditor.create('textarea[name="agreement"]',{
-                          minWidth : '340px',
-                          minHeight : '182px',
-                          resizeType : 1,
-                          uploadJson : '{:U('Crm/Customer/upload');}',
-                          allowFileManager : true,
-                          allowImageUpload : true, 
-                          items : [
-                              'source', '|', 'undo', 'redo','|','fontname', 'fontsize', '|', 'forecolor', 'hilitecolor', 'bold', 'italic', 'underline',
-                              'removeformat', '|', 'justifyleft', 'justifycenter', 'justifyright', 'insertorderedlist',
-                              'insertunorderedlist', '|', 'emoticons', 'image', 'link']
-                      });
-
-              </script>
                   <div class="panel-body">
                        <fieldset style="height:100%;">
                         <legend>官网设置</legend>

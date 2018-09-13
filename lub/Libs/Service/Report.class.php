@@ -122,7 +122,6 @@ class Report{
 					if(M('ReportData')->where($where)->setField('status',0)){
 						$status = Report::strip_order($map,$datetime,1);
 					}else{
-						error_insert('111221');
 						//失败记录日志，并发送错误短信
 						$msg = array('phone'=>'18631451216','title'=>"",'rema'=>"订单拆解",'code'=>'120001');
 						Sms::err_msg($msg);
@@ -1201,7 +1200,7 @@ class Report{
  		$product = M('Product')->where(['status'=>1])->field('id')->select();
  		foreach ($product as $i => $ve) {
  			//检测是否重新生成
- 			$total = $model->where(['months'=>$months,'product_id'=>$vae['product_id']])->getField('day_'.$day);
+ 			$total = $model->where(['months'=>$months,'product_id'=>$ve['product_id']])->getField('day_'.$day);
  		}
  		
 
@@ -1239,15 +1238,24 @@ class Report{
 	    foreach ($arr2 as $k => $v) {
 	    	//判断该渠道商在当月是否已注册
     		if($model->where(['channel_id'=>$v['channel_id'],'months'=>$v['months'],'price_id'=>$v['price_id']])->find()){
-    			$up = [
-    				'day_'.$day  => $v['number'],
-    				'number'	 => ['exp','number+'.$v['number']],
-    				'money'		 => ['exp','money+'.$v['money']],
-    				'moneys'	 => ['exp','moneys+'.$v['moneys']],
-    				'subsidy'    => ['exp','subsidy+'.$v['subsidy']],
-    			];//dump($up);
+    			if((int)$v['moneys'] === 0){
+    				$up = [
+	    				'day_'.$day  => $v['number'],
+	    				'number'	 => ['exp','number+'.$v['number']],
+	    				'money'		 => ['exp','money+'.$v['money']],
+	    				'subsidy'    => ['exp','subsidy+'.$v['subsidy']],
+	    			];
+    			}else{
+    				$up = [
+	    				'day_'.$day  => $v['number'],
+	    				'number'	 => ['exp','number+'.$v['number']],
+	    				'money'		 => ['exp','money+'.$v['money']],
+	    				'moneys'	 => ['exp','moneys+'.$v['moneys']],
+	    				'subsidy'    => ['exp','subsidy+'.$v['subsidy']],
+	    			];
+    			}
+    			
     			$status = $model->where(['months' => $v['months'],'product_id' => $v['product_id'],'channel_id' => $v['channel_id'],'price_id'=>$v['price_id']])->save($up);
-    			//dump($status);
     		}else{
     			$model->add($v);
     		}

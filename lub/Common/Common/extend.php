@@ -1421,10 +1421,11 @@ function crmName($param,$type=NULL){
         //获取要检测的场次
         $list = $model->where(array('status'=>array('in','2,3'),'plantime'=>array('elt',strtotime($datetime))))->select();
         $itemConf = cache('ItemConfig');
-
+        
         foreach ($list as $k => $v) {
             $itemid = D('Product')->where(['id'=>$v['product_id']])->cache(true)->getField('item_id');
-            load_redis('set','check_plan',date('Y-m-d H:m:i').'['.$itemConf[$itemid]['1']['send_sms'].']'.json_encode($itemConf));
+            
+            load_redis('set','check_plan',date('Y-m-d H:m:i').'['.$itemConf[$itemid]['1']['send_msg'].']'.json_encode($itemConf));
             //计划日期
             $plantime = date('Ymd',$v['plantime']);
             if($plantime < $datetime){
@@ -1432,7 +1433,7 @@ function crmName($param,$type=NULL){
                 F('Plan_'.$v['id'],NULL);
                 //停用已过期场次
                 $status = $model->where(array('id'=>$v['id']))->setField('status',4);
-                if((int)$itemConf[$itemid]['1']['send_sms'] === 1){
+                if((int)$itemConf[$itemid]['1']['send_msg'] === 1){
                     send_sms($v['id']);
                 }
                 //销毁过期的数据
@@ -1457,7 +1458,8 @@ function crmName($param,$type=NULL){
                     //停用已过期场次
                     F('Plan_'.$v['id'],NULL);
                     $status = $model->where(array('id'=>$v['id']))->setField('status',4);
-                    if((int)$itemConf[$itemid]['1']['send_sms'] === 1){
+
+                    if((int)$itemConf[$itemid]['1']['send_msg'] === 1){
                         send_sms($v['id']);
                     }
                     //销毁过期的数据

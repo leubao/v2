@@ -1051,7 +1051,7 @@ class WorkController extends ManageBase{
 					$model->commit();//提交事务
 					//是否改变受让人
 					$phone = (int)$pinfo['is_party'] === 2 ? $pinfo['phone'] : D('Order')->where(['order_sn'=>$pinfo['sns']])->getField('phone');
-					$msg 
+					
 					$msgs = array(
 						'phone'	 =>$phone,
 						'title'	 =>planShow($pinfo['plan'],1,2),

@@ -42,6 +42,18 @@
           </td>
         </tr>
         <tr>
+          <td>销售场景:</td>
+          <td colspan="3">
+            <input type="checkbox" name="scene[]" value="1" <if condition="in_array('1',explode(',',$data['scene']))">checked</if>> 窗口
+            <input type="checkbox" name="scene[]" value="2" <if condition="in_array('2',explode(',',$data['scene']))">checked</if>> 渠道版
+            <input type="checkbox" name="scene[]" value="3" <if condition="in_array('3',explode(',',$data['scene']))">checked</if>> 网站
+            <input type="checkbox" name="scene[]" value="4" <if condition="in_array('4',explode(',',$data['scene']))">checked</if>> 微信
+            <input type="checkbox" name="scene[]" value="5" <if condition="in_array('5',explode(',',$data['scene']))">checked</if>> API
+            <input type="checkbox" name="scene[]" value="6" <if condition="in_array('6',explode(',',$data['scene']))">checked</if>> 自助机
+          </td>
+        </tr>
+        <if condition="$ptype eq 1">
+        <tr>
           <td>票型特权:</td>
           <td>
             <input type="checkbox" name="param[quota]" value="1" <if condition="$data['param']['quota'] eq '1'">checked</if>> 不消耗配额
@@ -53,31 +65,33 @@
               <input type="text" name="param[ticket_print_custom]" value="{$data['param']['ticket_print_custom']}" size="10"><span class="remark">座位号选择自定义时打印该内容</span>
           </td>
         </tr>
+        </if>
+        <if condition="$ptype eq 2">
+          <tr>
+            <td>联票支持:</td>
+            <td>
+              <input type="radio" name="param[present]" value="1" <if condition="$data['param']['present'] eq '1'">checked</if>>  是
+              <input type="radio" name="param[present]" value="0" <if condition="$data['param']['present'] eq '0'">checked</if>>  否
+              <span class="remark">用于子票设置，主票不用设置</span>
+            </td>
+            <td>门票有效期:</td>
+            <td>
+              <input type="text" name="param[validity]" value="{$data['param']['validity']}" size="10"><span class="remark">默认值0，代表当天有效</span>
+            </td>
+          </tr>
+        </if>
         <tr>
-          <td>联票支持:</td>
-          <td>
-            <input type="radio" name="param[present]" value="1" <if condition="$data['param']['present'] eq '1'">checked</if>>  是
-             <input type="radio" name="param[present]" value="0" <if condition="$data['param']['present'] eq '0'">checked</if>>  否
-            <span class="remark">用于子票设置，主票不用设置</span>
-          </td>
+          
           <td>活动标记</td>
           <td>
             <input type="radio" name="activity" value="1" <if condition="$data['activity'] eq '1'">checked</if>>  是
             <input type="radio" name="activity" value="0" <if condition="$data['activity'] eq '0'">checked</if>>  否
             <span class="remark">仅用于活动销售</span>
           </td>
+          <td></td>
+          <td></td>
         </tr>
-        <tr>
-          <td>销售场景:</td>
-          <td colspan="3">
-            <input type="checkbox" name="scene[]" value="1" <if condition="in_array('1',explode(',',$data['scene']))">checked</if>> 窗口
-            <input type="checkbox" name="scene[]" value="2" <if condition="in_array('2',explode(',',$data['scene']))">checked</if>> 渠道版
-            <input type="checkbox" name="scene[]" value="3" <if condition="in_array('3',explode(',',$data['scene']))">checked</if>> 网站
-            <input type="checkbox" name="scene[]" value="4" <if condition="in_array('4',explode(',',$data['scene']))">checked</if>> 微信
-            <input type="checkbox" name="scene[]" value="5" <if condition="in_array('5',explode(',',$data['scene']))">checked</if>> API
-            <input type="checkbox" name="scene[]" value="6" <if condition="in_array('6',explode(',',$data['scene']))">checked</if>> 自助机
-          </td>
-        </tr>
+        
         <tr>
           <td>排序:</td><td><input type="text" name="sort" value="0" size="15" value="{$data.sort}"></td>
             <td>状态:</td><td>
@@ -85,9 +99,6 @@
                 <option value="1" <if condition="$data['status'] eq 1">selected</if>>启用</option>
                 <option value="0" <if condition="$data['status'] eq 0">selected</if>>禁用</option>
             </select></td>
-        </tr>
-        <tr>
-          <td>其它:</td><td colspan="3"><volist name="data['param']['full']" id="v" >{$i}级:{$v}元 / </volist></td>
         </tr>
         <tr>
           <td>备注:</td><td colspan="3"><input type="text" name="remark" placeholder="如：一大人|一儿童" value="{$data.remark}" size="50"></td>

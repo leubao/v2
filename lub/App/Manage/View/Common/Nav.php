@@ -1,7 +1,6 @@
 <div class="toolBar">
 <?php 
 $getMenu = isset($Custom)?$Custom:D('Manage/Menu')->getMenu();
-//print_r($getMenu);
 if($getMenu['tool']) {
 ?>
 

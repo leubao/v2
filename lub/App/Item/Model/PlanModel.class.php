@@ -49,6 +49,7 @@ class PlanModel extends Model{
 				$data['plan'] = $plan;
 			}
 		}
+
 		$info = $this->structure_data($data,$plantime,$starttime,$endtime);
 		
 		if(count($info) == 1){
@@ -146,10 +147,10 @@ class PlanModel extends Model{
 			//漂流
 			//批量新增排次
 			foreach ($data['plan'] as $key => $value) {
-				$plantime = strtotime($value['plantime']);
-				$starttime = $value['plantime'].' '.$value['starttime'];
+				$plantime = strtotime($data['plantime']);
+				$starttime = $data['plantime'].' '.$value['starttime'];
 				$starttime = strtotime($starttime);
-				$endtime = $value['plantime'].' '.$value['endtime'];
+				$endtime = $data['plantime'].' '.$value['endtime'];
 				$endtime = strtotime($endtime);
 				$infos = array(
 					'product_id' => $data['product_id'],

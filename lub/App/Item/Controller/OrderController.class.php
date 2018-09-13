@@ -696,8 +696,8 @@ class OrderController extends ManageBase{
 					$area[]=array(
 						'area' => $value['areaId'],
 						'num'  => $value['num'],
-						'priceid' => $value['seat'][0]['priceid'],
-						'price' => $value['seat'][0]['price'],
+						'priceid' => $value['priceid'],
+						'price' => $value['price'],
 					);
 				}
 				//只支持单个区域
@@ -730,8 +730,8 @@ class OrderController extends ManageBase{
 			$info = unserialize($list['info']);
 			foreach ($info['data']['area'] as $key => $value) {
 				if($ginfo['num'] == $value['num']){
-					$ginfo['priceid'] = $value['seat'][0]['priceid'];
-					$ginfo['price'] = $value['seat'][0]['price'];
+					$ginfo['priceid'] = $value['priceid'];
+					$ginfo['price'] = $value['price'];
 				}
 			}
 			//加载座椅

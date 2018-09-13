@@ -814,7 +814,7 @@ function load_payment($pay = '',$itemid = ''){
 
             //'redirect_url'      => '',// 如果是h5支付，可以设置该值，返回到指定页面
 
-            'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
+            //'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
         ];
     }
     if(stripos($pay,'ccb') !== false){

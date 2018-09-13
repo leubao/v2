@@ -225,8 +225,8 @@ class ProductController extends ManageBase{
 				'scene'=>implode(',', I('post.scene')),
 				'bonus'=>I('post.bonus'),
 				'income'=>I('post.income'),
-				'param'=>serialize(array('quota'=>$param['quota'],'ticket_print'=>$param['ticket_print'],'ticket_print_custom'=>$param['ticket_print_custom'],'present'=>$param['present'])),
-				);
+				'param'=>serialize(array('quota'=>$param['quota'],'ticket_print'=>$param['ticket_print'],'ticket_print_custom'=>$param['ticket_print_custom'],'present'=>isset($param['present']) ? $param['present'] : 0,'validity'=> isset($param['validity']) ? $param['validity'] : 0)),
+			);
 			if(Operate::do_add('TicketType',$data)){
 				$this->srun("新增成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
@@ -240,10 +240,10 @@ class ProductController extends ManageBase{
 				if($product['type'] == 1){
 					//剧院产品增加座位区域选择
 					$area = Operate::do_read('Area',1,array('template_id'=>$product['template_id'],'status'=>'1'),'',array('id','name','template_id','num','status'));
-					$this->assign('area',$area)
-						 ->assign('ptype',$product['type']);
+					$this->assign('area',$area);
+						 
 				}
-				$this->assign('product_id',$product_id)->assign('gid',$group_id);
+				$this->assign('product_id',$product_id)->assign('gid',$group_id)->assign('ptype',$product['type']);
 				$this->display();
 			}else{
 				$this->erun('参数错误!');
@@ -262,7 +262,13 @@ class ProductController extends ManageBase{
 		if(IS_POST){
 			$pinfo = I('post.');
 			$pinfo['scene'] = implode(',', $pinfo['scene']);
-			$param = array('quota'=>$pinfo['param']['quota'],'ticket_print'=>$pinfo['param']['ticket_print'],'ticket_print_custom'=>$pinfo['param']['ticket_print_custom'],'present'=>$pinfo['param']['present']);
+			$param = array(
+				'quota'=>$pinfo['param']['quota'],
+				'ticket_print'=>$pinfo['param']['ticket_print'],
+				'ticket_print_custom'=>$pinfo['param']['ticket_print_custom'],
+				'present'=>isset($pinfo['param']['present']) ? $pinfo['param']['present'] : 0,
+				'validity'=> isset($pinfo['param']['validity']) ? $pinfo['param']['validity'] : 0
+			);
 			$pinfo['param'] = serialize($param);
 			$model = D('Item/TicketType');
 			$status = $model->where(array('id'=>$pinfo['id']))->save($pinfo);
@@ -282,12 +288,12 @@ class ProductController extends ManageBase{
 				if($product['type'] == 1){
 					//剧院产品增加座位区域选择
 					$area = Operate::do_read('Area',1,array('template_id'=>$product['template_id'],'status'=>'1'),'',array('id','name','template_id','num','status'));
-					$this->assign('area',$area)
-						 ->assign('ptype',$product['type']);
+					$this->assign('area',$area);
 				}
 				$group = Operate::do_read('TicketGroup',1,array('status'=>1));
 				$this->assign('data',$data)
 					->assign('group',$group)
+					->assign('ptype',$product['type'])
 					->display();
 			}else{
 				$this->erun('参数错误!');

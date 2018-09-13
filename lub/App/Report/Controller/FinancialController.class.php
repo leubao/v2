@@ -96,14 +96,16 @@ class FinancialController extends ManageBase{
         G('begin');
         $db = D('ReportData');
 		$map['product_id'] = $this->pid;
-		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,region,pay,type,plantime,games,user_id,status,createtime',true)->select();//echo count($list)."<br>";
-		//dump($list);
+		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,region,pay,type,plantime,games,user_id,status,createtime',true)->select();
+		//echo count($list)."<br>";
+		/*dump($list);*/
 		if(!empty($list)){
 			if($this->procof['agent'] == '1'){
 				//开启代理商制度，时执行
 				$list = Report::level_fold($list);
 			}
 			//echo count($list)."<br>";
+			
 			if($type == '1'){
 				//根据计划汇总
 			//	$plan_fold = Report::plan_fold($list);
@@ -114,16 +116,16 @@ class FinancialController extends ManageBase{
 				$list = Report::channel_fold($list,$is_check);
 				
 			}
-			G('end');
-			echo G('begin','end').'s';
-			echo G('begin','end','m').'kb';
+			
 			$export_map['report'] = 'channel';
 			$export_map['type']	= $type;
 			S('ChannelReport'.get_user_id(),$list);
 			//加载当前产品配置 TODO
 			$this->assign('data',$list)->assign('export_map',$export_map);
 		}
-		
+		G('end');
+		echo G('begin','end').'s';
+		echo G('begin','end','m').'kb';
 		$this->assign('type',$type)->assign('product_id',$map['product_id'])->assign('is_check',$is_check)->display();
 	}
 	/**

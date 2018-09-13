@@ -1001,7 +1001,6 @@ class Order extends \Libs\System\Service {
           	$this->error = '400018 : 金额校验失败';
 			return false;
         }
-		
 		$model = new Model();
 		$model->startTrans();
 		//写入订单 窗口订单直接写入并完成排座   微信等其它场景只写入订单  支付完成后排座
@@ -1027,6 +1026,10 @@ class Order extends \Libs\System\Service {
 				return false;
 			}
 		}
+		/*校验当前登录用户和商户
+		if(!checkUserToCrm($uinfo,$info['crm'][0]['qditem'])){
+			return false;
+		}*/
 		/*写入订单信息*/
 		$orderData = array(
 			'order_sn' 		=> $sn,
@@ -2676,7 +2679,7 @@ class Order extends \Libs\System\Service {
 		$map = array(
 			'plan_id' => $plan_id,
 			'status'  => array('in','2,99,66'),
-			);
+		);
 		$sale_num = D(ucwords($table))->where($map)->count()+$num;
 		if((int)$plan_num >= (int)$sale_num){
 			return 200;
@@ -2796,5 +2799,17 @@ class Order extends \Libs\System\Service {
 	 */
 	private function create_ticket_pwd($ciphertext,$encry){
 		return md5($ciphertext . md5($encry));
+	}
+	/**
+	 * 校验当前操作员是否属于当前商户
+	 */
+	public function checkUserToCrm($uinfo,$crm_id)
+	{
+		$count = D('User')->where(['id'=>$uinfo['id'],'cid'=>$crm_id])->count();
+		if((int)$count === 0){
+			$this->error = "当前商户,未找到有效用户";
+			return false;
+		}
+		return ture;
 	}
 }
