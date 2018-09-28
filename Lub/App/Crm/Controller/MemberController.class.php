@@ -165,7 +165,12 @@ class MemberController extends ManageBase{
 	public function del_member()
 	{
 		$id  = I("get.id");
-		$del = D('Member')->where(['id'=>$id])->delete();
+		$data = [
+			'update_time'	=>	time(),
+			'user_id'		=>	get_user_id(),
+			'status'		=> '-1',
+		];
+		$del = D('Member')->where(['id'=>$id])->save($data);
 		if($del){
 			//记录删除日志
 			$this->srun('删除成功!',array('tabid'=>$this->menuid));

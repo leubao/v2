@@ -700,6 +700,32 @@ class FinancialController extends ManageBase{
 	//会员卡销售汇总
 	public function member_seale()
 	{
-		
+		$start_time = I('starttime');
+	    $end_time = I('endtime') ? I('endtime') : date('Y-m-d',time());
+	    $this->assign('starttime',$start_time);
+        $this->assign('endtime',$end_time);
+        if (!empty($start_time) && !empty($end_time)) {
+            $start_time = date("Ymd",strtotime($start_time));
+            $end_time = date("Ymd",strtotime($end_time));
+            $map['datetime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }else{
+        	//默认显示当天的订单
+        	$start_time = date("Ym");
+            $end_time = $start_time;
+        	$map['datetime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }
+		$memType = F('MemGroup');
+		$list = D('MemberSum')->where($map)->field('create_time',true)->select();
+		foreach ($list as $k => $v) {
+			$return[$v['group_id']] = $v;
+			$return[$v['group_id']]['title'] =  $memType[$v['group_id']]['title'];
+			$return[$v['group_id']]['number'] += $v['number'];
+			$return[$v['group_id']]['money'] += $v['money'];
+			$memSum['number'] += $v['number'];
+			$memSum['money'] += $v['money'];
+		}
+		$this->assign('member_seale',$return)->assign('product_id',get_product('id'));
+		$this->assign('member_sum',$memSum);
+		$this->display();
 	}
 }
