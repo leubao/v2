@@ -47,7 +47,7 @@
         <td align="center">{$vo.createtime|date="Y-m-d H:i:s",###}</td>
         <td align="center">{$vo['status']|status}</td>
         <td align="center">
-          {$vo['type']|print_buttn_show=$vo['pay'],$vo['order_sn'],$vo['plan_id'],$vo['money']}
+          {$vo['type']|print_buttn_show=$vo['pay'],$vo['order_sn'],$vo['plan_id'],$vo['money'],1,$vo['activity'],1}
         </td>
        </tr>
     </volist>

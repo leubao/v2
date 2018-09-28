@@ -17,21 +17,21 @@
   <div class="pageFormContent">
   <div class="print_type">
   <input type="radio" name="type" id="print_type" value="1" <if condition="$proconf['print_type'] eq '1'">checked</if>> 一人一票  
-  <input type="radio" name="type" id="print_type" value="2" <if condition="$proconf['print_type'] eq '2'">checked</if>> 一单一票
+  <input type="radio" name="type" id="print_type" value="2" <if condition="$proconf['print_type'] eq '2'">checked</if> <if condition="$data['genre'] eq '6'">disabled</if>> 一单一票
   </div>
-  <button type="button" style="width:200px; height:130px" id="print_ticket" onclick="printTicket({$data.sn},{$data.plan_id})">打印门票</button>
+  <button type="button" style="width:200px; height:130px" id="print_ticket" onclick="printTicket()">打印门票</button>
   </div>
 </div>
 </div>
 <script>
 var LODOP; //声明为全局变量  
-function printTicket(sn,planid){
+function printTicket(){
 	var type = $('#print_type:checked').val();
 	$("#print_ticket").attr("disabled", true).val('打印中..');
 	$.ajax({
 		type:'get',
 		dataType : 'json',
-		url:'index.php?g=Item&m=Order&a=printTicket&sn='+sn+'&plan_id='+planid+'&user={$data.user}&type='+type,
+		url:'{$get_ticket_url}&user={$data.user}&type='+type,
 		timeout: 2500,
         error: function(){
         	/*关闭当前弹窗*/

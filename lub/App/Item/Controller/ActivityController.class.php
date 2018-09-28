@@ -124,7 +124,7 @@ class ActivityController extends ManageBase{
 					$this->assign('seat',$seat);
 				}
 				$prolist = M('Product')->where(['status'=>1])->field('id,name')->select();
-				$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
+				$printer = D('Printer')->where(['status'=>1,'product'=>$product_id])->field('id,title')->select();
 				$this->assign('printer',$printer);
 				$this->assign('prolist',$prolist);
 				$this->assign('product_id',$product_id)

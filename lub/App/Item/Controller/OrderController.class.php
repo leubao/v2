@@ -42,7 +42,7 @@ class OrderController extends ManageBase{
 					$height = '400';
 					$pageId = 'payment';
 				}else{
-					$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan));
+					$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'genre'=>1,'plan_id'=>$plan));
 					$title = "门票打印";
 					$width = '213';
 					$height = '208';
@@ -87,47 +87,23 @@ class OrderController extends ManageBase{
 			if(empty($ginfo)){
 				$this->erun('参数错误!');
 			}
-			// 检测订单是否过期
-			if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
-				$order_type = order_type($ginfo['sn']);
-				if($order_type['is_print'] == '1'){
-					$this->erun("该订单仅支持身份证入园,不能打印纸质门票!");
-				}
-				//判断订单状态是否可执行此项操作
-				if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
-					$this->erun("订单状态不允许此项操作!");
-				}else{
-					//加载当前打印模板 活动订单的打印模板
-					if(!empty($ginfo['act'])){
-						//获取活动指定打印模板
-						$actPrint = D('Activity')->where(['id'=>$ginfo['act']])->getField('print_tpl');
-						if(empty($actPrint)){$actPrint = $this->procof['print_tpl'];}
-					}else{
-						//读取默认模板
-						$actPrint = $this->procof['print_tpl'];
-					}
-					//读取模板渲染
-					$printTpl = D('Printer')->where(['id'=>$actPrint])->find();
-					if(empty($printTpl)){
-						$this->erun("未找到打印模板!");
-					}
-					$this->assign('printTpl',$printTpl);
-					//传递参数
-					$this->assign('data',$ginfo);
-					if($order_type['status'] == '9'){
-						if(empty($ginfo['user'])){
-							$user = M('Pwd')->where(array('status'=>1))->select();
-							$this->assign('user',$user)->display('to_print');
-						}else{
-							$this->display();
-						}
-					}else{
-						$this->display();
-					}
-				}
-			}else{
-				$this->erun("订单已过期，无法出票!");
+			//会员卡临时凭证
+			if((int)$ginfo['genre'] === 6){
+				$return = $this->member_ticket($ginfo);
+
+				$get_ticket_url = U('Item/Order/print_year',['id'=>$ginfo['id'],'genre'=>6]);
 			}
+			//常规门票打印
+			if((int)$ginfo['genre'] === 1){
+				$return = $this->default_ticket($ginfo);
+				$get_ticket_url = U('Item/Order/printTicket',['sn'=>$ginfo['sn'],'plan_id'=>$ginfo['plan_id'],'genre'=>1]);
+				
+			}
+			$this->assign('get_ticket_url',$get_ticket_url);
+			if($return['status']){
+				$this->display($return['tpl']);
+			}
+
 		}	
 	}
 	//门票打印
@@ -307,7 +283,7 @@ class OrderController extends ManageBase{
 					'rel'	 => 'page1',
 					'title'	=> '门票打印',
 					'popup'	=>	'dialog',
-					'forward' => U('Item/Order/drawer',array('sn'=>$pinfo['sn'],'plan_id'=>$pinfo['plan_id'],'user'=>$user['id'],'act'=>$pinfo['act'])),
+					'forward' => U('Item/Order/drawer',array('sn'=>$pinfo['sn'],'plan_id'=>$pinfo['plan_id'],'user'=>$user['id'],'act'=>$pinfo['act'],'genre'=>$pinfo['genre'])),
 				);
 				die(json_encode($return));
 			}else{
@@ -322,6 +298,124 @@ class OrderController extends ManageBase{
 			}
 			$this->assign('data',$ginfo)->display();
 		}	
+	}
+	//年卡临时凭证
+	public function member_ticket($ginfo)
+	{
+		$member = D('Member')->where(['id'=>$ginfo['id'],'status'=>1])
+			->field('icreate_time,update_time',true)
+			->find();
+		if(empty($member)){
+			$this->erun("未找到有效会员卡!");
+		}
+		//读取会员卡类型并读取模板
+		$memType = F('MemGroup');
+		if(empty($memType[$member['group_id']])){
+			D('Crm/MemberType')->mem_group_cache();
+			$memType = F('MemGroup');
+		}
+		//读取打印模板
+		$this->getPrintTpl($memType[$member['group_id']]['print_tpl']);
+		//传递参数
+		$this->assign('data',$ginfo);
+		return ['status'=>true,'tpl'=>'drawer',''];
+	}
+	//常规门票打印
+	public function default_ticket($ginfo)
+	{
+		if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
+			$order_type = order_type($ginfo['sn']);
+			if($order_type['is_print'] == '1'){
+				$this->erun("该订单仅支持身份证入园,不能打印纸质门票!");
+			}
+			//判断订单状态是否可执行此项操作
+			if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
+				$this->erun("订单状态不允许此项操作!");
+			}else{
+				//加载当前打印模板 活动订单的打印模板
+				if(!empty($ginfo['act'])){
+					//获取活动指定打印模板
+					$actPrint = D('Activity')->where(['id'=>$ginfo['act']])->getField('print_tpl');
+					if(empty($actPrint)){$actPrint = $this->procof['print_tpl'];}
+				}else{
+					//读取默认模板
+					$actPrint = $this->procof['print_tpl'];
+				}
+				$this->getPrintTpl($actPrint);
+				//传递参数
+				$this->assign('data',$ginfo);
+				if($order_type['status'] == '9'){
+					if(empty($ginfo['user'])){
+						$user = M('Pwd')->where(array('status'=>1))->select();
+						$this->assign('user',$user);
+						return ['status'=>true,'tpl'=>'to_print'];
+					}
+				}
+				return ['status'=>true,'tpl'=>'drawer'];
+			}
+		}else{
+			$this->erun("订单已过期，无法出票!");
+		}
+	}
+	public function getPrintTpl($actPrint)
+	{
+		//读取模板渲染
+		$printTpl = D('Printer')->where(['id'=>$actPrint])->find();
+		if(empty($printTpl)){
+			$this->erun("未找到打印模板!");
+		}
+		$this->assign('printTpl',$printTpl);
+	}
+	//打印临时凭证
+	function print_year(){
+		//读取信息
+		$id = I('get.id',0,intval);
+		$user = $ginfo['user'] ? $ginfo['user'] : 0;
+		if(empty($id)){
+			$this->erun('参数错误!');
+		}
+
+		$info = D('Crm/Member')->where(['id'=>$id,'status'=>1])->field('id,idcard,verify,number')->find();
+		if(empty($info)){
+			$this->erun('未找到有效年票!');
+		}
+		
+		$time = time();
+		$sn = 'Y'.$time;
+		$data = [
+			'sn'		=>	$sn,
+			'thetype'	=>	'2',//凭证类型
+			'member_id'	=>	$info['id'],//凭证数据
+			'datetime'	=>  strtotime(date('Y-m-d')),//入园日期时间
+			'password'	=>	$this->yearPassword($info,$time),
+			'status'	=>	1,
+			'user_id'	=>  get_user_id(),
+			'update_time'=>$time
+		];
+		//事务
+		$logId = D('MemberLog')->add($data);
+		//更新入园次数
+		D('Item/Member')->where(['id'=>$id])->setInc('number',1);
+		$code = $time.$logId.'^YK#';
+		$info = [
+			'sn'		=>	$code,
+			'sns'		=>	$sn,
+			'price'		=>	'会员卡',
+			'plantime'	=>	date('Y-m-d'),
+			'number'	=>	1,
+		];
+		$return = array(
+			'status' => '1',
+			'message' => '订单读取成功!',
+			'info'	=> $info ? $info : 0,
+		);
+		//记录打印日志
+		print_log($sn,$user,'1',0,'',1,1);
+		die(json_encode($return));
+	}
+	public function yearPassword($info,$time)
+	{
+		return md5($info['id'].$info['verify'].$info['number'].$time);
 	}
 /*=============================华丽分割线  2 添加快捷订单====================================*/
 	/*快捷售票*/
@@ -342,7 +436,7 @@ class OrderController extends ManageBase{
 				$height = '400';
 				$pageId = 'payment';
 			}else{
-				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan,'act'=>$run['act']));
+				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan,'act'=>$run['act'],'genre'=>1));
 				$title = "门票打印";
 				$width = '213';
 				$height = '208';
@@ -536,7 +630,7 @@ class OrderController extends ManageBase{
 				'height'	 =>	'208',
 				'dialog'	 =>	true,
 				'pageid'	 => 'print',
-				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$oinfo['order_sn'],'plan_id'=>$oinfo['plan_id'])),
+				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$oinfo['order_sn'],'plan_id'=>$oinfo['plan_id'],'genre'=>1)),
 			);
 			$message = "支付成功!单号".$run;
 			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
@@ -559,7 +653,7 @@ class OrderController extends ManageBase{
 		if($sn != false){
 			$return = array(
 				'statusCode' => '200',
-				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan['id'])),
+				'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan['id'],'genre'=>1)),
 			);
 			$message = "下单成功!单号".$sn;
 			D('Item/Operationlog')->record($message, 200);//记录售票员日报表
@@ -686,7 +780,7 @@ class OrderController extends ManageBase{
 					'sn'	=>	$ginfo['id'],
 					'num'	=>	$ginfo['num'],
 					'statusCode' => '300',
-					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn)),
+					'forwardUrl' => U('Item/Order/drawer',array('sn'=>$sn,'genre'=>1)),
 				);
 				die(json_encode($return));
 			}else{

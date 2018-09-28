@@ -304,7 +304,7 @@ function seatOrder($param, $plan_id, $area_id = '', $type = NULL){
         }else{
             switch ($plan['product_type']) {
                 case '1':
-                    $map = array('seat'=>$param,'area_id'=>$area_id);
+                    $map = array('seat'=>$param,'area'=>$area_id);
                     $table = $plan['seat_table'];
                     break;
                 case '2':
@@ -2148,19 +2148,19 @@ function pay_pattern($chane){
     }
 }
 //订单售票
-function print_buttn_show($type,$pay,$sn,$plan_id,$money,$view = '1',$act = 0){
+function print_buttn_show($type,$pay,$sn,$plan_id,$money,$view = '1',$act = 0,$genre = 1){
     if(in_array($pay, array('1','3')) && $type == '6' && check_collection_pay($sn) && $money > 0){
         $title = "网银支付";
         $width = '600';
         $height = '400';
         $pageId = 'payment';
-        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'money'=>$money,'order_type'=>3,'act'=>$act));
+        $url = U('Item/Order/public_payment',array('plan'=>$plan_id,'sn'=>$sn,'is_pay'=>$pay,'money'=>$money,'order_type'=>3,'act'=>$act,'genre'=>$genre));
     }else{
         $pageId = 'print';
         $width = '213';
         $height = '208';
         $title = '门票打印';
-        $url = U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan_id,'act'=>$act));
+        $url = U('Item/Order/drawer',array('sn'=>$sn,'plan_id'=>$plan_id,'act'=>$act,'genre'=>$genre));
     }
     if($view == '2'){
         //return 返回

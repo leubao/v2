@@ -23,7 +23,7 @@ class Leadersms extends \Libs\System\Service {
 	function send_sms($plan = null,$type = 1,$param = []){
       $start = '0';
       if(empty($plan)){
-        return false;
+        return false; 
       }
       switch ($plan['product_type']) {
         case '1':

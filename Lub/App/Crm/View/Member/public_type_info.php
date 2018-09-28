@@ -4,30 +4,33 @@
       <tbody>
         <tr>
           <td width="100px">类型名称:</td>
-          <td>{$data.title}></td>
+          <td>{$data.title}</td>
         </tr>
         <tr>
           <td width="100px">类型属性:</td>
           <td>
-            <input type="radio" name="type" value="1" data-toggle="icheck" data-label="按次计费" />
-            <input type="radio" name="type" value="3" data-toggle="icheck" data-label="时间段计费" />
-            <input type="radio" name="type" value="4" data-toggle="icheck" data-label="身份识别" />
+            {$data.type|memberType}
           </td>
         </tr>
         <tr>
-          <td width="100px">时间段:</td>
-          <td><input type="text" size="11" id="starttime" name="starttime" data-toggle="datepicker" value="{$starttime}">
-              <label>至</label>
-              <input type="text" size="11" id="endtime" name="endtime" data-toggle="datepicker"  value="{$endtime}">
-            </td>
+          <td width="100px">办理期:</td>
+          <td>{$data.rule.datetime.starttime} 至 {$data.rule.datetime.endtime}</td>
+        </tr>
+        <tr>
+          <td width="100px">有效期:</td>
+          <td>{$data.rule.efftime.start} 至 {$data.rule.efftime.end}</td>
         </tr>
         <tr>
           <td width="100px">次数:</td>
-          <td><input type="text" name="number" id="number" value="0" size="5" /><span class="fun_tips">次卡选择</span></td>
+          <td>{$data.rule.number} 次</td>
         </tr>
         <tr>
-          <td width="100px">起售金额:</td>
-          <td><input type="text" name="money" value="0" size="5" /><span class="fun_tips">起售金额</span></td>
+          <td width="100px">金额:</td>
+          <td>{$data.money}</td>
+        </tr>
+        <tr>
+          <td width="100px">可办理区域:</td>
+          <td>{$data.rule.area}</td>
         </tr>
         </tbody>
     </table>

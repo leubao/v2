@@ -1,16 +1,16 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <!DOCTYPE html>
 <html lang="zh">
-<head>
+<head> 
 <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 <meta name="renderer" content="webkit"> 
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <link rel="apple-touch-icon" href="{$config_siteurl}static/images/favicon.ico">
 <link rel="icon" href="{$config_siteurl}static/images/favicon.ico">
 <title>云鹿(剧院版)票务系统登录 v2.0.1</title>
-<script src="{$config_siteurl}static/bjui/js/jquery-1.7.2.min.js"></script>
-<script src="{$config_siteurl}static/bjui/js/jquery.cookie.js"></script>
-<link href="{$config_siteurl}static/bjui/themes/css/bootstrap.min.css" rel="stylesheet">
+<script src="//static.leubao.com/js/jquery.js"></script>
+<script src="//static.leubao.com/bjui/js/jquery.cookie.js"></script>
+<link href="//static.leubao.com/bootstrap.min.css" rel="stylesheet">
 <style type="text/css">
 *{font-family:"Verdana","Tahoma","Lucida Grande","Microsoft YaHei","Hiragino Sans GB",sans-serif}body{background:url(static/images/loginbg_01.jpg) no-repeat center center fixed;-webkit-background-size:cover;-moz-background-size:cover;-o-background-size:cover;background-size:cover}a:link{color:#285e8e}.main_box{position:absolute;top:50%;left:50%;margin-top:-260px;margin-left:-300px;padding:30px;width:600px;height:360px;background:#fafafa;background:rgba(255,255,255,0.5);border:1px #DDD solid;border-radius:5px;-webkit-box-shadow:1px 5px 8px #888;-moz-box-shadow:1px 5px 8px #888;box-shadow:1px 5px 8px #888}.main_box .setting{position:absolute;top:5px;right:10px;width:10px;height:10px}.main_box .setting a{color:#f60}.main_box .setting a:hover{color:#555}.login_logo{margin-bottom:20px;height:45px;text-align:center}.login_logo img{height:45px}
 .login_msg{text-align:center;font-size:14px;display: none;color: red; margin:10px;padding:5px;}
@@ -182,7 +182,7 @@ $(function(){
 });
 function choose_bg() {
 	var bg = Math.floor(Math.random() * 9 + 1);
-	$('body').css('background-image', 'url(static/images/loginbg_0'+ bg +'.jpg)');
+	$('body').css('background-image', 'url(//static.leubao.com/loginbg_0'+ bg +'.jpg)');
 }
 choose_bg();
 //刷新验证码

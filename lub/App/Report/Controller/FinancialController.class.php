@@ -261,6 +261,34 @@ class FinancialController extends ManageBase{
 			//构造报表生成数据
 			$list = Report::operator($list);
 			$list = Report::day_fold($list,$work);
+			//年卡销售记录
+			$memCount = (int)D('Member')->count();
+			if($memCount > 0){
+				$memType = F('MemGroup');
+				foreach ($memType as $k => $v) {
+					$mmap = [
+						'group_id' => $v['id'],
+						'status' => 1,
+						'user_id'=> $pinfo['user'],
+			    		'create_time' => array(array('EGT', $starttime), array('ELT', $endtime), 'AND'),
+			    	];
+					$number = D('Member')->where($mmap)->count();
+					if($number > 0){
+						$money = $number*$v['money'];
+						$memReport[$v['id']] = [
+							'id'	 => $v['id'],
+							'title'	 => $v['title'],
+							'price'	 => $v['money'],
+							'number' => $number,
+							'money'	 => $money
+						];
+						$memSum['number'] += $number;
+						$memSum['money'] += $money;
+					}
+				}
+				$this->assign('member_seale',$memReport);
+				$this->assign('member_sum',$memSum);
+			}
 			
 			//缓存用于导出
 			S('Operator'.get_user_id(),$list);
@@ -668,5 +696,10 @@ class FinancialController extends ManageBase{
 		$export_map['report'] = 'channel_months';
 		S('ChannelMonths'.get_user_id(),$channel);
 		$this->assign('data',$channel)->assign('export_map',$export_map)->assign('type',$type)->assign('product_id',$map['product_id'])->display();
+	}
+	//会员卡销售汇总
+	public function member_seale()
+	{
+		
 	}
 }

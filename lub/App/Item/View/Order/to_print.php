@@ -19,6 +19,7 @@
 <input type="hidden" name="sn" value="{$data.sn}">
 <input type="hidden" name="plan_id" value="{$data.plan_id}">
 <input type="hidden" name="act" value="{$data.act}">
+<input type="hidden" name="genre" value="{$data.genre}">
 <div class="bjui-pageFooter">
     <ul>
         <li><button type="button" class="btn-close" data-icon="close">取消</button></li>

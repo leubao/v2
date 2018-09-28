@@ -350,7 +350,7 @@ class ProductController extends ManageBase{
 			}
 		}else{
 			//产品信息
-			$pinfo = get_product('info');
+			$pinfo = get_product('info');dump($pinfo);
 			if(empty($pinfo)){$this->erun('未捕获产品信息,请重新登录系统...');}
 			switch ($pinfo['type']) {
 				case '1':
@@ -377,7 +377,7 @@ class ProductController extends ManageBase{
 			//票型价格信息
 			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
 			//商品
-			$goods = D('Goods')->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->field('id,title')->select();
+			$goods = D('Goods')->where(array('status'=>'1'))->field('id,title')->select();
 			$this->assign('group',$ticket)
 			     ->assign('pinfo',$pinfo)
 			     ->assign('plantime',date('Y-m-d',$plantime))

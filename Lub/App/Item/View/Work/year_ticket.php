@@ -22,25 +22,29 @@
 	<table data-toggle="tablefixed" data-width="100%" data-nowrap="true">
     <thead>
       <tr>
-      	<th align="center" width="65px">编号</th>
+      	<th align="center" width="85px">编号</th>
         <th align="center" width="65px">姓名</th>
         <th align="center" width="90px">手机号</th>
         <th align="center" width="90px">身份证号</th>
         <th align="center" width="80px">入园次数</th>
         <th align="center">上次入园时间</th>
         <th align="center" width="60px">状态</th>
+        <th align="center" width="80px">操作</th>
       </tr>
     </thead>
     <tbody>
     <volist name="data" id="vo">
       <tr>
-      	<td align="center"><a data-toggle="dialog" href="{:U('Crm/Member/public_member',array('id'=>$vo['id'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="年卡详情">{$vo.no-number}</a></td>
+      	<td align="center"><a data-toggle="dialog" href="{:U('Crm/Member/public_member',array('id'=>$vo['id'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="年卡详情">{$vo.no_number}</a></td>
         <td align="center">{$vo.nickname}</td>
         <td align="center">{$vo['phone']}</td>
         <td align="center">{$vo['idcard']}</td>
         <td align="center">{$vo.number}</td>
         <td align="center">{$vo.update_time|date="Y-m-d H:i:s",###}</td>
         <td align="center">{$vo['status']|status}</td>
+        <td align="center"><a data-toggle="dialog" href="{:U('Crm/Member/public_member',array('id'=>$vo['id'],'menuid'=>$menuid))}"  data-id="memberinfo" data-width="900" data-height="600" data-title="年卡详情">临时凭证</a>
+          
+        </td>
        </tr>
     </volist>
     </tbody>

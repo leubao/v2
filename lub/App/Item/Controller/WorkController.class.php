@@ -61,28 +61,6 @@ class WorkController extends ManageBase{
 		$plantime = strtotime($pinfo['plantime']);
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$this->pid))->field('id,starttime,endtime,games,param,product_type')->select();
 		foreach ($plan as $k => $v) {
-			/*
-			$param = unserialize($v['param']);
-			switch ($v['product_type']) {
-				case '2':
-					$tooltype = '00';
-					$name = date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']);
-					break;
-				case '3':
-					$tooltype = tooltype($param['tooltype'],1);
-					$name = '[第'.$v['games'].'趟-'.$tooltype.'] '. date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']);
-
-					break;
-			}
-			$data[] = array(
-				'id'	=> $v['id'],
-				'pid'   => '1',
-				'pId'	=>	'1',
-				'plan' 	=>	$v['id'],
-				'type'	=>	$pinfo['type'],
-				'tooltype' => $tooltype,
-				'name'  => $name,
-			);*/
 			$param = unserialize($v['param']);
 			if($v['product_type'] == '1'){
 				$data[] = array(
@@ -456,7 +434,7 @@ class WorkController extends ManageBase{
 				
 				$info = $data['info'];
 				//生成打印URl
-				$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2,$info['activity']);
+				$prshow  = print_buttn_show($info['type'],$info['pay'],$info['order_sn'],$info['plan_id'],$info['money'],2,$info['activity'],1);
 				$this->assign('data',$info)
 					->assign('type',$info['product_type'])
 					->assign('area',$data['area'])
@@ -1276,7 +1254,7 @@ class WorkController extends ManageBase{
 	function year_card(){
 		if(IS_POST){
 			$pinfo = I('post.');
-			$model = D('Item/Member');
+			$model = D('Member');
 			//判断身份证号是否唯一
 			if($model->where(['idcard'=>$pinfo['idcard']])->field('id')->find()){
 				$this->erun("添加失败,该身份证已注册");
@@ -1284,24 +1262,36 @@ class WorkController extends ManageBase{
 			}
 			$data = [
 				'source'	=>  '1',
-				'no-number' =>  date('YmdH').genRandomString(6,1),
-				'idcard'	=>	$pinfo['idcard'],
+				'no_number' =>  date('YmdH').genRandomString(6,1),
+				'idcard'	=>	strtolower(trim($pinfo['idcard'])),
 				'nickname'	=>	$pinfo['content'],
 				'phone'		=>	$pinfo['phone'],
+				'group_id'	=>	(int)$pinfo['group'],
 				'user_id'	=>	get_user_id(),//窗口时写入办理人
 				'thetype'	=>	$pinfo['type'], //凭证类型
 				'remark'	=>	$pinfo['remark'],//备注
+				'create_time'=> time(),
+				'update_time'=> time(),
+				'verify'	=>	genRandomString(),
 				'status'	=>	'1',
 			];
-			try{ 
-				$model->token(false)->create($data);
-				$model->add();
-			}catch(Exception $e){ 
-				$this->erun("添加失败:".$e);
+			if($model->token(false)->create($data)){
+				$result = $model->add();
+				if($result){
+					$this->srun('办理成功',array('tabid'=>$this->menuid,'closeCurrent'=>true));
+				}else{
+					$this->erun("添加失败:");
+				}
+			}else{
+				$this->erun("添加失败tokern".$e);
 			}
-			$this->srun('办理成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			
 		}else{
-			$this->display();
+			$type = F('MemGroup');
+			if(empty($type)){
+				D('Crm/MemberType')->mem_group_cache();
+			}
+			$this->assign('type',$type)->display();
 		}
 	}
 	//年卡临时凭证
@@ -1321,57 +1311,10 @@ class WorkController extends ManageBase{
 			$list = D('Crm/Member')->where($where)->field('openid,password,verify,thetype,remark,user_id,create_time',true)->select();
 			$this->assign("data",$list);
 			//打印凭证
+			//录入年卡记录
 		}
 		$this->display();
 	}
-	//打印临时凭证
-	function print_year(){
-		//读取信息
-		$id = I('get.id',0,intval);
-		if(empty($id)){
-			$this->erun('参数错误!');
-		}
 
-		$info = D('Crm/Member')->where(['id'=>$id,'status'=>1])->field('id,idcard.no-number')->find();
-		if(empty($info)){
-			$this->erun('未找到有效年票!');
-		}
-		//组合二维码信息
-		$code = \Libs\Service\LubToken::createToken();
-		//写入临时入园库
-		$sn = get_order_sn();
-		$data = [
-			'sn'		=> $sn,
-			'code' 		=> $code,
-			'member_id'	=> $info['id'],
-			'status'	=> 2,//已售出可检票
-			'user_id'   => get_user_id(),
-			'plantime'  => date('Ymd'),
-			'createtime'=> time(),
-		];
-		D('Temporary')->add($data);
-		$return = [
-			'code'		=>	$code,
-			'sn'		=>	$sn,
-			'plantime'	=>	date('Y-m-d'),
-			'number'	=>	1,
-		];
-		//身份证过来 直接比对会员信息库
-		
-		//二微码过来 比对临时凭证表
-	}
-	//年卡入园记录
-	function year_garden_log(){
-		//记录入园日志
-		$data = [
-			'data'		=>	'',//凭证数据
-			'thetype'	=>	'',//凭证类型
-			'createtime'=>  '',//入园日期时间
-		];
-		D('MemberLog')->add($data);
-		//更新入园次数
-		D('Item/Member')->where(['idcard'=>$idcard])->setInc('number',1);
-		return true;
-	}
 	//打开订单详情,直接编辑区域数量
 }

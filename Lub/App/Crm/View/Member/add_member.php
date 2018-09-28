@@ -1,6 +1,6 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageContent">
-	<form id="yearCardForm" action="{:U('Item/Work/year_card',array('menuid'=>$menuid));}" data-toggle="validate" data-alertmsg="false" novalidate="novalidate">
+	<form id="yearCardForm" action="{:U('Crm/Member/add_member',array('menuid'=>$menuid));}" data-toggle="validate" data-alertmsg="false" novalidate="novalidate">
 	<table class="table table-bordered mt20">
         <tbody>
             <tr>

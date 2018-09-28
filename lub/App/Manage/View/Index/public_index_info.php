@@ -1,4 +1,3 @@
-<script src="{$config_siteurl}static/bjui/plugins/echarts/echarts.js"></script>
 <div class="bjui-pageHeader" style="background:#FFF;">
  
 </div>
@@ -101,7 +100,10 @@
             <p>待支付</p>
             <a href="">{$year.year_pre}</a>
           </li>
-          
+          <li>
+            <p>入园数</p>
+            <a href="">{$year.year_into}</a>
+          </li>
         </ul>
       </div>
     </div>

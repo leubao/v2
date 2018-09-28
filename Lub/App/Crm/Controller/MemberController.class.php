@@ -16,49 +16,13 @@ class MemberController extends ManageBase{
 	//会员管理
 	function index()
 	{
-		$map['status'] = '1';
-		$list = M('MemberType')->where($map)->order('status DESC,id DESC')->field('id,title')->select();
-		$this->assign('data',$list)->display();
-		//加载类型
-		//根据类型读取列表
-	}
-	public function lists(){
-		$groupid = I('id');    //客户分组id
-		$type = I('type');
-		$name = I('name');
-		$level = I('level');//级别
-		$status = I('status');
-		$product_id = get_product('id');
-		//$map["id"] = $groupid;
-		//$map =  array('id'=>$groupid,'type'=>$type,'product_id'=>$product_id);
-		$map =  array('groupid'=>$groupid);
-		/*搜索查询*/
-		if(!empty($name)){
-			if($type <> '2'){
-				$map['name'] = array("like","%".$name."%");
-			}else{
-				$map['nickname'] = array("like","%".$name."%");
-			}
-			$this->assign("name",$name);
-		}
-		$map['level'] = $level ? $level : '16';
-		if(!empty($status)){
-			$map['status'] = $status;
-		}
-		/*搜索END查询级别END*/
-		if($type == '1'  || $type == '3'){
-			//企业
-			$db = "Crm";
-		}elseif ($type == '4') {
-			//个人
-			$db = "User";
-		}
-		$this->basePage($db,$map,array('status'=>"DESC","id"=>"DESC"));
-		$this->assign ('groupid',$groupid)
-			 ->assign('type',$type)
+		$this->basePage('Member','','id DESC,status DESC');
+		$group = M('MemberType')->where(['status'=>1])->order('status DESC,id DESC')->field('id,title')->select();
+		$this->assign ('group',$group)
 			 ->assign('map',$map)
-			 ->display();	
+			 ->display();
 	}
+
 	//会员类型
 	public function types()
 	{
@@ -70,11 +34,46 @@ class MemberController extends ManageBase{
 			$pinfo = I('post.');
 			$model = D('Crm/MemberType');
 			if($model->insert($pinfo)){
+				$model->mem_group_cache();
 				$this->srun('新增成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('新增失败!');
 			}			
 		}else{
+			$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
+			$this->assign('printer',$printer);
+			$this->display();
+		}
+	}
+	public function edit_type(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			$model = D('Crm/MemberType');
+			if($model->update($pinfo)){
+				$model->mem_group_cache();
+				$this->srun('编辑成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun('编辑失败!');
+			}			
+		}else{
+			$ginfo = I('get.');
+			$model = D('Crm/MemberType');
+			$info = $model->where(['id'=>$ginfo['id']])->field('type,create_time,update_time,user_id',true)->find();
+			$rule = json_decode($info['rule'],true);
+			$info['rule'] = [
+				'datetime' => [
+					'starttime' => date('Y-m-d',$rule['starttime']),
+					'endtime'	=> date('Y-m-d',$rule['endtime'])
+				],
+				'efftime'	=> [
+					'start'	=>	date('Y-m-d',$rule['start']),
+					'end'	=>	date('Y-m-d',$rule['end'])
+				],
+				'area'		=> $rule['area'],
+				'number'	=> $rule['number'],//次卡，或单日入园次数
+			];
+			$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
+			$this->assign('data',$info)->assign('printer',$printer);
 			$this->display();
 		}
 	}
@@ -113,9 +112,65 @@ class MemberController extends ManageBase{
 	public function add_member()
 	{
 		if(IS_POST){
+			$pinfo = I('post.');
+			$model = D('Member');
+			//判断身份证号是否唯一
+			if($model->where(['idcard'=>$pinfo['idcard']])->field('id')->find()){
+				$this->erun("添加失败,该身份证已注册");
+				return false;
+			}
+			$data = [
+				'source'	=>  '1',
+				'no_number' =>  date('YmdH').genRandomString(6,1),
+				'idcard'	=>	strtolower(trim($pinfo['idcard'])),
+				'nickname'	=>	$pinfo['content'],
+				'phone'		=>	$pinfo['phone'],
+				'group_id'	=>	(int)$pinfo['group'],
+				'user_id'	=>	get_user_id(),//窗口时写入办理人
+				'thetype'	=>	$pinfo['type'], //凭证类型
+				'remark'	=>	$pinfo['remark'],//备注
+				'status'	=>	'1',
+			];
+			if($model->token(false)->create($data)){
+				$result = $model->add();
+				if($result){
+					$this->srun('办理成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				}else{
+					$this->erun("添加失败:");
+				}
+			}else{
+				$this->erun("添加失败tokern".$e);
+			}
+			
+		}else{
+			$type = F('MemGroup');
+			if(empty($type)){
+				D('Crm/MemberType')->mem_group_cache();
+			}
+			$this->assign('type',$type)->display();
+		}
+	}
+	function edit_member(){
+		if(IS_POST){
+			$pinfo = I('post.');
 
 		}else{
-			$this->display();
+			$id  = I('id');
+			if(empty($id)){$this->erun('参数错误');}
+			$info = D('Member')->where(['id'=>$id])->find();
+			$this->assign('data',$info)->display();
+		}
+	}
+	//删除会员
+	public function del_member()
+	{
+		$id  = I("get.id");
+		$del = D('Member')->where(['id'=>$id])->delete();
+		if($del){
+			//记录删除日志
+			$this->srun('删除成功!',array('tabid'=>$this->menuid));
+		}else{
+			$this->erun('删除失败!');
 		}
 	}
 	//类型配置
@@ -152,7 +207,8 @@ class MemberController extends ManageBase{
 			$map = array("id"=>$id);
 			$model = D('Crm/MemberType');
 			$info = $model->where($map)->find();
-			$this->display();
+			$info['rule'] = json_decode($info['rule'],true);
+			$this->assign('data',$info)->display();
 		}else{
 			$this->erun('参数错误!');
 		}
@@ -165,9 +221,6 @@ class MemberController extends ManageBase{
 		$level = I('level');//级别
 		$status = I('status');
 		$product_id = get_product('id');
-		//$map["id"] = $groupid;
-		//$map =  array('id'=>$groupid,'type'=>$type,'product_id'=>$product_id);
-		$map =  array('groupid'=>$groupid);
 		/*搜索查询*/
 		if(!empty($name)){
 			if($type <> '2'){
@@ -177,17 +230,9 @@ class MemberController extends ManageBase{
 			}
 			$this->assign("name",$name);
 		}
-		$map['level'] = $level ? $level : '16';
+		//$map['level'] = $level ? $level : '16';
 		if(!empty($status)){
 			$map['status'] = $status;
-		}
-		/*搜索END查询级别END*/
-		if($type == '1'  || $type == '3'){
-			//企业
-			$db = "Crm";
-		}elseif ($type == '4') {
-			//个人
-			$db = "User";
 		}
 		$this->basePage('Member',$map,array('update_time'=>"DESC","id"=>"DESC"));
 		$this->assign ('groupid',$groupid)

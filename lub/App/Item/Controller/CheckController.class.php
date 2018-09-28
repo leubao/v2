@@ -68,11 +68,22 @@ class CheckController extends ManageBase{
 			case 31:
 				$map = ['idcard'=>$ginfo['idcard'],'activity_id'=>$ginfo['actid']];
 				$return = $this->check_name2('IdcardLog',$map);
+				break;
+			case 51:
+				if(!empty($ginfo['id'])){
+					$map = ['idcard'=>$ginfo['idcard'],'id'=>['neq',$id]];
+				}else{
+					$map = ['idcard'=>$ginfo['idcard']];
+				}
+				
+				$return = $this->check_name2('Member',$map);
+				$msg = $return ? '年卡已存在' : 'ok';
+				break;
 		}
 		if(empty($return)){
-			$this->ajaxReturn(array('ok'=>'名称可用','state'=>'ok'),json);
+			$this->ajaxReturn(array('ok'=>$msg ? $msg : '名称可用','state'=>'ok'),json);
 		}else{
-			$this->ajaxReturn(array('error'=>'名称已存在','state'=>'error'),json);
+			$this->ajaxReturn(array('error'=>$msg ? $msg : '已存在','state'=>'error'),json);
 		}
 	}
 	private function check_name2($table,$map){
@@ -91,11 +102,12 @@ class CheckController extends ManageBase{
 			case 31:
 				$map = ['idcard'=>$ginfo['idcard'],'activity_id'=>$ginfo['actid']];//dump($map);
 				$return = $this->check_name2('IdcardLog',$map);
+				
 		}
 		if(empty($return)){
-			die(json_encode(['msg'=>'名称可用','status'=>true]));
+			die(json_encode(['msg'=>'身份证号可用','status'=>true]));
 		}else{
-			die(json_encode(['msg'=>'名称已存在','status'=>false]));
+			die(json_encode(['msg'=>$msg ? $msg : '已存在','status'=>false]));
 		}
 	}
 }

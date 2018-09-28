@@ -18,26 +18,27 @@ class LubTMPSms {
     	//获取发送人列表
         //$list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
         //根据日期获取销售额
-        $datetime = strtotime(date('Ymd',strtotime("-1 day")));
         //读取产品列表
         $product = M('Product')->where(['status'=>1])->field('id,item_id')->select();
         $itemConf = cache('ItemConfig');
         foreach ($product as $key => $value) {
             
             if((int)$itemConf[$value['item_id']]['1']['send_msg'] === 2){
-                $map = array('plantime'=>$datetime,'product_id'=>$value['id']);
-                $planList = M('Plan')->where($map)->field('id')->select();
-                $plan_id = arr2string($planList,'id');
-                //dump($plan_id);
-                if(!empty($plan_id)){
-                    $param = [
-                        'day' => date('Y年m月d日',$datetime),
-                        'product_id'   =>   $value['id']
-                    ];
-                    $plan = ['product_type'=>2,'plan_id'=>$plan_id];
-                    \Libs\Service\Leadersms::send_sms($plan,2,$param);
-                }
-                
+                $datetime = strtotime(date('Ymd',strtotime("-1 day")));
+            }
+            if((int)$itemConf[$value['item_id']]['1']['send_msg'] === 3){
+                $datetime = strtotime(date('Ymd'));
+            }
+            $map = array('plantime'=>$datetime,'product_id'=>$value['id']);
+            $planList = M('Plan')->where($map)->field('id')->select();
+            $plan_id = arr2string($planList,'id');
+            if(!empty($plan_id)){
+                $param = [
+                    'day' => date('Y年m月d日',$datetime),
+                    'product_id'   =>   $value['id']
+                ];
+                $plan = ['product_type'=>2,'plan_id'=>$plan_id];
+                \Libs\Service\Leadersms::send_sms($plan,2,$param);
             }
         }
         

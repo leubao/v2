@@ -43,7 +43,9 @@
                         <tr>
                           <td width="120px">运营短信:</td>
                           <td><input type="radio" name="send_msg" value="1" <eq name="vo.send_msg" value="1"> checked</eq>> 停止销售发送
-                            <input type="radio" name="send_msg" value="2" <eq name="vo.send_msg" value="2"> checked</eq>> T+1发送</td>
+                            <input type="radio" name="send_msg" value="2" <eq name="vo.send_msg" value="2"> checked</eq>> T+1发送
+                            <input type="radio" name="send_msg" value="3" <eq name="vo.send_msg" value="3"> checked</eq>> 定点发送
+                          </td>
                         </tr>
                         <tr>
                           <td width="120px">返利红包模板:</td>

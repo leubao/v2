@@ -824,7 +824,8 @@ function load_payment($pay = '',$itemid = ''){
             'pos_id'      => $itemCof['ccb_posid'],  //柜台号
             'txcode'      => $itemCof['ccb_txcode'],
             'pub_key'     => $itemCof['ccb_pub'],
-            'qupwd'       => $itemCof['ccb_qupwd']
+            'qupwd'       => $itemCof['ccb_qupwd'],
+            'pubkey'      => $itemCof['ccb_pubkey']
         ];
     }
     return $options;

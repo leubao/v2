@@ -133,6 +133,40 @@
       </tr>
   </tbody>
 </table>
+<?php if(!empty($member_seale)){ ?>
+  <table class="table table-bordered">
+  <caption><h3 align="center">{$product_id|productName}售票员会员卡销售汇总表</h3></caption>
+  <thead>
+    <tr>
+      <th align="center" width="80px">日期</th>
+      <th align="center" width="80px">卡型</th>
+      <th align="center" width="80px">单价</th>
+      <th align="center" width="80px">数量</th>
+      <th align="center" width="80px">金额</th>
+      <th align="center" width="80px">备注</th>
+    </tr>
+  </thead>
+  <tbody>
+    <volist name="member_seale" id="mem">
+    <tr>
+      <td align="center">{$starttime}</td>
+      <td align="center">{$mem.title}</td>
+      <td align="right">{$mem.price|format_money}</td>
+      <td align="center">{$mem.number}</td>
+      <td align="right">{$mem.money|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+    </volist>
+    <tr>
+      <td></td><td></td>
+      <td align="right"><strong>合计:</strong></td>
+      <td align="center">{$member_sum.number}</td>
+      <td align="right">{$member_sum.money|format_money}</td>
+      <td>&nbsp;</td>
+    </tr>
+  </tbody>
+</table>
+<?php } ?>
 <table class="table table-bordered">
   <caption><h3 align="center">{$product_id|productName}售票员资金一览表</h3></caption>
   <thead>

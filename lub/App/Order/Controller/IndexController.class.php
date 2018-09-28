@@ -319,4 +319,23 @@ class IndexController extends ManageBase {
 			$this->erun('删除失败...');
 		}
 	}
+	/**
+	 * @Company  承德乐游宝软件开发有限公司
+	 * @Author   zhoujing      <zhoujing@leubao.com>
+	 * @DateTime 2018-09-24
+	 * @return   年卡入园记录        [description]
+	 */
+	public function year_log()
+	{
+		$starttime = I('starttime');
+	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
+	    $sn = I('sn');
+	    $status = I('status');
+	     $this->assign('starttime',$starttime)
+	        ->assign('endtime',$endtime)
+	        ->assign('status',$status);
+	    $this->basePage('MemberLog', $map, 'id DESC', 25, 'id,sn,thetype,password,member_id,status,datetime,update_time');
+	    $this->assign('pinfo',$pinfo)
+			->display();
+	}
 }

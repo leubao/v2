@@ -27,6 +27,9 @@ function memberType($param = '', $type = '1')
 		case '4':
 			$return = '身份识别';
 			break;
+		case '5':
+			$return = '按天计费';
+			break;
 		default:
 			$return = '未知';
 			break;
@@ -36,4 +39,14 @@ function memberType($param = '', $type = '1')
 	}else{
 		return $return;
 	}
+}
+//会员分组
+function memGroup($param = '')
+{
+	$type = F('MemGroup');
+	if(empty($type)){
+		D('Crm/MemberType')->mem_group_cache();
+		$type = F('MemGroup');
+	}
+	return $type[$param]['title'];
 }

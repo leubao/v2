@@ -506,7 +506,6 @@ class PlanModel extends Model{
 sql;
         }
 		$res = M()->execute($sql);
-		//dump($res);
     	return $res !== false;
 	}
 /**

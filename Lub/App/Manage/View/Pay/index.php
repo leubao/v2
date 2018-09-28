@@ -129,13 +129,18 @@
                               </td>
                             </tr>
                             <tr>
-                              <td width="120px">交易码:</td>
-                              <td><input type="text" name="ccb_txcode" class="form-control" value="{$vo.ccb_txcode}" size="20" placeholder="交易码">
+                              <td width="120px">查询密码:</td>
+                              <td><input type="text" name="ccb_qupwd" class="form-control" value="{$vo.ccb_qupwd}" size="20" placeholder="查询密码">
                               </td>
                             </tr>
                             <tr>
                               <td width="120px">公钥后30位:</td>
                               <td><input type="text" name="ccb_pub" class="form-control" value="{$vo.ccb_pub}" size="40" placeholder="公钥后30位">
+                              </td>
+                            </tr>
+                            <tr>
+                              <td width="120px">公钥:</td>
+                              <td><input type="text" name="ccb_pubkey" class="form-control" value="{$vo.ccb_pubkey}" size="40" placeholder="柜台公钥">
                               </td>
                             </tr>
                           </tbody>

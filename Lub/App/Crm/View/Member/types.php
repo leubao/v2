@@ -26,7 +26,7 @@
       <volist id="vo" name="data">
       <tr data-id="{$vo['id']}">
         <td>{$i}</td>
-        <td>{$vo['title']}</td>
+        <td><a data-toggle="dialog" href="{:U('Crm/Member/public_type_info',array('id'=>$vo['id']))}" data-id="memberconfig" data-width="900" data-height="600" data-title="{$vo['title']}详情">{$vo['title']}</a></td>
         <td>{$vo['money']}</td>
         <td>{$vo['remark']}</td>
         <td align="center">{$vo['status']|status}</td>

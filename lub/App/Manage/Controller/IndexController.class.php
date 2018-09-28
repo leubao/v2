@@ -99,10 +99,13 @@ class IndexController extends ManageBase {
         $year_today = D('Member')->where(['create_time' => ['GT', strtotime(date('Y-m-d'))],'status'=>1])->count();
         //未支付
         $year_pre = D('Member')->where(['status'=>2])->count();
+        //年卡入园
+        $year_into = D("MemberLog")->where(['status'=>9,'datetime'=>strtotime(date('Y-m-d'))])->count();
         $year = [
             'year_count'    =>  $year_count,
             'year_today'    =>  $year_today,
-            'year_pre'      =>  $year_pre
+            'year_pre'      =>  $year_pre,
+            'year_into'     =>  $year_into
         ];
         $this->assign('year',$year);
     }

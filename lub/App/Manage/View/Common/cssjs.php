@@ -1,60 +1,48 @@
 <!--bootstrap css-->
-<link href="{$config_siteurl}static/bjui/themes/css/bootstrap.css" rel="stylesheet">
+<link href="//static.leubao.com/bootstrap.min.css" rel="stylesheet">
 <!-- core - css -->
-<link href="{$config_siteurl}static/bjui/themes/css/style.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/themes/default/core.css" id="bjui-link-theme" rel="stylesheet">
+<link href="//static.leubao.com/style.css" rel="stylesheet">
+<link href="//static.leubao.com/default/core.css" id="bjui-link-theme" rel="stylesheet">
 <!-- plug - css -->
-<link href="{$config_siteurl}static/bjui/plugins/kindeditor_4.1.10/themes/default/default.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/plugins/colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/plugins/niceValidator/jquery.validator.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/plugins/bootstrapSelect/bootstrap-select.css" rel="stylesheet">
-<link href="{$config_siteurl}static/bjui/themes/css/FA/css/font-awesome.min.css" rel="stylesheet">
+<link href="//static.leubao.com/bjui/plugins/bootstrapSelect/bootstrap-select.css" rel="stylesheet">
+<link href="//static.leubao.com/FA/font-awesome.min.css" rel="stylesheet">
 
 <!--lub css -->
-<link href="{$config_siteurl}static/css/common.css" rel="stylesheet">
+<link href="//static.leubao.com/css/common.css" rel="stylesheet">
 <!--[if lte IE 7]>
-<link href="{$config_siteurl}static/bjui/themes/css/ie7.css" rel="stylesheet">
+<link href="//static.leubao.com/ie7.css" rel="stylesheet">
 <![endif]-->
 <!--[if lte IE 9]>
-    <script src="{$config_siteurl}static/bjui/other/html5shiv.min.js"></script>
-    <script src="{$config_siteurl}static/bjui/other/respond.min.js"></script>
+    <script src="//static.leubao.com/bjui/other/html5shiv.min.js"></script>
+    <script src="//static.leubao.com/bjui/other/respond.min.js"></script>
+    <script src="//static.leubao.com/bjui/other/jquery.iframe-transport.js"></script> 
 <![endif]-->
 <!-- jquery -->
-<script src="{$config_siteurl}static/js/jquery.js"></script>
-<script src="{$config_siteurl}static/bjui/js/jquery.cookie.js"></script>
-<!--[if lte IE 9]>
-<script src="{$config_siteurl}static/bjui/other/jquery.iframe-transport.js"></script>    
-<![endif]-->
+<script src="//static.leubao.com/js/jquery.js"></script>
+<script src="//static.leubao.com/bjui/js/jquery.cookie.js"></script>
 <!-- BJUI.all 分模块压缩版 -->
-<script src="{$config_siteurl}static/bjui/js/bjui-all.js"></script>
-<script src="{$config_siteurl}static/js/common.js"></script>
+<script src="//static.leubao.com/bjui/js/bjui-all.js"></script>
+<script src="//static.leubao.com/js/common.js"></script>
 <!-- plugins -->
 <!-- swfupload for uploadify && kindeditor -->
-<script src="{$config_siteurl}static/bjui/plugins/swfupload/swfupload.js"></script>
-<!-- kindeditor -->
-<script src="{$config_siteurl}static/bjui/plugins/kindeditor_4.1.10/kindeditor-all.min.js"></script>
-<script src="{$config_siteurl}static/bjui/plugins/kindeditor_4.1.10/lang/zh_CN.js"></script>
-<!-- colorpicker 颜色选择器-->
-<script src="{$config_siteurl}static/bjui/plugins/colorpicker/js/bootstrap-colorpicker.min.js"></script>
+<script src="//static.leubao.com/bjui/plugins/swfupload/swfupload.min.js"></script>
+
 <!-- ztree -->
-<script src="{$config_siteurl}static/bjui/plugins/ztree/jquery.ztree.all-3.5.min.js"></script>
+<script src="//static.leubao.com/js/jquery.ztree.all-3.5.min.js"></script>
 <!-- nice validate -->
-<script src="{$config_siteurl}static/bjui/plugins/niceValidator/jquery.validator.js"></script>
-<script src="{$config_siteurl}static/bjui/plugins/niceValidator/jquery.validator.themes.js"></script>
+<script src="//static.leubao.com/bjui/plugins/jquery.validator.js"></script>
+<script src="//static.leubao.com/bjui/plugins/jquery.validator.themes.js"></script>
+<link href="//static.leubao.com/bjui/plugins/jquery.validator.css" rel="stylesheet">
 <!-- other plugins -->
-<script src="{$config_siteurl}static/bjui/plugins/other/jquery.autosize.js"></script>
+<script src="//static.leubao.com/bjui/plugins/other/jquery.autosize.js"></script>
 <!-- bootstrap plugins -->
-<script src="//cdn.bootcss.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
-<script src="{$config_siteurl}static/bjui/plugins/bootstrapSelect/bootstrap-select.min.js"></script>
-<script src="{$config_siteurl}static/bjui/plugins/bootstrapSelect/defaults-zh_CN.min.js"></script>
+<script src="//static.leubao.com/bjui/plugins/bootstrap.min.js"></script>
+<script src="//static.leubao.com/bjui/plugins/bootstrapSelect/bootstrap-select.min.js"></script>
+<script src="//static.leubao.com/bjui/plugins/bootstrapSelect/defaults-zh_CN.min.js"></script>
 <!-- icheck -->
-<script src="{$config_siteurl}static/bjui/plugins/icheck/icheck.min.js"></script>
-<script src="{$config_siteurl}static/bjui/plugins/download/jquery.fileDownload.js"></script>
+<script src="//static.leubao.com/bjui/plugins/icheck/icheck.min.js"></script>
+<script src="//static.leubao.com/bjui/plugins/download/jquery.fileDownload.js"></script>
 <!--Seat s-->
-<script src="{$config_siteurl}static/js/jquery-seat.js"></script>
+<script src="//static.leubao.com/js/jquery-seat.js"></script>
 <script src="{$config_siteurl}static/js/layer.js"></script>
 <!--seat e-->
-<script src="{$config_siteurl}static/calendar/lib/moment.min.js"></script>
-<script src="{$config_siteurl}static/calendar/fullcalendar.min.js"></script>
-<script src="{$config_siteurl}static/calendar/lang/zh-cn.js"></script>
-<link href="{$config_siteurl}static/calendar/fullcalendar.min.css" rel="stylesheet">

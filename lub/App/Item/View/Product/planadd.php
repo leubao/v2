@@ -183,7 +183,7 @@
     <table id="tabledit1" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
             <thead>
                 <tr data-idname="plan[#index#][id]">
-                    <th title="No."><input type="text" name="plan[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
+                    <th title="No."><input type="text" name="plan[#index#][no]" class="no" data-rule="required" value="1" size="2"></th> 
                     
                     <th title="开始时间"><input type="text" name="plan[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="" size="10"></th>
                     <th title="结束时间"><input type="text" name="plan[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>

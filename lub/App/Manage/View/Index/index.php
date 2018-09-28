@@ -14,8 +14,8 @@
 <script type="text/javascript">
 $(function() {
     BJUI.init({
-        JSPATH       : '{$config_siteurl}static/bjui/',         //[可选]框架路径
-        PLUGINPATH   : '{$config_siteurl}static/bjui/plugins/', //[可选]插件路径
+        JSPATH       : '//static.leubao.com/bjui/',         //[可选]框架路径
+        PLUGINPATH   : '//static.leubao.com/bjui/plugins/', //[可选]插件路径
         loginInfo    : {url:'{:U('Manage/Index/login_time');}', title:'登录', width:400, height:200}, // 会话超时后弹出登录对话框
         statusCode   : {ok:200, error:300, timeout:301}, //[可选]
         ajaxTimeout  : 5000, //[可选]全局Ajax请求超时时间(毫秒)
