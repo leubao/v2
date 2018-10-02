@@ -43,7 +43,7 @@ class Api extends \Libs\System\Service {
         foreach ($proArr as $k=>$v){
             $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname')->select();
             if($list[$v] != false){
-                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->select();
+                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC,games ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->select();
             }
         }
         load_redis('set','2123',json_encode($uinfo));

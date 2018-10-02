@@ -99,10 +99,12 @@ class SetController extends Base{
 			$where = [
 				'group_id'=>['in',$uinfo['group']['price_group']],
 				'status'=>'1',
-				'type'	=>['in','2,3']
+				'type'	=>['in','2,3,6,7,8']
 			];
 			$where['_string']="FIND_IN_SET(2,scene)";
-			$list = D('TicketType')->where($where)->field('id,name,price,discount')->select();//dump($where);
+			$list = D('TicketType')->where($where)->field('id,name,price,discount')->select();
+			//dump($where);
+			//dump($list);
 			foreach ($list as $k => $v) {
 				$seale = D('TicketLevel')->where(['ticket_id'=>$v['id'],'crm_id'=>$uinfo['cid']])->find();
 				//判断当前渠道商的级别

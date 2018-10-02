@@ -23,7 +23,7 @@ function printTicket(sn,planid){
   $.ajax({
     type:'get',
     dataType : 'json',
-    url:'index.php?g=Home&m=Order&a=printTicket&sn='+sn+'&plan_id='+planid+'&user={$data.user}',
+    url:'index.php?g=Home&m=Order&a=printTicket&type='+type+'&sn='+sn+'&plan_id='+planid+'&user={$data.user}',
     timeout: 2500,
     error: function(){
       /*关闭当前弹窗*/

@@ -19,7 +19,7 @@ class LubTMPSms {
         //$list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
         //根据日期获取销售额
         //读取产品列表
-        $product = M('Product')->where(['status'=>1])->field('id,item_id')->select();
+        $product = M('Product')->where(['status'=>1])->field('id,item_id,type')->select();
         $itemConf = cache('ItemConfig');
         foreach ($product as $key => $value) {
             
@@ -37,7 +37,9 @@ class LubTMPSms {
                     'day' => date('Y年m月d日',$datetime),
                     'product_id'   =>   $value['id']
                 ];
-                $plan = ['product_type'=>2,'plan_id'=>$plan_id];
+                $plan = [
+                    'plantime'  => $datetime,
+                    'product_type'=>$value['type'],'product_id'=>$value['id'],'id'=>$plan_id];
                 \Libs\Service\Leadersms::send_sms($plan,2,$param);
             }
         }

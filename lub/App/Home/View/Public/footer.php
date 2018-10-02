@@ -50,7 +50,7 @@ $(function () {
 		$('#cash').html(USER_INFO.cash);
 	<?php }?>
 	$('.print').click(function(){
-		if(USER_INFO.param.prints == '1'){
+		if(USER_INFO.param.print == '1'){
 			var url = $(this).data('url');
 			layer.open({type: 2,title: '门票打印',skin: 'layui-layer-rim',shadeClose: true,area: ['180px', '210px'],content: [url,'no']});
 		}else{
