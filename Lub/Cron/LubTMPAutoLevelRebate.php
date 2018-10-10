@@ -13,15 +13,15 @@ class LubTMPAutoLevelRebate {
     //任务主体
     public function run($cronId) {
     	//默认计算当天的订单
-        //$datetime= date('Ymd',strtotime("-1 day"));
-        /**/
+        $datetime= date('Ymd',strtotime("-1 day"));
+        /*
         $date = $this->getDateFromRange('2018-06-01','2018-07-04');
         foreach ($date as $k => $v) {
             //$this->rebate($v);
             //$this->report($v,2);
            // dump($v);
-        }
-        //$this->rebate($datetime);
+        }*/
+        $this->rebate($datetime);
     }
     //批量重置报表
     public function report($datetime,$type = 1)
