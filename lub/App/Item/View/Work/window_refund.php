@@ -81,7 +81,6 @@
     </tbody>
   </table>
   <else />
-
   <table class="table table-bordered table-hover table-striped table-top w900">
     <thead>
       <tr>
@@ -119,14 +118,14 @@
           </if>
           </volist>
        </if>
-
       </volist>
-
     </tbody>
   </table>
-  </if>
+  </if></if>
+  <div class="remark">
+    <textarea name="remark" id="remark"></textarea>
   </div>
-  </if>
+  </div>
   <div class="bjui-pageFooter">
     <ul>
       <li>
@@ -137,14 +136,19 @@
     </ul>
   </div>
 </form>
+<style>
+.remark{ margin-top: 10px} 
+</style>
 <script type="text/javascript">
   $('#refund_all').click(function(){
     var urls = "{:U('Item/Work/refunds',array('sn'=>$data['order_sn'],'order'=>1,'plan'=>$data['plan_id'],'menuid'=>$menuid));}";
+    var reason = $("#remark").val();
     $.ajax({
       type:"get",
       url:urls,
       dataType:"JSON",
       timeout: 1500,
+      data:{reason: reason},
       error: function(){
         layer.msg('服务器请求超时，请检查网络...');
       },
@@ -163,6 +167,7 @@
   $('#recycle').click(function(){
       var ii = 0;
       var refund_seat_checked = $("#refund_seat tr input[type=checkbox]:checked");
+      var reason = $("#remark").val();
       if(refund_seat_checked.length > 0){
         refund_seat_checked.each(function(i){
           if(this.checked){
@@ -177,6 +182,7 @@
                 url:urls,
                 dataType:"JSON",
                 timeout: 3500,
+                data:{reason: reason},
                 error: function(){
                   layer.msg('服务器请求超时，请检查网络...');
                 },

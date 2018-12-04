@@ -633,6 +633,10 @@ class WorkController extends ManageBase{
 					break;
 			}
 			if($ret){
+				if(!empty($ginfo['reason'])){
+					D('TicketRefund')->where(['order_sn'=>$ginfo['sn']])->setField('reason',trim($ginfo['reason']));	
+				}
+				
 				$this->srun('退票成功',array('tabid'=>$this->menuid.MODULE_NAME));
 			}else{
 				$this->erun('退票失败:'.$refund->error);

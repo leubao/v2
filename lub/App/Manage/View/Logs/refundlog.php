@@ -33,11 +33,13 @@
     <input type="text" value="{$where['sn']}" name="sn" class="form-control" size="10" placeholder="单号">&nbsp;
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
+
+    <a type="button" class="btn btn-info" href="javascript:$.printBox('w_refund_print')"><i class="fa fa-print"> 打印报表</i></a>
   </div>
   <!--检索条件 e-->
   </form>
 </div>
-<div class="bjui-pageContent tableContent">
+<div class="bjui-pageContent tableContent"  id="w_refund_print">
   <table data-toggle="tablefixed" data-width="100%" data-nowrap="true">
     <thead>
       <tr>
