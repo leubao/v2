@@ -1044,8 +1044,12 @@ class ItemReport{
  	function conductor($datatime = '',$plan_id = '',$user_id = '')
  	{	
  		if(empty($plan_id)){
- 			$list = D('Item/Order')->where($datatime)->field('plan_id')->select();
- 			$list = array_column($list,'plan_id');
+ 			$map = [
+ 				'plantime'	=>	['EGT', $datatime],
+ 				'status'	=>	['in','2,3,4']
+ 			];
+ 			$list = M('Plan')->where($map)->field('id')->limit(20)->cache('conductor_plan',3600)->select();
+ 			$list = array_column($list,'id');
  			$plan = array_flip($list);
  			foreach ($plan as $k => $v) {
  				//窗口售票
@@ -1085,7 +1089,7 @@ class ItemReport{
  		return $return;
  	}
  	//根据计划按支付类型汇总金额
- 	function sum_pay($plan_id = '',$user_id,$datatime = ''){
+ 	function sum_pay($plan_id = '', $user_id, $datatime = ''){
  		$map = array(
  			'product_id' => get_product('id'), 
  			'status'	 => array('in','1,7,9'),
@@ -1093,8 +1097,10 @@ class ItemReport{
  			'plan_id'	 => $plan_id
  		);
  		if(!empty($datatime)){
- 			$map['createtime'] = $datatime['createtime'];
+ 			$endtime = $datatime + 86399;
+ 			$map['createtime'] = array(array('EGT', $datatime), array('ELT', $endtime), 'AND');
  		}
+
  		$model = D('Item/Order');
  		$pay = array(
  			'1' => array('pay'=>1,'name'=>'cash'),
@@ -1113,7 +1119,7 @@ class ItemReport{
  	/**
  	 * 窗口代收款 
  	 */
- 	function collection($plan_id = '',$user_id,$datatime = '')
+ 	function collection($plan_id = '', $user_id, $datatime = '')
  	{
  		$map = array(
  			'product_id' => get_product('id'),
@@ -1122,7 +1128,8 @@ class ItemReport{
  			'plan_id'	 => $plan_id
  		);
  		if(!empty($datatime)){
- 			$map['createtime'] = $datatime['createtime'];
+ 			$endtime = $datatime + 86399;
+ 			$map['createtime'] = array(array('EGT', $datatime), array('ELT', $endtime), 'AND');
  		}
  		$pay = array(
  			'1' => array('pay'=>1,'name'=>'cash'),

@@ -1031,8 +1031,13 @@ class Report{
  	function conductor($datatime = '',$plan_id = '',$user_id = '')
  	{	
  		if(empty($plan_id)){
- 			$list = D('Item/Order')->where($datatime)->field('plan_id')->select();
- 			$list = array_column($list,'plan_id');
+ 			//获取当天及以后的销售计划
+ 			$map = [
+ 				'plantime'	=>	['EGT', strtotime(date('Y-m-d'))],
+ 				'status'	=>	['in','2,3,4']
+ 			];
+ 			$list = D('Plan')->where($map)->field('id')->limit('20')->select();
+ 			$list = array_column($list,'id');
  			$plan = array_flip($list);
  			foreach ($plan as $k => $v) {
  				//窗口售票
@@ -1080,7 +1085,7 @@ class Report{
  			'plan_id'	 => $plan_id
  		);
  		if(!empty($datatime)){
- 			$map['createtime'] = $datatime['createtime'];
+ 			$map['createtime'] = array(array('EGT', $datatime), array('ELT', $endtime), 'AND');
  		}
  		$model = D('Item/Order');
  		$pay = array(
@@ -1109,7 +1114,7 @@ class Report{
  			'plan_id'	 => $plan_id
  		);
  		if(!empty($datatime)){
- 			$map['createtime'] = $datatime['createtime'];
+ 			$map['createtime'] = array(array('EGT', $datatime), array('ELT', $endtime), 'AND');
  		}
  		$pay = array(
  			'1' => array('pay'=>1,'name'=>'cash'),

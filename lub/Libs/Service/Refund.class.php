@@ -777,14 +777,14 @@ class Refund extends \Libs\System\Service {
 				return false;
 			}
 		}
-		/*微信支付4支付宝5微信支付*/
+		/*微信支付4支付宝5微信支付
 		if($info['pay'] == '5'){
 			$refundPay = Refund::weixin_refund($sn,$info['product_id'],$money_back);
 			if(!$refundPay){
 				$model->rollback();//事务回滚
 				return false;
 			}
-		}
+		}*/
 		if($info['pay'] == '4'){
 			$refundPay = Refund::alipay_refund($sn,$info['product_id'],$money_back);
 		}
@@ -1052,7 +1052,6 @@ class Refund extends \Libs\System\Service {
 		
 
 		$info = D('Item/Pay')->where(array('order_sn'=>$sn))->find();
-		
 		//$money = $info['money'];//临时
 		$rsn = get_order_sn($product_id);
 	

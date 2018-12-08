@@ -93,7 +93,7 @@ class FinancialController extends ManageBase{
         //按照客户分组来统计报表 TODO 政企订单不计算在内
         $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
-        G('begin');
+        //G('begin');
         $db = D('ReportData');
 		$map['product_id'] = $this->pid;
 		$list = $db->where($map)->order('plantime ASC,games')->field('product_id,datetime,order_sn,games,area,guide_id,region,pay,type,plantime,games,user_id,status,createtime',true)->select();
@@ -123,9 +123,9 @@ class FinancialController extends ManageBase{
 			//加载当前产品配置 TODO
 			$this->assign('data',$list)->assign('export_map',$export_map);
 		}
-		G('end');
-		echo G('begin','end').'s';
-		echo G('begin','end','m').'kb';
+		//G('end');
+		//echo G('begin','end').'s';
+		//echo G('begin','end','m').'kb';
 		$this->assign('type',$type)->assign('product_id',$map['product_id'])->assign('is_check',$is_check)->display();
 	}
 	/**
@@ -168,6 +168,7 @@ class FinancialController extends ManageBase{
 		if(!empty($sn)){$map['order_sn'] = $sn;}
 		if(!empty($channel)){$map['qd_id'] = array('in',agent_channel($channel,2));}
         if(!empty($guide)){$map['guide_id'] = array('in',$guide);}
+       
 		if($type == '1'){
 			$this->basePage('TeamOrder',$map,'id DESC');
 		}else{
@@ -251,7 +252,7 @@ class FinancialController extends ManageBase{
 	        	$collection = Report::conductor('',$pinfo['plan_id'],$pinfo['user']);
 	        }else{
 	        	//获取售票员单天所有销售过的场次
-	        	$collection = Report::conductor($map,'',$pinfo['user']);
+	        	$collection = Report::conductor($starttime,'',$pinfo['user']);
 	        }
 	        if(!empty($pinfo['user'])){
 				$map['user_id'] = $pinfo['user'];
