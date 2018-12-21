@@ -157,7 +157,7 @@ class LogsController extends ManageBase {
         if ($status != '') {
             $where['status'] = $status;
         }
-        $where['is_scene'] = array('eq', 2);
+        // $where['is_scene'] = array('eq', 2);
         
         $this->basePage('Item/TicketRefund',$where,array("id" => "desc"));
         $this->assign('where', $where)->display();

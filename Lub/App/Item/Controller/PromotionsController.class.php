@@ -50,6 +50,10 @@ class PromotionsController extends ManageBase{
 			case '5':
 				$idcard = $info['param']['info']['card'];
 				$tempate = 'pack';
+				break;
+			case '6':
+				$idcard = $info['param']['info']['card'];
+				$tempate = 'pack';
 				break;	
 			default:
 				break;

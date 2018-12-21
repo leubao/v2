@@ -123,7 +123,8 @@
   </table>
   </if></if>
   <div class="remark">
-    <textarea name="remark" id="remark"></textarea>
+    <textarea name="remark" id="remark" cols="60" onfocus="if(value=='退票说明'){value=''}"
+    onblur="if (value ==''){value='退票说明'}">退票说明</textarea>
   </div>
   </div>
   <div class="bjui-pageFooter">

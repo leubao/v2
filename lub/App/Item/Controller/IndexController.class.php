@@ -68,5 +68,33 @@ class IndexController extends ManageBase{
 		$info = M('Cash')->where(array('id'=>$ginfo['id']))->find();
 		$this->assign('data',$info)->display();
 	}
-	
+	//根据手机号查询订单数  和门票预订总数
+    public function public_phone()
+    {
+        $starttime = I('starttime');
+        $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
+        $phone = trim(I('phone'));
+        $this->assign('starttime',$starttime)
+            ->assign('endtime',$endtime);
+        $map = [];
+        if (!empty($starttime) && !empty($endtime)) {
+            $starttime = strtotime($starttime);
+            $endtime = strtotime($endtime) + 86399;
+            $map['createtime'] = array(array('GT', $starttime), array('LT', $endtime), 'AND');
+        }else{
+            //默认显示当天的订单
+            $starttime = strtotime(date("Ymd"));
+            $endtime = $starttime + 86399;
+            $map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+        }
+        $map['status'] =  ['in','1,9'];
+        $map['phone'] = $phone;
+        if(!empty($phone)){
+            $order = D('Order')->where($map)->count();
+            $ticket = D('Order')->where($map)->sum('number');
+            $money = D('Order')->where($map)->sum('money');
+        }
+        $this->assign('phone',$phone)->assign('order',$order)->assign('ticket',$ticket)->assign('money',$money);
+        $this->display();
+    }
 }

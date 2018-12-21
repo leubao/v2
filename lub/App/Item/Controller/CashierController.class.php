@@ -112,13 +112,12 @@ class CashierController extends ManageBase{
 	/**
 	 * 微信支付退款
 	 */
-	function weixin_refund_payment(){
+	function weixin_refund_paymen(){
 		$id = I('get.id',0,intval);
 		if(!empty($id)){
-			$map = array("id"=>$id);
 			$model = D('Item/Pay');
 			//读取状态
-			$map = array('status'=>1);
+			$map = array('status'=>1,"id"=>$id);
 			$pay = $model->where($map)->find();
 			if(!$pay){
 				$this->erun('订单状态不允许此项操作!');

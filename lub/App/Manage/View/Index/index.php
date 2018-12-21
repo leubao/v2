@@ -18,7 +18,7 @@ $(function() {
         PLUGINPATH   : '//static.leubao.com/bjui/plugins/', //[可选]插件路径
         loginInfo    : {url:'{:U('Manage/Index/login_time');}', title:'登录', width:400, height:200}, // 会话超时后弹出登录对话框
         statusCode   : {ok:200, error:300, timeout:301}, //[可选]
-        ajaxTimeout  : 5000, //[可选]全局Ajax请求超时时间(毫秒)
+        ajaxTimeout  : 15000, //[可选]全局Ajax请求超时时间(毫秒)
         pageInfo     : {total:'total', pageCurrent:'pageCurrent', pageSize:'pageSize', orderField:'orderField', orderDirection:'orderDirection'}, //[可选]分页参数
         alertMsg     : {displayPosition:'topcenter', displayMode:'none', alertTimeout:1500}, //[可选]信息提示的显示位置，显隐方式，及[info/correct]方式时自动关闭延时(毫秒)
         keys         : {statusCode:'statusCode', message:'message'}, //[可选]
