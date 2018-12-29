@@ -96,15 +96,26 @@ class Mysql extends Driver
      * 字段和表名处理
      * @access protected
      * @param string $key
+     * @param bool   $strict
      * @return string
      */
-    protected function parseKey(&$key)
+    protected function parseKey($key, $strict = false)
     {
         $key = trim($key);
-        if (!is_numeric($key) && !preg_match('/[,\'\"\*\(\)`.\s]/', $key)) {
+        if ($strict || (!is_numeric($key) && !preg_match('/[,\'\"\*\(\)`.\s]/', $key))) {
             $key = '`' . $key . '`';
         }
         return $key;
+    }
+
+    /**
+     * 随机排序
+     * @access protected
+     * @return string
+     */
+    protected function parseRand()
+    {
+        return 'rand()';
     }
 
     /**
@@ -182,7 +193,7 @@ class Mysql extends Driver
                     $val = array('value', $val);
                 }
 
-                if (!isset($val[1])) {
+                if (!isset($val[1]) && !is_null($val[1])) {
                     continue;
                 }
 

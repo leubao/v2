@@ -59,7 +59,7 @@ class CheckController extends ManageBase{
 				break;
 			case 19:
 				$map = array('phone'=>$ginfo['phone']);
-				$return = $this->check_name2('User',$map);
+				$return = $this->check_name2('User',$map); 
 				break;
 			case 20:
 				$map = array('legally'=>$ginfo['legally']);
@@ -71,9 +71,9 @@ class CheckController extends ManageBase{
 				break;
 			case 51:
 				if(!empty($ginfo['id'])){
-					$map = ['idcard'=>$ginfo['idcard'],'id'=>['neq',$id]];
+					$map = ['idcard'=>$ginfo['idcard'],'id'=>['neq',$id],'status'=>['gt',0]];
 				}else{
-					$map = ['idcard'=>$ginfo['idcard']];
+					$map = ['idcard'=>$ginfo['idcard'],'status'=>['gt',0]];
 				}
 				
 				$return = $this->check_name2('Member',$map);

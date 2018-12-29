@@ -54,5 +54,47 @@ class LubTMPMemberSum {
 		if(!empty($memSum)){
 			D('MemberSum')->addAll($memSum);
 		}
+		$this->renewal();
+    }
+	public function renewal()
+    {
+    	$starttime = strtotime(date('Ymd',strtotime("-1 day")));
+	    $endtime = $starttime  + 86399;
+	    $map =[
+			'status' => 1,
+			'renewal'=>['gt',0],
+    		'update_time' => array(array('EGT', $starttime), array('ELT', $endtime), 'AND'),
+    	];
+	    $member = D('Member')->where($map)->field('user_id')->select();
+	    if(empty($member)){
+	    	return false;
+	    }
+	    $userId = array_unique(array_column($member, 'user_id'));
+		foreach ($memType as $k => $v) {
+			foreach ($userId as $ka => $va) {
+				$mmap = [
+					'group_id' => $v['id'],
+					'status' => 1,
+					'user_id'=>$va,
+					'renewal'=>['gt',0],
+		    		'update_time' => array(array('EGT', $starttime), array('ELT', $endtime), 'AND'),
+		    	];
+		    	$number = D('Member')->where($mmap)->count();
+				if($number > 0){
+					$money = $number*$v['money'];
+					$memSum[] = [
+						'datetime'  => date('Ymd',$starttime),
+						'price'	    => $v['money'],
+						'user_id'	=> $va,
+						'group_id'	=> $v['id'],
+						'number' 	=> $number,
+						'money'	 	=> $money
+					];
+				}
+			}
+		}
+		if(!empty($memSum)){
+			D('MemberSum')->addAll($memSum);
+		}
     }
 }

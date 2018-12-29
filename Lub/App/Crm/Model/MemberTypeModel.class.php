@@ -7,6 +7,7 @@ class MemberTypeModel extends Model{
         array('update_time', 'time', 3, 'function'),
         array('user_id', 'get_user_id', 1, 'function'), 
         array('status', '1'),
+        array('renewal', '0')
 	);
 	function insert($pinfo = [])
 	{

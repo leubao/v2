@@ -61,7 +61,7 @@ class Model
     // 是否批处理验证
     protected $patchValidate = false;
     // 链操作方法列表
-    protected $methods = array('strict', 'order', 'alias', 'having', 'group', 'lock', 'distinct', 'auto', 'filter', 'validate', 'result', 'token', 'index', 'force');
+    protected $methods = array('strict', 'order', 'alias', 'having', 'group', 'lock', 'distinct', 'auto', 'filter', 'validate', 'result', 'token', 'index', 'force', 'master');
 
     /**
      * 架构函数
@@ -93,7 +93,7 @@ class Model
         } elseif ('' != $tablePrefix) {
             $this->tablePrefix = $tablePrefix;
         } elseif (!isset($this->tablePrefix)) {
-            $this->tablePrefix = C('DB_PREFIX');
+            $this->tablePrefix = !empty($this->connection) && !is_null(C($this->connection . '.DB_PREFIX')) ? C($this->connection . '.DB_PREFIX') : C('DB_PREFIX');
         }
 
         // 数据库初始化操作
@@ -114,8 +114,7 @@ class Model
         if (empty($this->fields)) {
             // 如果数据表字段没有定义则自动获取
             if (C('DB_FIELDS_CACHE')) {
-                $db     = $this->dbName ?: C('DB_NAME');
-                $fields = F('_fields/' . strtolower($db . '.' . $this->tablePrefix . $this->name));
+                $fields = F('_fields/' . strtolower($this->getTableName()));
                 if ($fields) {
                     $this->fields = $fields;
                     if (!empty($fields['_pk'])) {
@@ -138,7 +137,8 @@ class Model
     {
         // 缓存不存在则查询数据表信息
         $this->db->setModel($this->name);
-        $fields = $this->db->getFields($this->getTableName());
+        $tableName = $this->getTableName();
+        $fields    = $this->db->getFields($tableName);
         if (!$fields) {
             // 无法获取字段信息
             return false;
@@ -173,8 +173,7 @@ class Model
         // 2008-3-7 增加缓存开关控制
         if (C('DB_FIELDS_CACHE')) {
             // 永久缓存数据表信息
-            $db = $this->dbName ?: C('DB_NAME');
-            F('_fields/' . strtolower($db . '.' . $this->tablePrefix . $this->name), $this->fields);
+            F('_fields/' . strtolower($tableName), $this->fields);
         }
     }
 
@@ -252,7 +251,7 @@ class Model
             $where[$name] = $args[0];
             return $this->where($where)->getField($args[1]);
         } elseif (isset($this->_scope[$method])) {
-// 命名范围的单独调用支持
+            // 命名范围的单独调用支持
             return $this->scope($method, $args[0]);
         } else {
             E(__CLASS__ . ':' . $method . L('_METHOD_NOT_EXIST_'));
@@ -519,8 +518,8 @@ class Model
             } else {
                 $where[$pk] = $options;
             }
-            $options          = array();
-            $options['where'] = $where;
+
+            $this->options['where'] = $where;
         }
         // 根据复合主键删除记录
         if (is_array($options) && (count($options) > 0) && is_array($pk)) {
@@ -537,13 +536,13 @@ class Model
                     $where[$field] = $options[$i];
                     unset($options[$i++]);
                 }
-                $options['where'] = $where;
+                $this->options['where'] = $where;
             } else {
                 return false;
             }
         }
         // 分析表达式
-        $options = $this->_parseOptions($options);
+        $options = $this->_parseOptions();
         if (empty($options['where'])) {
             // 如果条件为空 不进行删除操作 除非设置 1=1
             return false;
@@ -590,8 +589,8 @@ class Model
             } else {
                 $where[$pk] = $options;
             }
-            $options          = array();
-            $options['where'] = $where;
+
+            $this->options['where'] = $where;
         } elseif (is_array($options) && (count($options) > 0) && is_array($pk)) {
             // 根据复合主键查询
             $count = 0;
@@ -607,16 +606,16 @@ class Model
                     $where[$field] = $options[$i];
                     unset($options[$i++]);
                 }
-                $options['where'] = $where;
+                $this->options['where'] = $where;
             } else {
                 return false;
             }
         } elseif (false === $options) {
             // 用于子查询 不查询只返回SQL
-            $options['fetch_sql'] = true;
+            $this->options['fetch_sql'] = true;
         }
         // 分析表达式
-        $options = $this->_parseOptions($options);
+        $options = $this->_parseOptions();
         // 判断查询缓存
         if (isset($options['cache'])) {
             $cache = $options['cache'];
@@ -709,11 +708,6 @@ class Model
                     if (is_scalar($val)) {
                         $this->_parseType($options['where'], $key);
                     }
-                } elseif (!is_numeric($key) && '_' != substr($key, 0, 1) && false === strpos($key, '.') && false === strpos($key, '(') && false === strpos($key, '|') && false === strpos($key, '&')) {
-                    if (!empty($this->options['strict'])) {
-                        E(L('_ERROR_QUERY_EXPRESS_') . ':[' . $key . '=>' . $val . ']');
-                    }
-                    unset($options['where'][$key]);
                 }
             }
         }
@@ -780,8 +774,8 @@ class Model
     {
         if (is_numeric($options) || is_string($options)) {
             $where[$this->getPk()] = $options;
-            $options               = array();
-            $options['where']      = $where;
+
+            $this->options['where'] = $where;
         }
         // 根据复合主键查找记录
         $pk = $this->getPk();
@@ -800,15 +794,15 @@ class Model
                     $where[$field] = $options[$i];
                     unset($options[$i++]);
                 }
-                $options['where'] = $where;
+                $this->options['where'] = $where;
             } else {
                 return false;
             }
         }
         // 总是查找一条记录
-        $options['limit'] = 1;
+        $this->options['limit'] = 1;
         // 分析表达式
-        $options = $this->_parseOptions($options);
+        $options = $this->_parseOptions();
         // 判断查询缓存
         if (isset($options['cache'])) {
             $cache = $options['cache'];
@@ -824,7 +818,7 @@ class Model
             return false;
         }
         if (empty($resultSet)) {
-// 查询结果为空
+            // 查询结果为空
             return null;
         }
         if (is_string($resultSet)) {
@@ -834,8 +828,8 @@ class Model
         // 读取数据后的处理
         $data = $this->_read_data($resultSet[0]);
         $this->_after_find($data, $options);
-        if (!empty($this->options['result'])) {
-            return $this->returnResult($data, $this->options['result']);
+        if (!empty($options['result'])) {
+            return $this->returnResult($data, $options['result']);
         }
         $this->data = $data;
         if (isset($cache)) {
@@ -921,7 +915,7 @@ class Model
     public function setInc($field, $step = 1, $lazyTime = 0)
     {
         if ($lazyTime > 0) {
-// 延迟写入
+            // 延迟写入
             $condition = $this->options['where'];
             $guid      = md5($this->name . '_' . $field . '_' . serialize($condition));
             $step      = $this->lazyWrite($guid, $step, $lazyTime);
@@ -945,7 +939,7 @@ class Model
     public function setDec($field, $step = 1, $lazyTime = 0)
     {
         if ($lazyTime > 0) {
-// 延迟写入
+            // 延迟写入
             $condition = $this->options['where'];
             $guid      = md5($this->name . '_' . $field . '_' . serialize($condition));
             $step      = $this->lazyWrite($guid, -$step, $lazyTime);
@@ -978,14 +972,14 @@ class Model
                 return $value + $step;
             } else {
                 // 追加数据到缓存
-                S($guid, $value + $step);
+                S($guid, $value + $step, 0);
                 return false;
             }
         } else {
             // 没有缓存数据
-            S($guid, $step);
+            S($guid, $step, 0);
             // 计时开始
-            S($guid . '_time', NOW_TIME);
+            S($guid . '_time', NOW_TIME, 0);
             return false;
         }
     }
@@ -1107,6 +1101,15 @@ class Model
             $fields = $this->insertFields;
         } elseif (self::MODEL_UPDATE == $type && isset($this->updateFields)) {
             $fields = $this->updateFields;
+            $pk     = $this->getPk();
+            if (is_string($pk)) {
+                array_push($fields, $pk);
+            }
+            if (is_array($pk)) {
+                foreach ($pk as $pkTemp) {
+                    array_push($fields, $pkTemp);
+                }
+            }
         }
         if (isset($fields)) {
             if (is_string($fields)) {
@@ -1371,9 +1374,10 @@ class Model
     protected function _validationField($data, $val)
     {
         if ($this->patchValidate && isset($this->error[$val[0]])) {
+            //当前字段已经有规则验证没有通过
             return;
         }
-        //当前字段已经有规则验证没有通过
+
         if (false === $this->_validationFieldItem($data, $val)) {
             if ($this->patchValidate) {
                 $this->error[$val[0]] = $val[2];
@@ -1486,7 +1490,7 @@ class Model
                     list($min, $max) = explode(',', $rule);
                     return $length >= $min && $length <= $max;
                 } else {
-// 指定长度
+                    // 指定长度
                     return $length == $rule;
                 }
             case 'expire':
@@ -1634,7 +1638,7 @@ class Model
         if (empty($this->name)) {
             $name = substr(get_class($this), 0, -strlen(C('DEFAULT_M_LAYER')));
             if ($pos = strrpos($name, '\\')) {
-//有命名空间
+                //有命名空间
                 $this->name = substr($name, $pos + 1);
             } else {
                 $this->name = $name;
@@ -1757,7 +1761,7 @@ class Model
     public function getDbFields()
     {
         if (isset($this->options['table'])) {
-// 动态指定表名
+            // 动态指定表名
             if (is_array($this->options['table'])) {
                 $table = key($this->options['table']);
             } else {
@@ -1932,11 +1936,11 @@ class Model
     public function field($field, $except = false)
     {
         if (true === $field) {
-// 获取全部字段
+            // 获取全部字段
             $fields = $this->getDbFields();
             $field  = $fields ?: '*';
         } elseif ($except) {
-// 字段排除
+            // 字段排除
             if (is_string($field)) {
                 $field = explode(',', $field);
             }

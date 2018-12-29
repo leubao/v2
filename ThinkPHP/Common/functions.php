@@ -332,16 +332,16 @@ function I($name, $default = '', $filter = null, $datas = null)
             break;
         case 'param':
             switch ($_SERVER['REQUEST_METHOD']) {
-            case 'POST':
+                case 'POST':
                     $input = $_POST;
                     break;
-            case 'PUT':
+                case 'PUT':
                     if (is_null($_PUT)) {
                         parse_str(file_get_contents('php://input'), $_PUT);
                     }
                     $input = $_PUT;
                     break;
-            default:
+                default:
                     $input = $_GET;
             }
             break;
@@ -405,6 +405,7 @@ function I($name, $default = '', $filter = null, $datas = null)
 
             if (is_array($filters)) {
                 foreach ($filters as $filter) {
+                    $filter = trim($filter);
                     if (function_exists($filter)) {
                         $data = is_array($data) ? array_map_recursive($filter, $data) : $filter($data); // 参数过滤
                     } else {
@@ -418,19 +419,19 @@ function I($name, $default = '', $filter = null, $datas = null)
         }
         if (!empty($type)) {
             switch (strtolower($type)) {
-                case 'a':    // 数组
+                case 'a': // 数组
                     $data = (array) $data;
                     break;
-                case 'd':    // 数字
+                case 'd': // 数字
                     $data = (int) $data;
                     break;
-                case 'f':    // 浮点
+                case 'f': // 浮点
                     $data = (float) $data;
                     break;
-                case 'b':    // 布尔
+                case 'b': // 布尔
                     $data = (boolean) $data;
                     break;
-                case 's':// 字符串
+                case 's': // 字符串
                 default:
                     $data = (string) $data;
             }
@@ -1067,7 +1068,17 @@ function U($url = '', $vars = '', $suffix = true, $domain = false)
             if (!empty($path)) {
                 $var[$varModule] = implode($depr, $path);
             } else {
-                if (C('MULTI_MODULE')) {
+                // 如果为插件，自动转换路径
+                if (CONTROLLER_PATH) {
+                    $var[$varModule] = MODULE_NAME;
+                    $varAddon        = C('VAR_ADDON');
+                    if (MODULE_NAME != C('DEFAULT_MODULE')) {
+                        $var[$varController] = MODULE_NAME;
+                    }
+
+                    $vars = array_merge(array($varAddon => CONTROLLER_PATH), $vars);
+
+                } elseif (C('MULTI_MODULE')) {
                     if (MODULE_NAME != C('DEFAULT_MODULE') || !C('MODULE_ALLOW_LIST')) {
                         $var[$varModule] = MODULE_NAME;
                     }
@@ -1079,14 +1090,14 @@ function U($url = '', $vars = '', $suffix = true, $domain = false)
                 }
             }
             if (isset($var[$varModule])) {
-                $module = $var[$varModule];
+                $module = defined('BIND_MODULE') && BIND_MODULE == $var[$varModule] ? '' : $var[$varModule];
                 unset($var[$varModule]);
             }
 
         }
     }
 
-    if (C('URL_MODEL') == 0) {
+    if (0 == C('URL_MODEL')) {
         // 普通模式URL转换
         $url = __APP__ . '?' . C('VAR_MODULE') . "={$module}&" . http_build_query(array_reverse($var));
         if ($urlCase) {
@@ -1101,8 +1112,16 @@ function U($url = '', $vars = '', $suffix = true, $domain = false)
         if (isset($route)) {
             $url = __APP__ . '/' . rtrim($url, $depr);
         } else {
-            $module = (defined('BIND_MODULE') && BIND_MODULE == $module) ? '' : $module;
-            $url    = __APP__ . '/' . ($module ? $module . MODULE_PATHINFO_DEPR : '') . implode($depr, array_reverse($var));
+            $path = implode($depr, array_reverse($var));
+            if (C('URL_ROUTER_ON')) {
+                $url = Think\Route::reverse($path, $vars, $depr, $suffix);
+                if (!$url) {
+                    $url = $path;
+                }
+            } else {
+                $url = $path;
+            }
+            $url = __APP__ . '/' . ($module ? $module . MODULE_PATHINFO_DEPR : '') . $url;
         }
         if ($urlCase) {
             $url = strtolower($url);
@@ -1113,7 +1132,6 @@ function U($url = '', $vars = '', $suffix = true, $domain = false)
                 if ('' !== trim($val)) {
                     $url .= $depr . $var . $depr . urlencode($val);
                 }
-
             }
         }
         if ($suffix) {
@@ -1126,11 +1144,11 @@ function U($url = '', $vars = '', $suffix = true, $domain = false)
             }
         }
     }
-    if (isset($anchor)) {
+    if (!empty($anchor)) {
         $url .= '#' . $anchor;
     }
     if ($domain) {
-        $url = (is_ssl() ? 'https://' : 'http://') . $domain . strtolower($url);
+        $url = (is_ssl() ? 'https://' : 'http://') . $domain . $url;
     }
     return $url;
 }
@@ -1731,7 +1749,7 @@ function think_filter(&$value)
     // TODO 其他安全过滤
 
     // 过滤查询特殊字符
-    if (preg_match('/^(EXP|NEQ|GT|EGT|LT|ELT|OR|XOR|LIKE|NOTLIKE|NOT BETWEEN|NOTBETWEEN|BETWEEN|NOTIN|NOT IN|IN)$/i', $value)) {
+    if (preg_match('/^(EXP|NEQ|GT|EGT|LT|ELT|OR|XOR|LIKE|NOTLIKE|NOT BETWEEN|NOTBETWEEN|BETWEEN|NOTIN|NOT IN|IN|BIND)$/i', $value)) {
         $value .= ' ';
     }
 }

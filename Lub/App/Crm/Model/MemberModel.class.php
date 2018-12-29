@@ -50,7 +50,7 @@ class MemberModel extends Model{
     /**
      *更新成功后的回调方法
      */
-     protected function _after_update(){
-     	
+     protected function _after_update($data, $options){
+ 
      }  
 }

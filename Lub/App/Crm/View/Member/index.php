@@ -15,13 +15,13 @@
     <select name="group" data-toggle="selectpicker">
         <option value="">全部</option>
         <volist name="group" id="vo">
-        <option value="{$vo.id}" <if condition="$vo.id eq '1'">selected</if>>{$vo.title}</option>
+        <option value="{$vo.id}" <if condition="$vo.id eq $group_id">selected</if>>{$vo.title}</option>
         </volist>
     </select>
     &nbsp;
-    <input type="text" value="{$map.phone}" name="phone" data-rule="length[11~]" placeholder="手机号" size="11">
+    <input type="text" value="{$phone}" name="phone" data-rule="length[11~]" placeholder="手机号" size="11">
     &nbsp;
-    <input type="text" value="{$map.card}" name="card" data-rule="length[15~]" placeholder="身份证号" size="15">
+    <input type="text" value="{$card}" name="card" data-rule="length[15~]" placeholder="身份证号" size="15">
     
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
@@ -42,9 +42,9 @@
         <th width="120" align="center">编号</th>
         <th width="80" align="center">姓名</th>
         <th width="100" align="center">办理方式</th>
-        <th width="100" align="center">年龄</th>
+        <th width="60" align="center">年龄</th>
         <th width="100" align="center">类型</th>
-        <th width="60" align="center">入园数</th>
+        <th width="120" align="center">入园数</th>
         <th width="60" align="center">状态</th>
         <th width="130" align="center">添加时间</th>
         <th width="130" align="center">过期时间</th>
@@ -61,7 +61,7 @@
         <td align="center">{$vo['group_id']|memGroup}</td>
         <td align="center">{$vo['number']}</td>
         <td align="center">{$vo['status']|status}</td>
-        <td align="center">{$vo['create_time']|datetime}</td>
+        <td align="center">{$vo['create_time']|datetime} {$vo['update_time']|datetime}</td>
         <td align="center">{$vo['endtime']|datetime}</td>
         <td align="center"><a href="{:U('Crm/Member/del_member',array('id'=>$vo['id'],'menuid'=>$menuid))}" data-toggle="doajax" data-confirm-msg="确定要删除这条记录吗?">删除</a></td>
       </tr>

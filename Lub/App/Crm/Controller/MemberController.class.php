@@ -16,7 +16,36 @@ class MemberController extends ManageBase{
 	//会员管理
 	function index()
 	{
-		$this->basePage('Member','','id DESC,status DESC');
+		if(IS_POST){
+			$starttime = I('starttime');
+		    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
+		    $group = I('group');
+		    $phone = I('phone');
+		    $card = I('card');
+		    $this->assign('starttime',$starttime)
+		        ->assign('endtime',$endtime)
+		        ->assign('group_id',$group)
+		        ->assign('phone',$phone)
+		        ->assign('card',$card);
+		    $map = [];
+		    if(!empty($phone) || !empty($card)){
+		    	if(!empty($card)){
+		    		$map['idcard'] = $card;
+		    	}
+		    	if(!empty($phone)){
+		    		$map['phone'] = $phone;
+		    	}
+		    }else{
+		    	$starttime = strtotime($starttime);
+			    $endtime = strtotime($endtime) + 86399;
+			   	$map['create_time'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+		    }
+		    if(!empty($group)){
+		    	$map['group_id'] = $group;
+		    }
+		}
+		$map['status']	= 1;
+		$this->basePage('Member',$map,'id DESC,status DESC');
 		$group = M('MemberType')->where(['status'=>1])->order('status DESC,id DESC')->field('id,title')->select();
 		$this->assign ('group',$group)
 			 ->assign('map',$map)
@@ -60,18 +89,19 @@ class MemberController extends ManageBase{
 			$model = D('Crm/MemberType');
 			$info = $model->where(['id'=>$ginfo['id']])->field('type,create_time,update_time,user_id',true)->find();
 			$rule = json_decode($info['rule'],true);
+			dump($rule);
 			$info['rule'] = [
 				'datetime' => [
-					'starttime' => date('Y-m-d',$rule['starttime']),
-					'endtime'	=> date('Y-m-d',$rule['endtime'])
+					'starttime' => date('Y-m-d',$rule['datetime']['starttime']),
+					'endtime'	=> date('Y-m-d',$rule['datetime']['endtime'])
 				],
 				'efftime'	=> [
-					'start'	=>	date('Y-m-d',$rule['start']),
-					'end'	=>	date('Y-m-d',$rule['end'])
+					'start'	=>	date('Y-m-d',$rule['efftime']['start']),
+					'end'	=>	date('Y-m-d',$rule['efftime']['end'])
 				],
 				'area'		=> $rule['area'],
 				'number'	=> $rule['number'],//次卡，或单日入园次数
-			];
+			];dump($info);
 			$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
 			$this->assign('data',$info)->assign('printer',$printer);
 			$this->display();
@@ -115,7 +145,7 @@ class MemberController extends ManageBase{
 			$pinfo = I('post.');
 			$model = D('Member');
 			//判断身份证号是否唯一
-			if($model->where(['idcard'=>$pinfo['idcard']])->field('id')->find()){
+			if($model->where(['idcard'=>$pinfo['idcard'],'status'=>['gt',0]])->field('id')->find()){
 				$this->erun("添加失败,该身份证已注册");
 				return false;
 			}
@@ -299,5 +329,51 @@ class MemberController extends ManageBase{
 		}else{
 			$this->erun('参数错误!');
 		}
+	}
+	// 续期
+	public function renewal()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			$model = D('Member');
+			$updata = [
+				'id'		=>	$pinfo['id'],
+				'renewal'	=>	$pinfo['renewal'],
+				'group_id'	=>	(int)$pinfo['group'],
+				'user_id'	=>	get_user_id(),//窗口时写入办理人
+			];
+			$updata['endtime'] = D('Member')->validity($updata);
+			if($model->token(false)->create($updata)){
+				$result = $model->save();
+				if($result){
+					$this->srun('续期成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				}else{
+					$this->erun("续期失败:");
+				}
+			}else{
+				$this->erun("续期失败tokern".$e);
+			}
+		}else{
+			//读取会员详情，以及会员卡类型
+			$id = I('id');
+			$info = D('Member')->where(['id'=>$id])->field('id,nickname,group_id,endtime')->find();
+			if(empty($info)){
+				$this->erun('未找到该会员!');
+			}
+			//到期时间大于三个月的，禁止操作 TODO  次卡未考虑
+			$timediff = timediff(date('Y-m-d'), date('Y-m-d',$info['endtime']), 'day');
+			if((int)$timediff['day'] > 60){
+				$this->erun('当前会员余额充足,暂不支持此项操作!');
+			}
+			// TODO 续费只能续当前类型相同
+			$type = F('MemGroup');
+			if(empty($type)){
+				D('Crm/MemberType')->mem_group_cache();
+			}
+			$type = $type[$info['group_id']]['type'];
+			$group = D('MemberType')->where(['type'=>$type])->field('id,title,money')->select();
+			$this->assign('type',$group)->assign('data',$info);
+		}
+		$this->display();
 	}
 }
