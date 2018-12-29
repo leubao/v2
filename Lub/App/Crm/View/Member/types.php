@@ -17,6 +17,7 @@
         <th width="100" align="center">类型名称</th>
         <th width="100">起售金额</th>
         <th width="100">类型描述</th>
+        <th width="100">备注</th>
         <th width="60" align="center">状态</th>
         <th width="130" align="center">添加时间</th>
         <th width="130" align="center">操作</th>
@@ -28,6 +29,7 @@
         <td>{$i}</td>
         <td><a data-toggle="dialog" href="{:U('Crm/Member/public_type_info',array('id'=>$vo['id']))}" data-id="memberconfig" data-width="900" data-height="600" data-title="{$vo['title']}详情">{$vo['title']}</a></td>
         <td>{$vo['money']}</td>
+        <td>{$vo['type']|memberType}</td>
         <td>{$vo['remark']}</td>
         <td align="center">{$vo['status']|status}</td>
         <td align="center">{$vo['create_time']|datetime}</td>

@@ -89,7 +89,6 @@ class MemberController extends ManageBase{
 			$model = D('Crm/MemberType');
 			$info = $model->where(['id'=>$ginfo['id']])->field('type,create_time,update_time,user_id',true)->find();
 			$rule = json_decode($info['rule'],true);
-			dump($rule);
 			$info['rule'] = [
 				'datetime' => [
 					'starttime' => date('Y-m-d',$rule['datetime']['starttime']),
@@ -101,7 +100,7 @@ class MemberController extends ManageBase{
 				],
 				'area'		=> $rule['area'],
 				'number'	=> $rule['number'],//次卡，或单日入园次数
-			];dump($info);
+			];
 			$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
 			$this->assign('data',$info)->assign('printer',$printer);
 			$this->display();
@@ -362,7 +361,7 @@ class MemberController extends ManageBase{
 			}
 			//到期时间大于三个月的，禁止操作 TODO  次卡未考虑
 			$timediff = timediff(date('Y-m-d'), date('Y-m-d',$info['endtime']), 'day');
-			if((int)$timediff['day'] > 60){
+			if((int)$timediff['day'] > 90){
 				$this->erun('当前会员余额充足,暂不支持此项操作!');
 			}
 			// TODO 续费只能续当前类型相同
