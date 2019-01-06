@@ -39,6 +39,14 @@
               </div>
             </div>
             <div class="form-group">
+              <select class="form-control" name="product">
+                <option value="">选择产品</option>
+                <volist name="product" id="v">
+                <option value="{$v.id}" <if condition="$product_id eq $v['id']">selected="selected"</if>>{$v.name}</option>
+                </volist>
+              </select>
+            </div>
+            <div class="form-group">
               <select class="form-control" name="channel">
                 <option value="">全部渠道商</option>
                 <volist name="channel" id="chan">

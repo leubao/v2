@@ -382,8 +382,9 @@ class ReportController extends Base{
         }
 	    $start_time = I('start_time');
         $end_time = I('end_time') ? I('end_time') : date('Y-m-d',time());
-	    $sum_det = I('sum_det');
+	    $sum_det = I('sum_det') ? I('sum_det') : '2';
 	    $channel = I('channel');
+	    $product_id = I('product');
 	    //传递条件
 	    $this->assign('sum_det',$sum_det)
 	        ->assign('starttime',$start_time)
@@ -401,11 +402,14 @@ class ReportController extends Base{
         }
         $uInfo = Partner::getInstance()->getInfo();
         $map['channel_id'] = array('in',agent_channel($uInfo['crm']['id'],2));
+        $product = M('Product')->field('id,name')->select();
         //设置订单类型为团队或渠道
         $map['type'] = array('in','2,4,7');
         $map['status'] = '1';
         $db = M('ReportData');
-		//$map['product_id'] = $uInfo['product'];
+		if(!empty($product_id)){ 
+			$map['product_id'] = $product_id;
+		}
 		$list = $db->where($map)->order('plantime ASC,games')->field('datetime,order_sn,games,area,guide_id,createtime,region,pay,type,plantime,games,user_id,status',true)->select();
 		if($sum_det == '1'){
 			$list = Report::channel_plan_fold($list);
@@ -417,7 +421,7 @@ class ReportController extends Base{
 		S('ChannelReport'.get_user_id(),$list);
 		$this->user_channel();
 		//加载当前产品配置 TODO
-		$this->assign('data',$list)->assign('export_map',$export_map)->display();
+		$this->assign('data',$list)->assign('export_map',$export_map)->assign('product_id',$product_id)->assign('product',$product)->display();
 	}
 	/**
 	 * 今日销售明细
