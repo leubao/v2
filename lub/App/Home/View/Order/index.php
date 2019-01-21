@@ -65,7 +65,9 @@
               </select>
             </div>
             <button type="submit" class="btn btn-default">查询</button>
+            <a type="button" href="{$export_url}" class="btn btn-default">导出</a>
           </form>
+
         </div>
         <!-- Table -->
         <table class="table table-condensed table-hover table-responsive table-bordered table-vcenter">

@@ -107,7 +107,7 @@ class IndexController extends Base{
 			$product = M('Product')->where(['id'=>$v,'status'=>1])->find();
 			if(!empty($product)){
 				$list[$k] = $product;
-				$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'prodct_id'=>$v))->getField('quota');
+				$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'product_id'=>$v))->getField('quota');
 				if($list[$k] != false){
 					$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
 					$list[$k]['plan'] = Operate::do_read('Plan',1,array('product_id'=>$v,'status'=>2),"plantime ASC,games ASC",array('id,product_id,plantime,games,seat_table'));

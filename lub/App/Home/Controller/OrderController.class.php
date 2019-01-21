@@ -28,8 +28,8 @@ class OrderController extends Base{
         }
 		$db = D('Order');
 		$where = array();
-        $start_time = I('start_time');
-        $end_time = I('end_time');
+        $start_time = I('start_time') ? I('start_time') : date('Y-m-d');
+        $end_time = I('end_time') ? I('end_time') : date('Y-m-d');
         $user_id = I('user');
         $product_id = I('product');
         $datetype = I('datetype') ? I('datetype') : '1';
@@ -38,6 +38,16 @@ class OrderController extends Base{
         //传递查询时间
         $this->assign('start_time',$start_time)
         	->assign('end_time',$end_time)->assign('datetype',$datetype);
+        //导出条件
+       	$export_map = [
+			'start_time'	=>	$start_time,
+			'end_time'		=>	$end_time,
+			'user'			=>	$user_id,
+			'datetype'		=>	$datetype,
+			'product'		=>	$product_id,
+			'status'		=>	$status,
+			'sn'			=>	$sn,
+		];
 		$uinfo = Partner::getInstance()->getInfo();
 
         if($uinfo['groupid'] == '3'){
@@ -73,13 +83,13 @@ class OrderController extends Base{
         	$where['plan_id'] = array('in',implode(',',array_column($planlist,'id')));
         	$order = 'plan_id DESC';
         }
-        if ($status != '') {
+        if (!empty($status)) {
             $where['status'] = $status;
         }
-		if($sn != ''){
+		if(!empty($sn)){
 			$where['order_sn'] = $sn;
 		}
-		if(!empty($product_id)){
+		if(!empty($product_id)){ 
 			$where['product_id'] = $product_id;
 		}
 		$user = M('User')->where(array('status'=>'1','cid'=>$uinfo['cid']))->field('id,nickname')->select();
@@ -91,12 +101,15 @@ class OrderController extends Base{
 		//统计数量和金额
 		$info['num'] = $db->where($where)->sum('number');
 		$info['money'] = $db->where($where)->sum('money');
+		
+		$export_url = U('Home/Order/public_export_order',$export_map);
 		$this->assign('data',$list)
 			->assign('page',$show)
 			->assign('where',$where)
 			->assign('user',$user)
 			->assign('info',$info)
 			->assign('product',$product)
+			->assign('export_url',$export_url)
 			->display();
 	}
 	/**
@@ -644,6 +657,95 @@ class OrderController extends Base{
 			}
 		}
 		$this->assign('data',$data)->assign('area',$area)->assign('pinfo',$pinfo)->display();
+	}
+	//订单导出 最多导出一个月的数据
+	function public_export_order() {
+		$start_time = I('start_time');
+	    $end_time = I('end_time');
+
+	    if(empty($start_time) || empty($end_time)){
+	    	$this->error("亲，先查询要导出的数据...");
+	    }
+	    $user_id = I('user');
+        $product_id = I('product');
+        $datetype = I('datetype');
+        $status = I('status');
+        $sn = I('sn');
+        //限制导出时间范围不能超过60天
+        $check_day = timediff($start_time,$end_time);
+        if($check_day['day'] > '31'){
+        	$this->error("亲，一次最多只能导出31天的数据....");
+        }
+	    if(!empty($user_id)){
+        	$where['user_id'] = $user_id;
+        }
+        if($datetype == '1'){
+        	if (!empty($start_time) && !empty($end_time)) {
+	            $start_time = strtotime($start_time);
+	            $end_time = strtotime($end_time) + 86399;
+	            $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+	        }else{
+	        	//查询时间段为空时默认查询未过期的订单
+	        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
+	        }
+	        $order = 'createtime DESC';
+        }elseif($datetype == '2' && !empty($start_time) && !empty($end_time)){
+        	//查询一段时间内所有演出计划,时间段 不超过三十天
+        	$day = timediff($start_time,$end_time);
+        	if($day['day'] < 0 || $day['day'] > 60){
+        		$this->error("根据演出日期查询时最多可查询60天的数据...");
+        	}
+        	$start_time = strtotime($start_time);
+	        $end_time = strtotime($end_time);
+	        $plantime = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        	$planlist = M('Plan')->where(['plantime'=>$plantime,'status'=>['in','2,3,4']])->field('id')->select();
+        	$where['plan_id'] = array('in',implode(',',array_column($planlist,'id')));
+        	$order = 'plan_id DESC';
+        }
+        if (!empty($status)) {
+            $where['status'] = $status;
+        }
+		if(!empty($sn)){
+			$where['order_sn'] = $sn;
+		}
+		if(!empty($product_id)){ 
+			$where['product_id'] = $product_id;
+		}
+		$uinfo = Partner::getInstance()->getInfo();
+
+        if($uinfo['groupid'] == '3'){
+        	$where['channel_id'] =	$uinfo['cid'];
+        }else{
+        	$where['channel_id'] =	array(in,$this->get_channel());
+        }
+		$list = M('Order')->where($where)->field('order_sn,addsid,number,money,product_id,plan_id,user_id,status,createtime,type')->select();
+		foreach ($list as $k => $v) {
+   			$data[] = array(
+   				'sn'		=>	$v['order_sn'],
+   				'scena'		=>	addsid($v['addsid'],1).'('.channel_type($v['type'],1).')',
+   				'product'	=>	product_name($v['product_id'],1),
+   				'plan'		=>	planShow($v['plan_id'],2,1),
+	   			'number'	=>	$v['number'],
+	   			'money'		=>	$v['money'],
+	   			'user'		=>	userName($v['user_id'],1,1),
+	   			'status'	=>	order_status($v['status'],1),
+	   			'datetime'	=>	date('Y-m-d H:i:s',$v['createtime']),
+	   		);
+   		}
+   		$headArr = array(
+   			'sn'		=>	'订单号',
+   			'scena'		=>	'场景(类型)',
+   			'product'	=>	'产品名称',
+   			'plan'		=>	'所属计划',
+   			'number'	=>	'数量',
+   			'money'		=>	'金额',
+   			'user'		=>	'下单人',
+   			'status'	=>	'状态',
+   			'datetime'	=>	'操作时间',
+   		);//dump($data);
+   		$filename = "订单记录";
+   		return \Libs\Service\Exports::getExcel($filename,$headArr,$data);
+   		exit;
 	}
 	//添加身份证
 	function upidcard(){
