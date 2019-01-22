@@ -11,6 +11,11 @@
     <label>至</label>
     <input type="text" size="11" name="endtime" data-toggle="datepicker"  value="{$endtime}">
     &nbsp;
+    <select class="required" name="type" data-toggle="selectpicker">
+      <option value="1" <if condition="$type eq '1'">selected</if>>明细</option>
+      <option value="2" <if condition="$type eq '2'">selected</if>>汇总</option>
+    </select>
+    &nbsp;
     <button type="submit" class="btn-default" data-icon="search">查询</button>&nbsp;
     <a class="btn btn-orange" href="javascript:;" data-toggle="reloadsearch" data-clear-query="true" data-icon="undo">清空查询</a>
     <div class="pull-right">
@@ -32,6 +37,7 @@
     <span class="pull-left mb10">统计日期：{$starttime}-{$endtime}</span>
     <span class="pull-right mb10">打印时间:<?php echo date('Y年m月d日 H:i:s');?></span>
   </div>
+  <if condition="$type eq '1'">
 	<table class="table table-bordered w900">
 	<tbody>
     <tr>
@@ -42,7 +48,7 @@
       <th align="center" width="70px">小计</th>
       <th align="center" width="170px">备注</th>
     </tr>
-  <volist name="data" id="vo">
+    <volist name="data" id="vo">
     <tr class="subtotal" data-money="{$vo.money}">
       <td align="center" rowspan="7">{$i}</td>
       <td rowspan="7">{$vo.plan|planShow}</td>
@@ -75,7 +81,7 @@
       <td>其它</td>
       <td align="right">{$vo.unknown|format_money}</td>
     </tr>
-  </volist>
+    </volist>
     <tr>
       <td></td>
       <td></td>
@@ -86,6 +92,61 @@
     </tr>
 	  </tbody>
 	</table>
+  </if>
+  <if condition="$type eq '2'">
+    <table class="table table-bordered w900">
+      <tbody>
+      <tr>
+        <th align="center" width="20px">编号</th>
+        <th align="center" width="160px">日期范围</th>
+        <th align="center" width="60px">支付类型</th>
+        <th align="center" width="70px">金额</th>
+        <th align="center" width="70px">小计</th>
+        <th align="center" width="170px">备注</th>
+      </tr>
+      <tr class="subtotal" data-money="{$data.money}">
+        <td align="center" rowspan="7">{$i}</td>
+        <td rowspan="7">{$starttime}至{$endtime}</td>
+        <td>现金</td>
+        <td align="right">{$data.cash|format_money}</td>
+        <td align="right" rowspan="7">{$data.money|format_money}</td>
+        <td align="center" rowspan="7"></td>
+      </tr>
+      <tr>
+        <td>授信额</td>
+        <td align="right">{$data.difference|format_money}</td>
+      </tr>
+      <tr>
+        <td>签单</td>
+        <td align="right">{$data.sign|format_money}</td>
+      </tr>
+      <tr>
+        <td>划卡</td>
+        <td align="right">{$data.stamp|format_money}</td>
+      </tr>
+      <tr>
+        <td>支付宝</td>
+        <td align="right">{$data.alipay|format_money}</td>
+      </tr>
+      <tr>
+        <td>微信支付</td>
+        <td align="right">{$data.wxpay|format_money}</td>
+      </tr>
+      <tr>
+        <td>其它</td>
+        <td align="right">{$data.unknown|format_money}</td>
+      </tr>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td align="right"><strong>合计:</strong></td>
+        <td id="sub-source-money" align="right">0.00</td>
+        <td ></td>
+      </tr>
+      </tbody>
+    </table>
+  </if>
 </div>
 <div class="bjui-pageFooter">
     <ul>

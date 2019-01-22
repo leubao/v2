@@ -90,6 +90,9 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		if((int)$pinfo['type'] === 7){
+	 			//限时秒杀
+	 		}
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);

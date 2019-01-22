@@ -1000,43 +1000,84 @@ class ItemReport{
  	/**
  	 * 资金来源汇总
  	 * @param  array $param 待处理的数据包
+ 	 * @param $type  1明细 2汇总
  	 * @return [type]       [description]
  	 * 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡 
  	 */
- 	function source_cash($list){
- 		foreach ($list as $k => $v) {
- 			$return[$v['plan_id']]['plan'] = $v['plan_id'];
- 			$return[$v['plan_id']]['money'] += $v['moneys'];
-			switch ($v['pay']) {
- 				case '1':
- 					//现金
- 					$return[$v['plan_id']]['cash'] +=  $v['moneys'];
- 					break;
- 				case '2':
- 					//余额
- 					$return[$v['plan_id']]['difference'] +=  $v['moneys'];
- 					break;
- 				case '3':
- 					//签单
- 					$return[$v['plan_id']]['sign'] +=  $v['moneys'];
- 					break;
- 				case '4':
- 					//支付宝
- 					$return[$v['plan_id']]['alipay'] +=  $v['moneys'];
- 					break;
- 				case '5':
- 					//微信支付
- 					$return[$v['plan_id']]['wxpay'] +=  $v['moneys'];
- 					break;
- 				case '6':
- 					//划卡
- 					$return[$v['plan_id']]['stamp'] +=  $v['moneys'];
- 					break;
- 				default:
- 					//未知
- 					$return[$v['plan_id']]['unknown'] +=  $v['moneys'];
- 					break;
- 			}
+ 	function source_cash($list, $type){
+ 		$return = [];
+ 		//明细
+ 		if((int)$type === 1){
+			foreach ($list as $k => $v) {
+	 			$return[$v['plan_id']]['plan'] = $v['plan_id'];
+	 			$return[$v['plan_id']]['money'] += $v['moneys'];
+				switch ($v['pay']) {
+	 				case '1':
+	 					//现金
+	 					$return[$v['plan_id']]['cash'] +=  $v['moneys'];
+	 					break;
+	 				case '2':
+	 					//余额
+	 					$return[$v['plan_id']]['difference'] +=  $v['moneys'];
+	 					break;
+	 				case '3':
+	 					//签单
+	 					$return[$v['plan_id']]['sign'] +=  $v['moneys'];
+	 					break;
+	 				case '4':
+	 					//支付宝
+	 					$return[$v['plan_id']]['alipay'] +=  $v['moneys'];
+	 					break;
+	 				case '5':
+	 					//微信支付
+	 					$return[$v['plan_id']]['wxpay'] +=  $v['moneys'];
+	 					break;
+	 				case '6':
+	 					//划卡
+	 					$return[$v['plan_id']]['stamp'] +=  $v['moneys'];
+	 					break;
+	 				default:
+	 					//未知
+	 					$return[$v['plan_id']]['unknown'] +=  $v['moneys'];
+	 					break;
+	 			}
+	 		}
+ 		}
+ 		if((int)$type === 2){
+			//汇总
+	 		foreach ($list as $k => $v) {
+	 			$return['money'] += $v['moneys'];
+	 			switch ($v['pay']) {
+	 				case '1':
+	 					//现金
+	 					$return['cash'] +=  $v['moneys'];
+	 					break;
+	 				case '2':
+	 					//余额
+	 					$return['difference'] +=  $v['moneys'];
+	 					break;
+	 				case '3':
+	 					//签单
+	 					$return['sign'] +=  $v['moneys'];
+	 					break;
+	 				case '4':
+	 					//支付宝
+	 					$return['alipay'] +=  $v['moneys'];
+	 					break;
+	 				case '5':
+	 					//微信支付
+	 					$return['wxpay'] +=  $v['moneys'];
+	 					break;
+	 				case '6':
+	 					//划卡
+	 					$return['stamp'] +=  $v['moneys'];
+	 					break;
+	 				default:
+	 					//未知
+	 					$return['unknown'] +=  $v['moneys'];
+	 					break;
+	 			}
+	 		}
  		}
  		return $return;
  	}

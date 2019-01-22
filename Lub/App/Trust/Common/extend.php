@@ -26,3 +26,4 @@ function showReturnCode($status = false, $code = '1002', $data = [], $count = ''
     //return json_encode($return_data);
     return json($return_data);
 }
+/**/

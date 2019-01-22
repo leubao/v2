@@ -504,8 +504,9 @@ class FinancialController extends ManageBase{
 	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
 	    $plan_id = I('plan_id');
 		$plan_name = I('plan_name');
+		$type = I('type') ? I('type') : 1;
 		$this->assign('starttime',$starttime ? $starttime : $endtime)
-        	->assign('endtime',$endtime)->assign('plan_id',$plan_id)
+        	->assign('endtime',$endtime)->assign('plan_id',$plan_id)->assign('type', $type)
         	->assign('plan_name',$plan_name);
         if (!empty($starttime) && !empty($endtime)) {
             $starttime = date("Ymd",strtotime($starttime));
@@ -521,7 +522,7 @@ class FinancialController extends ManageBase{
 		$map['product_id'] = get_product('id');
 		$db = D('ReportData');
 		$list = $db->where($map)->field('id,plan_id,pay,moneys')->select();
-		$data = Report::source_cash($list);
+		$data = Report::source_cash($list, (int)$type);//dump($data);
 		$this->assign('data',$data)->assign('map',$map)->assign('product_id',$map['product_id'])->display();
 	}
 	/**
