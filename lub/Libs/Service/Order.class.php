@@ -333,13 +333,12 @@ class Order extends \Libs\System\Service {
 		}
 	}
 	/**************************************************窗口订单****************************************************/
-	/*快捷售票
-	*数据处理
+	/*快捷售票 数据处理
 	*@apram $pinfo array 数据
 	*@param $scena int 场景 1窗口2渠道版3网站4微信5api
 	*@param $uinfo array 当前用户信息
 	*/
-	public function quick($pinfo,$scena,$uinfo = null){
+	public function quick($pinfo, $scena, $uinfo = null){
 		if(empty($pinfo) || empty($scena)){
 			$this->error = '400001 : 数据传递失败,请重试...';
 			return false;
@@ -347,13 +346,12 @@ class Order extends \Libs\System\Service {
 		$info = json_decode($pinfo,true);
 		if(empty($info)){$this->error = '400002 : 部分数据丢失,解析失败...';return false;}
 		//获取订单初始数据
-		$scena = Order::is_scena($scena,$info['param'][0]['is_pay']);
-		//判断是否选择的是微信或支付宝刷卡支付
-		//1现金2余额3签单4支付宝5微信支付6划卡
+		$scena = Order::is_scena($scena, $info['param'][0]['is_pay']);
+		
+		//判断是否选择的是微信或支付宝刷卡支付 1现金2余额3签单4支付宝5微信支付6划卡
 		if(in_array($info['param'][0]['is_pay'],array('4','5'))){$is_seat = '2';}else{$is_seat = '1';}
-		$sn = Order::quick_order($info,$scena,$uinfo,$is_seat);
+		$sn = Order::quick_order($info, $scena, $uinfo, $is_seat);
 		if($sn != false){
-
 			$return = array('sn' => $sn['order_sn'],'act'=>$sn['act'],'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
 			
 			return $return;
@@ -968,7 +966,7 @@ class Order extends \Libs\System\Service {
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
 		//获取订单号 1代表检票方式1人一票2 一团一票
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
-		$sn = get_order_sn($plan['id'],$printtype);
+		$sn = $info['order_sn'] ? $info['order_sn'] : get_order_sn($plan['id'],$printtype);
 
 		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
 		if((int)$seat['num'] > 200){$this->error = "400005 : 单笔订单门票数不能超过200...";return false;}
@@ -1050,6 +1048,7 @@ class Order extends \Libs\System\Service {
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($newData),'remark'=>$info['param'][0]['remark']));
+		
 		if($state && $oinfo){
 			$model->commit();//提交事务
 			//设置订单完结有效期
@@ -2452,7 +2451,7 @@ class Order extends \Libs\System\Service {
 				}
 			}//dump($settlement);
 			//TODO 临时解决散客销售底价结算问题
-			if($v['priceid'] == 468){
+			if($v['priceid'] == 468 || $v['priceid'] == 471){
 				$settlement = 2;
 			}
 			//计算订单金额
@@ -2599,7 +2598,7 @@ class Order extends \Libs\System\Service {
 	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
 	*/
-	private function is_scena($param = null,$is_pay = null){
+	private function is_scena($param = null, $is_pay = null){
 		switch ($param) {
 			case '11':
 				//窗口选座散客
