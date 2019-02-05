@@ -192,11 +192,19 @@
       </table>
       <table id="tabledit2" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
             <thead>
-                <tr data-idname="plan[#index#][id]">
-                    <th title="No."><input type="text" name="plan[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
-                    <th title="开始时间" align="center"><input type="text" name="plan[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
-                    <th title="结束时间" align="center"><input type="text" name="plan[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
-                    <th title="销售配额" align="center"><input type="text" name="plan[#index#][quotas]" data-rule="required" value="{$proconf.quotas}" size="5"></th>
+                <tr data-idname="kill[#index#][id]">
+                    <th title="No."><input type="text" name="kill[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
+                    <th title="开始时间" align="center"><input type="text" name="kill[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
+                    <th title="结束时间" align="center"><input type="text" name="kill[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
+                    <th title="销售配额" align="center"><input type="text" name="kill[#index#][quota]" data-rule="required" value="{$proconf.quota}" size="5"></th>
+                    <th title="秒杀场次" align="center">
+                      <select name="kill[#index#][plan]" class="required" data-toggle="selectpicker" data-rule="required">
+                        <option value="">选择秒杀场次</option>
+                        <volist name="plan" id="pl">
+                        <option value="{$pl.id}">{$pl.title}</option>
+                        </volist>
+                      </select>
+                    </th>
                     <th title="" data-addtool="true" width="100">
                         <a href="javascript:;" class="btn btn-red row-del" data-confirm-msg="确定要删除该行信息吗？">删</a>
                     </th>

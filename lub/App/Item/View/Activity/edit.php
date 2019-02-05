@@ -112,6 +112,37 @@
         </tbody>
       </table>
     </if>
+    <!--秒杀-->
+    <if condition="$data['type'] eq '7'">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+          </tr>
+          <tr>
+            <td>秒杀票型:</td>
+            <td colspan="3"><input type="hidden" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+        </tbody>
+      </table>
+      <table id="tabledit2" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
+            <thead>
+                <tr data-idname="kill[#index#][id]">
+                    <th title="No."><input type="text" name="kill[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
+                    <th title="开始时间" align="center"><input type="text" name="kill[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
+                    <th title="结束时间" align="center"><input type="text" name="kill[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
+                    <th title="销售配额" align="center"><input type="text" name="kill[#index#][quota]" data-rule="required" value="{$proconf.quota}" size="5"></th>
+                    <th title="" data-addtool="true" width="100">
+                        <a href="javascript:;" class="btn btn-red row-del" data-confirm-msg="确定要删除该行信息吗？">删</a>
+                    </th>
+                </tr>
+            </thead>
+            <tbody>
+              
+            </tbody>
+    </table>
+    </if>
   </div>
   <input name="type" value="{$data['type']}" type="hidden">
   <input name="id" value="{$data.id}" type="hidden">

@@ -85,13 +85,20 @@ class ActivityController extends ManageBase{
 	 				'discount' => $pinfo['discount']
 	 			];
 	 		}
+	 		//单场限额
 	 		if($pinfo['type'] == '6'){
-	 			//单场限额
+	 			
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		//限时秒杀
 	 		if((int)$pinfo['type'] === 7){
-	 			//限时秒杀
+	 			if(empty($pinfo['ticket_id']) || empty($pinfo['kill'])){
+	 				$this->erun("新增失败,票型或抢票时间不能为空!");
+	 			}
+	 			$info['tciket'] = $pinfo['ticket_id'];
+	 			$info['number'] = $pinfo['number'];
+	 			$info['rule']	= $pinfo['kill'];
 	 		}
 	 		$param = array(
 	 			'info' =>  $info,
@@ -128,10 +135,22 @@ class ActivityController extends ManageBase{
 				}
 				$prolist = M('Product')->where(['status'=>1])->field('id,name')->select();
 				$printer = D('Printer')->where(['status'=>1,'product'=>$product_id])->field('id,title')->select();
+				/*秒杀增加场次选择*/
+				$plan = D('Plan')->where(['product_id'=>get_product('id'),'status'=>2])->field('id')->select();
+				$list = [];
+				if(!empty($plan)){
+					foreach ($plan as $k => $v) {
+						$list[] = [
+							'id'	=>	$v['id'],
+							'title'	=>	planShow($v['id'],4,1)
+						];
+					}
+				}
 				$this->assign('printer',$printer);
 				$this->assign('prolist',$prolist);
 				$this->assign('product_id',$product_id)
 				     ->assign('pinfo',$pinfo)
+				     ->assign('plan',$list)
 					 ->display();
 			}else{
 				$this->erun('参数错误!');
@@ -158,11 +177,11 @@ class ActivityController extends ManageBase{
 	 			$info['voucher'] = $actinfo['param']['info']['voucher'];
 	 			$info['ticket'] = $actinfo['param']['info']['ticket'];
 	 		}
-	 		//组团销售
-	 		if($pinfo['type'] == '4'){
-	 			$info['number'] = $pinfo['number'];
-	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		//组团销售 单场限额
+	 		if(in_array($pinfo['type'], ['4','6'])){
 	 			
+	 			$info['number'] = $actinfo['param']['info']['number'];
+	 			$info['ticket'] = $actinfo['param']['info']['ticket'];
 	 		}
 	 		$info['scope'] = $scope;//参与范围
 	 		$param = array(
@@ -209,11 +228,21 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
+	 		//限时秒杀
+	 		if((int)$pinfo['type'] === 7){
+	 			if(empty($pinfo['ticket_id']) || empty($pinfo['kill'])){
+	 				$this->erun("新增失败,票型或抢票时间不能为空!");
+	 			}
+	 			$info['tciket'] = $pinfo['ticket_id'];
+	 			$info['number'] = $pinfo['number'];
+	 			$info['rule']	= $pinfo['kill'];
+	 		}
 	 		//开启范围
 	 		if($pinfo['scope']){
 	 			$actinfo = $this->get_activity($pinfo['id']);
 	 			$info['scope'] = $actinfo['param']['info']['scope'];
 	 		}
+
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);
@@ -264,7 +293,15 @@ class ActivityController extends ManageBase{
 	 			//$info['ticket'] = $pinfo['ticket_id'];
 
 	 		}
-
+	 		//限时秒杀
+	 		if((int)$pinfo['type'] === 7){
+	 			if(empty($pinfo['ticket_id']) || empty($pinfo['kill'])){
+	 				$this->erun("新增失败,票型或抢票时间不能为空!");
+	 			}
+	 			$info['tciket'] = $pinfo['ticket_id'];
+	 			$info['number'] = $pinfo['number'];
+	 			$info['rule']	= $pinfo['kill'];
+	 		}
 	 		//dump($info);
 	 		$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
 			$this->assign('printer',$printer);
@@ -350,6 +387,25 @@ class ActivityController extends ManageBase{
 				->assign('ginfo',$ginfo)
 				->assign('area',$ginfo['area'])
 				->display();
+	}
+	//获取当前可售场次
+	public function public_get_sales_plan()
+	{
+		$plan = D('Plan')->where(['product_id'=>get_product('id'),'status'=>2])->field('id')->select();
+		$list = [];
+		if(!empty($plan)){
+			foreach ($plan as $k => $v) {
+				$list[] = [
+					'id'	=>	$v['id'],
+					'title'	=>	planShow($v['id'],4,1)
+				];
+			}
+		}
+		$return = array(
+			'statusCode'=>'200',
+			'plan' => $list,
+		);
+		die(json_encode($return));
 	}
 	 //优惠券
 	 //新增优惠券
