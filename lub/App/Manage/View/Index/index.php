@@ -9,13 +9,13 @@
 <title>{$Config.company} - 云鹿运营管理平台 v3.0.1</title>
 <link rel="apple-touch-icon" href="{$config_siteurl}static/images/favicon.ico">
 <link rel="icon" href="{$config_siteurl}static/images/favicon.ico">
-<Managetemplate file="Common/cssjs"/>
+<Managetemplate file="Common/host_cssjs"/>
 <!-- init -->
 <script type="text/javascript">
 $(function() {
     BJUI.init({
-        JSPATH       : '//static.leubao.com/bjui/',         //[可选]框架路径
-        PLUGINPATH   : '//static.leubao.com/bjui/plugins/', //[可选]插件路径
+        JSPATH       : '//ticket.leubao.com/static/bjui/',         //[可选]框架路径
+        PLUGINPATH   : '//ticket.leubao.com/static/bjui/plugins/', //[可选]插件路径
         loginInfo    : {url:'{:U('Manage/Index/login_time');}', title:'登录', width:400, height:200}, // 会话超时后弹出登录对话框
         statusCode   : {ok:200, error:300, timeout:301}, //[可选]
         ajaxTimeout  : 15000, //[可选]全局Ajax请求超时时间(毫秒)
@@ -28,7 +28,7 @@ $(function() {
                          clientPaging     : true, //[可选]是否在客户端响应分页及排序参数
                          overwriteHomeTab : true //[可选]当打开一个未定义id的navtab时，是否可以覆盖主navtab(我的主页)
                        },
-        debug        : false,    // [可选]调试模式 [true|false，默认false]
+        debug        : true,    // [可选]调试模式 [true|false，默认false]
         theme        : 'blue' // 若有Cookie['bjui_theme'],优先选择Cookie['bjui_theme']。皮肤[五种皮肤:default, orange, purple, blue, red, green]
     })
     // main - menu
@@ -63,13 +63,11 @@ $(function() {
             options.onClose  = onClose
             options.onSwitch = onSwitch
             if (!options.title) options.title = $a.text()
-            
             if (!options.target)
                 $a.navtab(options)
             else
                 $a.dialog(options)
         }
-        
         e.preventDefault()
     })
 })
@@ -91,8 +89,8 @@ function MainMenuClick(event, treeId, treeNode) {
 </head>
 <body> 
 <!--[if lte IE 7]>
-        <div id="errorie"><div>您还在使用老掉牙的IE，正常使用系统前请升级您的浏览器到 IE8以上版本 <a target="_blank" href="http://windows.microsoft.com/zh-cn/internet-explorer/ie-8-worldwide-languages">点击升级</a>&nbsp;&nbsp;强烈建议您更改换浏览器：<a href="http://down.tech.sina.com.cn/content/40975.html" target="_blank">谷歌 Chrome</a></div></div>
-    <![endif]-->
+  <div id="errorie"><div>您还在使用老掉牙的IE，正常使用系统前请升级您的浏览器到 IE8以上版本 <a target="_blank" href="http://windows.microsoft.com/zh-cn/internet-explorer/ie-8-worldwide-languages">点击升级</a>&nbsp;&nbsp;强烈建议您更改换浏览器：<a href="http://down.tech.sina.com.cn/content/40975.html" target="_blank">谷歌 Chrome</a></div></div>
+<![endif]-->
 <div id="bjui-window">
   <header id="bjui-header">
     <nav id="bjui-hnav-navbar-box" class='navbar navbar-inverse navbar-fixed-top'>
@@ -203,9 +201,5 @@ function prompt(){
     },
   });
 }
-/*长时间未操作系统自动退出
-$(window).keyup( function(event){
-  $("body").append( "<br>你按下并释放的按键的代码值为:[" + event.which + ']' ) ;
-} );*/
 </script>
 </html>

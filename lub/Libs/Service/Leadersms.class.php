@@ -16,7 +16,7 @@ class Leadersms extends \Libs\System\Service {
   * @Author   zhoujing      <zhoujing@leubao.com>
   * @DateTime 2018-07-20
   * @param    array        $plan                 销售计划
-  * @param    int       $type                 1场次结束后统一发送2T+1推送
+  * @param    int       $type                 1场次结束后统一发送2T+1推送3定时推送
   * @param    array     $param   其它辅助参数
   * @return   [type]                              [description]
   */
@@ -38,7 +38,7 @@ class Leadersms extends \Libs\System\Service {
         case '2':
           //景区 T+1发送
           if($type == 2){
-            $channel = Leadersms::channel($plan['plan_id']);
+            $channel = Leadersms::channel($plan['id']);
             $where = array('status'=>array('in','2,99'),'plan_id'=>array('in',$plan['plan_id']));
             $start = '2';
           }else{
@@ -46,6 +46,8 @@ class Leadersms extends \Libs\System\Service {
             $where = array('status'=>array('in','2,99'),'plan_id'=>$plan['id']);
             $start = '1';
           }
+          $ids = $plan['id'];
+          $table = 'Scenic';
           $type = '10';
           break;
         case '3':
@@ -53,36 +55,44 @@ class Leadersms extends \Libs\System\Service {
           $db = M('Plan');
           $counts = $db->where(array('plantime'=>$plan['plantime'],'status'=>'2','product_id'=>$plan['product_id']))->count();
           if($counts == '0'){
-            //拉取当日计划集合
-            $planList = $db->where(array('plantime'=>$plan['plantime'],'product_id'=>$plan['product_id']))->field('id')->select();
-            $ids = arr2string($planList,'id');
+            if($type == 2){
+              $ids = $plan['id'];
+              $start = '2';
+            }else{
+              //拉取当日计划集合
+              $planList = $db->where(array('plantime'=>$plan['plantime'],'product_id'=>$plan['product_id']))->field('id')->select();
+              $ids = arr2string($planList,'id');
+              $start = '1';
+            }
             //漂流
             $channel = Leadersms::channel($ids);
             $where = array('status'=>array('in','2,99'),'plan_id'=>array('in',$ids));
             $type = '10';
-            $start = '1';
+            $table = 'Drifting';
           }
           break;
       }
+      
       if($start == '1'){
-          $count = M(ucwords($plan['seat_table']))->where($where)->count();
+          //$count = M(ucwords($plan['seat_table']))->where($where)->count();
+          $count = M('Order')->where(array('plan_id'=>array('in',$ids),'status'=>array('in','1,7,9')))->sum('number');
           //获取所有票型
          if($count != 0){
           //获取发送人列表
           $list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
           foreach ($list as $ke => $valu) {
-              $info = array('phone'=>$valu['phone'],'title'=>planShows($plan['id']),'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($plan['product_id'],1));
+              $info = array('phone'=>$valu['phone'],'title'=>planShows($plan['id']),'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($plan['product_id'],1));dump($info);
                 Sms::order_msg($info,$type);
            }
          }
       }
       if($start == '2'){
-        $count = M('Scenic')->where($where)->count();
+        $count = M('Order')->where(array('plan_id'=>array('in',$ids),'status'=>array('in','1,7,9')))->sum('number');
         if($count != 0){
           $list = M('LeaderSms')->where(array('status'=> array('in','1,3')))->field('id,name,phone')->select();
 
           foreach ($list as $ke => $valu) {
-              $info = array('phone'=>$valu['phone'],'title'=>$param['day'],'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($param['product_id'],1));
+              $info = array('phone'=>$valu['phone'],'title'=>$param['day'],'num'=>$count,'area'=>$area,'channel'=>$channel,'product'=>productName($plan['product_id'],1));dump($info);
                 Sms::order_msg($info,$type);
            }
         }

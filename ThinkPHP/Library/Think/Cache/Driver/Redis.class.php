@@ -35,7 +35,6 @@ class Redis extends Cache
             'timeout'    => C('DATA_CACHE_TIMEOUT') ?: false,
             'persistent' => false,
         ), $options);
-
         $this->options           = $options;
         $this->options['expire'] = isset($options['expire']) ? $options['expire'] : C('DATA_CACHE_TIME');
         $this->options['prefix'] = isset($options['prefix']) ? $options['prefix'] : C('DATA_CACHE_PREFIX');

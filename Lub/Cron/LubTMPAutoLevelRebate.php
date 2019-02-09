@@ -14,14 +14,42 @@ class LubTMPAutoLevelRebate {
     public function run($cronId) {
     	//默认计算当天的订单
         $datetime= date('Ymd',strtotime("-1 day"));
-        /*
-        $date = $this->getDateFromRange('2018-06-01','2018-07-04');
+        /**/
+        $date = getDateFromRange('2018-10-09','2018-10-11');
         foreach ($date as $k => $v) {
-            //$this->rebate($v);
+            $this->rebate($v);
             //$this->report($v,2);
-           // dump($v);
-        }*/
-        $this->rebate($datetime);
+            dump($v);
+        }
+        /*
+        $info = D('Item/Order')->where(['order_sn'=>'81010154784904'])->relation(true)->find();
+        $ticketType = F('TicketType'.$info['product_id']);
+        $cid = money_map($info['channel_id']);
+        dump($cid);*/
+        /*
+        $wher = [
+            'id' => ['in','81010154607567,81010154784904']
+        ];
+        $list = D('Item/TeamOrder')->where($wher)->field('id')->delete();*/
+        //dump($list);
+        //load_redis('lupsh','level_rebate', value, time)
+        //$this->rebate($datetime);
+        //$this->rebates();
+    }
+    //批量返佣
+    public function rebates()
+    {
+        $map = array(
+            'id'    => ['gt',30000],
+            'status'=>array('neq','4'),
+        );
+        $list = M('TeamOrder')->where($map)->limit(200)->select();
+        
+        /*按订单返佣*/
+        foreach ($list as $key => $value) {
+           $info[$key] = Rebate::rebate($value,1);
+        }
+        dump($info);
     }
     //批量重置报表
     public function report($datetime,$type = 1)
@@ -49,7 +77,6 @@ class LubTMPAutoLevelRebate {
             }else{
                 echo '已生成';
             }
-            
             
         }
     }
@@ -112,7 +139,10 @@ class LubTMPAutoLevelRebate {
                         
                     }
                 }  
-            }/*
+            }
+            dump(count($teamData));
+            dump($teamData);
+            /*
             $map = array(
                 'plan_id' => ['in',array_column($plan,'id')],
                 'status'  => array('neq','4'),
@@ -128,7 +158,7 @@ class LubTMPAutoLevelRebate {
             dump($info);*/
         }
        
-        /* */ 
+        /*
         if(!empty($teamData)){
             $status = $model->addAll($teamData);
             if($status){
@@ -137,30 +167,7 @@ class LubTMPAutoLevelRebate {
                 //load_redis('lpush','Error_PreOrder',$info['order_sn'].'E1');
                 return false;
             }
-        }
+        }*/
         
-    }
-    /**
-     * 获取指定日期段内每一天的日期
-     * @param  Date  $startdate 开始日期
-     * @param  Date  $enddate   结束日期
-     * @return Array
-     */
-    function getDateFromRange($startdate, $enddate){
-
-        $stimestamp = strtotime($startdate);
-        $etimestamp = strtotime($enddate);
-
-        // 计算日期段内有多少天
-        $days = ($etimestamp-$stimestamp)/86400+1;
-
-        // 保存每天日期
-        $date = array();
-
-        for($i=0; $i<$days; $i++){
-            $date[] = date('Ymd', $stimestamp+(86400*$i));
-        }
-
-        return $date;
     }
 }

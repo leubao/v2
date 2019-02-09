@@ -47,22 +47,21 @@ class LubTMPAutoRefund {
 
 
     function autorefund(){
-        //读取当天所有销售计划，查询出未取票的订单，开始退票
+        /*读取当天所有销售计划，查询出未取票的订单，开始退票
         $datetime = strtotime(date('Ymd'));
         $where = ['plantime'=>$datetime,'status'=>4];
+        $plan = M('Plan')->where($where)->field('id')->select();*/
+        $datetime = strtotime(date('Ymd',strtotime("-1 day")));
+        $where = ['plantime'=>$datetime,'status'=>4];
         $plan = M('Plan')->where($where)->field('id')->select();
-        if(empty($plan)){
-            $datetime = strtotime(date('Ymd',strtotime("-1 day")));
-            $where = ['plantime'=>$datetime,'status'=>4];
-            $plan = M('Plan')->where($where)->field('id')->select(); 
-        }
         if(!empty($plan)){
-            $plan_id = array('in',implode(',',array_column($plan,'id')));
+            $plan_id = implode(',',array_column($plan,'id'));
             $map = [
                 'plan_id' => ['in',$plan_id],
                 'status'  => 1
             ];
             $orderList = D('Order')->where($map)->field('order_sn as sn')->select();
+  
             if(!empty($orderList)){
                 foreach ($orderList as $key => $v) {
                     //整单退票

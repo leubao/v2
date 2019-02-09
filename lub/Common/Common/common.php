@@ -490,6 +490,30 @@ function timediff($begin_time,$end_time,$type = 'all') {
     }
     return $res;
 }
+/**
+ * 获取开始日期与结束日期之间所有日期
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2019-01-30T16:19:59+0800
+ * @param    string                   $startdate            开始时间
+ * @param    string                   $enddate              结束时间
+ * @return   array 
+ */
+function getDateFromRange($startdate, $enddate){
+    $stimestamp = strtotime($startdate);
+    $etimestamp = strtotime($enddate);
+
+    // 计算日期段内有多少天
+    $days = ($etimestamp-$stimestamp)/86400+1;
+
+    // 保存每天日期
+    $date = array();
+
+    for($i=0; $i<$days; $i++){
+        $date[] = date('Y-m-d', $stimestamp+(86400*$i));
+    }
+
+    return $date;
+}
 /*二维数组转字符串
 * @param array $arr 待处理的数组
 * @param string $field 字段

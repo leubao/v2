@@ -18,9 +18,11 @@ class GoodsModel extends Model{
     /**
 	 * 更新缓存
 	 */
-	function goods_cache($proid){
-	 	$productId = $proid ? $proid : get_product('id');	 	
-	 	$data = $this->where(array('product_id'=>array('find_in_set',$productId),'status'=>1))->field('id,title,price,discount,rebate,scene')->select();
+	function goods_cache($proid = ''){
+	 	$productId = $proid ? $proid : get_product('id');
+        $where['status'] = 1;
+        $where['_string'] = 'FIND_IN_SET('."'$productId'".',product)'; 	
+	 	$data = $this->where($where)->field('id,title,price,discount,rebate,scene')->select();
         if (empty($data)) {
             return false;
         }
@@ -29,7 +31,6 @@ class GoodsModel extends Model{
         	//缓存当前产品的小商品
         	$cache[$rs['id']] = $rs;
         }
-        //cache('TicketType'.$productId, $cache);
         F('Goods_'.$productId, $cache);
         return true;
 	}
