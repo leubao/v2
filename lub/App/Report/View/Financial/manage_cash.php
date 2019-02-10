@@ -1,7 +1,7 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageHeader">
 <!--Page -->
-<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Report/Financial/index',array('menuid'=>$menuid));}" method="post">
+<form id="pagerForm" data-toggle="ajaxsearch" action="{:U('Report/Financial/manage_cash',array('menuid'=>$menuid));}" method="post">
   <input type="hidden" name="pageSize" value="{$numPerPage}">             
   <input type="hidden" name="pageCurrent" value="{$currentPage}">
   <!--条件检索 s--> 

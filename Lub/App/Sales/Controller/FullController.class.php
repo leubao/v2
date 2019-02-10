@@ -140,23 +140,8 @@ class FullController extends ManageBase{
     		$this->erun("参数错误!");
     	}
     	
-        $base64_image_content = get_up_fxqr($ginfo['id'],$this->pid);
+        $base64_image_content = get_up_fxqr($ginfo['id'], get_product('id'));
     	$this->assign('qr',$base64_image_content)->assign('id',$ginfo['id'])->display();
-        /*
-        import('Libs.Util.FileToZip');//引入zip下载类文件FileToZip
-        // 打包下载
-        $handler = opendir($image_file); //$cur_file 文件所在目录
-        dump($handler);
-        $download_file = array();
-        $i = 0;
-        while( ($filename = readdir($handler)) !== false ) {
-         if($filename != '.' && $filename != '..') {
-            $download_file[$i++] = $filename;
-         }
-        }
-        closedir($handler);
-        $scandir    =   new traverseDir($cur_file,$save_path); //$save_path zip包文件目录
-        $scandir->tozip($download_file);*/
     }
     /**
      * 编辑

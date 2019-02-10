@@ -154,7 +154,6 @@ layui.use(['form','layer'], function(){
   });
   //监听提交
   form.on('submit(active-submit)', function(data){
-    //layer.msg(JSON.stringify(data.field));
     $.ajax({
       type:'POST',
       url:"<?php echo U('Wechat/activity/killorder');?>",

@@ -1666,7 +1666,7 @@ class Order extends \Libs\System\Service {
 			
 			//判断活动属性 todo 读取活动属性
 			if(!empty($oInfo['param'][0]['activity'])){
-				$actInfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('real,param')->find();
+				$actInfo = D('Activity')->where(['id'=>$oInfo['param'][0]['activity']])->field('real,param')->find();
 				$actParam = json_decode($actInfo['param'],true);
 				if($actInfo['real'] && $actParam['info']['voucher'] == 'card'){
 					$is_print = 1;
