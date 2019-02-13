@@ -8,7 +8,7 @@ use Payment\HelperContext;
 /**
  * @author: helei
  * @createTime: 2017-09-02 18:20
- * @description: 招商银行的辅助类
+ * @description: 招商、建设银行的辅助类
  * @link      https://www.gitbook.com/book/helei112g1/payment-sdk/details
  * @link      https://helei112g.github.io/
  *
@@ -20,6 +20,7 @@ class Helper
     private static $supportChannel = [
         Config::CMB_BIND,// 招商绑卡操作
         Config::CMB_PUB_KEY,// 招商公钥查询操作
+        Config::CCB_PUB_SIGN,//建设银行验证签名
     ];
 
     /**

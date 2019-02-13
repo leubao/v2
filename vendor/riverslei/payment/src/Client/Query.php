@@ -30,6 +30,9 @@ class Query
 
         Config::CMB_CHARGE,
         Config::CMB_REFUND,
+
+        Config::CCB_CHARGE,
+        Config::CCB_REFUND,
     ];
 
     /**

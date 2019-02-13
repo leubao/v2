@@ -5,6 +5,7 @@ use Payment\Common\BaseStrategy;
 use Payment\Common\PayException;
 use Payment\Helper\Cmb\BindCardHelper;
 use Payment\Helper\Cmb\PubKeyHelper;
+use Payment\Helper\Ccb\PubSignHelper;
 
 /**
  * 用于完成一些辅助操作，例如： 招商绑卡  操作
@@ -38,8 +39,11 @@ class HelperContext
                 case Config::CMB_PUB_KEY:
                     $this->helper = new PubKeyHelper($config);
                     break;
+                case Config::CCB_PUB_SIGN:
+                    $this->helper = new PubSignHelper($config);
+                    break;
                 default:
-                    throw new PayException('当前仅支持：CMB_BIND CMB_PUB_KEY 操作');
+                    throw new PayException('当前仅支持：CMB_BIND CMB_PUB_KEY  CCB_PUB_SIGN 操作');
             }
         } catch (PayException $e) {
             throw $e;
