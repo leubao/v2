@@ -60,7 +60,7 @@
     <tbody id="cash-list">
       <volist name="data" id="vo">
       <tr data-id="{$vo.id}" data-money="{$vo.money}">
-        <td align="center"><a data-toggle="dialog" href="{:U('Sales/Cashback/public_cashinfo',array('sn'=>$vo['sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.sn}</a></td>
+        <td align="center"><a data-toggle="dialog" href="{:U('Sales/Cashback/public_cashinfo',array('sn'=>$vo['sn']))}"  data-id="orderinfo" data-width="920" data-height="600" data-title="订单详情">{$vo.sn}</a></td>
         <td align="center">{$vo['user_id']|userName}</td>
         <td align="center">{$vo['datetime']}</td>
         <td align="right">{$vo.money}</td>

@@ -240,6 +240,7 @@ class FinancialController extends ManageBase{
 		if(IS_POST){
 			$pinfo = I('post.');
 			$starttime = strtotime($pinfo['starttime']);
+
 	        $endtime = $starttime  + 86399;
 	        $work = I('work') ? I('work') : '1';
 	    	$map = array(
@@ -258,7 +259,7 @@ class FinancialController extends ManageBase{
 				$map['user_id'] = $pinfo['user'];
 	        }
 	    	//获取订单
-			$list = Report::strip_order($map,date('Ymd',strtotime($pinfo['starttime'])),2);
+			$list = Report::strip_order($map,date('Ymd',$starttime),2);
 			//构造报表生成数据
 			$list = Report::operator($list);
 			$list = Report::day_fold($list,$work);
@@ -302,7 +303,7 @@ class FinancialController extends ManageBase{
 		$access = M('Access')->where(array('controller' => 'Work', 'action'=>array('in','quick,per_window,seatpost')))->field('role_id')->select();
 		//根据角色找人
 		$map = array('status'=>1,'is_scene'=>1,'role_id'=>array('in',implode(',',array_unique(explode(',',arr2string($access,'role_id'))))));
-		$user = M('User')->where($map)->field('id,nickname')->select();
+		$user = M('User')->where($map)->field('id,nickname')->cache('conductor',1800)->select();
 		$this->assign('user',$user)->assign('starttime',$pinfo['starttime'])
 			->assign('product_id',get_product('id'))
 			->assign('empty','<span class="empty">没有数据</span>')

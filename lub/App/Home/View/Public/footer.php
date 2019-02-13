@@ -13,7 +13,7 @@
     </div>
   </div>
   <!-- /.modal --> 
-<script src="{$config_siteurl}static/js/layer.js"></script>
+<script src="{$config_siteurl}static/layer/layer.js"></script>
 <script src="{$config_siteurl}static/home/js/common.js?=<?php echo  rand(100,999);?>"></script>
 <script>
 //弹窗每次重新加载

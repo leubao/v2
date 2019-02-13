@@ -51,11 +51,26 @@ function pay_cash_back_status($param = ''){
             echo "<span class='label label-success'>待审核</span>";
             break;
         case 5:
-            echo "<span class='label label-warning'>审核中</span>";
+            echo "<span class='label label-warning'>发放中</span>";
+            break;
+        case 6:
+            echo "<span class='label label-warning'>分包中</span>";
             break;
         case 1:
             echo "<span class='label label-default'>完结</span>";
             break;
+    }
+}
+function userMobile($param,$type=NULL){
+    if(!empty($param)){
+        $name = M('User')->where(array('id'=>$param))->getField('phone');
+    }else{
+        $name = "未知";
+    }
+    if($type){
+        return $name ? $name : "未知";
+    }else{
+        echo $name;
     }
 }
 ?>

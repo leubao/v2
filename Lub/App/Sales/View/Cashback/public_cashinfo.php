@@ -9,9 +9,9 @@
   <tbody>
     <tr>
       <td width="100px">收款人:</td>
-      <td width="500px">{$data.user_id|userName}</td>
-      <td width="100px">身份证号码:</td>
-      <td>{$data.user_id|userCard}</td>
+      <td width="300px">{$data.user_id|userName}</td>
+      <td width="100px">手机号码:</td>
+      <td>{$data.user_id|userMobile}</td>
     </tr>
     <tr>
       <td>支付方式</td>
@@ -21,8 +21,7 @@
     </tr>
     <tr>
       <td>金额</td>
-      <td colspan="2">{$data.money|num_to_rmb}</td>
-      <td>{$data.money|format_money}</td>
+      <td colspan="3">{$data.money|format_money} [大写: {$data.money|num_to_rmb} ]</td>
     </tr>
     <tr>
       <td>经办人/审核员</td>
@@ -36,7 +35,7 @@
     </tr>
   </tbody>
 </table>
-<table class="table table-bordered table-hover mb25">
+<table class="table table-bordered table-hover">
   <thead>
     <tr>
       <th>编号</th>
@@ -64,20 +63,5 @@
     <li>
       <button type="button" class="btn-close" data-icon="close">关闭</button>
     </li>
-    <!--
-    <if condition="$data['status'] eq '1' ">
-    <li>
-      <button type="button" class="btn-info" data-icon="print" id="print_window">打印</button>
-    </li>
-    </if>
-    -->
   </ul>
 </div>
-<script>
-$('#print_window').click(function(){
-    var url = '{:U('Item/Order/drawer',array('sn'=>$data['order_sn'],'plan_id'=>$data['plan_id']))}';
-    /*关闭订单详情的窗口*/
-    $(this).dialog('close','orderinfo');
-    $(this).dialog({id:'print', url:''+url+'', title:'门票打印',width:'213',height:'208',resizable:false,maxable:false,mask:true});
-});
-</script>
