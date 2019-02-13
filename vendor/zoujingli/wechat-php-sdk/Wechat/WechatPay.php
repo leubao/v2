@@ -69,6 +69,7 @@ class WechatPay {
         isset($data['nonce_str']) || $data['nonce_str'] = Tools::createNoncestr();
         //$data['nonce_str'] = 'f0o5dkko7zhce4s0u7l1nbcgrdunvlix';
         $data["sign"] = Tools::getPaySign($data, $this->partnerKey);
+
         return Tools::arr2xml($data);
     }
 
@@ -208,13 +209,22 @@ class WechatPay {
         }else{
             empty($openid) || $postdata['openid'] = $openid;
         }
+        //dump($postdata);dump($postdata);dump($postdata);dump($postdata);
         $result = $this->getArrayResult($postdata, self::MCH_BASE_URL . '/pay/unifiedorder');
+        
         if (false === $this->_parseResult($result)) {
             return false;
         }
         //记录支付日志 zj
-        $param = array('appid'=>$this->appid,'mch_id'=>$this->mch_id,'sub_appid'=>$this->sub_appid,'sub_mch_id'=>$this->sub_mch_id,'openid'=>$openid);
-        payLog($total,$out_trade_no,2,2,1,$param);
+        $param = array(
+            'appid'=>$this->appid,
+            'mch_id'=>$this->mch_id,
+            'sub_appid'=>$this->sub_appid,
+            'sub_mch_id'=>$this->sub_mch_id,
+            'openid'=>$openid,
+            'total_fee'=>$total_fee
+        );
+        payLog($total_fee,$out_trade_no,2,2,1,$param);
         return ($trade_type === 'JSAPI') ? $result['prepay_id'] : $result['code_url'];
     }
 
@@ -245,7 +255,7 @@ class WechatPay {
         }
         //记录支付日志 zj
         $param = array('appid'=>$this->appid,'mch_id'=>$this->mch_id,'sub_appid'=>$this->sub_appid,'sub_mch_id'=>$this->sub_mch_id,'openid'=>$openid);
-        payLog($total,$out_trade_no,2,2,1,$param);
+        //payLog($total,$out_trade_no,2,2,1,$param);
         return $result['prepay_id'];
     }
 
@@ -286,7 +296,7 @@ class WechatPay {
         );
         empty($goods_tag) || $postdata['goods_tag'] = $goods_tag;
         $result = $this->postXml($postdata, self::MCH_BASE_URL . '/pay/micropay');
-        $json = Tools::xml2arr($result);//dump($this->_parseResult($json));
+        $json = Tools::xml2arr($result);
         if (!empty($json) && false === $this->_parseResult($json)) {
             return false;
         }
