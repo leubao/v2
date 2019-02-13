@@ -43,7 +43,27 @@ class StrUtil
 
         return $str;
     }
-
+    /** 
+     * js escape php 实现 
+     * @param $string           the sting want to be escaped 
+     * @param $in_encoding       
+     * @param $out_encoding 
+     * Author zhoujing     
+     */ 
+    public static function escape($string, $in_encoding = 'UTF-8',$out_encoding = 'UCS-2') { 
+        $return = ''; 
+        if (function_exists('mb_get_info')) { 
+            for($x = 0; $x < mb_strlen ( $string, $in_encoding ); $x ++) { 
+                $str = mb_substr ( $string, $x, 1, $in_encoding ); 
+                if (strlen ( $str ) > 1) { // 多字节字符 
+                    $return .= '%u' . strtoupper ( bin2hex ( mb_convert_encoding ( $str, $out_encoding, $in_encoding ) ) ); 
+                } else { 
+                    $return .= '%' . strtoupper ( bin2hex ( $str ) ); 
+                } 
+            } 
+        } 
+        return $return; 
+    }
     /**
      * 转成16进制
      * @param string $string
@@ -73,19 +93,21 @@ class StrUtil
         } else {
             $keyStr = $key;
         }
+        if (empty($keyStr)) {
+            return null;
+        }
+
         $keyStr = str_replace(PHP_EOL, '', $keyStr);
         // 为了解决用户传入的密钥格式，这里进行统一处理
         if ($type === 'private') {
-            $beginStr = ['-----BEGIN RSA PRIVATE KEY-----', '-----BEGIN PRIVATE KEY-----'];
-            $endStr = ['-----END RSA PRIVATE KEY-----', '-----END PRIVATE KEY-----'];
+            $beginStr = '-----BEGIN RSA PRIVATE KEY-----';
+            $endStr = '-----END RSA PRIVATE KEY-----';
         } else {
-            $beginStr = ['-----BEGIN PUBLIC KEY-----', ''];
-            $endStr = ['-----END PUBLIC KEY-----', ''];
+            $beginStr = '-----BEGIN PUBLIC KEY-----';
+            $endStr = '-----END PUBLIC KEY-----';
         }
-        $keyStr = str_replace($beginStr, ['', ''], $keyStr);
-        $keyStr = str_replace($endStr, ['', ''], $keyStr);
-
-        $rsaKey = $beginStr[0] . PHP_EOL . wordwrap($keyStr, 64, PHP_EOL, true) . PHP_EOL . $endStr[0];
+        $rsaKey = chunk_split(base64_encode($keyStr), 64, "\n");
+        $rsaKey = $beginStr . PHP_EOL . $keyStr . PHP_EOL . $endStr;
 
         return $rsaKey;
     }

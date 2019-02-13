@@ -8,7 +8,7 @@ namespace Payment\Utils;
  * @link      https://www.gitbook.com/book/helei112g1/payment-sdk/details
  * @link      https://helei112g.github.io/
  */
-class Rsa2Encrypt
+class Rsa2Encrypt 
 {
     protected $key;
 

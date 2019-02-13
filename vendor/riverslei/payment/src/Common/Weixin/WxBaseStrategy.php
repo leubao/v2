@@ -67,7 +67,7 @@ abstract class WxBaseStrategy implements BaseStrategy
         }
 
         if ($this->config->useSandbox) {
-            $url = str_ireplace('{debug}',WxConfig::SANDBOX_PRE, $url);
+            $url = str_ireplace('{debug}', WxConfig::SANDBOX_PRE, $url);
         } else {
             $url = str_ireplace('{debug}/', '', $url);
         }
@@ -89,7 +89,6 @@ abstract class WxBaseStrategy implements BaseStrategy
         }
 
         $body = $response->getBody()->getContents();
-
         // 格式化为数组
         $retData = DataParser::toArray($body);
         if (strtoupper($retData['return_code']) != 'SUCCESS') {
@@ -122,7 +121,11 @@ abstract class WxBaseStrategy implements BaseStrategy
         $this->reqData->setSign();
 
         $xml = DataParser::toXml($this->reqData->getData());
-        $ret = $this->sendReq($xml);
+        try {
+            $ret = $this->sendReq($xml);
+        } catch (PayException $e) {
+            throw $e;
+        }
 
         // 检查返回的数据是否被篡改
         $flag = $this->verifySign($ret);

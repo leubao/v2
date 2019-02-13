@@ -49,15 +49,16 @@ abstract class BaseData
      * @throws PayException
      */
     public function __construct(ConfigInterface $config, array $reqData)
-    {
+    {   
         if ($config instanceof WxConfig) {
             $this->channel = Config::WECHAT_PAY;
         } elseif ($config instanceof AliConfig) {
             $this->channel = Config::ALI_PAY;
         } elseif ($config instanceof CmbConfig) {
             $this->channel = Config::CMB_PAY;
+        } elseif ($config instanceof CcbConfig) {
+            $this->channel = Config::CCB_PAY;
         }
-
         $this->data = array_merge($config->toArray(), $reqData);
 
         try {
@@ -111,10 +112,26 @@ abstract class BaseData
         $values = ArrayUtil::arraySort($values);
 
         $signStr = ArrayUtil::createLinkstring($values);
-
         $this->retData['sign'] = $this->makeSign($signStr);
+        
     }
+    /**
+     * 建设银行设置签名
+     * @author zhoujing
+     */
+    public function setMac()
+    {
+        $this->buildData();
 
+        if ($this->channel === Config::CMB_PAY) {
+            $data = $this->retData['reqData'];
+        } else {
+            $data = $this->retData;
+        }
+        $values = ArrayUtil::removeKeys($data, ['MAC']);
+        $signStr = ArrayUtil::createLinkstring($values);
+        $this->retData['MAC'] = $this->makeSign($signStr);
+    }
     /**
      * 返回处理之后的数据
      * @return array
