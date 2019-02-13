@@ -345,9 +345,10 @@ function check_idcard(code) {
  * @DateTime 2017-12-22
  * @param    {string}      code                  身份证号码
  * @param    {objct}      area                  允许区域
+ * @param {int} number 单用户限额
  * @return   {[type]}                            [description]
  */
-function check_idcard_area(code,area,actid) {
+function check_idcard_area(code,area,actid,number) {
     var length = 0, retu = false;//console.log(actid);
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
