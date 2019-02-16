@@ -97,11 +97,12 @@ class IndexController extends Base{
 	}
 	//显示销售计划 
 	function plan(){
-		//根据当前用户信息差选产品、根据产品查询销售信息
+		//根据当前用户信息差选产品、根据产品查询销售信息channel_pre_team
 		$uInfo = Partner::getInstance()->getInfo();
 		//根据商户ID查询相应产品
 		$pro = Operate::do_read('Item',0,array('id'=>$uInfo['item_id']),'',array('product'));
 		$proArr = explode(',', $pro['product']);
+		$proConf = cache('ProConfig');
 		//TODO 判断产品是否都可用
 		foreach ($proArr as $k=>$v){
 			$product = M('Product')->where(['id'=>$v,'status'=>1])->find();
@@ -110,12 +111,34 @@ class IndexController extends Base{
 				$list[$k]['quota'] = M('CrmQuota')->where(array('crm_id'=>$uInfo['cid'],'product_id'=>$v))->getField('quota');
 				if($list[$k] != false){
 					$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
-					$list[$k]['plan'] = Operate::do_read('Plan',1,array('product_id'=>$v,'status'=>2),"plantime ASC,games ASC",array('id,product_id,plantime,games,seat_table'));
+					$pre_team = $proConf[$v]['1']['channel_pre_team'];
+					$list[$k]['plan'] = $this->getPlanList($v,$pre_team);
 				}
 			}
 		}
 		$list = array_filter($list);
 		$this->assign('uinfo',$uInfo);
+		return $list;
+	}
+	public function getPlanList($product, $pre_team)
+	{
+		if(empty($pre_team)){
+			$list = Operate::do_read('Plan',1,array('product_id'=>$product,'status'=>2),"plantime ASC,games ASC",array('id,product_id,plantime,games,seat_table'));
+		}else{
+			$plantime = strtotime(date('Y-m-d'));
+			$plan = Operate::do_read('Plan',1,array('product_id'=>$product,'status'=>2),"plantime ASC,games ASC",array('id,product_id,plantime,games,seat_table'));
+
+			foreach ($plan as $k => $v) {
+				if($plantime == $v['plantime']){
+					$list[$k] = $v;
+					$list[$k]['seale'] = 1;
+				}else{
+					$list[$k] = $v;
+					$list[$k]['seale'] = 0;
+				}
+			}
+
+		}
 		return $list;
 	}
 	//拉取区域
