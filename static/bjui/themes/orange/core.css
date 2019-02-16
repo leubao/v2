@@ -37,7 +37,7 @@ fieldset{border-color:#fdd5bc;}
 .table > thead > tr > th.orderby a.order:hover{color:#FFF!important; background:#ff6601;}
 .table > tbody > tr.selected > td{background-color:#fedcc7;}
 /* Main */
-#bjui-header{}
+#bjui-header{background:#fdd5bc url(topbg.png); border-bottom:2px #ff6601 solid;}
 #bjui-header > .bjui-navbar-header > .bjui-navbar-toggle:focus,
 #bjui-header > .bjui-navbar-header > .bjui-navbar-toggle:hover{background:#ff6601;}
 #bjui-header > #bjui-navbar-collapse > .bjui-navbar-right > li{border-right:1px #DC8E70 solid;}
@@ -97,6 +97,7 @@ fieldset{border-color:#fdd5bc;}
 #bjui-navtab > .tabsPageContent{background:#fefefe; border-color:#fdd5bc;}
 /* Dialog */
 .bjui-dialog{background:#fff9f3; border:1px #DDD solid;}
+.bjui-dialog.dialogShadow{-webkit-box-shadow:0 3px 9px rgba(255,102,1, 0.9); box-shadow:0 3px 9px rgba(255,102,1, 0.9);}
 .bjui-dialog > .dialogHeader{background:#fff6ed; border-bottom:1px #fdd5bc solid;}
 .bjui-dialog > .dialogHeader a{color:#222 !important;}
 .bjui-dialog > .dialogHeader a:hover{color:#ff6601 !important;}

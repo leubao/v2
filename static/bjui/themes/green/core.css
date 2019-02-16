@@ -37,7 +37,7 @@ fieldset{border-color:#b5d2b5;}
 .table > thead > tr > th.orderby a.order:hover{color:#FFF!important; background:#225b16;}
 .table > tbody > tr.selected > td{background-color:#E5F3E5;}
 /* Main */
-#bjui-header{}
+#bjui-header{background:#b5d2b5 url(topbg.png); border-bottom:2px #225b16 solid;}
 #bjui-header > .bjui-navbar-header > .bjui-navbar-toggle:focus,
 #bjui-header > .bjui-navbar-header > .bjui-navbar-toggle:hover{background:#225b16;}
 #bjui-header > #bjui-navbar-collapse > .bjui-navbar-right > li{border-right:1px #70a370 solid;}
@@ -97,6 +97,7 @@ fieldset{border-color:#b5d2b5;}
 #bjui-navtab > .tabsPageContent{background:#fefefe; border-color:#b5d2b5;}
 /* Dialog */
 .bjui-dialog{background:#f5fdf5; border:1px #DDD solid;}
+.bjui-dialog.dialogShadow{-webkit-box-shadow:0 3px 9px rgba(62,153,62, 0.9); box-shadow:0 3px 9px rgba(62,153,62, 0.9);}
 .bjui-dialog > .dialogHeader{background:#eef4ee; border-bottom:1px #b5d2b5 solid;}
 .bjui-dialog > .dialogHeader a{color:#0f4c0f !important;}
 .bjui-dialog > .dialogHeader a:hover{color:#225b16 !important;}
