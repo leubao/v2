@@ -253,10 +253,23 @@ class IndexController extends ManageBase{
 	 */
 	function groupadd(){
 		if(IS_POST){
-			$data["itemid"] = \Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE');
-			$data["create_time"] = time();
-			$data['price_group'] = implode(',',$_POST['price_group']);
-			$add = Operate::do_add("CrmGroup",$data);
+			$pinfo = I('post.');
+			$param = [
+				'quota'  => $pinfo['group_quota']
+			];
+			$data = [
+				'settlement'  	=>  $pinfo['settlement'],
+				'name'			=>	$pinfo['name'],
+				'price_group'	=>	implode(',', $pinfo['price_group']),
+				'type'			=>	$pinfo['type'],
+				'status'		=>	$pinfo['status'],
+				'privilege'		=>	$pinfo['privilege'],
+				'param'			=>	json_encode($param),
+				'itemid'		=>	\Libs\Util\Encrypt::authcode($_SESSION['lub_imid'], 'DECODE'),
+				'create_time'	=>	time()
+			];
+
+			$add = D('CrmGroup')->add($data);
 			if($add){
 				$this->srun('新增成功!',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
@@ -293,12 +306,16 @@ class IndexController extends ManageBase{
 	function groupedit(){
 		if(IS_POST){
 			$pinfo = I('post.');
+			$param = [
+				'quota'  => $pinfo['group_quota']
+			];
 			$data = array(
 				'name' => $pinfo['name'],
 				'type' => $pinfo['type'],
 				'privilege' => $pinfo['privilege'],
 				'settlement'=> $pinfo['settlement'],
 				'status' => $pinfo['status'],
+				'param'			=>	json_encode($param),
 				'price_group' => implode(',',$pinfo['price_group']),
 				'create_time' => time()
 			);
@@ -312,6 +329,7 @@ class IndexController extends ManageBase{
 		}else{
 			$id = I("id");
 			$list = Operate::do_read('CrmGroup',0,array("id"=>$id));
+			$list['param'] = json_decode($list['param'], true);
 			$price = Operate::do_read('TicketGroup',1,array('status'=>1));
 			$this->assign('price',$price)
 				->assign("id",$id)

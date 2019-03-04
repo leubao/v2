@@ -32,9 +32,9 @@
           <input type="radio" name="settlement" value="2" data-toggle="icheck" <eq name="data['settlement']" value="2">checked="checked"</eq> data-label="底价结算(无返佣)" /></td>
         </tr>
         <tr>
-          <td width="100px">分组配额:</td>
-          <td><input type="text" name="group_quota" value="{$data.group_quota}" size="5" />
-              <span class="fun_tips">单场有效</span></td>
+          <td width="100px">单笔最小:</td>
+          <td><input type="text" name="group_quota" value="{$data.param.quota}" size="5" />
+              <span class="fun_tips">单笔订单最少预定量</span></td>
         </tr>
         <tr>
           <td width="100px">状态:</td>
