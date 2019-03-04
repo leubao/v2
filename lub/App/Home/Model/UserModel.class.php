@@ -38,6 +38,7 @@ class UserModel extends RelationModel {
     protected $_auto = array(
         array('create_time', 'time', 1, 'function'),
         array('update_time', 'time', 3, 'function'),
+        array('is_scene', 3 ),
         array('verify', 'genRandomString', 1, 'function', 6), //新增时自动生成验证码
     );
 
@@ -69,7 +70,9 @@ class UserModel extends RelationModel {
             return false;
         }
         //查询所属分组信息
-        $uInfo['group'] = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement')->find();
+        $group = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement,param')->find();
+        $group['param'] = json_decode($group['param'], true);
+        $uInfo['group'] = $group;
         if($uInfo['group']['type'] <> '4'){
             //查询所属商户相关信息
             $crm = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,agent,itemid,f_agents,param')->find();

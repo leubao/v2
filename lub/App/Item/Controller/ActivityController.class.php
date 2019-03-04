@@ -97,9 +97,18 @@ class ActivityController extends ManageBase{
 	 			if(empty($pinfo['ticket_id']) || empty($pinfo['kill'])){
 	 				$this->erun("新增失败,票型或抢票时间不能为空!");
 	 			}
-	 			$info['tciket'] = $pinfo['ticket_id'];
+	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
+	 		}
+	 		//预约销售
+	 		if((int)$pinfo['type'] === 8){
+	 			if(empty($pinfo['ticket_id']) || empty($pinfo['today'])){
+	 				$this->erun("新增失败,票型或预约天数不能为空!");
+	 			}
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			$info['number'] = $pinfo['number'];
+	 			$info['tody']	= $pinfo['today'];
 	 		}
 	 		$param = array(
 	 			'info' =>  $info,
@@ -239,6 +248,15 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
 	 		}
+	 		//限时秒杀
+	 		if((int)$pinfo['type'] === 8){
+	 			if(empty($pinfo['ticket_id']) || empty($pinfo['today'])){
+	 				$this->erun("新增失败,票型或预约天数不能为空!");
+	 			}
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			$info['number'] = $pinfo['number'];
+	 			$info['today']	= $pinfo['today'];
+	 		}
 	 		//开启范围
 	 		if($pinfo['scope']){
 	 			$actinfo = $this->get_activity($pinfo['id']);
@@ -283,7 +301,7 @@ class ActivityController extends ManageBase{
 	 			$this->assign('card',$card);
 	 		}
 	 		//组团销售
-	 		if(in_array($info['type'], ['4','6'])){
+	 		if(in_array($info['type'], ['4','6','8','7'])){
 	 			$ticket = explode(',',$info['param']['info']['ticket']);
 	 			foreach ($ticket as $k => $v) {
 	 				$name[] = ticketName($v,1);

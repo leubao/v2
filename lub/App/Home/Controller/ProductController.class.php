@@ -90,6 +90,22 @@ class ProductController extends Base{
 				die(json_encode($return));
 			}
 		}
+		if(isset($pinfo['actid']) && !empty($pinfo['actid'])){
+			$info = D('Activity')->where(['id'=>$pinfo['actid'],'type'=>8])->getField('param');
+			if(!empty($info)){
+				$info = json_decode($info ,true);
+
+				$pretime = strtotime(date('Ymd',strtotime('+'.$info['info']['today'].' day')));
+				if($plantime < $pretime){
+					$return = array(
+						'statusCode'=>'300',
+						'msg'	=>	'当前日期不可销售'
+					);
+					die(json_encode($return));
+				}
+			}
+			
+		}
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$pinfo['product']))->field('id,starttime,endtime,games,param,product_type')->select();
 		foreach ($plan as $k => $v) {
 			$param = unserialize($v['param']);
@@ -277,10 +293,11 @@ class ProductController extends Base{
 	function pre_order()
 	{
 		$ginfo = I('get.');
+		/*
 		$ginfo = [
 			'type'	=>	'1',
 			'productid' => '43'
-		];
+		];*/
 		//if(empty($ginfo['productid'])){$this->error('参数错误!');}
 		//默认日期
 		$plantime = date("Y-m-d",strtotime("+1 day"));

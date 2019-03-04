@@ -120,7 +120,7 @@
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="{$data.param.info.number}" size="15"><span class="remark">0为不限制</span></td>
           </tr>
           <tr>
             <td>秒杀票型:</td>
@@ -146,6 +146,24 @@
             </tbody>
     </table>
     </if>
+    <!--预约销售-->
+    <if condition="$data['type'] eq '8'">
+    <table class="table table-striped table-bordered">
+      <tbody>
+        <tr>
+          <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="{$data.param.info.number}" size="15"><span class="remark">0为不限制</span></td>
+        </tr>
+        <tr>
+          <td>提前预约天数:</td><td colspan="3"><input type="text" name="today" value="{$data.param.info.today}" size="15"><span class="remark">最少提前一天</span></td>
+        </tr>
+        <tr>
+          <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="{$data.param.info.ticket}">
+    <input type="text" name="ticket.name" readonly value="{$ticket_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+        </tr>
+      </tbody>
+    </table>
+    </if>
+    <!--预约销售-->
   </div>
   <input name="type" value="{$data['type']}" type="hidden">
   <input name="id" value="{$data.id}" type="hidden">

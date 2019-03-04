@@ -144,17 +144,6 @@
   <script type="text/javascript">
   var selectdate;
   $(function() {
-    $("#plantime").datetimepicker({
-        language:  'zh-CN',
-        format: "yyyy-mm-dd",
-        autoclose: true,
-        minView: "month",
-        maxView: "decade",
-        todayBtn: true,
-        pickerPosition: "bottom-left",
-        startDate:new Date(new Date()-1000 * 60 * 60 * 24 * 30),
-        endDate : new Date()
-    });
     empty_cart_ticket();
     scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['productid']});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
@@ -187,12 +176,15 @@
                 <input class="form-control qk" type="text" id="tomoney" value="" readonly>
               </div>
               <p>
-                 <label class="radio-inline">
-                    <input type="radio" name="pay_type" id="pay_type" value="1" checked> 现金支付
-                 </label>
                 <label class="radio-inline">
-                    <input type="radio" name="pay_type" id="pay_type" value="3"> 结算单支付
-                 </label>
+                  <input type="radio" name="pay_type" id="pay_type" value="2" checked> 授信额支付
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="pay_type" id="pay_type" value="1" disabled> 现金支付
+                </label>
+                <label class="radio-inline">
+                  <input type="radio" name="pay_type" id="pay_type" value="3" disabled> 结算单支付
+                </label>
               </p>
               <button type="button" class="btn btn-success" id="teamPrePay" data-loading-text="正在提交..." data-toggle="modal">立即预约</button>
             </div>

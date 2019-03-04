@@ -14,7 +14,9 @@
 //景区漂流加载价格
 function scenic_drifting_plan(plantime,type,product,actid){
     empty_cart_ticket();
-    var postData = 'info={"plantime":"'+plantime+'","type":"'+type+'","product":"'+product+'"}',content = "";
+    var content = '';
+    var postData = 'info={"plantime":"'+plantime+'","type":"'+type+'","product":"'+product+'","actid":"'+actid+'"}',content = "";
+    $("#tablelist").html(content);
     //切换日期查询场次
     $.ajax({ 
         type:'POST',

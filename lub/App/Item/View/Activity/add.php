@@ -13,7 +13,7 @@
           <td>活动场景:</td>
           <td colspan="3">
             <input type="checkbox" name="scene[]" value="1"> 窗口
-            <input type="checkbox" name="scene[]" value="2"> 渠道版
+            <input type="checkbox" name="scene[]" value="2"  checked=""> 渠道版
             <input type="checkbox" name="scene[]" value="3"> 网站
             <input type="checkbox" name="scene[]" value="4"> 微信
             <input type="checkbox" name="scene[]" value="5"> API
@@ -32,6 +32,7 @@
                 <option value="6" data-area="onePlan">单场限额销售</option>
                 <option value="5" data-area="more">多产品套票销售</option>
                 <option value="7" data-area="kill">限时秒杀</option>
+                <option value="8" data-area="pre">预约销售</option>
               </select>
             </td>
         </tr>
@@ -219,6 +220,24 @@
     </table>
     </div>
     <!--秒杀-->
+    <!--预约销售-->
+    <div id="pre" style="display: none;">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+          </tr>
+          <tr>
+            <td>提前预约天数:</td><td colspan="3"><input type="text" name="today" value="1" size="15"><span class="remark">最少提前一天</span></td>
+          </tr>
+          <tr>
+            <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <!--预约销售-->
   </div>
   <input name="product_id" value="{$product_id}" type="hidden">
   <div class="bjui-pageFooter">

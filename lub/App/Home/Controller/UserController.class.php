@@ -37,10 +37,6 @@ class UserController extends Base{
             $start_time = strtotime($start_time);
             $end_time = strtotime($end_time) + 86399;
             $where['createtime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
-        }else{
-        	//查询时间段为空时默认查询一个月内的数据
-	        $start_time = time() - (86400 * 30);
-	        $where['createtime'] = array(array('GT', $start_time), array('LT', time()), 'AND');
         }
         if ($status != '') {
             $where['status'] = array(array('NEQ',2),array('EQ',$status), 'AND');
@@ -78,15 +74,21 @@ class UserController extends Base{
 	 */
 	function add(){
 		if(IS_POST){
-			$info=array(
-				'is_scene'	=> '3'
-			);
-			$user_id = Operate::do_add('User',$info);
-			if($user_id){
-				D('UserData')->add(array('user_id'=>$user_id));
-				$this->success("新增成功!");
+
+			$User = D("User"); // 实例化User对象
+			if (!$User->create()){
+			     // 如果创建失败 表示验证没有通过 输出错误提示信息
+			     
+			     $this->error('新增失败:'.$User->getError());
 			}else{
-				$this->erun('新增失败!');
+			     // 验证通过 可以进行其他数据操作
+			    $result = $User->add(); // 写入数据到数据库 
+			    if($result){
+			        D('UserData')->add(array('user_id'=>$result));
+					$this->success("新增成功!");
+			    }else{
+			    	$this->error('新增失败!');
+			    }
 			}
 		}else{
 			

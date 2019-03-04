@@ -67,7 +67,7 @@ class PromotionsController extends Base{
 				$tempate = 'area_sale';
 				break;
 			case '4':
-				$this->assign('number',$info['param']['number']);
+				$this->assign('number',$info['param']['info']['number']);
 				$tempate = 'team';
 				break;
 			case '5':
@@ -76,8 +76,15 @@ class PromotionsController extends Base{
 				break;
 			case '6':
 				//单场限额
-				$this->assign('number',$info['param']['number']);
+				$this->assign('number',$info['param']['info']['number']);
 				$tempate = 'single';
+				break;
+			case '8':
+				//预约销售
+				$plantime = date("Y-m-d", strtotime("+".$info['param']['info']['today']." day"));
+				$this->assign('plantime',$plantime);
+				$this->assign('number',$info['param']['info']['number']);
+				$tempate = 'pre';
 				break;
 			default:
 				break;

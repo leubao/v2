@@ -15,7 +15,6 @@ $(function(){
 	var obj = $(this);
 	var data_name  = obj.find("td").eq(0).text();
 	var data_price = obj.find("td").eq(1).text();
-	//console.log(real);
 	//获取指定值
 	if(real){
 		//开启实名制
@@ -331,6 +330,11 @@ $(function(){
 	          	toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
 	        }
         });
+
+        if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
+        	layer.msg("低于单笔订单最少预订数...");
+	        return false;
+		}
         if(nums <= PRO_CONF.channel_order){
 		  /*获取支付相关数据*/
 		  var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
@@ -445,6 +449,10 @@ $(function(){
           toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
         }
       });
+      if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
+    	layer.msg("低于单笔订单最少预订数...");
+        return false;
+	  }
       if(nums <= PRO_CONF.channel_order){
       	  //判断配额
       	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums+"&plan="+plan, function(data){
@@ -634,6 +642,10 @@ $("#preteam").bind("click",function(){
 	          	toJSONString = toJSONString + '{"areaId":'+ids[2]+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
 	        }
         });
+        if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
+        	layer.msg("低于单笔订单最少预订数...");
+	        return false;
+		}
         if(nums <= PRO_CONF.channel_order){
 		  /*获取支付相关数据*/
 		  var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/

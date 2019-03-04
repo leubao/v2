@@ -35,6 +35,9 @@ function activity_type($param,$type = null)
 		case '7':
 			$return = "限量秒杀";
 			break;
+		case '8':
+			$return = "预约销售";
+			break;
 	}
 	if($type){
 		return $return;
