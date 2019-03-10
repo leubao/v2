@@ -326,58 +326,111 @@ class WorkController extends ManageBase{
 		if(IS_POST){
 			//修正数量
 			$pinfo = I('post.');
+			if(!isset($pinfo['model']) || empty($pinfo['model'])){
+				$this->erun("操作类型不能为空...");
+			}
 			//读取订单
 			foreach ($pinfo['priceid'] as $ke => $va) {
 				$new[$va] = (int)$pinfo['price_num'][$ke];
 			}
-			$data = $this->getOrder($pinfo['sn']);
+			$data = D('Booking')->where(['order_sn'=>$pinfo['sn'],'status'=>5])->find();
+			$info = json_decode($data['info'], true);
 			if($data == false){
-				$this->erun("未找到相应订单...");
+				$this->erun("未找到相应订单或该订单已完成审核...");
 			}
-			//dump($data);
 			//更新数量
-			$oinfo = $data['info'];
-			$info = $oinfo['info'];
-			foreach ($info['data']['area'] as $k => $v) {
+			foreach ($info['info']['data'] as $k => $v) {
 				$newArea[$v['priceid']] = [
 					'areaId'	=>	$v['areaId'],
 					'priceid'	=>	$v['priceid'],
 					'price'		=>	$v['price'],
 					'num'		=>	$new[$v['priceid']],
-					'idcard'	=>	$v['idcard']
+					'idcard'	=>	isset($v['idcard']) ? $v['idcard'] : 0
 				];
 			}
+
 			$order = new \Libs\Service\Order();
-			$areaSeat = $order->area_group($newArea,$oinfo['product_id'],$info['param'][0]['settlement'],$oinfo['product_type'],$info['child_ticket']);
+			$areaSeat = $order->area_group($newArea,$data['product_id'],$info['info']['param'][0]['settlement'],1,'');
 			//更新订单
 			$newInfo = [
+				'order_sn'		=> $data['order_sn'],
+				'subtotal'		=> $areaSeat['money'],
 				'plan_id'		=> $pinfo['plan'],
-				'subtotal'		=> $areaSeat['moneys'],
-				'checkin'		=> $info['checkin'],
-				'data'			=> $areaSeat,
-				'child_ticket'	=> $info['child_ticket'],
-				'crm'			=> $info['crm'],
-				'pay'			=> $info['pay'],				
-				'param'			=> $info['param'],	
+				'checkin'		=> $info['info']['checkin'],
+				'data'			=> $newArea,
+				'crm'			=> $info['info']['crm'],				
+				'param'			=> $info['info']['param'],	
+			];
+			//暂存订单
+			$param = [
+				'info'	=>	$newInfo,
+				'uinfo'	=>	$info['uinfo'],
+				'act'	=>	$info['act']
 			];
 			$newData = [
+				'id'			=> $data['id'],
+				'plan_id'		=> $pinfo['plan'],
 				'number'		=> $areaSeat['num'],
 				'money' 		=> $areaSeat['money'],
+				'info'			=> json_encode($param)
 			];
-			$model = new Model();
-			$model->startTrans();
+			$bookingModel = D('Booking');
+			if($pinfo['model'] == 'staging'){
 
-			$up_order = $model->table(C('DB_PREFIX').'order')->where(['order_sn' => $pinfo['sn']])->save($newData);
-			$states = $model->table(C('DB_PREFIX').'order_data')->where(['order_sn' => $pinfo['sn']])->setField('info',serialize($newInfo));
-			if($up_order && $states){
-				$model->commit();//提交事务
-				$this->srun("核准成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-			}else{
-				$model->rollback();//事务回滚
-				$this->erun('核准失败!');
-				return false;
+				if($bookingModel->token(false)->create($newData)){
+				    $result = $bookingModel->save(); // 写入数据到数据库 
+				    if($result){
+						$this->srun("暂存成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+					}else{
+						$this->erun('暂存失败!');
+					}
+				}else{
+					$this->erun('失败:'.$bookingModel->getError());
+				}
 			}
-			//dump($newArea);
+			if($pinfo['model'] == 'push'){
+				$newData['status'] = 1;
+				//推送订单
+				if($bookingModel->token(false)->create($newData)){
+				    $result = $bookingModel->save(); // 写入数据到数据库 
+				    if($result){
+				    	$status = $order->channel(json_encode($newInfo),27,$info['uinfo'],8,$data['pay']);
+				    	
+				    	if($status){
+				    		$this->srun("订单推送成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				    	}else{
+				    		$bookingModel->where(['id'=>$data['id']])->setField('status', '5');
+				    		$this->erun('订单推送失败:'.$order->error);
+				    	}
+						
+					}else{
+						$this->erun('预约更新失败!');
+					}
+
+				}else{
+					$this->erun('失败:'.$bookingModel->getError());
+				}
+				
+				
+
+				
+				// $model = new Model();
+				// $model->startTrans();
+
+				// $up_order = $model->table(C('DB_PREFIX').'order')->where(['order_sn' => $pinfo['sn']])->save($newData);
+				// $states = $model->table(C('DB_PREFIX').'order_data')->where(['order_sn' => $pinfo['sn']])->setField('info',serialize($newInfo));
+				// if($up_order && $states){
+				// 	$model->commit();//提交事务
+				// 	$this->srun("核准成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+				// }else{
+				// 	$model->rollback();//事务回滚
+				// 	$this->erun('核准失败!');
+				// 	return false;
+				// }
+			}
+		    
+
+			
 			//修改日志
 			$editOrderLog = [
 				'user_id'	=>	get_user_id(),
@@ -391,17 +444,20 @@ class WorkController extends ManageBase{
 			if(empty($sn)){
 				$this->erun('参数错误!');
 			}
-			$data = $this->getOrder($sn);
+			//$data = $this->getOrder($sn);
+			$data = D('Booking')->where(['order_sn'=>$sn,'status'=>5])->find();
+
 			if($data == false){
-				$this->erun("未找到相应订单...");
+				$this->erun("未找到相应订单或该订单已完成审核...");
 			}else{
 				//获取当前所有可售计划
 				$plan = D('Plan')->where(['status'=>2,'product_id'=>get_product('id')])->field('id,plantime,starttime,games')->select();
-				$this->assign('data',$data['info'])
+				$info = json_decode($data['info'],true);
+				dump($info);
+
+				$this->assign('data',$data)
+					->assign('info',$info['info'])
 					->assign('plan',$plan)
-					->assign('type',$data['info']['product_type'])
-					->assign('area',$data['area'])
-					->assign('ticket',$data['ticket'])
 					->display();
 			}
 		}

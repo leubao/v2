@@ -285,6 +285,15 @@
                           </td>
                         </tr>
                         <tr>
+                          <td width="120px">预约模式:</td>
+                          <td>
+
+                          <input type="radio" name="channel_pre_model" data-toggle="icheck" value="1" <eq name="vo['channel_pre_model']" value="1"> checked</eq> data-label="预约&nbsp;">
+                          <input type="radio" name="channel_pre_model" data-toggle="icheck" value="2" <eq name="vo['channel_pre_model']" value="2"> checked</eq> data-label="预售&nbsp;">
+                          <span class="remark">预约为接单扣款,预售为预扣款</span>
+                          </td>
+                        </tr>
+                        <tr>
                           <td width="120px">客源地:</td>
                           <td>
                           <input type="radio" name="tourists" data-toggle="icheck" value="0" <eq name="vo['tourists']" value="0"> checked</eq> data-label="关闭&nbsp;">

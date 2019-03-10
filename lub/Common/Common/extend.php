@@ -972,7 +972,7 @@ function crmName($param,$type=NULL){
                 $return = "政企";
                 break;
             case 7:
-                $return = "渠道底价";
+                $return = "预约";
                 break;
             case 8:
                 $return = "全员";

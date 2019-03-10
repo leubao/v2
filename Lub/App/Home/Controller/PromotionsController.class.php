@@ -84,6 +84,7 @@ class PromotionsController extends Base{
 				$plantime = date("Y-m-d", strtotime("+".$info['param']['info']['today']." day"));
 				$this->assign('plantime',$plantime);
 				$this->assign('number',$info['param']['info']['number']);
+				$this->assign('pre_model',$info['param']['info']['pre_model']);
 				$tempate = 'pre';
 				break;
 			default:

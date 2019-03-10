@@ -137,23 +137,14 @@
 
       <input type="hidden" value="" id="planID">
       <div class="btn-group">
+        <if condition="proconf.channel_pre_model eq 2">
         <button type="button" class="btn btn-default" id="preteam" data-toggle="modal">立即预约</button>
+        <else />
+        <button type="button" class="btn btn-default" id="booking" data-toggle="modal">立即预约</button>  
+        </if>
       </div>
   </div>
   </div>
-  <script type="text/javascript">
-  var selectdate;
-  $(function() {
-    empty_cart_ticket();
-    scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['productid']});
-    $('#plantime').datetimepicker().on('changeDate', function(ev) {
-        selectdate = $('#plantime').val();
-        empty_cart_ticket();
-        scenic_drifting_plan(selectdate,{$info['type']},{$info['productid']});
-    });
-  });
-  </script>
-
 </div>
 <div> 
   <!--内容主体区域 end--> 
@@ -177,16 +168,17 @@
               </div>
               <p>
                 <label class="radio-inline">
-                  <input type="radio" name="pay_type" id="pay_type" value="2" checked> 授信额支付
+                  <input type="radio" name="pay_type" id="pay_type" value="2" > 授信额支付
                 </label>
                 <label class="radio-inline">
-                  <input type="radio" name="pay_type" id="pay_type" value="1" disabled> 现金支付
-                </label>
-                <label class="radio-inline">
-                  <input type="radio" name="pay_type" id="pay_type" value="3" disabled> 结算单支付
+                  <input type="radio" name="pay_type" id="pay_type" value="1" checked> 窗口现金支付
                 </label>
               </p>
+              <?php if($proconf['channel_pre_model'] == 1) {?>
+              <button type="button" class="btn btn-success" id="bookingPay" data-loading-text="正在提交..." data-toggle="modal">立即预约</button>
+              <?php }else{ ?>
               <button type="button" class="btn btn-success" id="teamPrePay" data-loading-text="正在提交..." data-toggle="modal">立即预约</button>
+            <?php } ?>
             </div>
             <input id="sn" value="" type="hidden">
           </div>
@@ -309,7 +301,7 @@
       ...
     </div>
   </div>
-</div>
+</div><?php dump($proconf);?>
   <!--弹出窗口 end-->
   <Managetemplate file="Home/Public/footer"/>
   <!--页脚--> 
@@ -318,7 +310,16 @@
 </html>
 <script src="{$config_siteurl}static/home/js/cart.js?=<?php echo  rand(100,999);?>"></script>
 <script type="text/javascript">
-
+var selectdate;
+  $(function() {
+    empty_cart_ticket();
+    scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['productid']});
+    $('#plantime').datetimepicker().on('changeDate', function(ev) {
+        selectdate = $('#plantime').val();
+        empty_cart_ticket();
+        scenic_drifting_plan(selectdate,{$info['type']},{$info['productid']});
+    });
+  });
 var type = {$info['type']},
     product = {$info['productid']},
     real = 0;

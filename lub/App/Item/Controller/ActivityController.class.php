@@ -29,8 +29,11 @@ class ActivityController extends ManageBase{
 	 function add(){
 	 	if(IS_POST){
 	 		$pinfo = I('post.');
+	 		if(!in_array($pinfo['type'],['1','2','3','4','5','6','7','8'])){
+	 			$this->erun("请选择活动类型~!");
+	 		}
 	 		//TODO  活动类型多样化之后.....  买赠
-	 		if($pinfo['type'] == '1'){
+	 		if((int)$pinfo['type'] === 1){
 	 			foreach ($pinfo['area'] as $key => $value) {
 		 			$info[$value] = array(
 		 				'area'=>$value,
@@ -44,7 +47,7 @@ class ActivityController extends ManageBase{
 		 		}
 	 		}
 	 		//首单免
-	 		if($pinfo['type'] == '2'){
+	 		if((int)$pinfo['type'] === 2){
 	 			foreach ($pinfo['area'] as $key => $value) {
 		 			$info[$value] = array(
 		 				'area'=>$value,
@@ -58,7 +61,7 @@ class ActivityController extends ManageBase{
 		 		}
 	 		}
 	 		//限定区域销售
-	 		if($pinfo['type'] == '3'){
+	 		if((int)$pinfo['type'] === 3){
 	 			$card = explode('|',trim($pinfo['card']));
 	 			$info['number'] = $pinfo['number'];
 	 			$info['card'] = $card;
@@ -66,12 +69,12 @@ class ActivityController extends ManageBase{
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
 	 		//组团销售
-	 		if($pinfo['type'] == '4'){
+	 		if((int)$pinfo['type'] === 4){
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
 	 		//多产品套票
-	 		if($pinfo['type'] == '5'){
+	 		if((int)$pinfo['type'] === 5){
 	 			//判断是否选择
 	 			foreach ($pinfo['product'] as $k => $v) {
 	 				$packages[] = [
@@ -87,7 +90,7 @@ class ActivityController extends ManageBase{
 	 			];
 	 		}
 	 		//单场限额
-	 		if($pinfo['type'] == '6'){
+	 		if((int)$pinfo['type'] === 6){
 	 			
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
@@ -108,7 +111,8 @@ class ActivityController extends ManageBase{
 	 			}
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['number'] = $pinfo['number'];
-	 			$info['tody']	= $pinfo['today'];
+	 			$info['today']	= $pinfo['today'];
+	 			$info['pre_model'] = $pinfo['pre_model'] ? $pinfo['pre_model'] : '2';
 	 		}
 	 		$param = array(
 	 			'info' =>  $info,
@@ -138,7 +142,7 @@ class ActivityController extends ManageBase{
 				//产品信息
 				$pinfo = M('Product')->where(array('id'=>$product_id))->find();
 				//判断产品类型
-				if($pinfo['type'] == '1'){
+				if((int)$pinfo['type'] === 1){
 					//剧院 座椅区域信息
 					$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->select();
 					$this->assign('seat',$seat);
@@ -182,7 +186,7 @@ class ActivityController extends ManageBase{
 	 				}
  				}
  			}
-	 		if($pinfo['type'] == '3'){
+	 		if((int)$pinfo['type'] === 3){
 	 			$info['card'] = $actinfo['param']['info']['card'];
 	 			$info['voucher'] = $actinfo['param']['info']['voucher'];
 	 			$info['ticket'] = $actinfo['param']['info']['ticket'];
@@ -221,7 +225,7 @@ class ActivityController extends ManageBase{
 	 		$pinfo = I('post.');
 
 	 		//限定区域销售
-	 		if($pinfo['type'] == '3'){
+	 		if((int)$pinfo['type'] === 3){
 	 			$card = explode('|',trim($pinfo['card']));
 	 			$info['card'] = $card;
 	 			$info['number'] = $pinfo['number'];
@@ -229,12 +233,12 @@ class ActivityController extends ManageBase{
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
 	 		//组团销售
-	 		if($pinfo['type'] == '4'){
+	 		if((int)$pinfo['type'] === 4){
 
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
-	 		if($pinfo['type'] == '6'){
+	 		if((int)$pinfo['type'] === 6){
 	 			//单场限额
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
@@ -248,7 +252,7 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
 	 		}
-	 		//限时秒杀
+	 		//预售
 	 		if((int)$pinfo['type'] === 8){
 	 			if(empty($pinfo['ticket_id']) || empty($pinfo['today'])){
 	 				$this->erun("新增失败,票型或预约天数不能为空!");
@@ -256,6 +260,7 @@ class ActivityController extends ManageBase{
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['number'] = $pinfo['number'];
 	 			$info['today']	= $pinfo['today'];
+	 			$info['pre_model'] = $pinfo['pre_model'];
 	 		}
 	 		//开启范围
 	 		if($pinfo['scope']){
@@ -322,7 +327,7 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
 	 		}
-	 		//dump($info);
+	 		dump($info);
 	 		$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
 			$this->assign('printer',$printer);
 	 		$this->assign('data',$info)->display();

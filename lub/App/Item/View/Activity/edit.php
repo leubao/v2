@@ -157,6 +157,13 @@
           <td>提前预约天数:</td><td colspan="3"><input type="text" name="today" value="{$data.param.info.today}" size="15"><span class="remark">最少提前一天</span></td>
         </tr>
         <tr>
+            <td>预售模型:</td><td colspan="3">
+              <input type="radio" name="pre_model" data-toggle="icheck" value="1" <eq name="data['param']['info']['pre_model']" value="1"> checked</eq> data-label="预约&nbsp;">
+              <input type="radio" name="pre_model" data-toggle="icheck" value="2" <eq name="data['param']['info']['pre_model']" value="2"> checked</eq> data-label="预售&nbsp;">
+              <span class="remark">预约为接单扣款,预售为预扣款</span>
+            </td>
+          </tr>
+        <tr>
           <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="{$data.param.info.ticket}">
     <input type="text" name="ticket.name" readonly value="{$ticket_name}" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
         </tr>

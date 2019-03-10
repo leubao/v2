@@ -681,7 +681,6 @@ class OrderController extends ManageBase{
 		}else{
 			if($ginfo['type'] == '1'){
 				//同意 排座
-				//$status = Order::add_seat($oinfo);
 				$order = new Order();
 				$status = $order->add_seat($oinfo);
 			}else{
