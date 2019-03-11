@@ -62,7 +62,13 @@
         <td>订单金额</td>
         <td>{$info['subtotal']|format_money} </td>
         <td>支付方式</td>
-        <td>{$data.pay|pay}</td>
+        <td>{$data.pay|pay}
+          <select class="required" name="pay" data-toggle="selectpicker">
+            <option value="">请选择</option>
+            <option value="1" <eq name="data.pay" value="1">selected</eq>>现金 </option>
+            <option value="2" <eq name="data.pay" value="2">selected</eq>>授信额</option>
+          </select>
+        </td>
       </tr>
       <tr>
         <td>区域详情</td>

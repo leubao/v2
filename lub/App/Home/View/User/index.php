@@ -1,5 +1,4 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<!DOCTYPE HTML>
 <html lang="zh-CN">
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">

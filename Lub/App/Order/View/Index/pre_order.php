@@ -15,14 +15,15 @@
     
     <input type="text" value="" name="sn" class="form-control" data-rule="length[5~]" size="10" placeholder="单号">&nbsp;
     <select name="status" data-toggle="selectpicker">
-        <option value="">全部</option>
+        <option value="">状态</option>
         <option value="1" <if condition="$status eq '1'">selected</if>>预定成功</option>
         <option value="5" <if condition="$status eq '5'">selected</if>>待审核</option>
-        <option value="2,0" <if condition="$status eq '0'">selected</if>>已作废</option>
+        <option value="2" <if condition="$status eq '2'">selected</if>>待支付</option>
+        <option value="3" <if condition="$status eq '3'">selected</if>>已撤销</option>
     </select>
    &nbsp;
     <select name="pay" data-toggle="selectpicker">
-        <option value="">全部</option>
+        <option value="">支付</option>
         <option value="1" <if condition="$pay eq '1'">selected</if>>现金</option>
         <option value="2" <if condition="$pay eq '2'">selected</if>>授信额</option>
     </select>
@@ -72,7 +73,7 @@
      <tr>
      <td></td><td></td><td align="right">当前页合计:</td>
      <td id="sub-pre-num" align="center">0</td>
-     <td id="sub-pre-money" align="right">0.00</td><td></td><td></td><td></td><td></td><td></td></tr>
+     <td id="sub-pre-money" align="right">0.00</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
     </tbody>
   </table>
 </div>

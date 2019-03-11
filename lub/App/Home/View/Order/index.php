@@ -51,6 +51,13 @@
               </select>
             </div>
             <div class="form-group">
+              <select class="form-control" name="pay">
+                <option value="">支付</option>
+                <option value="1" <eq name="where['pay']" value="1">selected="selected"</eq>>现金</option>
+                <option value="2" <eq name="where['pay']" value="2">selected="selected"</eq>>授信额</option>
+              </select>
+            </div>
+            <div class="form-group">
               <select class="form-control" name="datetype">
                 <option value="1" <if condition="$datetype eq '1'">selected="selected"</if>>下单日期</option>
                 <option value="2" <if condition="$datetype eq '2'">selected="selected"</if>>演出日期</option>
@@ -78,7 +85,7 @@
           <col>
           <col>
           <col>
-          <col>
+          <col width="60px">
           <col width="120px">
           <col width="55px">
           <col width="90px">
@@ -91,6 +98,7 @@
               <td align="center">数量</td>
               <td align="center" class="hidden-xs">金额</td>
               <td align="center" class="hidden-xs">业务员</td>
+              <td align="center" class="hidden-xs">支付</td>
               <td align="center">渠道商</td>
               <td align="center" class="hidden-xs">下单时间</td>
               <td align="center">状态</td>
@@ -108,6 +116,7 @@
                 <td align="center" >{$vo.number}</td>
                 <td align="center" >{$vo.money}</td>
                 <td align="center"  class="hidden-xs">{$vo.user_id|userName=$vo['addsid']}</td>
+                <td align="center">{$vo.pay|pay}</td>
                 <td align="center" ><?php echo D('Home/Crm')->where(array('id'=>$vo['channel_id']))->getField('name');?></td>
                 <td align="center" >{$vo.createtime|date="m-d H:i",###}</td>
                 <td align="center" >{$vo['status']|order_status}</td>
@@ -137,6 +146,7 @@
               <td align="right" >合计:</td>
               <td align="center" >{$info['num']}</td>
               <td align="center" >{$info['money']|format_money}</td>
+              <td align="center" ></td>
               <td align="center" ></td>
               <td align="center" ></td>
               <td align="center" ></td>

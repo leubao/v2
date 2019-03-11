@@ -411,22 +411,6 @@ class WorkController extends ManageBase{
 					$this->erun('失败:'.$bookingModel->getError());
 				}
 				
-				
-
-				
-				// $model = new Model();
-				// $model->startTrans();
-
-				// $up_order = $model->table(C('DB_PREFIX').'order')->where(['order_sn' => $pinfo['sn']])->save($newData);
-				// $states = $model->table(C('DB_PREFIX').'order_data')->where(['order_sn' => $pinfo['sn']])->setField('info',serialize($newInfo));
-				// if($up_order && $states){
-				// 	$model->commit();//提交事务
-				// 	$this->srun("核准成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-				// }else{
-				// 	$model->rollback();//事务回滚
-				// 	$this->erun('核准失败!');
-				// 	return false;
-				// }
 			}
 		    
 
@@ -453,7 +437,6 @@ class WorkController extends ManageBase{
 				//获取当前所有可售计划
 				$plan = D('Plan')->where(['status'=>2,'product_id'=>get_product('id')])->field('id,plantime,starttime,games')->select();
 				$info = json_decode($data['info'],true);
-				dump($info);
 
 				$this->assign('data',$data)
 					->assign('info',$info['info'])
@@ -1375,6 +1358,26 @@ class WorkController extends ManageBase{
 		}
 		$this->display();
 	}
-
-	//打开订单详情,直接编辑区域数量
+	/**
+	 * 取消预约
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2019-03-11T12:10:59+0800
+	 */
+	public function invalid()
+	{
+		$ginfo = I('get.');
+		if(empty($ginfo['id'])){
+			$this->erun("查询条件未知...");
+		}
+		$info = D('Booking')->where(['status'=>5,'order_sn'=>$ginfo['id']])->field('id')->find();
+		if(empty($info)){
+			$this->erun("未找到可操作的定单...");
+		}
+		$status = D('Booking')->where(['status'=>5,'order_sn'=>$ginfo['id']])->setField('status', 3);
+		if($status){
+			$this->srun("撤销成功!",array('tabid'=>$this->menuid.MODULE_NAME));
+		}else{
+			$this->erun("撤销失败...");
+		}
+	}
 }

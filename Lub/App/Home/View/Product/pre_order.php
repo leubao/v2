@@ -301,7 +301,7 @@
       ...
     </div>
   </div>
-</div><?php dump($proconf);?>
+</div>
   <!--弹出窗口 end-->
   <Managetemplate file="Home/Public/footer"/>
   <!--页脚--> 

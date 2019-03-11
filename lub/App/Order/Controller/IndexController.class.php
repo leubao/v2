@@ -26,39 +26,16 @@ class IndexController extends ManageBase {
 	function public_export_order(){
 		$starttime = I('starttime');
 	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
-	    $status = I('status');
-	    $channel_id = I('channel_id');
-	    $user_id = I('user_id');
-	    $plan_id = I('plan_id');
-	    $type = I('type');
-        //限制导出时间范围不能超过60天
+	    //限制导出时间范围不能超过60天
         $check_day = timediff($starttime,$endtime);
         if($check_day['day'] > '60'){
         	$this->erun("亲，一次最多只能导出60天的数据....");
         	return false;
         }
-	    if(!empty($plan_id)){
-				$map['plan_id'] = $plan_id;
-    	}else{
-    		if (!empty($starttime) && !empty($endtime)) {
-	            $starttime = strtotime($starttime);
-	            $endtime = strtotime($endtime) + 86399;
-	            $map['createtime'] = array(array('GT', $starttime), array('LT', $endtime), 'AND');
-	        }else{
-	        	//默认显示当天的订单
-	        	$starttime = strtotime(date("Ymd"));
-	            $endtime = $starttime + 86399;
-	        	$map['createtime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
-	        }
-    	}
-        if(!empty($channel_id)){
-        	$map['channel_id'] = $channel_id;
-        }
-        if(!empty($user_id)){
-        	$map['user_id'] = $user_id;
-        }
-        if(!empty($status)){$map['status'] = array('in',$status);}
-        if(!empty($type)){$map['type'] = $type;}
+        $map = [];
+        $rest = $this->get_order_map();
+		$map = array_merge($rest['map'],$map);
+        
 		$list = M('Order')->where($map)->select();
 		foreach ($list as $k => $v) {
    			$data[] = array(
@@ -81,7 +58,7 @@ class IndexController extends ManageBase {
    			'user'		=>	'下单人',
    			'status'	=>	'状态',
    			'datetime'	=>	'操作时间',
-   		);//dump($data);
+   		);
    		$filename = "订单记录";
    		return \Libs\Service\Exports::getExcel($filename,$headArr,$data);
    		exit;
@@ -113,7 +90,7 @@ class IndexController extends ManageBase {
 	public function team()
 	{
 		$map = [];
-        $map['type'] = ['in','2,4,6'];
+        $map['type'] = ['in','2,4,6,7'];
         $map['status'] = ['in','1,9'];
 		$rest = $this->get_order_map();
 		$map = array_merge($rest['map'],$map);
@@ -199,6 +176,15 @@ class IndexController extends ManageBase {
         	'export'=>	$export_map
         ];
         return $return;
+	}
+	public function pre_order()
+	{
+		$map = [];
+		$rest = $this->get_order_map();
+		$map = array_merge($rest['map'],$map);
+		
+		$this->basePage('Booking',$map,array('createtime'=>'DESC'));
+		$this->display();
 	}
 	/*打印团队接待单*/
 	function team_report()

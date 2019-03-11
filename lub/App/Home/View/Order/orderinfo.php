@@ -33,6 +33,9 @@
     <div class="col-md-6">
       <label>联系人电话：</label>
       {$data['info']['crm']['0']['phone']} </div>  
+    <div class="col-md-6">
+      <label>支付方式：</label>
+      {$data['pay']|pay} </div>  
     <div class="col-md-12">
       <label>备注：</label>
       {$data.remark}</div>

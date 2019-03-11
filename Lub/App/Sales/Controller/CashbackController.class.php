@@ -107,12 +107,13 @@ class CashbackController extends ManageBase{
                         //构建红包基础数据,并发送红包
                         foreach ($redInfo as $k => $v) {
                             if((int)$v['money'] > 0){
-                                $ret = $this->pay_red($v,$itemCof);
+                                $ret = $this->pay_red($v,$itemCof,$info['sn']);
                             }
                         }
                     }else{
-                        $ret = $this->pay_red($info,$itemCof);
-                    }*/
+                        $ret = $this->pay_red($info,$itemCof,$info['sn']);
+                    }
+                    */
                     $ret = $this->pay_red($info,$itemCof,$info['sn']);
                     if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
                         $this->srun($ret['err_code_des'],array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));

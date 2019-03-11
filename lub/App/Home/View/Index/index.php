@@ -1,5 +1,4 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
-<!doctype html>
 <html>
 <head>
 <meta charset="utf-8">

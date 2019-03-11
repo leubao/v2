@@ -327,7 +327,6 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
 	 		}
-	 		dump($info);
 	 		$printer = D('Printer')->where(['status'=>1,'product'=>$this->pid])->field('id,title')->select();
 			$this->assign('printer',$printer);
 	 		$this->assign('data',$info)->display();

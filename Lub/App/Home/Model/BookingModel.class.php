@@ -8,7 +8,7 @@ class BookingModel extends Model {
 	protected $_auto = array(
         array('createtime', 'time', 1, 'function'),
         array('uptime', 'time', 3, 'function'),
-        array('status', '5'),
+        array('status', '2'),
         array('user_id', 'get_user_id', 1, 'function')
     );
 }

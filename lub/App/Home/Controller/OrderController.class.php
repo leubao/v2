@@ -35,6 +35,7 @@ class OrderController extends Base{
         $datetype = I('datetype') ? I('datetype') : '1';
         $status = I('status');
         $sn = I('sn');
+        $pay = I('pay');
         //传递查询时间
         $this->assign('start_time',$start_time)
         	->assign('end_time',$end_time)->assign('datetype',$datetype);
@@ -89,6 +90,9 @@ class OrderController extends Base{
 		if(!empty($sn)){
 			$where['order_sn'] = $sn;
 		}
+		if(!empty($pay)) {
+			$where['pay'] = $pay;
+		}
 		if(!empty($product_id)){ 
 			$where['product_id'] = $product_id;
 		}
@@ -111,6 +115,69 @@ class OrderController extends Base{
 			->assign('product',$product)
 			->assign('export_url',$export_url)
 			->display();
+	}
+	/**
+	 * 预约订单
+	 */
+	public function pre_order()
+	{
+		if (IS_POST) {
+            $this->redirect('home.php?g=home&m=order&a=pre_order', $_POST);
+        }
+		$db = D('Booking');
+		$where = array();
+        $start_time = I('start_time');
+        $end_time = I('end_time');
+        $user_id = I('user');
+        $status = I('status');
+        $sn = I('sn');
+        $pay = I('pay');
+        //传递查询时间
+        $this->assign('start_time',$start_time)
+        	->assign('end_time',$end_time);
+        if(!empty($user_id)){
+        	$where['user_id'] = $user_id;
+        }
+        if (!empty($status)) {
+            $where['status'] = $status;
+        }
+		if(!empty($sn)){
+			$where['order_sn'] = $sn;
+		}
+		if(!empty($pay)) {
+			$where['pay'] = $pay;
+		}
+		if (!empty($start_time) && !empty($end_time)) {
+            $start_time = strtotime($start_time);
+            $end_time = strtotime($end_time) + 86399;
+            $where['createtime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
+        }else{
+        	//查询时间段为空时默认查询未过期的订单
+        	$where['plan_id'] = array('in',implode(',',array_column(get_today_plan(),'id')));
+        }
+        $uinfo = Partner::getInstance()->getInfo();
+        if($uinfo['groupid'] == '3'){
+        	$where =  ['channel_id' =>	$uinfo['cid']];
+        }else{
+        	$where = array(
+				'channel_id' =>	array(in,$this->get_channel()),
+			);
+        }
+		$user = M('User')->where(array('status'=>'1','cid'=>$uinfo['cid']))->field('id,nickname')->select();
+		$count = $db->where($where)->count();
+		$Page  = new \Home\Service\Page($count,20);
+		$show  = $Page->show();
+		$list = $db->where($where)->limit($Page->firstRow.','.$Page->listRows)->order($order)->select();
+		//统计数量和金额
+		$info['num'] = $db->where($where)->sum('number');
+		$info['money'] = $db->where($where)->sum('money');
+		$this->assign('data',$list)
+			->assign('page',$show)
+			->assign('where',$where)
+			->assign('user',$user)
+			->assign('info',$info)
+			->display();
+		
 	}
 	/**
 	 * 订单座位图
@@ -176,6 +243,56 @@ class OrderController extends Base{
 		die(json_encode($return));
 		return true;
 	}
+	function channelBooking()
+	{
+		$pinfo = $_POST['info'];
+		$info = json_decode($pinfo,true);
+		$uInfo = \Home\Service\Partner::getInstance()->getInfo();
+		$order = new \Libs\Service\Order();
+		//活动订单 套票
+		$ginfo = I('get.act');
+		$plan = F('Plan_'.$info['plan_id']);
+		if(empty($plan)){
+			$return = array('statusCode' => '300','msg'=>"销售计划已暂停销售...");
+			die(json_encode($return));
+		}
+		$seat = $order->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],'',2);
+		if(!$seat){
+			$return = array('statusCode' => '300','msg'=>$order->error);
+			die(json_encode($return));
+		}
+		$param = [
+			'info'	=>	$info,
+			'uinfo'	=>	$uInfo,
+			'act'	=>	(int)$ginfo['act']
+		];
+		$sn = get_order_sn($info['plan_id']);
+		$data = [
+			'order_sn'	=>	$sn,
+			'channel_id'=>	$info['crm']['0']['qditem'],
+			'product_id'=>  $plan['product_id'],
+			'plan_id'	=>	$info['plan_id'],
+			'number'	=>	$seat['num'],
+			'money'		=>	$info['subtotal'],
+			'pay'		=>	0,
+			'info'		=>	json_encode($param)
+		];
+		$model = D('Booking');
+		if($model->token(false)->create($data)){
+		    $result = $model->add(); // 写入数据到数据库 
+		    if($result){
+				$return = array('statusCode' => '200','sn'=>$sn);
+			}else{
+				$return = array('statusCode' => '300','sn'=>$sn,'msg'=>$order->error);
+			}
+		}else{
+			$return = array('statusCode' => '300','sn'=>$sn,'msg'=>$model->getError());
+		}
+
+		//记录售票员日报表
+		die(json_encode($return));
+		return true;
+	}
 	/*
 	 *账户余额支付
 	 */
@@ -224,6 +341,27 @@ class OrderController extends Base{
 			return true;
 		}else{
 			return false;
+		}
+	}
+	//
+	public function booking_pay()
+	{
+		if(IS_POST){
+			$pinfo = $_POST['info'];
+			$info = json_decode($pinfo,true);
+			$oinfo = D('Booking')->where(['status'=>2,'order_sn'=>$info['sn']])->field('id')->find();
+			if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300')));}
+			$updata = ['status'=>5,'pay'=>$info['pay_type']];
+			$status = D('Booking')->where(['status'=>2,'order_sn'=>$info['sn']])->save($updata);
+			//返回结果
+			if($status){
+				$return = array('statusCode' => '200','sn'=>$info['sn'],);
+			}else{
+				$return = array('statusCode' => '300','sn'=>$info['sn'],'msg'=>$order->error);
+			}
+			//记录售票员日报表
+			die(json_encode($return));
+			return true;
 		}
 	}
 	/**
