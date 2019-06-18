@@ -19,10 +19,7 @@ use Payment\Client\Query;
 
 
 class IndexController extends ApiBase {
-    function _initialize(){
-      dump("2");
-      parent::_initialize();
-    }
+  
     //获取场次信息
     function api_plan(){
       if(IS_POST){
@@ -75,13 +72,12 @@ class IndexController extends ApiBase {
                       $scena = '52';
                     }
                     $order = new Order();
-                    $sn = $order->orderApi($info,$scena,$appInfo);
-                    //dump($sn);
-                    if($sn){
+                    $reOrder = $order->orderApi($info,$scena,$appInfo);
+                    if($reOrder){
                       $return = array(
                         'code'  => 200,
-                        'info'  => $sn,
-                        'seat'  => sn_seat($sn),
+                        'info'  => $reOrder['order_sn'],
+                        'seat'  => sn_seat($reOrder['order_sn']),
                         'msg'   => 'OK',
                       );
                     }else{
@@ -340,7 +336,7 @@ class IndexController extends ApiBase {
                     $return = array('code' => 200,'info' => $ticket_info,'msg' => '门票信息获取成功');
                   }
                 }else{
-                  $return = array('code' => 411,'info' => '','msg' => '门票信息获取失败');
+                  $return = array('code' => 411,'info' => '','msg' => '门票信息获取失败1');
                 }
               }else{
                 $return = array('code' => 410,'info' => '','msg' => '取票密码错误');
@@ -351,7 +347,7 @@ class IndexController extends ApiBase {
               if($ticket_info != false){
                 $return = array('code' => 200,'info' => $ticket_info,'msg' => '门票信息获取成功');
               }else{
-                $return = array('code' => 411,'info' => '','msg' => '门票信息获取失败');
+                $return = array('code' => 411,'info' => '','msg' => '门票信息获取失败2');
               }
               break;
           }
@@ -429,10 +425,12 @@ class IndexController extends ApiBase {
             $info[] = re_print($plan['id'],$plan['encry'],$v);
           }
           //锁定时间根据门票数量来确定
-          $time = (int)$info['number']*2;
+          $time = (int)$info['number']*1;
           load_redis('setex','lock_'.$sn,'警告:订单正在出票,稍后再试...',$time);
         }
         if(in_array($info['pay'],['1','3','6'])){
+          //return false;
+          
           if($info['money'] == '0'){
             return false;
             //return ['code' => 415,'info' => '','msg' => '订单金额不允许当前操作'];
@@ -443,13 +441,11 @@ class IndexController extends ApiBase {
           }elseif($payQr['code'] == 200){
             $info['code'] = '211';
             $info['qrurl'] = $payQr['info'];
-            $info['pid'] = $info['product_id'];//\Libs\Util\Encrypt::authcode($info['product_id'],'ENCODE');
+            $info['pid'] = $info['product_id'];
+          }else{
+            return false;
           }
           //现金、签单
-          
-         // $pid = \Libs\Util\Encrypt::authcode($info['product_id'],'ENCODE');
-          //生成支付二维码
-         // $info['paypage'] = U('Api/Index/paypage',array('sn'=>$info['order_sn'],'pid'=>$pid)); 
         }
         return $info;
       }
@@ -459,12 +455,12 @@ class IndexController extends ApiBase {
      * @param  string $sn [description]
      * @return [type]     [description]
      */
-    public function getPayQr($info='')
+    public function getPayQr($info='') 
     {
-      $product = product_name($info['product_id'],1);
+      $product = D('Product')->where(['id'=>$info['product_id']])->field('id,name,item_id')->find();
       $payData = [
-        'subject' => $product."门票",
-        'body'    => planShow($info['plan_id'],1,1).$product."门票",
+        'subject' => $product['name']."门票",
+        'body'    => planShow($info['plan_id'],1,1).$product['name']."门票",
         'order_no'    => $info['order_sn'],
         'timeout_express' => time() + 600,// 表示必须 600s 内付款
         'amount'      => $info['money'],// 单位为元 ,最小为0.01
@@ -473,21 +469,16 @@ class IndexController extends ApiBase {
         // 支付宝公有
         'goods_type' => 1,
         'store_id' => '',
-        'client_ip' => get_client_ip(),
-        'sub_appid' => 'wxd40b47548614c936',
-        'sub_mch_id' => '1441589102',
+        'client_ip' => get_client_ip()
       ];
-      /*
+      /**/
       $qr = load_redis('get','qr_sn_'.$info['order_sn']);
-      if($qr){
-        //发起一次查询
-        $return = \Api\Service\Apipay::orderquery('wx_charge',$info['product_id'],['out_trade_no'=>$info['order_sn'],'sub_appid'=>'wxd40b47548614c936','sub_mch_id'=>'1441589102'],2);
-        if($return['state'] == 'SUCCESS'){
-          return ['code' => 500,'msg' => '订单已支付成功,请勿重复操作'];
-        }
-      }*/
-      $qr = \Api\Service\Apipay::get_pay_qr('wx_qr',$info['product_id'],$payData);
-     
+      //发起一次查询 
+      $return = \Api\Service\Apipay::orderquery('wx_charge',$product['item_id'],['out_trade_no'=>$info['order_sn'],'sub_appid'=>'wx9e7b571701cc6601','sub_mch_id'=>'1390172002'],2);
+      if($return['state'] == 'SUCCESS'){
+        return ['code' => 500,'msg' => '订单已支付成功,请勿重复操作'];
+      }
+      $qr = \Api\Service\Apipay::get_pay_qr('wx_qr',$product['item_id'],$payData);
       $sData = serialize(['product_id'=>$info['product_id'],'code_url'=>$qr,'paytype'=>$pinfo['paytype'],'sn'=>$info['order_sn']]);
       load_redis('setex','qr_sn_'.$info['order_sn'],$sData,'9000');
 
@@ -517,10 +508,10 @@ class IndexController extends ApiBase {
         if(in_array($info['status'],['1','9']) && !in_array($info['pay'],['1','3'])){
           $return = array('code' => 412,'info' => '','msg' => '订单已完成支付');
         }else{
-          $product = product_name($info['product_id'],1);
+          $product = D('Product')->where(['id'=>$info['product_id']])->field('id,name,item_id')->find();
           $payData = [
-            'subject' => $product."门票",
-            'body'    => planShow($info['plan_id'],1,1).$product."门票",
+            'subject' => $product['name']."门票",
+            'body'    => planShow($info['plan_id'],1,1).$product['name']."门票",
             'order_no'    => $info['order_sn'],
             'timeout_express' => time() + 600,// 表示必须 600s 内付款
             'amount'      => $info['money'],// 单位为元 ,最小为0.01
@@ -530,12 +521,10 @@ class IndexController extends ApiBase {
             // 支付宝公有
             'goods_type' => 1,
             'store_id' => '',
-            'client_ip' => get_client_ip(),
-            'sub_appid' => 'wxd40b47548614c936',
-            'sub_mch_id' => '1441589102',
+            'client_ip' => get_client_ip()
           ];
           if($pinfo['paytype'] == 'alipay'){
-            $qr = \Api\Service\Apipay::get_pay_qr('ali_qr',$info['product_id'],$payData);
+            $qr = \Api\Service\Apipay::get_pay_qr('ali_qr',$product['item_id'],$payData);
             $sData = serialize(['product_id'=>$info['product_id'],'code_url'=>$qr,'paytype'=>$pinfo['paytype'],'sn'=>$info['order_sn']]);
             load_redis('setex','qr_sn_'.$info['order_sn'],$sData,'9000');
             $return = array('code' => 200,'info' => $qr,'msg' => '等待客户扫码...');
@@ -543,12 +532,15 @@ class IndexController extends ApiBase {
             $qr = load_redis('get','qr_sn_'.$info['order_sn']);
             if($qr){
               //发起一次查询
-              $return = \Api\Service\Apipay::orderquery('wx_charge',$info['product_id'],['out_trade_no'=>$info['order_sn'],'sub_appid'=>'wxd40b47548614c936','sub_mch_id'=>'1441589102'],2);
+              $queryData = [
+                'out_trade_no'=>$info['order_sn']
+              ];
+              $return = \Api\Service\Apipay::orderquery('wx_charge',$product['item_id'],$queryData,2);
               if($return['state'] == 'SUCCESS'){
                 die(json_encode(['code' => 200,'msg' => '订单已支付成功,请勿重复操作']));
               }
             }
-            $qr = \Api\Service\Apipay::get_pay_qr('wx_qr',$info['product_id'],$payData);
+            $qr = \Api\Service\Apipay::get_pay_qr('wx_qr',$product['item_id'],$payData);
             $sData = serialize(['product_id'=>$info['product_id'],'code_url'=>$qr,'paytype'=>$pinfo['paytype'],'sn'=>$info['order_sn']]);
             load_redis('setex','qr_sn_'.$info['order_sn'],$sData,'9000');
             $return = array('code' => 200,'info' => $qr,'msg' => '等待客户扫码...');
@@ -566,24 +558,22 @@ class IndexController extends ApiBase {
         $pinfo = $_POST['data'];
         $pinfo = json_decode($pinfo,true);
         $sn = $pinfo['sn'];
-        //$pid = \Libs\Util\Encrypt::authcode($pinfo['pid'],'DECODE');
         $pid = $pinfo['pid'];
-        //dump($pinfo);
-        //dump($sn);
-        //dump($pid);
         if(empty($sn) || empty($pid)){
           $return = ['code' => 404,'info' => '','msg' => '缺少必要的查询信息'];
         }else{
+          $product = D('Product')->where(['id'=>$pinfo['pid']])->field('id,name,item_id')->find();
           if($pinfo['paytype'] == 'wxpay'){
-            //'sub_appid'=>'wxd40b47548614c936','sub_mch_id'=>'1441589102'
-            $return  = \Api\Service\Apipay::orderquery('wx_charge',$pid,['out_trade_no'=>$sn,'sub_appid'=>'wxd40b47548614c936','sub_mch_id'=>'1441589102']);
+            $queryData = [
+                'out_trade_no'=>$sn
+              ];
+            $return  = \Api\Service\Apipay::orderquery('wx_charge',$product['item_id'],$queryData);
           }
           if($pinfo['paytype'] == 'alipay'){
-            $return  = \Api\Service\Apipay::orderquery('ali_charge',$pid,['out_trade_no'=>$sn]);
+            $return  = \Api\Service\Apipay::orderquery('ali_charge',$product['item_id'],['out_trade_no'=>$sn]);
           }
           if($return['state'] == 'SUCCESS'){
             $info = \Api\Service\Apipay::up_order($sn);
-            //$info = unserialize(load_redis('get','qr_pay_'.$sn));
             if($info['state'] == 'SUCCESS'){
               //单号和手机号
               $return = array('code' => 200,'info' => ['sn'=>$sn,'phone'=>$info['phone']],'msg' => '支付完成,开始打印门票...');
@@ -591,7 +581,7 @@ class IndexController extends ApiBase {
               $return = array('code' => 300,'info' => $qr,'msg' => $info['msg']);
             }
           }else{
-            $return = array('code' => 300,'info' => '','msg' => $return['msg']);
+            $return = array('code' => 300,'info' => '300','msg' => $return['msg']);
           }
         }
       }else{
@@ -604,6 +594,7 @@ class IndexController extends ApiBase {
     * 根据身份号码获取订单列表
     */
    function order_list($sn = null){
+    load_redis('setex', 'snnss', $sn .'1091', 37000);
       if(empty($sn) || checkIdCard($sn) == false){error_insert('400019');return false;}
       $map = array('id_card'=>$sn,'status'=>'1','pay'=>array('in','2,4,5'),'plan_id'=>array('in',normal_plan()));
       $list = M('Order')->where($map)->field('order_sn,phone,number,plan_id')->select();
@@ -751,17 +742,18 @@ class IndexController extends ApiBase {
                 }else{
                   $scena = '52';
                 }
-                $sn = Order::orderApi($info,$scena,$appInfo,$this->if_seat($pinfo['seat'])); 
-                if($sn){
+                $order = new Order;
+                $reOrder = $order->orderApi($info,$scena,$appInfo,$this->if_seat($pinfo['seat']));
+                if($reOrder){
                   $return = array(
                     'code'  => 200,
                     'info'  => array('plan'=>planShow($info['plan_id'],1,1)),
-                    'sn'    => $sn,
-                    'seat'  => sn_seat($sn),
+                    'sn'    => $reOrder['order_sn'],
+                    'seat'  => sn_seat($reOrder['order_sn']),
                     'msg'   => 'OK',
                   );
                 }else{
-                  $return = array('code' => 403,'info' => '','msg' => '订单提交失败');
+                  $return = array('code' => 403,'info' => '','msg' => '订单提交失败'.$order->error);
                 }
               }
             }
@@ -815,7 +807,7 @@ class IndexController extends ApiBase {
         'data'      =>  $oinfo,
         'id_card'   =>  $pinfo['crm']['id_card'],
         'crm'       =>  array('0'=>array('guide'=>$appInfo['id'],'qditem'=>$appInfo['crm_id'],'phone'=>$pinfo['crm']['phone'],'contact'=>$pinfo['crm']['contact'])),
-        'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'],'id_card'=>$pinfo['crm']['id_card'])),
+        'param'     =>  array('0'=>array('tour'=>'0','settlement'=>$appInfo['group']['settlement'],'remark'=>$pinfo['param']['remark'],'id_card'=>$pinfo['crm']['id_card'])),
       );
       return $info;
     }
@@ -836,7 +828,7 @@ class IndexController extends ApiBase {
               if($order_list != false){
                 $return = array('code' => 200,'info' => $order_list,'msg' => '订单列表获取成功');
               }else{
-                $return = array('code' => 411,'info' => '','msg' => '订单列表获取失败');
+                $return = array('code' => 411,'info' => '','msg' => '订单列表获取失败1');
               }
               break;
           }
@@ -1057,9 +1049,9 @@ class IndexController extends ApiBase {
           'app_sn'    =>  $pinfo['sn'],
           'data'      =>  $pinfo['oinfo'],
           'crm'       =>  array('0'=>array('guide'=>$appInfo['id'],'qditem'=>$appInfo['crm_id'],'phone'=>$pinfo['crm']['phone'],'contact'=>$pinfo['crm']['contact'])),
-          'param'     =>  array('0'=>array('tour'=>'0','remark'=>$pinfo['param']['remark'],'settlement'=>$appInfo['group']['settlement'])),
+          'param'     =>  array('0'=>array('tour'=>'0','settlement'=>$appInfo['group']['settlement'],'remark'=>$pinfo['param']['remark'])),
         );
-       // dump($appInfo);
+        //dump($pinfo['param']);
         return $info;
     }
 
@@ -1068,7 +1060,7 @@ class IndexController extends ApiBase {
         $plan = F('Plan_'.$pinfo['plan']);
         //重组座位
         $seat = Order::area_group($pinfo['oinfo'],$plan['product_id'],$appInfo['group']['settlement']);
-        dump($seat);
+        
         $ticketType = F("TicketType".$plan['product_id']);
         foreach ($seat['area'] as $k => $v) {
           foreach ($v['seat'] as $ke => $va) {
@@ -1091,41 +1083,7 @@ class IndexController extends ApiBase {
       # code...
     }
 
-    function api_topup()
-    {
-
-      $model = new \Think\Model();
-      $model->startTrans();
-      //判断是企业还是个人1企业4个人
-      $crmData = array('cash' => array('exp','cash+'.$cash),'uptime' => time());
-      if($channel == '1'){
-        //渠道商客户
-        $c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
-      }
-      if($channel == '4'){
-        //个人客户
-        $c_pay = $model->table(C('DB_PREFIX')."user")->where(array('id'=>$id))->setField($crmData);
-      }
-      //充值成功后，添加一条充值记录
-      $data = array(
-        'cash'    =>  $cash,
-        'user_id' =>  get_user_id(),
-        'crm_id'  =>  $id,
-        'type'    =>  '1',
-        'balance' =>  balance($id,$channel),
-        'tyint'   =>  $channel,//客户类型1企业4个人
-        'remark'  =>  $remark,
-        'createtime'=>  time(),
-      );    
-      $recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
-      if($c_pay && $recharge){
-        $model->commit();//成功则提交
-        $this->srun('充值成功!',array('dialogid'=>'checkcash','closeCurrent'=>true));
-      }else{
-        $model->rollback();//不成功，则回滚
-        $this->erun("充值失败!");
-      }
-    }
+    
     
     
    /*更新订单票型
@@ -1267,11 +1225,160 @@ class IndexController extends ApiBase {
       $datetime = '20160816';
 
       $list = \Libs\Service\ReportSum::summary($datetime);
-      dump($list);
+      //dump($list);
     }
   /*****************************第三方支付******************************/
   public function notify(){
     //use Payment\Common\PayException;
    // use Payment\Client\Notify;
+  }
+  public function ticket()
+  {
+    $sn = I('get.sn');
+    if(empty($sn)){
+      $class = 'error';
+    }else{
+      $ticket = \Libs\Service\Ticket::createTicket($sn);
+      if($ticket['status']){
+        $class = 'success';
+      }else{
+        $class = 'error';
+      }
+    }
+    $this->assign('class',$class);
+    $this->assign('ticket',$ticket);
+    $this->display();
+  }
+  public function cancel()
+  {
+    if(IS_POST){
+      $pinfo = I('post.');
+      if($pinfo['type'] == 'sn'){
+        $order = D('Order')->where(['order_sn'=>$pinfo['sn']])->field('plan_id,number,status')->find();
+        if(empty($order)){
+          $return = [
+            'status'=> false,
+            'code'  => 1000,
+            'data'  => [],
+            'msg'   => '未找到有效订单信息'
+          ];
+          die(json_encode($return)); 
+        }
+        $count = D('Scenic')->where(['order_sn'=>$pinfo['sn'],'status'=>2])->count();
+        if($count > 0){
+          $ticket = D('Scenic')->where(['order_sn'=>$pinfo['sn'],'status'=>2])->field('order_sn,price_id,ciphertext,plan_id,id')->select();
+          if(!empty($ticket)){
+            foreach ($ticket as $k => $v) {
+              $tickets[] = [
+                'sn'    =>  $v['order_sn'],
+                'price' =>  ticketName($v['price_id'],1),
+                'plan'  =>  planShow($v['plan_id'],2,1),
+                'ticket'=>  $v['ciphertext'], 
+                'id'    =>  $v['id'],
+              ];
+            }
+          }
+        }
+        $return = [
+          'status'=> true,
+          'code'  => 0,
+          'data'  => [
+            'sn'    => $pinfo['sn'],
+            'plan'  => planShow($order['plan_id'],2,1),
+            'number'=> $order['number'],
+            'count' => $count,
+            'ticket'=> $tickets ? $tickets : []
+          ]
+        ];
+        die(json_encode($return));
+      }
+    }else{
+      $this->display();
+    }
+  }
+  public function checkin()
+  {
+    if(IS_POST){
+      $pinfo = I('post.');
+      $upTicket = [
+        'status'    =>  99,
+        'checktime' =>  time()
+      ];
+      if($pinfo['type'] == 'all'){
+        //全部核销
+        $ticket = D('Scenic')->where(['order_sn'=>$pinfo['sn'],'status'=>2])->setField($upTicket);
+        $order = D('Order')->where(['order_sn'=>$pinfo['sn']])->setField('status',9);
+        if($ticket && $order){
+          $count = D('Scenic')->where(['order_sn'=>$pinfo['sn'],'status'=>99])->count();
+          $return = [
+            'status'=> true,
+            'code'  => 0,
+            'data'  => [
+              'count' => $count,
+            ],
+            'msg'   =>  '成功核销'.$ticket.'张'
+          ];
+          die(json_encode($return));
+        }else{
+          $return = [
+            'status'=> false,
+            'code'  => 1000,
+            'data'  => [
+              'count' => $count,
+            ],
+            'msg'   =>  '核销失败,请重试'
+          ];
+          die(json_encode($return));
+        }
+      }
+      if($pinfo['type'] == 'small'){
+        
+        foreach ($pinfo['info'] as $k => $v) {
+          $ticId[] = $v['id'];
+        }
+        $id = implode(',',$ticId);
+        $where = [
+          'order_sn'  =>  $pinfo['sn'],
+          'id'        =>  ['in',$id]
+        ];
+        $count = D('Scenic')->where(['order_sn'=>$pinfo['sn'],'status'=>2])->count();
+        if($count == 0){
+          $return = [
+            'status'=> false,
+            'code'  => 1000,
+            'data'  => [
+              'count' => $count,
+            ],
+            'msg'   =>  '核销失败,未找到可核销的门票'
+          ];
+          die(json_encode($return));
+        }
+        $number = count($pinfo['info']);
+        $ticket = D('Scenic')->where($where)->setField($upTicket);
+        if($count == $number){
+          $order = D('Order')->where(['order_sn'=>$pinfo['sn']])->setField('status',9);
+        }
+        $more = $count - $number;
+        if($ticket){
+          $return = [
+            'status'=> true,
+            'code'  => 0,
+            'data'  => [
+              'count' => $number,
+            ],
+            'msg'   =>  '成功核销'.$number.'张,剩余可核销'.$more."张"
+          ];
+          die(json_encode($return));
+        }else{
+          $return = [
+            'status'=> false,
+            'code'  => 0,
+            'data'  => [],
+            'msg'   =>  '核销失败,请重试'
+          ];
+          die(json_encode($return));
+        }
+      }
+    }
   }
 }
