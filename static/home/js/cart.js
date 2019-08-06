@@ -204,44 +204,40 @@ $(function(){
       });
       //检测总数
       if(nums <= PRO_CONF.channel_order){
-       	  //判断配额
-      	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums+"&plan="+plan, function(data){
-      		if(data != 0){
-      		  var result = $.parseJSON(data);
-      		  if(result.statusCode == "0"){
-      			$("#error").text("配额不足，请联系渠道负责人!");
-      			$("#myModal2").modal('show');  //出票失败的提示
-      		  }else{
-      			  /*获取支付相关数据 */
-      			  var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
-      			  var itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客 导游的id*/
-      			  var checkinT = 1;
-      			  crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-      			  param = '{"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","id_card":"'+id_card+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
-      			  var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}'; 
-      			  /*提交到服务器*/
-      			  $.ajax({
-      			    type:'POST',
-      			    url:'index.php?g=Home&m=Order&a=channelPost',
-      			    data:postData,
-      			    dataType:'json',
-      			    success:function(data){
-      				  	if(data.statusCode == "200"){
-      				  	  $("#myModal").modal('show');
-      				  	  money();
-      				  	  var total = $("#subtoal",window.parent.document).html();
-      				  	  $("#totalcash").text(total);
-      				  	  $("#tomoney").attr('value',total);
-      				  	  $("#sn").attr('value',data.sn);
-      				  	}else{
-      				  	  $("#error").text("订单创建失败!");
-      				  	  $("#myModal2").modal('show');  //出票失败的提示
-      				  	}
-      			    }
-      			  });
-      		  }
-      		}
-      	  });
+      	if(PRO_CONF.quota > 0){
+      		if(checkQuota(nums, plan)){
+	      		//配额不足
+	      		layer.msg("配额不足，请联系渠道负责人!");
+	      		return false;
+	      	}
+      	}
+      	/*获取支付相关数据 */
+		var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
+		var itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客 导游的id*/
+		var checkinT = 1;
+		crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
+		param = '{"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","id_card":"'+id_card+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}'; 
+		/*提交到服务器*/
+		$.ajax({
+			type:'POST',
+			url:'index.php?g=Home&m=Order&a=channelPost',
+			data:postData,
+			dataType:'json',
+			success:function(data){
+			  	if(data.statusCode == "200"){
+			  	  $("#myModal").modal('show');
+			  	  money();
+			  	  var total = $("#subtoal",window.parent.document).html();
+			  	  $("#totalcash").text(total);
+			  	  $("#tomoney").attr('value',total);
+			  	  $("#sn").attr('value',data.sn);
+			  	}else{
+			  	  $("#error").text("订单创建失败!");
+			  	  $("#myModal2").modal('show');  //出票失败的提示
+			  	}
+			}
+		});
       }else{
 	  	layer.msg("超出单笔订单门票总数限额...");
       }
@@ -331,10 +327,10 @@ $(function(){
 	        }
         });
 
-        if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
-        	layer.msg("低于单笔订单最少预订数...");
-	        return false;
-		}
+  //       if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
+  //       	layer.msg("低于单笔订单最少预订数...");
+	 //        return false;
+		// }
         if(nums <= PRO_CONF.channel_order){
 		  /*获取支付相关数据*/
 		  var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
@@ -449,50 +445,47 @@ $(function(){
           toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
         }
       });
-      if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
-    	layer.msg("低于单笔订单最少预订数...");
-        return false;
-	  }
+   //    if(USER_INFO.group.param.quota > 0 && nums < USER_INFO.group.param.quota){
+   //  	layer.msg("低于单笔订单最少预订数...");
+   //      return false;
+	  // }
       if(nums <= PRO_CONF.channel_order){
-      	  //判断配额
-      	  $.get("index.php?g=Home&m=Product&a=quota&num="+nums+"&plan="+plan, function(data){
-      		if(data != 0){
-      		  var result = $.parseJSON(data);
-      		  if(result.statusCode == "0"){
-      			layer.msg("配额不足，请联系渠道负责人!");
-      		  }else{
-      			/*获取支付相关数据*/
-				var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
-      			    itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客导游的id*/
-					checkinT = 1,
-					pre	= 1,
-					gov	= 1,
-					param = "";/*付款但不排座*/
-					crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
-					param = '{"pre":'+pre+',"gov":'+gov+',"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
-				var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
-				/*提交到服务器*/
-				$.ajax({
-					type:'POST',
-					url:'index.php?g=Home&m=Order&a=channelPost',
-					data:postData,
-					dataType:'json',
-					success:function(data){
-						if(data.statusCode == "200"){
-						  $("#myModal").modal('show');
-				  	  	  var total = $("#subtoal",window.parent.document).html();
-				  	  	  $("#totalcash").text(total);
-				  	  	  $("#tomoney").attr('value',total);
-				  	  	  $("#sn").attr('value',data.sn);
-						}else{
-						  $("#error").text("订单创建失败!");
-						  $("#myModal2").modal('show');  //出票失败的提示
-						}
-					}
-				});
-      		  }
-      		}
-      	  }); 
+      	if(PRO_CONF.quota > 0){
+      		if(checkQuota(nums, plan)){
+	      		//配额不足
+	      		layer.msg("配额不足，请联系渠道负责人!");
+	      		return false;
+	      	}
+      	}
+      	/*获取支付相关数据*/
+		var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
+		    itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客导游的id*/
+		checkinT = 1,
+		pre	= 1,
+		gov	= 1,
+		param = "";/*付款但不排座*/
+		crm = '{"guide":'+guide+',"qditem":'+itemid+',"phone":'+vMobile+',"contact":"'+vmima+'"}';
+		param = '{"pre":'+pre+',"gov":'+gov+',"tour":'+tour+',"city":'+city+',"remark":"'+remark+'","guide_black":"'+guide_black+'","settlement":"'+USER_INFO.group.settlement+'"}';
+		var postData = 'info={"subtotal":'+parseFloat($("#subtoal").html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"data":['+ toJSONString + '],"crm":['+crm+'],"param":['+param+']}';
+		/*提交到服务器*/
+		$.ajax({
+			type:'POST',
+			url:'index.php?g=Home&m=Order&a=channelPost',
+			data:postData,
+			dataType:'json',
+			success:function(data){
+				if(data.statusCode == "200"){
+				  $("#myModal").modal('show');
+				  	  var total = $("#subtoal",window.parent.document).html();
+				  	  $("#totalcash").text(total);
+				  	  $("#tomoney").attr('value',total);
+				  	  $("#sn").attr('value',data.sn);
+				}else{
+				  $("#error").text("订单创建失败!");
+				  $("#myModal2").modal('show');  //出票失败的提示
+				}
+			}
+		});
       }else{
       	layer.msg("超出单笔订单门票总数限额...");
       }
@@ -984,6 +977,23 @@ function checkPhone(mobile) {
 	} else {
 		return false;
 	}
+}
+function checkQuota(nums, plan) {
+	var boolean = false;
+	$.ajax({
+		type:'GET',
+		url:"index.php?g=home&m=product&a=quota&num="+nums+"&plan="+plan,
+		dataType:'json',
+		async: false,
+		success:function(data){
+		  if(data.statusCode == 0){
+			boolean = true;
+		  }else{
+			boolean = false;
+		  }
+		}
+	});
+	return boolean;
 }
 /*黑名单校验*/
 function black(phone){

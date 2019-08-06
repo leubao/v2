@@ -1,11 +1,19 @@
 <?php if (!defined('LUB_VERSION')) exit(); ?>
 <div class="bjui-pageHeader"> 
   <!--工具条 s-->
-  <Managetemplate file="Common/Nav"/>
+  <div class="toolBar">
+    <div class="btn-group" role="group" aria-label="操作栏">
+      <input id="cradarr" type="hidden" name="card.name" value="">
+      <a type="button" class="btn btn-success" data-toggle="lookupbtn" data-url="{:U('Manage/Index/public_collect_idcard');}" data-group="card" data-width="800" data-height="400" data-id="collect_idcard" data-mask="true" id="realToTicket" data-icon="credit-card"> 使用身份证阅读器</a>
+    </div>
+    <div class="btn-group f-right" role="group">
+      <a href="javascript:;" onclick="$(this).navtab('refresh');" class="btn btn-default" data-placement="bottom" data-toggle="tooltip" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>
+    </div>
+  </div>
   <!--帮助 说明-->
 </div>
 <div class="bjui-pageContent">
-  <div class="col-md-4">
+  <div style="width:450px; float: left; margin-right: 10px; height:100%">
     <div class="panel panel-default">
       <div class="panel-heading">
         <input type="text" data-toggle="datepicker" id="plantime" data-pattern="yyyy-MM-dd" value="{$today}" name="plantime" size="11">
@@ -27,6 +35,7 @@
 
           </tbody>
       </table>
+
     </div>
   </div>
   <div style="width:450px;float: left;">
@@ -48,12 +57,12 @@
         </tr>
     </table>
   </div>
-  <div style="margin-left:14px; width:400px;  height: auto; float: left; overflow:hidden;">
+  <div style="width:450px;  height: auto; float: left; overflow:hidden;" class="mt20">
         <table class="table table-bordered">
             <tbody id='promotions-crm'>
-            <if condition="$type eq '2'">
+            <if condition="$data['is_team'] eq 2">
             <tr>
-                <td align='right'>导游:</td>
+                <td align='right'>导游:{$data['is_team']}</td>
                 <td><input type="hidden" name="user.id" value="">
                     <input type="text" name="user.name" disabled value="" size="20" data-toggle="lookup" data-url="{:U('Manage/Index/public_user',array('type'=>5,'ifadd'=>2));}" data-group="user" data-width="600" data-height="445" data-title="导游" placeholder="导游">
                 </td>
@@ -107,11 +116,13 @@
         <li><button type="button" class="btn btn-default" data-toggle="navtab" data-id="{$menuid}Item" data-url="{:U('Item/Promotions/index',array('menuid'=>$menuid))}" data-title="促销活动" data-icon="reply-all">返回</button></li>
     </ul>
 </div>
+<script src="{$config_siteurl}static/js/socket.io.js"></script>
 <script type="text/javascript">
 $(document).ready(function(){
   var plan = '',
       actid = {$data.id},
-      planId = '';
+      planId = '',
+      cardArr = [];
   activity_plan($("#plantime").val());
   $('#plantime').on('afterchange.bjui.datepicker', function(e, data) {
       activity_plan(FormatDate(data.value));
@@ -121,7 +132,6 @@ $(document).ready(function(){
   //获取日期，加载销售计划自动加载默认选框
   plan = $('#promotions_plan').children('option:selected').val();
   if(isNull(plan)){
-    console.log(plan);
     getActivtyPrice(plan,actid,1,2);
   }else{
     var error_msg = "<tr><td style='padding:15px;' colspan='6' align='center'><strong style='color:red;font-size:48px;'>未找到可售票型</strong></td></tr>";
@@ -149,13 +159,29 @@ $(document).ready(function(){
         if(falg){
             $(this).alertmsg('error', '票型已选择!若要继续添加,请直接改变票型数量');
         }else{
-           var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='' size='20' class='form-control idcard' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
-           $('#promotions-price-select').append(row);
-           //$(this).tabledit('add', $('#promotions_table'), 1);
+          // 判断身份证采集容器中是否有数据，有数据直接按照当前循环
+          if (cardArr.length > 0) {
+            for(var j = 0, len = cardArr.length; j < len; j++){
+              var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='"+cardArr[j]+"' size='20' class='form-control idcard' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
+              $('#promotions-price-select').append(row);
+            }
+          } else {
+            console.log('2');
+            var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='' size='20' class='form-control idcard' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
+            $('#promotions-price-select').append(row);
+          }
         }
         //计算合计金额
         $("#promotions-total").html(total());
   });
+  //身份证采集结果
+  $('#cradarr').on('afterchange.bjui.lookup', function(e, data) {
+      var cardStr = data.value;
+      if(!cardStr){
+        $(this).alertmsg('error','未找到有效的身份证号码!');
+      }
+      cardArr = cardStr.split('|');
+  })
 });
 function total(){
     var sum = 0;
@@ -193,7 +219,7 @@ function promotions_server(){
         $(this).alertmsg('error','请选择要售出的票型!');
         return false;
     }
-    <?php if($type == '2'){?>
+    <?php if((int)$data['is_team'] === 2){?>
         guide = $("#promotions-crm input[name='user.id']").val(),
         qditem = $("#promotions-crm input[name='channel.id']").val();
         if(phone == '' || contact == '' || guide == '' || qditem == ''){
@@ -233,12 +259,56 @@ function promotions_server(){
         var idcard = idcardList[i];
         toJSONString = toJSONString + '{"areaId":'+$(this).data("area")+',"priceid":' +$(this).data("id")+',"price":'+parseFloat($(this).data('price')).toFixed(2)+',"idcard":"'+idcard+'","num":"'+$("#promotions-num-"+$(this).data("id")).val()+'"}'+fg;
     });
-    //console.log(toJSONString);
     /*获取支付相关数据*/
     pay = '{"cash":'+parseFloat($('#promotions-total').html())+',"card":0,"alipay":0}';
     param = '{"remark":"'+remark+'","settlement":"'+settlement+'","activity":"'+activety+'","is_pay":"'+is_pay+'"}';
     crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":'+phone+',"contact":"'+contact+'"}';
     postData = 'info={"subtotal":'+parseFloat($('#promotions-total').html())+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
     post_server(postData,url,'activity');
+    $(this).navtab('reload');
+}
+
+$("#realToTicket").on('click',function(){
+  //判断当前设备是否授权
+  var sadmin = '';//sessionStorage.getItem('sadmin');
+  var samidJsonUrl = 'http://127.0.0.1:8080/api/GetSAMID';
+  if(!sadmin){
+    $.ajax({
+      url: samidJsonUrl,
+      type: 'GET',
+      dataType: 'JSON',
+      success: function (res) {
+        if(res.retcode = '0x90'){
+          checkEqui(res.retmsg)
+        } else {
+          $(this).alertmsg('error',"error:未检测到有效设备,请检查硬件设备~");
+        }
+      },
+      error: function (e) {
+        $(this).dialog('close','collect_idcard');
+        $(this).alertmsg('error', 'error:未检测到有效设备,请检查硬件设备~');
+      }
+    })
+  }
+});
+function checkEqui(cardMi){
+  $.ajax({
+    url: 'https://api.pro.alizhiyou.com/eauth/idcard',
+    type: 'POST',
+    dataType: 'JSON',
+    data: {'type':2,'mi':cardMi},
+    success: function (res) {
+      if(res.status){
+        sessionStorage.setItem('sadmin', cardMi);
+      } else {
+        $(this).dialog('close','collect_idcard');
+        $(this).alertmsg('error',"error:未检测到有效设备,请检查硬件设备~");
+      }
+    },
+    error: function (e) {
+      $(this).dialog('close','collect_idcard');
+      $(this).alertmsg('error','错误');
+    }
+  })
 }
 </script> 

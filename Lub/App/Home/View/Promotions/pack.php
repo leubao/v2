@@ -346,7 +346,7 @@ $(function() {
 
     if($(".contact_input").css("display") == "block"){
       vMobile = $("#phone").val();
-      if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+      if (!checkPhone(vMobile)) {
         rstr += "手机格式不正确!";
       } 
       vmima = $("#contacts").val();
@@ -388,8 +388,10 @@ $(function() {
         $("#cart tr").each(function(i){
             var fg  = i+1 < length ? ',':' ';
             var ids = this.id.split("_");
+            var area = $("#areaid"+ids[1]).val();
+
             nums = parseInt(nums)+parseInt($("#qnum_"+ids[1]).val());
-            toJSONString = toJSONString + '{"areaId":'+$("#areaid"+ids[1]).val()+',"priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
+            toJSONString = toJSONString + '{"areaId":"'+$("#areaid"+ids[1]).val()+'","priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
         });
         
         /*获取支付相关数据 */

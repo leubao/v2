@@ -379,7 +379,7 @@ $(function() {
 
     if($(".contact_input").css("display") == "block"){
       vMobile = $("#phone").val();
-      if (!vMobile.match(/^((1[3,5,8][0-9])|(14[5,7])|(17[0,3,6,7,8]))\d{8}$/)) {
+      if (!checkPhone(vMobile)) {
         rstr += "手机格式不正确!";
       } 
       vmima = $("#contacts").val();
