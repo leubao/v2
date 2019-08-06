@@ -71,6 +71,7 @@ class FinancialController extends ManageBase{
 	    $channel = I('channel_id');
 	    $channelname = I('channel_name');
 	    $is_check = I('is_check') ? I('is_check') : '1';
+	    $work = I('work') ? I('work') : '1';
 	    //传递条件
 	    $this->assign('starttime',$start_time);
         $this->assign('endtime',$end_time);
@@ -89,6 +90,11 @@ class FinancialController extends ManageBase{
         if(!empty($channel)){
         	$map['channel_id'] = array('in',agent_channel($channel,2));
         }
+        if($work == '2'){
+			$map['price_id'] = array('not in',zero_ticket());
+		}elseif($work == '3'){
+			$map['price_id'] = array('in',zero_ticket());
+		}
         //设置订单类型为团队或渠道
         //按照客户分组来统计报表 TODO 政企订单不计算在内
         $map['type'] = array('in','2,4,7');
@@ -126,7 +132,7 @@ class FinancialController extends ManageBase{
 		//G('end');
 		//echo G('begin','end').'s';
 		//echo G('begin','end','m').'kb';
-		$this->assign('type',$type)->assign('product_id',$map['product_id'])->assign('is_check',$is_check)->display();
+		$this->assign('type',$type)->assign('product_id',$map['product_id'])->assign('is_check',$is_check)->assign('work',$work)->display();
 	}
 	/**
 	 * 渠道返佣计算
@@ -258,8 +264,8 @@ class FinancialController extends ManageBase{
 	        if(!empty($pinfo['user'])){
 				$map['user_id'] = $pinfo['user'];
 	        }
-	    	//获取订单
-			$list = Report::strip_order($map,date('Ymd',$starttime),2);
+	    	//获取订单 
+			$list = Report::strip_order($map, date('Ymd',$starttime),2);
 			//构造报表生成数据
 			$list = Report::operator($list);
 			$list = Report::day_fold($list,$work);

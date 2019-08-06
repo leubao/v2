@@ -90,7 +90,8 @@ class PromotionsController extends Base{
 			default:
 				break;
 		}
-		$this->public_info_conf();
+		$this->public_info_conf();		$this->public_info_conf();
+
 		//售票类型
 		$pinfo = I('get.');
 		$today = date('Y-m-d');
@@ -105,7 +106,7 @@ class PromotionsController extends Base{
 	function public_get_act_price(){
 		//活动ID
 		$ginfo = I('get.');
-		$info = D('Activity')->where(['id'=>$ginfo['id']])->field('param')->find();
+		$info = D('Activity')->where(['id'=>$ginfo['id']])->field('id,type,param')->find();
 		$param = json_decode($info['param'],true);
 		//读取活动票型
 		$plan = F('Plan_'.$ginfo['planid']);
@@ -116,10 +117,19 @@ class PromotionsController extends Base{
 			);
 			die(json_encode($return));
 		}
-		$where = array('plan_id'=>$ginfo['planid'],'product_id'=>$plan['product_id'],'status'=>array('in','2,99,66'));
-		$number = D('Scenic')->where($where)->count();
-        $area_num = $plan['quotas'] - $number;
+		
+		if((int)$param['type'] === 6){
+			$where = array('plan_id'=>$ginfo['planid'],'activity'=>$info['id'],'product_id'=>$plan['product_id'],'status'=>array('in','2,99,66'));
+			$quotas = $param['number'];
+			$number = D('Scenic')->where($where)->count();
+		}else{
+			$where = array('plan_id'=>$ginfo['planid'],'product_id'=>$plan['product_id'],'status'=>array('in','2,99,66'));
+			$quotas = $plan['quotas'];
+			$number = D('Scenic')->where($where)->count();
+		}
+        $area_num = $quotas - $number;
         $area_nums = $number;
+
 		$price = [
 			'title'		=>	$param['title'],
 			'price'		=>	$param['price'],
