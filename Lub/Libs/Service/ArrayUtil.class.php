@@ -11,7 +11,7 @@ class ArrayUtil extends \Libs\System\Service {
      * 设置签名
      * @author helei
      */
-    public function setSign()
+    public function setSign($data)
     {
         $values = ArrayUtil::removeKeys($data, ['sign']);
 
@@ -146,7 +146,7 @@ class ArrayUtil extends \Libs\System\Service {
      * @param string $appeky app秘钥
      * @return string
      */
-    protected function makeSign($signStr,$appkey)
+    protected function makeSign($signStr,$appkey='')
     {
         $signStr .= '&key=' . $appkey;
         $sign = md5($signStr);

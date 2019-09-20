@@ -80,4 +80,40 @@ class Encry extends \Libs\System\Service {
     	$crc32 = dechex($code);
     	return $crc32;
     }
+
+    static public function toQrData($id,$orderid,$plan_id,$print='1')
+    {
+        $string = $id.$orderid.$plan_id.$print;
+
+        //计算校验位
+        $digit = creatCheckDigit($string);
+        $code = [
+            $id,
+            $orderid,
+            $plan_id,
+            $print,
+            $digit
+        ];
+        $sn = putIdToCode($code, 12);
+        return $sn;
+    }
+    //获取二维码加密解密
+    static public function getQrData($value)
+    {
+        //解密
+        $qrInfo = getCodeToId($value, 12);
+        $position = array_key_last($qrInfo);
+        $string = '';
+        foreach ($qrInfo as $k => $v) {
+            if($k < $position){
+                $string .= $v;
+            }
+        }
+        //校验
+        if((int)$qrInfo[$position] === (int)creatCheckDigit($string)){
+            return $qrInfo;
+        }else{
+            return false;
+        }
+    }
 }

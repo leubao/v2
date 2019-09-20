@@ -20,14 +20,27 @@ class PlanModel extends Model{
 	 */
 	function add_plan($data = null){
 		if (empty($data)) {return false;}
-        $plantime = strtotime($data['plantime']);
+        $plantime = strtotime($data['plantime']);//dump($data);
 		//判断场次是否已存在
 		if($data['product_type'] == '1'){
-			$starttime = $data['plantime'].' '.$data['starttime'];
-			$starttime = strtotime($starttime);
-			$endtime = $data['plantime'].' '.$data['endtime'];
-			$endtime = strtotime($endtime);
-			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$data['games'])){
+			//是否模板
+			if($data['addType'] == 'batch'){
+				$tpl = D('Tplfield')->where(['id'=>$data['tplid']])->find();
+				$starttime = $data['plantime'].' '.$tpl['start'];
+				$starttime = strtotime($starttime);
+				$endtime = $data['plantime'].' '.$tpl['end'];
+				$endtime = strtotime($endtime);
+				$games = $tpl['number'];
+				$data['games'] = $tpl['number'];
+			}else{
+				$starttime = $data['plantime'].' '.$data['starttime'];
+				$starttime = strtotime($starttime);
+				$endtime = $data['plantime'].' '.$data['endtime'];
+				$endtime = strtotime($endtime);
+				$games = $data['games'];
+			}
+			
+			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$games)){
 				return false;
 			}
 		}
@@ -611,7 +624,7 @@ sql;
         	//缓存
         	F('Plan_'.$rs['id'], $rs);
         	//缓存可售列表
-        	$plan[] = $rs['id']; 
+        	$plan[] = $rs['id'];
         }
         F('planlist',implode(',',$plan));
         //S('planlist',json_encode($plan));
@@ -665,6 +678,46 @@ sql;
     	}
 
     	return true;
+   	}
+   	//同步推送到阿里智游
+	public function toAlizhiyouPlan($id, $productId, $type = 'add')
+	{
+		$product = D('Product')->where(['id'=>$productId])->field('id,idCode')->find();
+
+		$plan = $this->get_alizhiyou_plan($id);
+		$postData = [
+			'product'	=>  $product['idcode'],
+			'plan'		=>	[$plan]
+		];
+        vendor('Hprose.HproseHttpClient');
+        $client = new \HproseHttpClient('https://api.pro.alizhiyou.com/open/yunlu/start', false);
+        $result = $client->post_plan($postData);
+        load_redis('lpush','yunlu_plan', date('Y-m-d H:i:s').json_encode($result));
+        return $result;
+	}
+   	public function get_alizhiyou_plan($id)
+   	{
+   		$plan = D('Plan')->where(['id'=>$id])->find();
+   		$postData = [];
+   		if(!empty($plan)){
+			$param = unserialize($plan['param']);
+			//1未授权2售票中3暂停销售4已过期
+			if(in_array($plan['status'], ['1','3','4'])){
+				$status = false;
+			}else{
+				$status = true;
+			}
+	        $postData = [
+	          'id'        =>  $plan['id'],
+	          'plantime'  =>  $plan['plantime'],
+	          'starttime' =>  $plan['starttime'],
+	          'endtime'   =>  $plan['endtime'],
+	          'ticket'    =>  $param['ticket'],
+	          'status'	  =>  $status
+	        ];
+   		}
+   		
+        return $postData;
    	}
    	/**
    	 * 销毁过期内存存储

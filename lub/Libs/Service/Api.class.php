@@ -36,14 +36,14 @@ class Api extends \Libs\System\Service {
     * @param $param array 当前APP的全部信息
     * return array  
     */
-    function plans($param = null,$uinfo = ''){
+    function plans($param = null, $uinfo = ''){
         if(empty($param)){return false;}
         $product = $param['product'];
         $proArr = explode(',', $product);
         foreach ($proArr as $k=>$v){
             $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname')->select();
             if($list[$v] != false){
-                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC,games ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->select();
+                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC,games ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->limit(7)->select();
             }
         }
         load_redis('set','2123',json_encode($uinfo));

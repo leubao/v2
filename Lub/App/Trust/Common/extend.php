@@ -26,4 +26,13 @@ function showReturnCode($status = false, $code = '1002', $data = [], $count = ''
     //return json_encode($return_data);
     return json($return_data);
 }
-/**/
+
+function ticketStatus($value='')
+{
+    $arr = [
+        0 => '未售出',
+        2 => '未使用',
+        99 => '已使用'
+    ];
+    return $arr[$value];
+}

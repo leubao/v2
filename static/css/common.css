@@ -94,6 +94,7 @@
 /*自定义*/
 table.td50 td{height: 50px;}
 .mt20{margin-top: 20px;}
+.m20{margin: 20px;}
 /*座位图*/
 .front{width: 160px;margin: 5px auto 10px;background-color: #f0f0f0;color: #666;text-align: center;padding: 3px;border-radius: 5px;}
 .booking-details {float: right;position: relative; top:60px; width:300px;height: 370px;}

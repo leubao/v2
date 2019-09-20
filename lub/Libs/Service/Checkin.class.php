@@ -262,4 +262,90 @@ class Checkin extends \Libs\System\Service{
         ));
     }
 
+    //一单一票检票single ticket
+    static public function checkSingleTicket($data)
+    {
+    	load_redis('set','debug', json_encode($data));
+    	switch ($data['product_type']) {
+    		case '2':
+    			$table = 'Scenic';
+    			break;
+    		case '3':
+    			$table = 'Drifting';
+    			break;
+    	}
+    	$upTicket = [
+        	'status'    =>  99,
+        	'checktime' =>  time()
+      	];
+      	//全部核销
+      	if($data['way'] == 'all'){
+      		$where = [
+      			'order_sn'=>$data['sn'],
+      			'status'=>2
+      		];
+      	}
+      	//部分核销
+      	if($data['way'] == 'small'){
+      		foreach ($data['info'] as $k => $v) {
+	          $ticId[] = $v['id'];
+	        }
+	        $id = implode(',', $ticId);
+	        $where = [
+	          	'order_sn'  =>  $data['sn'],
+	          	'status'	=>	2,
+	          	'id'        =>  ['in', $id]
+	        ];
+      	}
+      	//当前订单是否存在未核销的门票
+      	$count = D($table)->where(['order_sn'=>$data['sn'],'status'=>2])->count();
+      	if((int)$count === 0){
+      		$return = [
+	            'status'=> false,
+	            'code'  => 1000,
+	            'data'  => [
+	            	'count' => 0,
+	            ],
+	            'msg'   =>  '核销失败,未找到可核销的门票'
+	        ];
+	        return $return;
+      	}
+      	$number = D('Order')->where(['order_sn'=>$data['sn']])->getField('number');
+      	//改变门票状态
+    	$ticket = D($table)->where($where)->setField($upTicket);
+    	//判断门票是否已核销完成
+    	if((int)$ticket === (int)$number){
+          	$status = 9;
+        }else{
+        	$status =10;//部分核销
+        }
+    	//改变订单状态
+    	$upOrder = [
+    		'status'	=>	$status,
+    		'uptime'	=>	time()
+    	];
+        $order = D('Order')->where(['order_sn'=>$data['sn']])->setField($upOrder);
+		$more = $number - $ticket;
+        if($ticket && $order){
+          $return = [
+            'status'=> true,
+            'code'  => 0,
+            'data'  => [
+              'count' => $ticket,
+            ],
+            'msg'   =>  '成功核销'.$ticket.'张,剩余可核销'.$more."张"
+          ];
+          return $return;
+        }else{
+          $return = [
+            'status'=> false,
+            'code'  => 1000,
+            'data'  => [
+            	'count' => 0,
+            ],
+            'msg'   =>  '核销失败,请重试'
+          ];
+          return $return;
+        }
+    }
 }
