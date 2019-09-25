@@ -43,7 +43,7 @@ class TrustController extends LubTMP {
 				$map = array(
 					'status' => '2',
 					'plantime'=>strtotime(date('Ymd')),
-					);
+				);
 				break;
 			case '2':
 				//获取指定日期的场次
@@ -110,6 +110,7 @@ class TrustController extends LubTMP {
 	function alizhiyou_order()
 	{
 		$info = I('post.info');
+		load_redis('setex','indd', json_encode($info), 3700);
 		$uInfo = ['id'=>'-1'];
 		$order = new Order();
         $sn = $order->orderApi($info,'52',$uInfo);
@@ -120,6 +121,26 @@ class TrustController extends LubTMP {
             'data'  => [
             	'sn' => $sn,
             	'seat'  => sn_seat($sn['order_sn']),
+            ],
+            'msg'   => 'OK',
+          );
+        }else{
+          $return = array('status'=>false,'code' => 403,'data'=>'' ,'msg' => $order->error);
+        }
+        die(json_encode($return));
+	}
+	//景区订单
+	function alizhiyou_scenic_order(){
+		$info = I('post.info');
+		$uInfo = ['id'=>'-1'];
+		$order = new Order();
+        $sn = $order->orderApi($info,'52',$uInfo);
+        if($sn){
+          $return = array(
+          	'status'=> true,
+            'code'  => 200,
+            'data'  => [
+            	'sn' => $sn,
             ],
             'msg'   => 'OK',
           );
@@ -299,9 +320,9 @@ class TrustController extends LubTMP {
 			dump(\Libs\Service\Rebate::ajax_rebate_order());
 		}
 		dump($ln);
-		$where['type'] = array('in','2,4,8,9');$where['status']=array('in','1,9,7,8');
-		//\Libs\Service\Check::check_rebate($where,2);
-		//return \Libs\Service\Check::check_rebate();
+		// $where['type'] = array('in','2,4,8,9');$where['status']=array('in','1,9,7,8');
+		// //\Libs\Service\Check::check_rebate($where,2);
+		// //return \Libs\Service\Check::check_rebate();
 	}
 	/*校验程序*/
 	function check()

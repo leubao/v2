@@ -333,12 +333,13 @@ class Order extends \Libs\System\Service {
 		}
 	}
 	/**************************************************窗口订单****************************************************/
-	/*快捷售票 数据处理
+	/*快捷售票
+	*数据处理
 	*@apram $pinfo array 数据
 	*@param $scena int 场景 1窗口2渠道版3网站4微信5api
 	*@param $uinfo array 当前用户信息
 	*/
-	public function quick($pinfo, $scena, $uinfo = null){
+	public function quick($pinfo,$scena,$uinfo = null){
 		if(empty($pinfo) || empty($scena)){
 			$this->error = '400001 : 数据传递失败,请重试...';
 			return false;
@@ -346,12 +347,28 @@ class Order extends \Libs\System\Service {
 		$info = json_decode($pinfo,true);
 		if(empty($info)){$this->error = '400002 : 部分数据丢失,解析失败...';return false;}
 		//获取订单初始数据
-		$scena = Order::is_scena($scena, $info['param'][0]['is_pay']);
-		
-		//判断是否选择的是微信或支付宝刷卡支付 1现金2余额3签单4支付宝5微信支付6划卡
+		$scena = Order::is_scena($scena,$info['param'][0]['is_pay']);
+		//判断是否选择的是微信或支付宝刷卡支付
+		//1现金2余额3签单4支付宝5微信支付6划卡
 		if(in_array($info['param'][0]['is_pay'],array('4','5'))){$is_seat = '2';}else{$is_seat = '1';}
-		$sn = Order::quick_order($info, $scena, $uinfo, $is_seat);
+		//判断活动
+		if(!empty($info['param'][0]['activity'])){
+			$act = D('Activity')->where('id',$info['param'][0]['activity'])->field('id,type')->find();
+			switch ((int)$act['type']) {
+			 	case 5:
+			 		//多产品组合套票
+			 		$sn = Order::pack_order($info,$scena,$uinfo,1,0); 
+			 		break;
+			 	default:
+			 		$sn = Order::quick_order($info,$scena,$uinfo,$is_seat);
+			 		break;
+			 }
+		}else{
+			$sn = Order::quick_order($info,$scena,$uinfo,$is_seat);
+		}
+		
 		if($sn != false){
+
 			$return = array('sn' => $sn['order_sn'],'act'=>$sn['act'],'is_pay' => $info['param'][0]['is_pay'],'money'=>$info['subtotal']);
 			
 			return $return;
@@ -384,10 +401,19 @@ class Order extends \Libs\System\Service {
 	* @param $info array 客户端提交数据
 	* 用户表中默认新增 微信 官网 自助机
 	*/
-	function mobile($pinfo,$scena = null,$uinfo = null,$is_seat = 2){
+	function mobile($pinfo,$scena = null,$uinfo = null,$is_seat = 2){//dump($pinfo);
 		if(empty($pinfo) || empty($scena)){$this->error = '400001 : 数据传递失败,请重试...';return false;}
 		$info = json_decode($pinfo,true);
 		if(empty($info)){$this->error = '400002 : 部分数据丢失,解析失败...';return false;}
+		/*$seat = Order::area_group($info['data']);//dump($seat);
+		//TODO   临时写法
+        $proconf = cache('ProConfig');
+        $plan = F('Plan_'.$info['plan_id']);
+		//判断是否写入配额
+        //检测是否开启配额个人不检测配额
+        if($proconf['quota']){
+            check_quota($info['plan_id'],$plan['product_id'],$uinfo['qditem']);
+        }*/
         $scena = Order::is_scena($scena);
 		return Order::quick_order($info,$scena,$uinfo,$is_seat); 
 	}
@@ -436,7 +462,7 @@ class Order extends \Libs\System\Service {
 		return $status;
 	}
 	/**************************************************渠道订单****************************************************/
-	function channel($pinfo,$scena,$uinfo = null,$act = '', $is_pay = ''){
+	function channel($pinfo,$scena,$uinfo = null,$act = ''){
 		if(empty($pinfo) || empty($scena)){$this->error = '400001 : 数据传递失败,请重试...';return false;}
 		$info = json_decode($pinfo,true);
 		if(empty($info) || if_plan($info['plan_id']) == false){
@@ -444,16 +470,12 @@ class Order extends \Libs\System\Service {
 			return false;
 		}
 		//获取订单初始数据
-		$scena = Order::is_scena($scena, $is_pay);
+		$scena = Order::is_scena($scena);
 		
 		switch ((int)$act) {
 		 	case 5:
 		 		//多产品组合套票
 		 		return Order::pack_order($info,$scena,$uinfo,2,2,5); 
-		 		break;
-		 	case 8:
-		 		//前台预约推送,直接排座
-		 		return Order::quick_order($info,$scena,$uinfo,1,1,$act); 
 		 		break;
 		 	default:
 		 		return Order::quick_order($info,$scena,$uinfo,2,2,$act); 
@@ -961,7 +983,7 @@ class Order extends \Libs\System\Service {
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
 		//获取订单号 1代表检票方式1人一票2 一团一票
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
-		$sn = $info['order_sn'] ? $info['order_sn'] : get_order_sn($plan['id'],$printtype);
+		$sn = get_order_sn($plan['id'],$printtype);
 
 		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
 		if((int)$seat['num'] > 200){$this->error = "400005 : 单笔订单门票数不能超过200...";return false;}
@@ -1043,7 +1065,6 @@ class Order extends \Libs\System\Service {
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid'=>$state,'order_sn' => $sn,'info' => serialize($newData),'remark'=>$info['param'][0]['remark']));
-		
 		if($state && $oinfo){
 			$model->commit();//提交事务
 			//设置订单完结有效期
@@ -1341,7 +1362,7 @@ class Order extends \Libs\System\Service {
 		$o_status = $model->table(C('DB_PREFIX').'order_data')->where(array('order_sn'=>$info['order_sn']))->setField('info',serialize($newData));
 		//改变订单状态
 		$status = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$info['order_sn']))->setField(['status'=>'1','pay'=>$newData['pay']]);
-		dump($state);dump($status);
+		//dump($state);dump($status);
 		if($state && $status){
 			$model->commit();//提交事务
 			if(!in_array($info['addsid'],array('1','6')) && $no_sms <> '1'){
@@ -1539,7 +1560,7 @@ class Order extends \Libs\System\Service {
 					'status' => array('eq',0),
 				);
 				/*校验身份证号码是否正确*/
-				$id_card = $v['idcard'] ? strtoupper($v['idcard']) : 0;
+				$id_card = strtoupper($v['idcard']);
 				if(!empty($id_card)  && (int)$info['param'][0]['cert_type'] === 1){
 					if(!checkIdCard($id_card)){
 						$this->error = '400030 : 身份证号码有误...';
@@ -1661,7 +1682,7 @@ class Order extends \Libs\System\Service {
 			
 			//判断活动属性 todo 读取活动属性
 			if(!empty($oInfo['param'][0]['activity'])){
-				$actInfo = D('Activity')->where(['id'=>$oInfo['param'][0]['activity']])->field('real,param')->find();
+				$actInfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('real,param')->find();
 				$actParam = json_decode($actInfo['param'],true);
 				if($actInfo['real'] && $actParam['info']['voucher'] == 'card'){
 					$is_print = 1;
@@ -2401,6 +2422,17 @@ class Order extends \Libs\System\Service {
 		/*重新组合区域*/
 		foreach($area as $k=>$v){
 			if($product_type == '1'){
+				/*相同区域相同票型合并
+				$seat['area'][$v['areaId']]['seat'][$k] = array(
+					'priceid'=>$v['priceid'],
+					'price'=>$v['price'],
+					'num'=>$v['num'],
+					'idcard' => $v['idcard']
+				);
+				$seat['area'][$v['areaId']]['num'] += $v['num'];
+				$seat['area'][$v['areaId']]['areaId'] = $v['areaId'];
+				$seat['area'][$v['areaId']]['price'] = $v['price'];
+				*/
 				//排座
 				$seat['area'][] = [
 					'areaId' => $v['areaId'],
@@ -2433,9 +2465,9 @@ class Order extends \Libs\System\Service {
 					);
 					$seat['num'] += $v['num'];
 				}
-			}
+			}//dump($settlement);
 			//TODO 临时解决散客销售底价结算问题
-			if($v['priceid'] == 468 || $v['priceid'] == 471){
+			if($v['priceid'] == 468){
 				$settlement = 2;
 			}
 			//计算订单金额
@@ -2444,7 +2476,7 @@ class Order extends \Libs\System\Service {
 				$child_moeny = $price*$v['num'];
 			}else{
 				$child_moeny = 0;
-			}//dump($money);
+			}
 			if($money){
 				$seat['moneys'] += $money['moneys']+$child_moeny;
 				$seat['poor'] += $money['poor']+$child_moeny;
@@ -2578,11 +2610,11 @@ class Order extends \Libs\System\Service {
 	* 根据订单场景设置订单的初始值 场景+订单类型 新增场景值 
 	* @param $scena 场景标识 11 窗口散客订单 12 窗口团队订单 22 渠道团队 23 微信散客订单
 	* 创建场景1窗口选座 6窗口快捷 2渠道版3网站4微信5api 7自助设备
-	* 订单类型1散客订单2团队订单4渠道版定单6政府订单7预约订单8全员销售9三级分销 3小商品 5 物品租聘
+	* 订单类型1散客订单2团队订单4渠道版定单6政府订单8全员销售9三级分销 3小商品 5 物品租聘
 	* 支付方式0未知1现金2余额3签单4支付宝5微信支付6划卡
 	* 状态0为作废订单1正常2为渠道版订单未支付情况3已取消5已支付但未排座6政府订单7申请退票中9门票已打印11窗口订单创建成功但未排座
 	*/
-	private function is_scena($param = null, $is_pay = null){
+	private function is_scena($param = null,$is_pay = null){
 		switch ($param) {
 			case '11':
 				//窗口选座散客
@@ -2615,10 +2647,6 @@ class Order extends \Libs\System\Service {
 			case '26':
 				//渠道版政企
 				$return = array('type'=>6,'addsid'=>2,'pay'=>3,'status'=>6,'createtime'=>time());
-				break;
-			case '27':
-				//渠道版预约
-				$return = array('type'=>7,'addsid'=>2,'pay'=>$is_pay ? $is_pay : '1','status'=>11,'createtime'=>time());
 				break;
 			case '31':
 				//网站散客
