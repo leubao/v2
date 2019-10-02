@@ -165,8 +165,8 @@ $(document).ready(function(){
               var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='"+cardArr[j]+"' size='20' class='form-control idcard' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
               $('#promotions-price-select').append(row);
             }
+            cardArr = [];
           } else {
-            console.log('2');
             var row = $("<tr data-id="+trId+" data-price='"+price+"' data-area='"+$(this).data('area')+"'><td>"+$(this).data('name')+"</td><td align='center'><input type='text' value='1' size='1' disabled id='promotions-num-"+trId+"' class='form-control' width: 20px;'></td><td><input type='text' value='' size='20' class='form-control idcard' width: 120px;'></td><td align='right'>"+price+"</td><td align='center'><a href='#' onclick='delRow(this);'><i class='fa fa-trash-o'></i></a><input type='hidden' id='areaid"+trId+"' value="+$(this).data('area')+" name='areaid'/></td></tr>");
             $('#promotions-price-select').append(row);
           }

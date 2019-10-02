@@ -1,9 +1,17 @@
 <style type="text/css" media="screen">
   .batch{display: none;}
+
 </style>
 <form class="form-horizontal" action="{:U('Item/Product/planadd',array('menuid'=>$menuid));}" method="post" data-toggle="validate">
   <div class="bjui-pageContent">
+    
   <if condition="$pinfo['type'] eq '1' ">
+    <div class="form-group">
+      <label class="col-sm-2 control-label">添加方式:</label>
+      <input type="radio" name="addType" value="one" checked>  自定义添加
+      <input type="radio" name="addType" value="batch">  模板添加
+    </div>
+    <div class="one">
     <table class="table table-condensed table-hover">
       <tbody>
         <tr>
@@ -26,6 +34,23 @@
         </tr>
       </tbody>
     </table>
+    </div>
+    <div class="batch" style="display: none;">
+      <table class="table table-striped">
+        <tbody>
+        <tr>
+          <td><label for="j_dialog_operation" class="control-label x90">销售日期:</label>
+            <input type="text" data-toggle="datepicker" name="plantime" class="required batch-input" disabled="true" value="{$plantime}" data-rule="required"></td>
+          <td><label for="j_dialog_code" class="control-label x85">场次：</label>
+            <select name="tplid" data-toggle="selectpicker">
+              <volist name="tplplan" id="vo">
+              <option value="{$vo.id}">第{$vo.number}场 {$vo.start}-{$vo.end}</option>
+              </volist>
+            </select></td>
+        </tr>
+        </tbody>
+      </table>
+    </div>
     <div class="panel-group" id="accordion" role="tablist" aria-multiselectable="true">
       <div class="panel panel-default">
         <div class="panel-heading" role="tab" id="headingOne">
@@ -96,17 +121,17 @@
         </tr>
         <tr>
           <td><label for="j_dialog_operation" class="control-label x90">销售配额:</label>
-            <input type="text" name="quotas" class="batch" disabled data-rule="required" value="{$proconf.quotas}" size="5">
+            <input type="text" name="quotas" class="batch-input" disabled data-rule="required" value="{$proconf.quotas}" size="5">
           </td>
           <td><label for="j_dialog_operation" class="control-label x90">渠道配额:</label>
-            <input type="text" name="quota" class="batch" disabled data-rule="required" value="{$proconf.quota}" size="5">
+            <input type="text" name="quota" class="batch-input" disabled data-rule="required" value="{$proconf.quota}" size="5">
           </td>
         </tr>
         <tr>
           <td colspan="2">
             <label for="j_dialog_operation" class="control-label x90">开始售票:</label>
-            <input class="batch" type="radio" name="start" value="1" checked disabled>  是
-            <input class="batch" type="radio" name="start" value="0" disabled>  否
+            <input class="batch-input" type="radio" name="start" value="1" checked disabled>  是
+            <input class="batch-input" type="radio" name="start" value="0" disabled>  否
           </td>
         </tr>
       </tbody>
@@ -256,12 +281,12 @@
 
 $('input[type=radio][name=addType]').change(function() {
     if (this.value == 'batch') {
-      $('.batch').attr('disabled',false);
+      $('.batch-input').attr('disabled',false);
       $('.batch').css('display','block')
       $('.one').css('display','none')
     }
     else if (this.value == 'one') {
-      $('.batch').attr('disabled',true);
+      $('.batch-input').attr('disabled',true);
       $('.batch').css('display','none')
       $('.one').css('display','block')
     }

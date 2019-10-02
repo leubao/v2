@@ -86,7 +86,7 @@ class Autoseat extends \Libs\System\Service {
 	* @param $group_id array 分组id
 	* @param $product_id int 产品id
 	*/
-	public function go_num($group_id = null, $table = null, $area = null){
+	static public function go_num($group_id = null, $table = null, $area = null){
 		$map = array('group' => array('in',$group_id), 'area' =>$area, 'status' => '0');
 		$num = M(ucwords($table))->where($map)->count();
 		return $num;

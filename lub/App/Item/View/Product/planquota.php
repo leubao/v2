@@ -9,7 +9,7 @@
   <if condition="$plan['product_type'] eq '2'">
   <div class="form-group">
     <label class="col-sm-2 control-label">总可售数:</label>
-    <input type="text" name="number" class="form-control required" data-rule="digits;" size="20" value="{$data.number}" placeholder="请输入正整数">
+    <input type="text" name="number" class="form-control required" data-rule="digits;" size="20" value="{$plan.quotas}" placeholder="请输入正整数">
   </div>
   </if>
 	<div class="form-group">
