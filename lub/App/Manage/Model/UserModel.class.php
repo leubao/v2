@@ -60,12 +60,25 @@ class UserModel extends Model {
             if($userInfo['ITEM'] == false){
                 return false;
             }
+            $userInfo['PRO'] = $this->userProduct($userInfo['product']);
+            if($userInfo['PRO'] == false){
+                return false;
+            }
         }
         //密码验证
         if (!empty($password) && $this->hashPassword($password, $userInfo['verify']) != $userInfo['password']) {
             return false;
         }//dump($userInfo);
         return $userInfo;
+    }
+    public function userProduct($proList)
+    {
+        if(empty($proList)){
+            return false;
+        }else{
+            $product = D('Product')->where(['id'=>['in',$proList]])->field('id,name')->select();
+            return $product;
+        }   
     }
     /**
      * 获取用户的公司及产品信息
@@ -75,7 +88,7 @@ class UserModel extends Model {
         if(empty($item_id)){
             return false;
         }
-        $item = D('Item/Item')->relation(true)->where(array('id'=>$item_id))->find();
+        $item = D('Item/Item')->where(array('id'=>$item_id))->find();
         return $item;
     }
     /**
@@ -133,6 +146,14 @@ class UserModel extends Model {
             $this->error = '该管理员不存在！';
             return false;
         }
+        //产品信息
+        if(empty($data['product'])){
+            $data['defaultpro'] = 0;
+        }else{
+            $data['defaultpro'] = $data['product'][0];
+        }
+        $data['product'] = implode(',', $data['product']);
+
         //密码为空，表示不修改密码
         if (isset($data['password']) && empty($data['password'])) {
             unset($data['password']);

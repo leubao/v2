@@ -36,6 +36,7 @@
       <th align="center">订单号</th>
       <th align="center">销售计划</th>
       <th align="center">身份证号</th>
+      <th align="center">门票</th>
       <th align="center">人数</th>
       <th align="center">活动名称</th>
       <th align="center">操作</th>
@@ -48,6 +49,7 @@
             <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn'],'menuid'=>$menuid))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a> </td>
             <td align="center">{$vo.plan_id|planShow}</td>
             <td align="center">{$vo.idcard} </td>
+            <td align="center">{$vo.ticket} </td>
             <td align="center">{$vo.number} </td>
             <td align="center">{$vo.activity_id|getActivity}</td>
             <td align="center"><a href="{:U('Order/index/del_idcard',array('id'=>$vo['id'],'menuid'=>$menuid));}" data-toggle="doajax" data-confirm-msg="确定要删除这条记录吗?">删除</a></td>

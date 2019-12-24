@@ -1089,16 +1089,17 @@ class ItemReport{
  				'plantime'	=>	['EGT', $datatime],
  				'status'	=>	['in','2,3,4']
  			];
- 			$list = M('Plan')->where($map)->field('id')->limit(20)->cache('conductor_plan',3600)->select();
+ 			$list = M('Plan')->where($map)->field('id')->limit(20)->cache('conductorPlan',3600)->select();
+
  			$list = array_column($list,'id');
- 			$plan = array_flip($list);
- 			foreach ($plan as $k => $v) {
+ 			//$plan = array_flip($list);
+ 			foreach ($list as $k => $v) {
  				//窗口售票
- 				$conductor = ItemReport::sum_pay($k,$user_id,$datatime);
+ 				$conductor = ItemReport::sum_pay($v,$user_id,$datatime);
  				//代收款
- 				$collection = ItemReport::collection($k,$user_id,$datatime);
- 				$money[$k] = array(
- 					'plan' => $k,
+ 				$collection = ItemReport::collection($v,$user_id,$datatime);
+ 				$money[$v] = array(
+ 					'plan' => $v,
  					'data' => array_merge($conductor,$collection)
  				);
  			}

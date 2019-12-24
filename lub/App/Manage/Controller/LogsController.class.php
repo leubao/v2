@@ -172,7 +172,7 @@ class LogsController extends ManageBase {
         $status = I('status');
         $type = I('type');
         $sn = I('sn');
-        $this->assign('starttime',$start_time)->assign('endtime',$end_time);
+        $this->assign('starttime',$start_time)->assign('endtime',$end_time)->assign('sn',$sn);
         if (!empty($start_time) && !empty($end_time)) {
             $start_time = strtotime($start_time);
             $end_time = strtotime($end_time) + 86399;
@@ -184,8 +184,8 @@ class LogsController extends ManageBase {
         if ($type != '') {
             $where['type'] = $type;
         }
-        if ($sn != '') {
-            $where['sn'] = $sn;
+        if (!empty($sn)) {
+            $where['order_sn'] = $sn;
         }
         $this->basePage('Pay',$where,array("id" => "desc"));
         $this->assign('where', $where)->display();

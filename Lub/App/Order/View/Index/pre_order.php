@@ -41,16 +41,15 @@
         <th align="center" width="115px">订单号</th>
         <th align="center">所属计划</th>
         <th align="center">渠道商</th>
-
-        <th align="center" width="30px">数量</th>
+        <th align="center" width="40px">数量</th>
         <th align="center" width="80px">金额</th>
         <th align="center" width="80px">支付方式</th>
         <th align="center" width="70px">下单人</th>
+        <th align="center" width="70px">联系人</th>
         <th align="center" width="65px">状态</th>
         <th align="center" width="70px">核单人</th>
-        <th align="center" width="120px">创建时间</th>
-        <th align="center" width="120px">更新时间</th>
-        
+        <th align="center" width="100px">创建时间</th>
+        <th align="center" width="100px">更新时间</th>
       </tr>
     </thead>
     <tbody id="pre-order-list">
@@ -63,17 +62,18 @@
         <td align="right">{$vo.money|format_money}</td>
         <td align="center">{$vo['pay']|pay}</td>
         <td align="center">{$vo['user_id']|userName}</td>
+        <td align="center">{$vo.contact}</td>
         <td align="center">{$vo['status']|order_status}</td>
         <td align="center">{$vo['admin_id']|userName}</td>
-        <td align="center">{$vo.createtime|date="m-d H:i:s",###}</td>
-        <td align="center">{$vo.uptime|date="m-d H:i:s",###}</td>
+        <td align="center">{$vo.createtime|date="m-d H:i",###}</td>
+        <td align="center">{$vo.uptime|date="m-d H:i",###}</td>
         
        </tr>
     </volist>
      <tr>
      <td></td><td></td><td align="right">当前页合计:</td>
      <td id="sub-pre-num" align="center">0</td>
-     <td id="sub-pre-money" align="right">0.00</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+     <td id="sub-pre-money" align="right">0.00</td><td></td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
     </tbody>
   </table>
 </div>

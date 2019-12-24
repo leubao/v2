@@ -148,7 +148,7 @@ class UserModel extends RelationModel{
                 $verify = genRandomString(6);
                 $this->verify = $verify;
                 $this->password = $this->hashPassword($this->password, $verify);
-            }
+            }dump($this);
             $status = $this->save();
             return $status !== false ? true : false;
         }

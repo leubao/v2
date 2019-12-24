@@ -3,7 +3,7 @@
 <div class="bjui-pageContent">
 	<div class="form-group">
     <label class="col-sm-2 control-label">产品名称:</label>
-    <input type="text" name="name" class="form-control required" data-rule="required;" size="40" placeholder="应用名称">
+    <input type="text" name="name" class="form-control required" data-rule="required;" size="40" placeholder="产品名称">
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">产品类型:</label>
@@ -24,6 +24,7 @@
   <div class="form-group seat" style="display: none">
     <label class="col-sm-2 control-label">场所列表:</label>
     <select name="place_id" id="place" data-toggle="selectpicker">
+    <option>请选择</option>
     <volist name="place" id="place">
       <option value="{$place.id}">{$place.name}</option>
     </volist>
@@ -65,7 +66,7 @@
 <script type="text/javascript">
 $(document).ready(function(){
     // 选择不同的场所调用不同的座椅模板
-    $("#place").change(function(){
+  $("#place").change(function(){
     var place = $("#place").val();
     var ptype = $('input[name="type"]:checked').val();
     if (place != 0 && ptype == 1) { 

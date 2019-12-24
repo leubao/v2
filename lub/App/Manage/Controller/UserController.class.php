@@ -59,10 +59,13 @@ class UserController extends ManageBase {
                 $this->erun($erun ? $erun : '修改失败！');
             }
         } else {
-            $data = D('Manage/User')->where(array("id" => $id))->find();
+            $data = D('Manage/User')->where(array("id" => $id))->field('verify,password',true)->find();
+
             if (empty($data)) {
                 $this->erun('该信息不存在！');
             }
+            $data['product'] = explode(',', $data['product']);
+            
             $this->assign("role", D('Manage/Role')->selectHtmlOption($data['role_id'], 'name="role_id"'));
             $this->assign("data", $data);
             $this->assign('product',$this->products);

@@ -14,25 +14,6 @@ class Ticket extends \Libs\System\Service {
 	{
 		$map['order_sn'] = $sn;
 		$order = D('Item/Order')->where($map)->relation(true)->find();
-		//订单状态校验
-		$order_type = order_type($sn);
-		
-		//判断订单状态是否可执行此项操作
-		if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
-			$return = array(
-				'status' => '0',
-				'message' => '订单状态不允许此项操作!'
-			);
-			return $return;
-		}
-		//判断是否是二次打印
-		if($order_type['status'] == '9' && empty($user)){
-			$return = array(
-				'status' => '0',
-				'message' => '订单已核销完成',
-			);
-			return $return;
-		}
 		$plan = F('Plan_'.$order['plan_id']);
 		if(empty($plan)){
 			$plan = D('Plan')->where(['id'=>$order['plan_id']])->field('id,product_type,seat_table,encry,starttime,endtime,product_id')->find();
@@ -45,11 +26,46 @@ class Ticket extends \Libs\System\Service {
 			);
 			return $return;
 		}
-		/** 订单状态校验 
-		$checkOrder = new CheckStatus();
-		if(!$checkOrder->OrderCheckStatus($sn,2103)){
-			$this->erun($checkOrder->error,array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-		}*/
+		//基本信息
+		$base = [
+			'product_name' 	=>	productName($plan['product_id'],1),
+			'games'			=>	$plan['games'],
+			'plantime'		=>	date('Y-m-d',$plan['plantime']),
+			'starttime'     =>  date('H:i',$plan['starttime']),
+			'endtime'		=>	date('H:i',$plan['endtime']),
+		];
+		$seatList = [];
+		//剧院展示座位
+		if((int)$plan['product_type'] === 1){
+			$oinfo = unserialize($order['info']);
+			foreach ($oinfo['data'] as $k => $v) {
+				$seatList[] = areaName($v['areaId'], 1). seatShow($v['seatid'],1);
+			}
+		}
+		//订单状态校验
+		$order_type = order_type($sn);
+		
+		//判断订单状态是否可执行此项操作
+		if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
+			$return = array(
+				'status' => '0',
+				'message' => '订单状态不允许此项操作!'
+			);
+			return $return;
+		}
+
+
+		//判断是否是二次打印
+		if($order_type['status'] == '9' && empty($user)){
+			$return = array(
+				'status' => '0',
+				'base'	=>	$base,
+				'seatList'=> implode(', ', $seatList),
+				'message' => '订单已核销完成',
+			);
+			return $return;
+		}
+		
 		//更新门票打印状态
 		$model = new Model();
 		$model->startTrans();
@@ -67,9 +83,8 @@ class Ticket extends \Libs\System\Service {
 		$list = M(ucwords($table))->where(array('order_sn'=>$sn,'status'=>2))->select();
 		$count = count($list);//dump($list);
 		//一单一票
-		//读取订单信息  日期时间  人数  单价 10元/人  
+		//读取订单信息  日期时间  人数  单价 10元/人   
 		if($count > 0){
-			
 			foreach ($list as $k=>$v){
 				$sale = unserialize($v['sale']);
 				
@@ -78,25 +93,18 @@ class Ticket extends \Libs\System\Service {
 				}else{
 					$print = $print + 1;
 				}
-				$sns = \Libs\Service\Encry::encryption($plan['id'],$sn,$plan['encry'],$v['area'],$v['seat'],$print,$v['id'])."&".$order['id']."^#";
-
+				$sns = \Libs\Service\Encry::toQrData($v['id'],$order['id'],$plan['id'],$print);
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
-					'games'			=>	$sale['games'],
-					'plantime'		=>	date('Y-m-d',$plan['plantime']),
-					'starttime'     =>  date('H:i',$plan['starttime']),
-					'endtime'		=>	date('H:i',$plan['endtime']),
 					'price'			=>	$sale['price'],
 					'priceName'		=>	$sale['priceName'],
-					'product_name' 	=>	$sale['product_name'],
 					'remark'		=>	$sale['remark'],
 					'remark_type'	=>	$sale['remark_type'],
 					'sn'			=>	$sn,
 					'sns'			=>	$sns,
 					'user'			=>	$info_user,
-					'number'		=>	$count,
-					'guest_area'	=>	$guest_area
+					'number'		=>	$count
 				);
 				$price_id = $v['price_id'];
 			}	
@@ -106,25 +114,26 @@ class Ticket extends \Libs\System\Service {
 			$up_print = $model->table(C('DB_PREFIX'). $table)->where($map)->setInc('print',1);
 		}else{
 			$up_print = true;
-			$up_order = $model->table(C('DB_PREFIX'). order)->where(array('order_sn'=>$sn))->setField('status',9);
+			$up_order = $model->table(C('DB_PREFIX'). 'order')->where(array('order_sn'=>$sn))->setField('status',9);
 		}
 		
 		if($count > 0 && $up_print){
 			//记录打印日志
 			//print_log($sn,$user,$type,$order_type['channel_id'],'',count($list),1);
 			$model->commit();//提交事务
-			//$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '1',
 				'message' => '订单读取成功!',
-				'sns'	=> $sns,
+				'base'	 => $base,
+				'seatList'=> implode(', ', $seatList),
+				'sns'	=> $sns,//TODO 暂时直接使用定单号
 				'info'	=> $info ? $info : 0,
 			);
 		}else{
 			$model->rollback();//事务回滚
-			//$checkOrder->delMarking($pinfo['sn']);
 			$return = array(
 				'status' => '0',
+				'seatList'=> implode(', ', $seatList),
 				'message' => '订单已核销完成',
 				'info'	=>  0,
 			);

@@ -34,16 +34,21 @@ class Api extends \Libs\System\Service {
     * 获取销售计划
     * @param $product string 产品id 集合
     * @param $param array 当前APP的全部信息
-    * return array  
+    * return array   
     */
-    function plans($param = null, $uinfo = ''){
+    function plans($param = null, $uinfo = '', $datetime = '', $sealeTicket = []){
         if(empty($param)){return false;}
         $product = $param['product'];
         $proArr = explode(',', $product);
         foreach ($proArr as $k=>$v){
             $list[$v] = M('Product')->where(array('id'=>$v,'status'=>1))->field('name as productname')->select();
             if($list[$v] != false){
-                $list[$v]['plan'] = M('Plan')->where(array('product_id'=>$v,'status'=>2))->order('plantime ASC,games ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->limit(7)->select();
+                if(empty($datetime)){
+                    $where = array('product_id'=>$v,'status'=>2);
+                }else{
+                    $where = array('product_id'=>$v,'status'=>2,'plantime'=>$datetime);
+                }
+                $list[$v]['plan'] = M('Plan')->where($where)->order('plantime ASC,games ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->limit(7)->select();
             }
         }
         load_redis('set','2123',json_encode($uinfo));
@@ -69,7 +74,7 @@ class Api extends \Libs\System\Service {
                     $area_nums = $number;
                     //TODO $param['group']['price_group'] 梦里老家  强制为70
 
-                    $valu['param'] = pullprice($valu['id'],$type,0,$param['scene'],$param['group']['price_group']);
+                    $valu['param'] = pullprice($valu['id'],$type,0,$param['scene'],$param['group']['price_group'], 1, $sealeTicket);
 
                     $valu['title'] = planShow($valu['id'],5,1);
                     $valu['product_id'] = $valu['product_id'];

@@ -84,6 +84,7 @@ class FullController extends ManageBase{
             $oauth = & load_wechat('Oauth',$product_id,'1');
             // 执行接口操作
             $reg = $oauth->getOauthRedirect(U('Wechat/Index/reg',array('pid'=>$product_id,'type'=>8)), $state, 'snsapi_userinfo');
+            //$reg = U('Wechat/Index/reg',array('pid'=>$product_id,'type'=>8));
             $this->assign('group',$group)->assign('reg',$reg)->display();
         }
     }
@@ -92,7 +93,7 @@ class FullController extends ManageBase{
     	if(IS_POST){
     		$pinfo = I('post.');
             //所属分组，状态
-            $data = array('id'=>$pinfo['id'],'type'=>$pinfo['type'],'groupid'=>$pinfo['groupid'],'status'=>$pinfo['status'],'remark'=>$pinfo['remark']);
+            $data = array('id'=>$pinfo['id'],'type'=>$pinfo['type'],'groupid'=>$pinfo['groupid'],'status'=>$pinfo['status'],'channel'=>'1', 'remark'=>$pinfo['remark']);
            // $ticket = (string)\Wechat\Controller\WechatController::get_wechat_code($pinfo['id']);
             //链接微信获取专属推广二维码
             if(D('User')->save($data)){

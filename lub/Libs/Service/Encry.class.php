@@ -94,14 +94,14 @@ class Encry extends \Libs\System\Service {
             $print,
             $digit
         ];
-        $sn = putIdToCode($code, 12);
+        $sn = putIdToCode($code, 24);
         return $sn;
     }
     //获取二维码加密解密
     static public function getQrData($value)
     {
         //解密
-        $qrInfo = getCodeToId($value, 12);
+        $qrInfo = getCodeToId($value, 24);
         $position = array_key_last($qrInfo);
         $string = '';
         foreach ($qrInfo as $k => $v) {

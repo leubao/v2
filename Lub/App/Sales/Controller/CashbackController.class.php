@@ -59,7 +59,8 @@ class CashbackController extends ManageBase{
             if(!empty($info)){
                 $db->where(array('id'=>$pinfo['id']))->save(array('win_remark'=>$pinfo['remark'],'userid'=>get_user_id()));
                 $itemCof = get_item_conf('1');
-                if(empty($itemCof)){$this->erun("商户配置信息获取失败,请重新登录...");}//dump($itemCof);
+                if(empty($itemCof)){$this->erun("商户配置信息获取失败,请重新登录...");}
+                //dump($itemCof);
                 
                 //微信企业付款
                 if($itemCof['rebate_pay'] == '1'){
@@ -85,37 +86,44 @@ class CashbackController extends ManageBase{
                 //微信普通红包
                 if($itemCof['rebate_pay'] == '2'){
                     /*注意200的限额,根据模板设置金额*/
-                    /*
-                    if($info['money'] > 200){
+                    $state = true;
+                    if($info['money'] > 1000){
                         //大于200拆分多个红包
                         $redNum = 1;
                         $redInfo = [];
                         $redInfo[] = [
-                            'money' => $info['money']%200,
+                            'money' => $info['money']%1000,
                             'sn'    => $info['sn'],
                             'openid'=> $info['openid'],
                         ];
-                        $num = (int)floor($info['money']/200);//dump($num);
+                        $num = (int)floor($info['money']/1000);//dump($num);
                         for ($i = $num; $i <> 0; $i--) {
                             $redInfo[] = [
-                                'money' => '200',
+                                'money' => '1000',
                                 'sn'    => $info['sn'].'I'.$redNum,
                                 'openid'=> $info['openid'],
                             ];
                             $redNum += 1;
-                        }//dump($redInfo);
+                        }
                         //构建红包基础数据,并发送红包
                         foreach ($redInfo as $k => $v) {
                             if((int)$v['money'] > 0){
                                 $ret = $this->pay_red($v,$itemCof,$info['sn']);
+                                if($ret['return_code'] != 'SUCCESS' && $ret['result_code'] != 'SUCCESS'){
+                                    $state = false;
+                                }
                             }
                         }
                     }else{
                         $ret = $this->pay_red($info,$itemCof,$info['sn']);
                     }
-                    */
-                    $ret = $this->pay_red($info,$itemCof,$info['sn']);
-                    if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
+                    
+                    // $ret = $this->check_back($info['sn'],2);dump($ret);
+                    // if($ret['is_success'] === 'T'){
+                    //     $ret['response']['reason']
+                    // }
+                    // $ret = $this->pay_red($info, $itemCof, $info['sn']);
+                    if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS' && $state){
                         $this->srun($ret['err_code_des'],array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
                     }else{
                         $this->erun($ret['err_code_des']);
@@ -150,14 +158,15 @@ class CashbackController extends ManageBase{
         if((int)$type === 2){
             $config = load_payment('wx_red');
             $data = [
-                'mch_billno' => $sn,
-                'bill_type'  => 'MCHT',
+                'mch_billno' =>  $sn,
+                'bill_type'  =>  'MCHT',
                 'sub_appid'  =>  $config['sub_appid'],
                 'sub_mch_id' =>  $config['sub_mch_id']
             ];
             $ret = Query::run('wx_red', $config, $data);
             try {
-                $ret = Query::run('wx_red', $config, $data);dump($ret);
+                $ret = Query::run('wx_red', $config, $data);
+                return $ret;
             } catch (PayException $e) {
                 error_insert($e->errorMessage());
                 $this->erun("ERROR:".$e->errorMessage());
@@ -178,11 +187,12 @@ class CashbackController extends ManageBase{
         ];
         $ret = Query::run('wx_red', $config, $data);
         try {
-            $ret = Query::run('wx_red', $config, $data);dump($ret);
+            $ret = Query::run('wx_red', $config, $data);
             if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
                 //发放成功，已领取
                 if($ret['status'] === 'RECEIVED'){
                     M('Cash')->where(array('sn'=>$ret["mch_billno"]))->setField(['status'=>1,'uptime'=>time()]);
+                   // $this->srun('发放成功,已领取');
                 }
                 //已退款或发放失败
                 if(in_array($ret['status'],['FAILED','REFUND'])){
@@ -195,14 +205,20 @@ class CashbackController extends ManageBase{
                         'remark'    =>  $info['remark'].'历史单号:'.$ret["mch_billno"]
                     ];
                     M('Cash')->where(array('id'=>$info['id']))->setField($up);
+                   // $this->erun('发放失败,请重新发放...');
                 }
                 //未领取  或者发放中  都继续写入查询中
                 if(in_array($ret['status'], ['SENDING','SENT','RFUND_ING'])){
                     load_redis('lpush','red_list',$ret["mch_billno"]);
+                    
+                   // $this->srun('发放成功,待领取...');
                 }
+
             }else{
-                $this->erun("ERROR:".$ret['err_code_des'].$ret['return_msg']);
+               // $this->erun("ERROR:".$ret['err_code_des'].$ret['return_msg']);
             }
+            $this->assign('data',$ret);
+            $this->display();
         } catch (PayException $e) {
             error_insert($e->errorMessage());
             $this->erun("ERROR:".$e->errorMessage());
@@ -304,17 +320,16 @@ class CashbackController extends ManageBase{
             'sub_appid'         =>  $config['sub_appid'],
             'sub_mch_id'        =>  $config['sub_mch_id']
         ];
+
         try {
             $ret = Red::run('wx_red', $config, $postData);
             if($ret['return_code'] === 'SUCCESS' && $ret['result_code'] === 'SUCCESS'){
                $this->pay_red_susess($ret,$sn); 
             }else{
-               //记录错误日志
-               
+               //记录错误日志 
             }
-            
         } catch (PayException $e) {
-            error_insert($e->errorMessage());
+            //error_insert($e->errorMessage());
             $this->erun("ERROR:".$e->errorMessage());
             exit;
         }

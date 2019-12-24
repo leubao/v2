@@ -20,7 +20,7 @@ class PlanModel extends Model{
 	 */
 	function add_plan($data = null){
 		if (empty($data)) {return false;}
-        $plantime = strtotime($data['plantime']);//dump($data);
+        $plantime = strtotime($data['plantime']);
 		//判断场次是否已存在
 		if($data['product_type'] == '1'){
 			//是否模板

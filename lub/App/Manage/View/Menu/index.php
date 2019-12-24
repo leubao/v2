@@ -22,6 +22,7 @@ function ZtreeClick(event, treeId, treeNode) {
     treeNode.stype ? $('#j_menu_stype_{$scene}').val(treeNode.stype) : $('#j_menu_stype_{$scene}').val();
     treeNode.parameter ? $('#j_menu_parameter_{$scene}').val(treeNode.parameter) : $('#j_menu_parameter_{$scene}').val();
     treeNode.isparam ? $('#j_menu_isparam_{$scene}').val(treeNode.isparam) : $('#j_menu_isparam_{$scene}').val('');
+    treeNode.isparam ? $('#j_menu_product_{$scene}').val(treeNode.product) : $('#j_menu_product_{$scene}').val(1);
 	$detail.attr('tid', treeNode.tId)
     $detail.show()
 }
@@ -46,7 +47,7 @@ function M_NodeRemove(event, treeId, treeNode) {
             <div style="float:left; width:320px; overflow:auto;">
                 <ul id="ztree{$scene}" class="ztree" data-toggle="ztree" data-options="{expandAll: false,onClick: 'ZtreeClick',showRemoveBtn: 'true',showRenameBtn: 'true',addDiyDom: 'true',maxAddLevel:'3',addHoverDom:'edit',removeHoverDom:'edit',onRemove:'M_NodeRemove'}">
                     <volist name="menu" id="vo">
-                        <li data-id="{$vo.id}" data-help="{$vo.help}" data-scene="{$vo.is_scene}" data-pid="{$vo.parentid}" data-app="{$vo.app}" data-model="{$vo.model}" data-action="{$vo.action}" data-target="{$vo.target}" data-parameter="{$vo.parameter}" data-status="{$vo.status}" data-type="{$vo.type}" data-tabid="{$vo.tId}" data-faicon="{$vo.icon}" data-stype="{$vo.stype}" data-width="{$vo.width}" data-height="{$vo.height}" data-faicon-close="{$vo.icon}" data-listorder="{$vo.listorder}" data-doajax="{$vo.doajax}" data-isparam="{$vo.is_param}">{$vo.name}</li>
+                        <li data-id="{$vo.id}" data-help="{$vo.help}" data-scene="{$vo.is_scene}" data-pid="{$vo.parentid}" data-app="{$vo.app}" data-model="{$vo.model}" data-action="{$vo.action}" data-target="{$vo.target}" data-parameter="{$vo.parameter}" data-status="{$vo.status}" data-type="{$vo.type}" data-tabid="{$vo.tId}" data-faicon="{$vo.icon}" data-stype="{$vo.stype}" data-width="{$vo.width}" data-height="{$vo.height}" data-faicon-close="{$vo.icon}" data-listorder="{$vo.listorder}" data-doajax="{$vo.doajax}" data-product="{$vo.is_product}" data-isparam="{$vo.is_param}">{$vo.name}</li>
                     </volist>
                 </ul>
             </div>
@@ -119,6 +120,16 @@ function M_NodeRemove(event, treeId, treeNode) {
                             <option value="dialog">dialog</option>
                             <option value="doajax">doajax</option>
                             <option value="_blank">_blank</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="j_menu_target" class="control-label x85">适用产品：</label>
+                        <select class="selectpicker show-tick" id="j_menu_product_{$scene}" name="is_product" data-style="btn-default btn-sel" data-width="auto">
+                            <option value="1">全部产品</option>
+                            <option value="2">剧院产品</option>
+                            <option value="3">景区产品</option>
+                            <option value="4">漂流产品</option>
+                            <option value="5">综合景区</option>
                         </select>
                     </div>
                     <div class="form-group">

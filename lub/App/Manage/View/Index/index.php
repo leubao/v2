@@ -94,7 +94,7 @@ function MainMenuClick(event, treeId, treeNode) {
 <div id="bjui-window">
   <header id="bjui-header">
     <nav id="bjui-hnav-navbar-box" class='navbar navbar-inverse navbar-fixed-top'>
-      <div class='navbar-header'> <a class='navbar-brand' href=''>  <i class="fa fa-ticket"></i>云鹿票券[剧院]</a> </div>
+      <div class='navbar-header'> <a class='navbar-brand' href=''>  <i class="fa fa-ticket"></i>云鹿票券[景区]</a> </div>
       <div class='collapse navbar-collapse'>
         <ul id="bjui-hnav-navbar" class='nav navbar-nav'>
           <volist name="SUBMENU_CONFIG" id="menu" key='k'>
@@ -113,7 +113,7 @@ function MainMenuClick(event, treeId, treeNode) {
         <ul class='nav navbar-nav navbar-right'>
           <li class="dropdown"><a href="#" class="dropdown-toggle" data-toggle="dropdown" title="切换产品"><i class="fa fa-cubes"></i>&nbsp;&nbsp;{$pid|product_name}(切换产品)</a>
             <ul class="dropdown-menu" role="menu">
-              <volist name="userInfo['ITEM']['Product']" id="pro">
+              <volist name="userInfo['PRO']" id="pro">
               <li><a href="{:U('Item/Index/changProduct',array('proid'=>$pro['id']));}">&nbsp;<i class="fa fa-tag"></i> {$pro.name}</a></li>
               </volist>
             </ul>

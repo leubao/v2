@@ -24,19 +24,34 @@ class SetController extends ManageBase{
 		$this->display();
 	}
 	/**
-	 * 检票终端管理
+	 * 检票通道管理
 	 */
 	function check_in(){
 		$this->basePage('Terminal',array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE')));
 		$this->display();
 	}
 	/**
-	 * 添加终端
+	 * 添加通道
 	 */
 	function terminal(){
 		if(IS_POST){
-			$product_type = M('Product')->where(array('id'=>$_POST['product_id']))->getField('type');
-			if(Operate::do_add('Terminal',array('createtime'=>time(),'product_type'=>$product_type,'user_id'=>\Manage\Service\User::getInstance()->id? : 0))){
+			$pinfo = I('post.');
+			$ticket = [];
+			if(!empty($pinfo['ticket'])){
+				foreach ($pinfo['ticket'] as $k => $v) {
+					$ticket[] = (int)$v;
+				}
+			}
+			$data = array(
+				'name'			=>	$pinfo['name'],
+				'ticket'		=>	json_encode($ticket),
+				'product_id'	=>	$pinfo['product_id'],
+				'createtime'	=>	time(),
+				'status'		=>	1,
+				'user_id'		=>	\Manage\Service\User::getInstance()->id? : 0
+			);
+			$status = D('Terminal')->add($data);
+			if($status){
 				$this->srun('新增成功!', array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('新增失败!');
@@ -44,14 +59,65 @@ class SetController extends ManageBase{
 		}else{
 			$pid = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
 			$this->assign('pid',$pid)
-				->assign('idcode',rand(0, 9999))
+				->assign('ticket', $this->getTerminalTicketType($pid, []))
 				->display();
 		}
 	}
 	/**
-	 * 删除终端
+	 * 编辑通道
 	 */
-	function terminalDel(){
+	function edit_terminal(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			$ticket = [];
+			if(!empty($pinfo['ticket'])){
+				foreach ($pinfo['ticket'] as $k => $v) {
+					$ticket[] = (int)$v;
+				}
+			}
+			$data = array(
+				'name'			=>	$pinfo['name'],
+				'ticket'		=>	json_encode($ticket),
+				'status'		=>	$pinfo['status'],
+				'user_id'		=>	\Manage\Service\User::getInstance()->id? : 0
+			);
+			$status = D('Terminal')->where(['id'=>$pinfo['id']])->save($data);
+			if($status){
+				$this->srun('更新成功!', array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun('更新失败!');
+			}
+		}else{
+			$id = I('get.id',0,intval);
+			if(empty($id)){
+				$this->erun('参数有误!');
+			}
+			//读取当前
+			$info = D('Terminal')->where(['id'=>$id])->find();
+			$info['ticket'] = json_decode($info['ticket'], true);
+			$pid = \Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE');
+			$this->assign('data', $info)->assign('ticket', $this->getTerminalTicketType($pid, $info['ticket']))
+				->display();
+		}
+	}
+	//通道可通过票型
+	private function getTerminalTicketType($pid, $ticketIdx = [])
+	{
+		//读取当前产品票型
+		$ticket = D('TicketType')->where(['product_id'=>$pid,'status'=>1])->field('id,name')->select();
+		foreach ($ticket as $k => &$v) {
+			if(in_array($v['id'], $ticketIdx)){
+				$v['checked'] = true;
+			}else{
+				$v['checked'] = false;
+			}
+		}
+		return $ticket;
+	}
+	/**
+	 * 删除通道
+	 */
+	function del_terminal(){
 		$id = I('get.id',0,intval);
 		if(empty($id)){
 			$this->erun('参数有误!');
@@ -148,7 +214,7 @@ class SetController extends ManageBase{
 	 * 渠道座椅
 	 */
 	function auto_seat(){
-		$this->basePage('AutoSeat',array('product_id'=>get_product('id')),'id DESC,sort ASC');
+		$this->basePage('AutoSeat',array('product_id'=>get_product('id')),'sort ASC,id DESC');
 		$this->display();
 	}
 	

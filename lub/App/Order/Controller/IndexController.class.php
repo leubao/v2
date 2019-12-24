@@ -18,8 +18,21 @@ class IndexController extends ManageBase {
 	function index(){
 		$map = [];
 		$rest = $this->get_order_map();
-		$map = array_merge($rest['map'],$map);
-		$this->basePage('Order',$map,array('createtime'=>'DESC'));	
+		$map = array_merge($rest['map'], $map);
+		$field = [
+			'order_sn',
+			'addsid',
+			'number',
+			'createtime',
+			'money',
+			'plan_id',
+			'status',
+			'user_id',
+			'pay',
+			'type',
+			'activity'
+		];
+		$this->basePage('Order', $map, array('createtime'=>'DESC'), 25, $field);
 		$this->assign('map',$map)->assign('export_map',$export_map)->display();
 	}
 	/*订单导出*/
@@ -44,7 +57,10 @@ class IndexController extends ManageBase {
 	   			'number'	=>	$v['number'],
 	   			'money'		=>	$v['money'],
 	   			'plan'		=>	planShow($v['plan_id'],2,1),
+	   			'channel'	=>	crmName($v['channel_id'],1),
 	   			'user'		=>	userName($v['user_id'],1,1),
+	   			'take'		=>	$v['take'],
+	   			'phone'		=>	$v['phone'],
 	   			'status'	=>	order_status($v['status'],1),
 	   			'datetime'	=>	date('Y-m-d H:i:s',$v['createtime']),
 	   		);
@@ -55,7 +71,10 @@ class IndexController extends ManageBase {
    			'number'	=>	'数量',
    			'money'		=>	'金额',
    			'plan'		=>	'所属计划',
+   			'channel'	=>	'渠道商',
    			'user'		=>	'下单人',
+   			'take'		=>	'联系人',
+   			'phone'		=>	'联系电话',
    			'status'	=>	'状态',
    			'datetime'	=>	'操作时间',
    		);
@@ -197,7 +216,7 @@ class IndexController extends ManageBase {
 		$model= D('Item/Order');
 		$map = [
 			'order_sn'	=>	$ginfo['sn'],
-			'type'  =>	['in','2,4,6'],
+			'type'  =>	['in','2,4,6,7'],
 			'status'=>	['in','1,9']
 		];
 		$info = $model->where($map)->field('id,order_sn,user_id,plan_id,product_id,type,number,money,guide_id,channel_id,phone,take,status,createtime')->relation(true)->find();
@@ -279,10 +298,11 @@ class IndexController extends ManageBase {
 		$where = [
 			'product_id'	=>	get_product('id'),
 			'endtime'		=>	['gt',$datetime]
-		];//dump($map);
+		];
 		$activity = D('Activity')->where($where)->field('id,title')->select();
 		$this->assign('activity',$activity)->assign('pinfo',$pinfo);
 		$this->basePage('idcardLog',$map,'id DESC');
+
 		$this->display();
 	}
 	/**

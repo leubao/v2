@@ -25,7 +25,7 @@
   <div class="form-group">
     <label class="col-sm-2 control-label">产品权限:</label>
     <volist name="product" id="vo">
-      <input type="checkbox" checked="checked" data-toggle="icheck" name="product[]" value="{$vo.id}" data-label="{$vo.name}">
+      <input type="checkbox" <if condition="in_array($vo['id'], $data['product'])"> checked="checked" </if> data-toggle="icheck" name="product[]" value="{$vo.id}" data-label="{$vo.name}">
     </volist>
   </div>
   <div class="form-group">

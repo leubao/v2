@@ -35,7 +35,7 @@ class MsgController extends ManageBase {
 			);
 		}
 		//渠道退单申请
-		$refund = M('TicketRefund')->where(array('status'=>'1'))->count();
+		$refund = M('TicketRefund')->where(array('status'=>'1','product_id'=>$this->pid))->count();
 		if($refund <> '0'){
 			$info[] = array(
 				'title'  => '渠道退单申请',
@@ -46,8 +46,8 @@ class MsgController extends ManageBase {
 				'titp'=> 'info',
 			);
 		}
-		/*查询新订单
-		$newOrder = M('Order')->where(['status'=>1])->count();
+		/*查询新订单*/
+		$newOrder = M('Order')->where(['status'=>1,'product_id'=>$this->pid])->count();
 		if($newOrder <> '0'){
 			$info[] = array(
 				'title'  => '新订单接入',
@@ -57,7 +57,7 @@ class MsgController extends ManageBase {
 				'title'=>'订单列表',
 				'titp'=> 'info',
 			);
-		}*/
+		}
 		//开演前30分钟未取票的订单检测
 		//下午三点后每隔半个小时检测一次未政企订单排座但未付款的
 		//系统异常记录

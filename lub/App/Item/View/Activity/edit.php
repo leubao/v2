@@ -30,8 +30,26 @@
                   </volist>
                 </select>
             </td>
-            <td></td><td>
-              </td>
+            <td>配额校验:</td>
+            <td><select name="is_quota" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1" <if condition="$data['is_quota'] eq 1">selected</if>>开启</option>
+                <option value="0" <if condition="$data['is_quota'] eq 0">selected</if>>关闭</option>
+              </select><span class="remark">下单时受配额限制</span>
+            </td>
+        </tr>
+        <tr>
+          <td>
+            开启团队售票:
+          </td>
+          <td>
+            <select name="is_team" class="required" data-toggle="selectpicker" data-rule="required">
+              <option> 请选择</option>
+              <option value="2" <if condition="$data['is_team'] eq 2">selected</if>>开启</option>
+              <option value="1" <if condition="$data['is_team'] eq 1">selected</if>>关闭</option>
+            </select>
+          </td>
+          <td></td>
+          <td></td>
         </tr>
         <tr>
             <td>参与范围:</td>
@@ -78,14 +96,14 @@
         </table>
       
     </if>
-    <if condition="$data['type'] eq '3'">
+    <if condition="in_array($data['type'],array('3','9'))">
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
             <td>身份证号段:</td><td colspan="3"><input type="text" name="card" value="{$card}" size="45"><span class="remark">身份证号前6位,多个区域用“|”分隔开</span></td>
           </tr>
           <tr>
-            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="{$data.param.info.number}" size="15"><span class="remark">0为不限制</span></td>
           </tr>
           <tr>
             <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="{$data.param.info.ticket}">

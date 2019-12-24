@@ -530,6 +530,7 @@ class WorkController extends ManageBase{
 	function getprice(){
 		if(IS_POST){
 			$pinfo = json_decode($_POST['info'],true);
+			$plan = F('Plan_'.$pinfo['plan']);
 			//常规根据计划、区域、产品类型获取销售价格
 			if($pinfo['method'] == 'general'){
 				$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1);
@@ -542,11 +543,41 @@ class WorkController extends ManageBase{
 					'_string'   =>  "FIND_IN_SET(1,is_scene)",
 					'id'		=>	$pinfo['actid']
 				];
-				$param = D('Activity')->where($where)->getField('param');
-				$param = json_decode($param,true);
-				//dump($param['info']['ticket']);
-				$ticket = explode(',',$param['info']['ticket']);
-				$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1,$pinfo['seale'],$ticket);
+				$ainfo = D('Activity')->where($where)->field('id,type,param')->find();
+				$param = json_decode($ainfo['param'],true);
+				//在套票时直接加载活动中的价格
+				if((int)$ainfo['type'] === 5){
+					//判断票型是否可售
+					$planParam = unserialize($plan['param']);
+					$state = true;
+					foreach ($param['info']['packages'] as $key => $value) {
+						if($plan['product_id'] == $value['product']){
+							//主产品票型不可用不显示，TODO子产品不可用时未判断
+							if(!in_array($value['ticket'], $planParam['ticket'])){
+								$state = false;
+							}
+						}
+						
+					}
+					if($state){
+						//判断活动的产品类型TODO
+						$number = D('Drifting')->where(['plan_id'=>$pinfo['plan']])->count();
+		                //获取当前可售数量 TODO 目前不支持票面价和结算价
+		                $area_num = $plan['quotas'] - $number;
+						$price = [
+							'id'		=>	$ainfo['id'],
+							'name'		=>	$param['info']['price']['name'],
+							'area_id'	=>  0,
+							'area_num' 	=>	$area_num, 
+							'area_nums' =>	$number,
+							'price'		=>	$param['info']['price']['price'],
+							'discount'	=>	$param['info']['price']['discount'],
+						];
+					}
+				}else{
+					$ticket = explode(',',$param['info']['ticket']);
+					$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1,$pinfo['seale'],$ticket);
+				}
 			}
 			$return =  array(
 				'statusCode' => 200,
@@ -621,20 +652,26 @@ class WorkController extends ManageBase{
 	function window_refund(){
 		$sn = I('sn');
 		if(!empty($sn)){
-			$info = D('Item/Order')->where(array('order_sn'=>$sn))->relation(true)->find();
-			//取消中的订单不允许窗口退票
-			$no_refund =  array('0','2','3','7','11');
-			if(in_array($info['status'],$no_refund)){
-				$this->assign("error","该订单状态,不允许此项操作..");
+			if(load_redis('get','lock_'.$sn)){
+				$this->assign("error","订单锁定中~");
 			}else{
-				$info['info'] = unserialize($info['info']);
-				if($info['info'] == false){
-					$this->assign("error","未找到相应数据!");
+
+				$info = D('Item/Order')->where(array('order_sn'=>$sn))->relation(true)->find();
+				//取消中的订单不允许窗口退票
+				$no_refund =  array('0','2','3','7','11');
+				if(in_array($info['status'],$no_refund)){
+					$this->assign("error","该订单状态,不允许此项操作..");
 				}else{
-					$this->assign('data',$info)
-						->assign('pinfo',$pinfo);
+					$info['info'] = unserialize($info['info']);
+					if($info['info'] == false){
+						$this->assign("error","未找到相应数据!");
+					}else{
+						$this->assign('data',$info)
+							->assign('pinfo',$pinfo);
+					}
 				}
 			}
+			
 		}
 		$this->assign('sn',$sn)->display();
 	}
@@ -651,6 +688,9 @@ class WorkController extends ManageBase{
 	function refunds(){
 		$ginfo = I('get.');
 		if(empty($ginfo)){$this->erun("参数错误!");}
+		if(load_redis('get','lock_'.$sn)){
+			$this->erun("订单锁定中~");
+		}
 		try{
 			$refund = new Refund;
 			switch ((int)$ginfo['order']) {

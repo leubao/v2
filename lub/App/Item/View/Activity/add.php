@@ -22,7 +22,7 @@
         </tr>
         <tr>
             <td>活动类型:</td>
-            <td colspan="3">
+            <td>
               <select name="type" class="required" id="activity_type" data-toggle="selectpicker" data-rule="required">
                 <option value="">活动类型</option>
                 <option value="1" data-area="buy">买赠</option>
@@ -33,6 +33,16 @@
                 <option value="5" data-area="more">多产品套票销售</option>
                 <option value="7" data-area="kill">限时秒杀</option>
                 <option value="8" data-area="pre">预约销售</option>
+                <option value="9" data-area="area">限制区域限制场次</option>
+              </select>
+            </td>
+            <td>
+              开启团队售票:
+            </td>
+            <td>
+              <select name="is_team" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="2">开启</option>
+                <option value="1" selected>关闭</option>
               </select>
             </td>
         </tr>
@@ -62,8 +72,12 @@
                   </volist>
                 </select>
             </td>
-            <td></td><td>
-              </td>
+            <td>配额校验:</td>
+            <td><select name="is_quota" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1">开启</option>
+                <option value="0" selected>关闭</option>
+              </select><span class="remark">下单时受配额限制</span>
+            </td>
         </tr>
         <tr>
             <td>排序:</td><td><input type="text" name="sort" value="0" size="15"></td>
@@ -114,7 +128,7 @@
           </tr>
           <tr>
             <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="">
-    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+    <input type="text" name="ticket.name" readonly value="" size="57" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
           <tr>
             <td>其它设置:</td>
@@ -244,7 +258,23 @@
         </tbody>
       </table>
     </div>
+    <!--组团销售-->
+    <div id="team" style="display: none;">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="" size="15"></td>
+          </tr>
+          <tr>
+            <td>可售票型:</td>
+            <td colspan="3"><input type="hidden" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <!--预约销售-->
+    <div id="remark" class="remark">1</div>
   </div>
   <input name="product_id" value="{$product_id}" type="hidden">
   <div class="bjui-pageFooter">
@@ -258,16 +288,17 @@
 $(document).ready(function() {
   //监听类型切换
   $('#activity_type').change(function(){
-      var selected = $(this).children('option:selected').data('area');
-      $("#"+selected).css('display','block');
-      $("#activity_type option").map(function(){return $(this).data('area');}).each(function(index,select) {
-        if(select != selected){
-          $("#"+select).css('display','none');
-        }
+    var selected = $(this).children('option:selected');
+    var area = selected.data('area');
+    $("#"+area).css('display','block');
+    $("#activity_type option").map(function(){return $(this).data('area');}).each(function(index,select) {
+      if(select != area){
+        $("#"+select).css('display','none');
+      }
     });
+    if(selected.val() == 9){
+      $('#remark').html('票型配合销售计划来实现票型限制场次销售');
+    }
   });
-  function checkSelect(selected) {
-    
-  }
 });
 </script>

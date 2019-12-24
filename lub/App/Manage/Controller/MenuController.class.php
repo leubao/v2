@@ -38,6 +38,7 @@ class MenuController extends ManageBase {
                     'stype'    => $v['stype'],
                     'width'    => $v['width'],
                     'height'   => $v['height'],
+                    'is_product' => $v['is_product'],
                     'is_param' => $v['is_param'],
                 );
         }
@@ -83,6 +84,7 @@ class MenuController extends ManageBase {
                     'stype'    => $v['stype'],
                     'width'    => $v['width'],
                     'height'   => $v['height'],
+                    'is_product' => $v['is_product'],
                     'is_param' => $v['is_param'],
                 );
         }
