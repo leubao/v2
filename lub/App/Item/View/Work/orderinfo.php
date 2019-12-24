@@ -176,6 +176,9 @@
     <li>
       <button type="button" class="btn-close" data-icon="close">关闭</button>
     </li>
+    <li>
+    <button href="{:U('Item/Order/public_tag_status',array('sn'=>$data['order_sn'],'menuid'=>$menuid));}" data-toggle="doajax" data-confirm-msg="确定要改变订单状态吗?" type="button" class="btn-info">标记</button>
+    </li>
     <if condition="$data['status'] eq '1' ">
     <li>
       <button type="button" class="btn-info" data-icon="print" data-url="{$prshow.url}" data-width="{$prshow.width}" data-height="{$prshow.height}" data-title="{$prshow.title}" data-pageid="{$prshow.pageId}" id="print_window">打印</button>

@@ -419,6 +419,16 @@ function asc_to_pinyin($asc, &$pyarr) {
         }
     }
 }
+if (! function_exists("array_key_last")) {
+    function array_key_last($array) {
+        if (!is_array($array) || empty($array)) {
+            return NULL;
+        }
+        
+        return array_keys($array)[count($array)-1];
+    }
+}
+
 /**
  * 二位数组转一维数组
  */
@@ -755,7 +765,7 @@ function get_wechat($product_id = ''){
  */
 function & load_wechat($type = '',$product_id = '',$submch = '') {
     !class_exists('Wechat\Loader', FALSE) && Vendor('Wechat.Loader');
-    static $wechat = array(); load_redis('set','ddss1224r',$product_id);
+    static $wechat = array();
     $index = md5(strtolower($type));
     if (!isset($wechat[$index])) {
         if(!empty($product_id)){
@@ -838,7 +848,7 @@ function load_payment($pay = '',$itemid = ''){
 
             //'redirect_url'      => '',// 如果是h5支付，可以设置该值，返回到指定页面
 
-            //'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
+            'return_raw'        => true,// 在处理回调时，是否直接返回原始数据，默认为true 
         ];
     }
     if(stripos($pay,'ccb') !== false){
@@ -950,4 +960,30 @@ function hashPassword($password, $verify = "") {
 function get_proconf($product_id,$type){
     $proconf = cache('ProConfig');
     return $proconf[$product_id][$type];
+}
+//计算校验位
+function creatCheckDigit($sign)
+{
+    $ql = str_split($sign);
+    $oddSum = 0;$evenSum = 0;  
+    //奇数
+    $odd = array_filter($ql,function($var){
+        return($var & 1);
+    },ARRAY_FILTER_USE_KEY);
+    
+    foreach ($odd as $k => $v) {
+        $oddSum += (int)$v;
+    }
+    //偶数
+    $even = $filter = array_filter($ql,function($var){
+        return(!($var & 1));
+    },ARRAY_FILTER_USE_KEY);
+
+    foreach ($even as $k => $v) {
+        $evenSum += (int)$v;
+    }
+    $sum = ($oddSum + $evenSum*3)%10;
+   
+    $val = (10 - $sum)%10;
+    return $val;
 }

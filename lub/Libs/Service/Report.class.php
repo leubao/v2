@@ -115,7 +115,7 @@ class Report{
 	    			'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 	    			'createtime' => array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),
 	    		);
-	    		$where = array('datetime'=>$datetime,'status'=>'1');
+	    		$where = array('datetime'=>$datetime,'product_id'=>$value['id'],'status'=>'1');
 	    		$count = M('ReportData')->where($where)->count();
 				//当前日期是否已生成
 				if($count != 0){
@@ -133,7 +133,7 @@ class Report{
 	        }else{
 	        	//按场次 查询场次id
 	        	$plan = M('Plan')->where(array('plantime'=>$start_time))->field('id')->select();
-	        	$where = array('plantime'=>$start_time,'status'=>'1');
+	        	$where = array('plantime'=>$start_time,'product_id'=>$value['id'],'status'=>'1');
 	        	$count = M('ReportData')->where($where)->count();
 				//当前日期是否已生成
 				if($count != 0){

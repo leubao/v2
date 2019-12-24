@@ -126,7 +126,7 @@ function getprice(event, treeId, treeNode){
             </tr>
         </table>
         <!--提交-->
-        <div class="submit_seat"><a href="#" class="btn btn-success" onclick="quick_server();">立即出票</a></div>
+        <div class="submit_seat"><button type="button" id="btn_quick" class="btn btn-success" onclick="quick_server();">立即出票</button></div>
     </div>
 </div>
 <div class="bjui-pageFooter">
@@ -251,6 +251,8 @@ function delNum(trId,price){
     $("#quick-total").html(total());/*合计*/
 }
 function quick_server(){
+    //禁用当前按钮
+    $('#btn_quick').attr('disabled', true);
     var postData = '',
         pay = '',
         crm = '',
@@ -268,6 +270,7 @@ function quick_server(){
         length =  $("#quick-price-select tr").length,
         url = '<?php echo U('Item/Order/quickpost',array('plan'=>$plan['id'],'type'=>$type));?>';
     if(length <= 0){
+        $('#btn_quick').attr('disabled',false);
         $(this).alertmsg('error','请选择要售出的票型!');
         return false;
     }
@@ -276,6 +279,7 @@ function quick_server(){
         qditem = $("#quick-crm input[name='channel.id']").val();
         if(phone == '' || contact == '' || guide == '' || qditem == ''){
           $(this).alertmsg('error','请完善团队信息!');
+          $('#btn_quick').attr('disabled',false);
           return false;
         }
     <?php } ?>

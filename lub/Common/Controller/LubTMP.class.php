@@ -197,66 +197,19 @@ class LubTMP extends \Think\Controller {
      * @param filed 要返回的字段 
      */
     protected function basePage($model, $where = '', $order = '', $limit = 25,$field = '') {
+        
         $model = $this->getModelObject($model);
         $count = $model->where($where)->count();
+
         $currentPage = !empty($_REQUEST["pageCurrent"])?$_REQUEST["pageCurrent"]:1;
         $firstRow = ($currentPage - 1) * $limit;
+        
         $page = new page($count, $limit);
         $data = $model->where($where)->order($order)->limit($firstRow . ',' . $page->listRows)->field($field)->select();
         $this->assign('data', $data)
              ->assign( 'totalCount', $count )
              ->assign( 'numPerPage', $page->listRows)
              ->assign( 'currentPage', $currentPage);
-
-
-
-        /*$options    =   array();
-        $REQUEST    =   (array)I('request.');
-         if(is_string($model)){
-             $model  =   M($model);
-         }
-         
-         $OPT        =   new \ReflectionProperty($model,'options');
-         $OPT->setAccessible(true);
-         
-         $pk         =   $model->getPk();
-         //排序
-         if ( isset($REQUEST['orderField']) && isset($REQUEST['orderDirection']) && in_array(strtolower($REQUEST['orderDirection']),array('desc','asc')) ) {
-             $options['order'] = '`'.$REQUEST['orderField'].'` '.$REQUEST['orderDirection'];
-         }elseif( empty($options['orderField']) && !empty($pk) ){
-             $options['order'] = $pk.' desc';
-         }
-         unset($REQUEST['orderField'],$REQUEST['orderDirection']);
-         //查询条件
-         if( !empty($map)){
-             $options['where'] = $map;
-         }else {
-             $options['where']['_logic'] = 'or';;
-         }
-         //每页显示行数
-         $pageSize=C('PAGE_SIZE') > 0 ? C('PAGE_SIZE') : 10;
-         //当前页
-         $pageCurrent =null;
-         if (isset($_REQUEST ['pageCurrent'])) {
-             $pageCurrent = $_REQUEST ['pageCurrent'];
-         }
-        if ($pageCurrent == '') {
-            $pageCurrent = 1;
-        }
-         
-         $options      =   array_merge( (array)$OPT->getValue($model), $options );
-         $count        =   $model->where($options['where'])->count();
-         $options['limit'] = $pageSize;
-         $options['page'] = $pageCurrent.','.$pageSize.'';
-         
-         $model->setProperty('options',$options);
-         
-         $voList= $model->field($field)->select();
-         $this->assign('list', $voList);
-         $this->assign('total', $count);//数据总数
-         $this->assign('pageCurrent', !empty($_REQUEST['pageCurrent']) ? $_REQUEST['pageCurrent'] : 1);//当前的页数，默认为1
-         $this->assign('pageSize', $pageSize); //每页显示多少条
-         cookie('_currentUrl_', __SELF__);*/
          return;
     }
 

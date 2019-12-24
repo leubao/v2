@@ -69,9 +69,11 @@ class IndexController extends ManageBase {
         $people_count = D('ReportData')->where(['status'=>1])->cache('people_count',60)->sum('number');
         //历史累计场次
         $plan_count = D('Plan')->where(['status'=>4])->cache('plan_count',60)->count();
-        //今日入园 景区
+        //今日入园 景区 根据核销人数统计
         
-        $today_garden = D('Scenic')->where(['plan_id' => ['in', arr2string(get_today_plan(),'id')],'status'=>['in','99']])->sum('number');
+        //$today_garden = D('Scenic')->where(['plan_id' => ['in', arr2string(get_today_plan(),'id')],'status'=>['in','99']])->sum('number');
+        $today_garden = D('Scenic')->where(['checktime' => getSearchToday(),'status'=>['in','99']])->sum('number');
+        
         //待入园
         $today_pre_garden = D('Scenic')->where(['plan_id' => ['in', $normal],'status'=>['in','2']])->sum('number');
         //昨日入园人数
@@ -361,6 +363,11 @@ class IndexController extends ManageBase {
     }
     //查询操作日志当前一小时内的所有操作
     function public_action_log(){
+        $this->display();
+    }
+    //使用身份证阅读器
+    public function public_collect_idcard()
+    {
         $this->display();
     }
 }

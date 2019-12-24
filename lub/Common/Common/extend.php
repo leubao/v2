@@ -10,8 +10,17 @@
 /**
  * 根据产品ID获取产品名称
  */
-function itemName($param){
-    echo M('Item')->where(array('id'=>$param))->getField('name');
+function itemName($param, $type = ''){
+    if(!empty($param)){
+         $name = M('Item')->where(array('id'=>$param))->getField('name');
+         if($type){
+            return $name;
+         }else{
+            echo $name;
+         }
+    }else{
+        echo "未知";
+    }
 }
 /**
  * 根据分组ID获取票型分组名称
@@ -118,7 +127,7 @@ function userName($param,$scene = '1',$type=NULL){
                 $field = 'nickname';
                 break;
         }
-        $name = M($table)->where(array('id'=>$param))->getField($field);
+        $name = M($table)->where(array('id'=>$param))->cache('nickname'.$param,3600)->getField($field);
     }
     if($type){
         return $name ? $name : "未知";
@@ -166,7 +175,7 @@ function areaName($param,$type=NULL){
         if(!empty($area)){
             $name = $area[$param]['name'];
         }else{
-            $name = M('Area')->where(array('id'=>$param))->getField('name');
+            $name = M('Area')->where(array('id'=>$param))->cache('area_name'.$param, 86400)>getField('name');
         }
         if($type){
           return $name;
@@ -187,7 +196,7 @@ function areaSeatCount($param,$type=NULL){
         if(!empty($area)){
             $num = $area[$param]['num'];
         }else{
-            $num = M('Area')->where(array('id'=>$param))->getField('num');
+            $num = M('Area')->where(array('id'=>$param))->cache('area_num'.$param, 86400)->getField('num');
         }
         if($type){
           return $num;
@@ -204,7 +213,7 @@ function areaSeatCount($param,$type=NULL){
  */
 function ticketName($param,$type=NULL){
     if(!empty($param)){
-        $name = M('TicketType')->where(array('id'=>$param))->getField('name');
+        $name = M('TicketType')->where(array('id'=>$param))->cache('ticketName'.$param, 86400)->getField('name');
         if($type){
             return $name;
          }else{
@@ -218,7 +227,7 @@ function ticketName($param,$type=NULL){
 
 function ticket_single($param,$type=NULL){
     if(!empty($param)){
-        $name = M('TicketSingle')->where(array('id'=>$param))->getField('name');
+        $name = M('TicketSingle')->where(array('id'=>$param))->cache('signleName'.$param, 86400)->getField('name');
         if($type){
             return $name;
          }else{
@@ -297,7 +306,7 @@ function seatOrder($param, $plan_id, $area_id = '', $type = NULL){
         $plan = F('Plan_'.$plan_id);
         if(empty($plan)){
             $plantime = strtotime(" -7 day ",strtotime(date('Y-m-d')));
-            $plan = M('Plan')->where(array('plantime'=>array('egt',$plantime),'id'=>$plan_id))->field('id,product_type,seat_table')->find();
+            $plan = M('Plan')->where(array('plantime'=>array('egt',$plantime),'id'=>$plan_id))->field('id,product_type,seat_table')->cache('plan_7'.$plan_id,86400)->find();
         }
         if(empty($plan)){
             $name = "订单已过期";
@@ -318,7 +327,7 @@ function seatOrder($param, $plan_id, $area_id = '', $type = NULL){
             }
             $info = M(ucwords($table))->where($map)->field('id,group,sort,number,soldtime,sale,middle,price_id',true)->find();
             $checktime = !empty($info['checktime']) ? date('Y-m-d H:i:s',$info['checktime']) : "未检票";
-            $idcard = !empty($info['idcard']) ? '<i class="fa fa-address-card" data-toggle="tooltip" data-placement="bottom" title="'.$info['idcard'].'"></i> ' : '';
+            $idcard = !empty($info['idcard']) ? '<i class="fa fa-cc" data-toggle="tooltip" data-placement="bottom" title="'.$info['idcard'].'"></i> ' : '';
             $name = $idcard.$info['order_sn'].' / '.seat_status($info['status'],1).' / '.$info['print'].' / '.$checktime;
         }
         if($type){
@@ -341,7 +350,7 @@ function planShow($param,$stype = 1,$type=NULL){
         if(!empty($plan)){
             $info = $plan;
         }else{
-           $info = M('Plan')->where(array('id'=>$param))->field('plantime,games,starttime,endtime,product_type')->find(); 
+           $info = M('Plan')->where(array('id'=>$param))->field('plantime,games,starttime,endtime,product_type')->cache('plan_show'.$param,259200)->find(); 
         }
         //判断产品类型
         switch ($info['product_type']) {
@@ -426,7 +435,7 @@ function planShows($param){
     if(!empty($param)){
         $plan = F('Plan_'.$param);
         if(empty($plan)){
-            $plan = M('Plan')->where(array('id'=>$param))->field('product_id,plantime,starttime,games,product_type')->find();
+            $plan = M('Plan')->where(array('id'=>$param))->field('product_id,plantime,starttime,games,product_type')->cache('plan_show'.$param,259200)->find();
         }
         $proconf = cache('ProConfig');
         $proconf = $proconf[$plan['product_id']][1];
@@ -633,6 +642,10 @@ function crmName($param,$type=NULL){
             case 9:
                 $msg = "完结";
                 $status = "default";
+                break;
+            case 10:
+                $msg = "部分核销";
+                $status = "info";
                 break;
             case 11:
                 $msg = "窗口待完成";
@@ -1063,7 +1076,7 @@ function crmName($param,$type=NULL){
    */
     function balance($param,$type = '1'){
         if(empty($param)){return '0.00';}
-        if($type == '1'){
+        if(in_array($type, ['1','3'])){
             //渠道商客户
             $db = M('Crm');
         }
@@ -1071,7 +1084,7 @@ function crmName($param,$type=NULL){
             //个人客户
             $db = M('User');
         }
-        $return = $db->where(array('id'=>$param))->getField('cash');
+        $return = $db->where(['id'=>$param])->getField('cash');
         //判断是否达到最低额
         $config = cache('Config');
         if(bccomp($return, $config['money_low']) > 0){
@@ -1487,7 +1500,7 @@ function crmName($param,$type=NULL){
         }else{
             $time = date('H');
             if($time == '00'){
-                $time = '24'.date('i');
+                $time = '00'.date('i');
             }else{
                 $time = date('Hi',time());
             }
@@ -1615,15 +1628,17 @@ function crmName($param,$type=NULL){
     $encry 加密常量
     $data 待处理的数据
     */
-    function re_print($plan_id,$encry,$data){
+    function re_print($plan_id,$encry,$data,$orderId = ''){
         $plan = F('Plan_'.$plan_id);
         $proconf = cache('ProConfig');
         $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;
-        $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
+        //原有闸机验票规则
+        // $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
         
-        $sn = $code."^#";
+        // $sn = $code."^#";
 
+        $sn = \Libs\Service\Encry::toQrData($data['id'],$orderId,$plan_id,$print);
         
         //条码号
         if($proconf['barcode'] == '1'){
@@ -1791,7 +1806,7 @@ function crmName($param,$type=NULL){
      * 获取当前系统中正常售票的销售计划 
     */
     function normal_plan(){
-        $list = M('Plan')->where(array('status'=>2))->field('id')->select();
+        $list = M('Plan')->where(array('status'=>2))->field('id')->order('plantime ASC,games ASC')->select();
         return arr2string($list,'id');
     }
     /**
@@ -1801,6 +1816,12 @@ function crmName($param,$type=NULL){
         $today = strtotime(date('Ymd'));
         $plan = M('Plan')->where(array('plantime'=>array('egt',$today)))->field('id')->select();
         return $plan;
+    }
+    //返回默认搜索日期
+    function getSearchToday()
+    {
+        $today = array(array('EGT', strtotime(date('Y-m-d'))), array('ELT', strtotime(date('Y-m-d', strtotime('+1 day')))), 'AND');
+        return $today;
     }
     /*通用价格拉取
      * @param $planid 销售计划
@@ -2072,14 +2093,13 @@ function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
 function get_up_fxqr($openid,$pid){
     //$pid = get_product('id') ? get_product('id') : '43';
     $model = D('WxMember');
-    $info = $model->where(['channel'=>1,'openid'=>$openid])->field('openid,user_id,headimgurl')->find();
+    $info = $model->where(['openid'=>$openid])->field('openid,user_id,headimgurl')->find();dump($info);
     $logo_path = SITE_PATH."d/upload/viplogo/";
     $logo = $logo_path.'u-logo-'.$info['user_id'].'.png';
     if(!file_exists($logo)){
         if(!$info['headimgurl']){
-            $user = & load_wechat('User',$pid,1);
+            $user = & load_wechat('User', $pid, 1);
             $result = $user->getUserInfo($openid);
-            dump($result);
             if(!empty($result['headimgurl'])){
                 $model->where(['openid'=>$v['openid']])->setField('headimgurl',$result['headimgurl']);
                 $logo_path = \Libs\Util\Upload::getImage($result['headimgurl'],$logo_path,'u-logo-'.$info['user_id'].'.png');
@@ -2095,7 +2115,8 @@ function get_up_fxqr($openid,$pid){
     //生成新的二维码
     $param = $pid."&".$info['user_id']."&qrcode";
     $param = \Libs\Util\Encrypt::authcode($param,'ENCODE');
-    $url = U('Wechat/Index/show',array('u'=>$info['user_id'],'pid'=>$pid,'param'=>$param));
+    //$url = U('Wechat/Index/show',array('u'=>$info['user_id'],'pid'=>$pid,'param'=>$param));
+    $url = U('Wechat/Activity/act',['pid'=>$pid,'act'=>'131159','u'=>$info['user_id'],'param'=>$param]);
     return qr_base64($url,'u-'.$info['user_id'],$logo,'M','6');
 }
 /**
@@ -2312,4 +2333,41 @@ function getHttpContent($url, $method = 'GET', $postData = array()){
         }
     }
     return $data;
+}
+/**
+ * 任意值转加密常量
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2019-04-29T16:55:29+0800
+ * @param    int|array|string     $value            加密值
+ * @param    integer                  $length      长度
+ * @param    string                   $authCode    颜值
+ * @return   string
+ */
+function putIdToCode($value, $length = 6, $authCode = '')
+{
+    if(empty($authCode)){
+        $authCode = C('AUTHCODE');
+    }
+    
+    $hashids = new Hashids\Hashids($authCode, $length);
+    $hashID = $hashids->encode($value);
+
+    return $hashID;
+}
+/**
+ * 解密
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2019-04-29T16:56:51+0800
+ * @param    string                   $value             解密常量
+ * @param    string                   $authCode        颜值
+ * @return   int|array|string
+ */
+function getCodeToId($value='', $length = 6, $authCode = '')
+{
+    if(empty($authCode)){
+        $authCode = C('AUTHCODE');
+    }
+    $hashids = new Hashids\Hashids($authCode, $length);
+    $decodeResult = $hashids->decode($value);
+    return $decodeResult;
 }
