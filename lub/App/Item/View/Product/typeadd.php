@@ -69,7 +69,7 @@
             </td>
           </tr>
         </if>
-        <if condition="$ptype eq 2">
+        <if condition="in_array($ptype, [2,3,4])">
           <tr>
             <td>联票支持:</td>
             <td>
@@ -90,9 +90,8 @@
             <input type="radio" name="activity" value="0">  否
             <span class="remark">仅用于活动销售</span>
           </td>
-          <td></td>
-          <td>
-          </td>
+          <td>可核销次数</td>
+          <td><input type="text" name="param[cknum]" value="1" size="10"><span class="remark">默认值1次核销</span></td>
         </tr>
         
         <tr>
@@ -117,7 +116,22 @@
         <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
           <div class="panel-body">
             <volist name="area" id="vo">
-              <input type="radio"  data-toggle="icheck" name="area" value="{$vo.id}" data-label="{$vo.name}（座椅数{$vo.num}个）">
+              <input type="radio" data-toggle="icheck" name="area" value="{$vo.id}" data-label="{$vo.name}（座椅数{$vo.num}个）">
+            </volist>
+          </div>
+        </div>
+      </div>
+    </if>
+    <!--综合景区-->
+    <if condition="$ptype eq 4">
+     <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title"> <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne"> 项目 </a> </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            <volist name="project" id="vo">
+              <input type="checkbox" data-toggle="icheck" name="project[]" value="{$vo.id}" data-label="{$vo.name}"> 
             </volist>
           </div>
         </div>

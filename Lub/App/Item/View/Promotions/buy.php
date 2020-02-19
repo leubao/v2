@@ -121,7 +121,6 @@ $(document).ready(function(){
   //获取日期，加载销售计划自动加载默认选框
   plan = $('#promotions_plan').children('option:selected').val();
   if(isNull(plan)){
-    console.log(plan);
     getActivtyPrice(plan,actid,1,2);
   }else{
     var error_msg = "<tr><td style='padding:15px;' colspan='6' align='center'><strong style='color:red;font-size:48px;'>未找到可售票型</strong></td></tr>";

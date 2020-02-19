@@ -14,8 +14,7 @@
       <tr>
         <th width="50">编号</th>
         <th align="center">名称</th>
-        <th align="center">终端识别码</th>
-        <th align="center">终端id</th>
+        <th align="center">可检票型</th>
         <th align="center">操作员</th>
         <th align="center">状态</th>
         <th align="center">创建时间</th>
@@ -26,8 +25,9 @@
       <tr data-id="{$vo.id}">
         <td>{$i}</td>
         <td align="center">{$vo.name}</td>
-        <td align="center">{$vo.idcode}</td>
-        <td align="center">{$vo.imei} </td>
+        <td align="center">
+          
+        </td>
         <td align="center">{$vo.user_id|userName}</td>
         <td align="center">{$vo.status|status}</td>
         <td align="center">{$vo.createtime|datetime}</td>

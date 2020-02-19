@@ -224,40 +224,7 @@ class ConfigController extends ManageBase {
             $this->display();
         }
     }
-    //云鹿作为销售终端
-    function third_sales(){
-        //获取当前产品
-        $product = get_product('info');
 
-        $db = M("ConfigProduct");   //产品设置表 
-        $type = '1';
-        $list = $db->where(array('product_id'=>$product['id'],'type'=>$type))->select();
-        foreach ($list as $k => $v) {
-            $config[$v["varname"]] = $v["value"];
-        }
-        if (IS_POST) {
-            $pinfo = $_POST;
-            //更新产品配置
-            $product['param']['zyb_pro_code'] = $pinfo['zyb_pro_code'];
-            $up_product = D('Product')->where(['id'=>get_product('id')])->setField('param',serialize($product['param']));
-            //更新票型配置
-            $dbs = D('TicketType');
-            //新建多级返利表  作为票型表的扩展 
-            $ticket = $dbs->where(['group_id'=>$pinfo['zyb_pro_code_group'],'status'=>1])->field('id,param')->select();
-            foreach ($ticket as $key => $value) {
-                $param = unserialize($value['param']);
-                $param['zyb_price_code'] = $pinfo['tic'][$value['id']];
-                $sataus = $dbs->where(array('id'=>$value['id']))->setField('param',serialize($param));
-            }
-            $this->success("更新成功！", array('tabid'=>$this->menuid.MODULE_NAME));
-        } else {
-            $ticket_group = D('TicketGroup')->where(['status'=>1])->field('id,name')->select();
-            $this->assign('product',$product)
-                ->assign("vo",$config)
-                ->assign('ticket_group',$ticket_group)
-                ->display();
-        }
-    }
     //商户配置
     public function item_config()
     {

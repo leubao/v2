@@ -135,7 +135,7 @@ class ReportController extends ManageBase{
 			if(empty($plan_id)){$this->erun("参数错误");}
 			$plan = F('Plan_'.$plan_id);
 			if(empty($plan)){
-				$plan = M('Plan')->where(array('id'=>$plan_id))->field('id,plantime,seat_table')->find();
+				$plan = M('Plan')->where(array('id'=>$plan_id))->field('id,plantime,seat_table,product_type')->find();
 			}
 			$plantime = date('Y-m-d',$plan['plantime']);
 			$timediff = timediff(date('Y-m-d'),$plantime,'day');
@@ -148,8 +148,21 @@ class ReportController extends ManageBase{
 				$ticket_id = array_column($ticket_id,'id');
 			}
 			$price = F('TicketType'.$product_id);
-			$map['plan_id'] = $plan_id;
-			$map['product_id'] = $product_id;
+			//判断产品类型
+			switch ($plan['product_type']) {
+				case 1:
+					
+					break;
+				case 2:
+					$map['plan_id'] = $plan_id;
+					break;
+				case 3:
+					$map['plan_id'] = $plan_id;
+					break;
+				case 4:
+					$map['plan_id'] = $plan_id;
+					break;
+			}
 			//判断演出日期是否超过30天
 			if($timediff['day'] < '30'){
 				$db = M(ucwords($plan['seat_table']));
@@ -172,6 +185,8 @@ class ReportController extends ManageBase{
 		        }
 			}else{
 				$db = M('ReportData');
+				$map['plan_id'] = $plan_id;
+				$map['product_id'] = $product_id;
 				foreach ($price as $v) {
 		        	if(in_array($v['id'],$ticket_id)){
 		        		$map['price_id'] = $v['id'];

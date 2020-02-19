@@ -23,7 +23,7 @@
       <tr data-id="{$vo.id}">
         <td>{$vo.name}</td>
         <td>{$vo.idcode}</td>
-        <td align="center"><if condition="$vo['type'] eq 1">剧院产品<elseif condition="$vo['type'] eq 2"/>景区产品<elseif condition="$vo['type'] eq 3"/>漂流产品</if></td>
+        <td align="center"><if condition="$vo['type'] eq 1">剧院产品<elseif condition="$vo['type'] eq 2"/>景区产品<elseif condition="$vo['type'] eq 3"/>漂流产品<elseif condition="$vo['type'] eq 4"/>综合景区</if></td>
         <td align="center">{$vo.status|status}</td>
         <td align="center">{$vo.createtime|datetime}</td>
        </tr>

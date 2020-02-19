@@ -165,6 +165,13 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">打印已入园门票:</td>
+                                <td><input type="radio" name="print_has" data-toggle="icheck" value="1" <eq name="vo['print_has']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="print_has" data-toggle="icheck" value="0" <eq name="vo['print_has']" value="0"> checked</eq> data-label="关闭">
+                                <span class="remark">二次打印默认关闭已入园门票</span>
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">打印票型备注:</td>
                                 <td><input type="radio" name="print_remark" data-toggle="icheck" value="1" <eq name="vo['print_remark']" value="1"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="print_remark" data-toggle="icheck" value="0" <eq name="vo['print_remark']" value="0"> checked</eq> data-label="关闭">
@@ -195,6 +202,7 @@
                                 <span class="remark">默认入场时间为开演前30分钟</span>
                                 </td>
                               </tr>
+                              
                               <tr>
                                 <td width="120px">座位号:</td>
                                 <td><input type="radio" name="print_seat" data-toggle="icheck" value="1" <eq name="vo['print_seat']" value="1"> checked</eq> data-label="x排y号&nbsp;">
@@ -318,6 +326,18 @@
                           <td width="120px">产品编号:</td>
                           <td>{$prono}
                           <span class="remark">用于检票设置</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">门票有效期:</td>
+                          <td>
+                            <input type="text" name="validity" value="{$vo.validity}" size="10">
+                            <span class="remark">此配置景区模式下有效</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">检票时间:</td>
+                          <td>开园前<input type="text" name="checktimeS" value="{$vo.checktimeS}" size="10">闭园前<input type="text" name="checktimeE" value="{$vo.checktimeE}" size="10">
                           </td>
                         </tr>
                       </tbody>

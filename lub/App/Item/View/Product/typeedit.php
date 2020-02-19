@@ -66,7 +66,7 @@
           </td>
         </tr>
         </if>
-        <if condition="$ptype eq 2">
+        <if condition="in_array($ptype, [2,3,4])">
           <tr>
             <td>联票支持:</td>
             <td>
@@ -81,17 +81,15 @@
           </tr>
         </if>
         <tr>
-          
           <td>活动标记</td>
           <td>
             <input type="radio" name="activity" value="1" <if condition="$data['activity'] eq '1'">checked</if>>  是
             <input type="radio" name="activity" value="0" <if condition="$data['activity'] eq '0'">checked</if>>  否
             <span class="remark">仅用于活动销售</span>
           </td>
-          <td></td>
-          <td></td>
+          <td>可核销次数</td>
+          <td><input type="text" name="param[cknum]" value="{$data['param']['cknum']}" size="10"><span class="remark">默认值1次核销</span></td>
         </tr>
-        
         <tr>
           <td>排序:</td><td><input type="text" name="sort" value="0" size="15" value="{$data.sort}"></td>
             <td>状态:</td><td>
@@ -114,6 +112,21 @@
           <div class="panel-body">
             <volist name="area" id="vo">
               <input type="radio"  data-toggle="icheck" name="area" value="{$vo.id}" <if condition="$data['area'] eq $vo['id']">checked</if> data-label="{$vo.name}（座椅数{$vo.num}个）">
+            </volist>
+          </div>
+        </div>
+      </div>
+    </if>
+    <!--综合景区-->
+    <if condition="$ptype eq 4">
+     <div class="panel panel-default">
+        <div class="panel-heading" role="tab" id="headingOne">
+          <h4 class="panel-title"> <a role="button" data-toggle="collapse" data-parent="#accordion" href="#collapseOne" aria-expanded="true" aria-controls="collapseOne"> 项目 </a> </h4>
+        </div>
+        <div id="collapseOne" class="panel-collapse collapse in" role="tabpanel" aria-labelledby="headingOne">
+          <div class="panel-body">
+            <volist name="project" id="vo">
+              <input type="checkbox" data-toggle="icheck" name="project[]" value="{$vo.id}" data-label="{$vo.name}" <if condition="in_array($vo['id'], $data['project'])">checked</if>> 
             </volist>
           </div>
         </div>

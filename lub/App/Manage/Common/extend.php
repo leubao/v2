@@ -59,6 +59,6 @@ function if_file($path,$type = ''){
 }
 function cronName($param = '')
 {
-    echo M('Cron')->where(['id'=>$param])->getField('subject');
+    echo M('Cron')->where(['cron_id'=>$param])->getField('subject');
 }
 ?>

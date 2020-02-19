@@ -98,7 +98,7 @@
         </div>
       </div>
     </div>
-  <elseif condition="$pinfo['type'] eq '2'" />
+  <elseif condition="in_array($pinfo['type'],['2','4'])" />
     <div class="form-group">
       <label class="col-sm-2 control-label">添加方式:</label>
       <input type="radio" name="addType" value="one" checked>  逐条添加
@@ -282,11 +282,13 @@
 $('input[type=radio][name=addType]').change(function() {
     if (this.value == 'batch') {
       $('.batch-input').attr('disabled',false);
+      $('.batch').attr('disabled',false);
       $('.batch').css('display','block')
       $('.one').css('display','none')
     }
     else if (this.value == 'one') {
       $('.batch-input').attr('disabled',true);
+      $('.batch').attr('disabled',true);
       $('.batch').css('display','none')
       $('.one').css('display','block')
     }

@@ -12,6 +12,7 @@
    <a type="button" class="btn btn-success" href="{:U('Item/Product/typeadd',array('menuid'=>$menuid,'gid'=>$gid));}" data-toggle="dialog" data-width="800" data-height="400" data-id="新增" data-mask="true"><i class="fa fa-plus"></i> 新增</a>
     <a type="button" class="btn btn-info" href="{:U('Item/Product/typeedit',array('menuid'=>$menuid,'gid'=>$gid));}&id={#bjui-selected}" data-toggle="dialog" data-width="800" data-height="400" data-id="编辑"><i class="fa fa-pencil"></i> 编辑</a>
     <a type="button" class="btn btn-danger" href="{:U('Item/Product/typedel',array('menuid'=>$menuid,'gid'=>$gid));}&id={#bjui-selected}" data-toggle="doajax" data-confirm-msg="确定要删除吗？" data-id="票型删除" ><i class="fa fa-trash-o"></i> 删除</a>
+
  </div>
   <!--帮助 说明-->
   <div class="btn-group f-right" role="group"> <a type="button" class="btn btn-default" data-placement="bottom" data-toggle="tooltip" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>

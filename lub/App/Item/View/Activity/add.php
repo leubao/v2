@@ -100,14 +100,14 @@
         <volist name="seat" id="vo"> 
         <tr>
             <td>活动区域：</td>
-            <td><input type="checkbox" name="area[{$vo.id}]" value="{$vo.id}"> {$vo.id|areaName} 
-            买: <input type="text" name="num[{$vo.id}]" value="" data-rule="digits" size="5"> 
-              <input type="hidden" name="ticket_num_{$vo.id}.id" value="{$ticket_id}">
-              <input type="text" name="ticket_num_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>0));}" data-group="ticket_num_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">
+            <td><input type="checkbox" class="buy" name="area[{$vo.id}]" value="{$vo.id}"> {$vo.id|areaName} 
+            买: <input type="text" class="buy" name="num[{$vo.id}]" value="" data-rule="digits" size="5"> 
+              <input type="hidden" class="buy" name="ticket_num_{$vo.id}.id" value="{$ticket_id}">
+              <input type="text" class="buy" name="ticket_num_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>0));}" data-group="ticket_num_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称">
 
-            赠送: <input type="text" name="nums[{$vo.id}]" value="" data-rule="digits" size="5">
-              <input type="hidden" name="ticket_nums_{$vo.id}.id" value="{$ticket_id}">
-              <input type="text" name="ticket_nums_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>0));}" data-group="ticket_nums_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"></td>
+            赠送: <input type="text" class="buy" name="nums[{$vo.id}]" value="" data-rule="digits" size="5">
+              <input type="hidden" class="buy" name="ticket_nums_{$vo.id}.id" value="{$ticket_id}">
+              <input type="text" class="buy" name="ticket_nums_{$vo.id}.name" readonly value="{$ticket_name}" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>0));}" data-group="ticket_nums_{$vo.id}" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"></td>
 
             
         </tr>
@@ -121,19 +121,19 @@
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td>身份证号段:</td><td colspan="3"><input type="text" name="card" value="" size="45"><span class="remark">身份证号前6位,多个区域用“|”分隔开</span></td>
+            <td>身份证号段:</td><td colspan="3"><input class="area" type="text" name="card" value="" size="45"><span class="remark">身份证号前6位,多个区域用“|”分隔开</span></td>
           </tr>
           <tr>
-            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+            <td>单用户限额:</td><td colspan="3"><input type="text" class="area" name="number" value="0" size="15"><span class="remark">0为不限制</span></td>
           </tr>
           <tr>
-            <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="">
-    <input type="text" name="ticket.name" readonly value="" size="57" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+            <td>可售票型:</td><td colspan="3"><input class="area" type="hidden" name="ticket.id" value="">
+    <input type="text" class="area" name="ticket.name" readonly value="" size="57" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
           <tr>
             <td>其它设置:</td>
             <td colspan="3">
-              <input type="checkbox" name="voucher" value="card"> 身份证入园
+              <input type="checkbox" class="area" name="voucher" value="card"> 身份证入园
             </td>
           </tr>
         </tbody>
@@ -144,12 +144,12 @@
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="" size="15"></td>
+            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" class="team" name="number" value="" size="15"></td>
           </tr>
           <tr>
             <td>可售票型:</td>
-            <td colspan="3"><input type="hidden" name="ticket.id" value="">
-    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+            <td colspan="3"><input type="hidden" class="team" name="ticket.id" value="">
+    <input type="text" name="ticket.name" class="team" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
         </tbody>
       </table>
@@ -160,19 +160,19 @@
           <tbody>
             <tr>
               <td>票型名称：</td>
-              <td><input type="text" name="price_name" value="">
+              <td><input type="text" class="more" name="price_name" value="">
                 销售价格
-                <input type="text" name="price" value="">
+                <input type="text" class="more" name="price" value="">
                 结算价格
-                <input type="text" name="discount" value="">
+                <input type="text" class="more" name="discount" value="">
               </td>
             </tr>
           <volist name="prolist" id="vo"> 
           <tr>
               <td>活动产品：</td>
-              <td><input type="checkbox" name="product[]" value="{$vo.id}"> {$vo.name} 
+              <td><input type="checkbox" class="more" name="product[]" value="{$vo.id}"> {$vo.name} 
               参与票型
-                <input type="text" name="ticket_{$vo.id}" value="{$ticket_id}">
+                <input type="text" class="more" name="ticket_{$vo.id}" value="{$ticket_id}">
               </td>
            </tr>
           </volist>
@@ -184,11 +184,11 @@
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td>单场票额:</td><td colspan="3"><input type="text" name="number" value="" size="15"></td>
+            <td>单场票额:</td><td colspan="3"><input type="text" class="onePlan" name="number" value="" size="15"></td>
           </tr>
           <tr>
             <td>可售票型:</td>
-            <td colspan="3"><input type="hidden" name="ticket.id" value="">
+            <td colspan="3"><input type="hidden" class="onePlan" name="ticket.id" value="">
     <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
         </tbody>
@@ -199,24 +199,24 @@
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td>单用户限额:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+            <td>单用户限额:</td><td colspan="3"><input type="text" class="kill" name="number" value="0" size="15"><span class="remark">0为不限制</span></td>
           </tr>
           <tr>
             <td>秒杀票型:</td>
-            <td colspan="3"><input type="hidden" name="ticket.id" value="">
-    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+            <td colspan="3"><input type="hidden" class="kill" name="ticket.id" value="">
+    <input type="text" name="ticket.name" class="kill" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
         </tbody>
       </table>
       <table id="tabledit2" class="table table-bordered table-hover table-striped table-top" data-toggle="tabledit" data-initnum="0" data-action="#" data-single-noindex="true">
             <thead>
                 <tr data-idname="kill[#index#][id]">
-                    <th title="No."><input type="text" name="kill[#index#][no]" class="no" data-rule="required" value="1" size="2"></th>
-                    <th title="开始时间" align="center"><input type="text" name="kill[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
-                    <th title="结束时间" align="center"><input type="text" name="kill[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
-                    <th title="销售配额" align="center"><input type="text" name="kill[#index#][quota]" data-rule="required" value="{$proconf.quota}" size="5"></th>
+                    <th title="No."><input type="text" name="kill[#index#][no]" class="no kill" data-rule="required" value="1" size="2"></th>
+                    <th title="开始时间" align="center"><input type="text" name="kill[#index#][starttime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_issuedate kill" data-toggle="datepicker" value="{$proconf.plan_start_time}" size="10"></th>
+                    <th title="结束时间" align="center"><input type="text" name="kill[#index#][endtime]" data-pattern='HH:mm:ss' data-rule="required" class="j_custom_indate kill"  data-toggle="datepicker" value="{$proconf.plan_end_time}" size="10"></th>
+                    <th title="销售配额" align="center"><input type="text" name="kill[#index#][quota]" class="kill" data-rule="required" value="{$proconf.quota}" size="5"></th>
                     <th title="秒杀场次" align="center">
-                      <select name="kill[#index#][plan]" class="required" data-toggle="selectpicker" data-rule="required">
+                      <select name="kill[#index#][plan]" class="required kill" data-toggle="selectpicker" data-rule="required">
                         <option value="">选择秒杀场次</option>
                         <volist name="plan" id="pl">
                         <option value="{$pl.id}">{$pl.title}</option>
@@ -239,42 +239,27 @@
       <table class="table table-striped table-bordered">
         <tbody>
           <tr>
-            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
+            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" class="pre" name="number" value="" size="15"><span class="remark">0为不限制</span></td>
           </tr>
           <tr>
-            <td>提前预约天数:</td><td colspan="3"><input type="text" name="today" value="1" size="15"><span class="remark">最少提前一天</span></td>
+            <td>提前预约天数:</td><td colspan="3"><input type="text" class="pre" name="today" value="1" size="15"><span class="remark">最少提前一天</span></td>
           </tr>
           <tr>
             <td>预售模型:</td><td colspan="3">
-              <input type="radio" name="pre_model" data-toggle="icheck" value="1" data-label="预约&nbsp;">
-              <input type="radio" name="pre_model" data-toggle="icheck" value="2" data-label="预售&nbsp;">
+              <input type="radio" name="pre_model" data-toggle="icheck" class="pre" value="1" data-label="预约&nbsp;">
+              <input type="radio" name="pre_model" data-toggle="icheck" class="pre" value="2" data-label="预售&nbsp;">
               <span class="remark">预约为接单扣款,预售为预扣款</span>
             </td>
           </tr>
           <tr>
-            <td>可售票型:</td><td colspan="3"><input type="hidden" name="ticket.id" value="">
-    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-    <!--组团销售-->
-    <div id="team" style="display: none;">
-      <table class="table table-striped table-bordered">
-        <tbody>
-          <tr>
-            <td>单笔订单最小人数:</td><td colspan="3"><input type="text" name="number" value="" size="15"></td>
-          </tr>
-          <tr>
-            <td>可售票型:</td>
-            <td colspan="3"><input type="hidden" name="ticket.id" value="">
-    <input type="text" name="ticket.name" readonly value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+            <td>可售票型:</td><td colspan="3"><input type="hidden" class="pre" name="ticket.id" value="">
+    <input type="text" name="ticket.name" readonly class="pre" value="" size="17" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
           </tr>
         </tbody>
       </table>
     </div>
     <!--预约销售-->
-    <div id="remark" class="remark">1</div>
+    <div id="remark" class="remark"></div>
   </div>
   <input name="product_id" value="{$product_id}" type="hidden">
   <div class="bjui-pageFooter">
@@ -292,8 +277,11 @@ $(document).ready(function() {
     var area = selected.data('area');
     $("#"+area).css('display','block');
     $("#activity_type option").map(function(){return $(this).data('area');}).each(function(index,select) {
+      $("."+select).attr("disabled", false);
       if(select != area){
+        $("."+select).attr("disabled", true);
         $("#"+select).css('display','none');
+        return;
       }
     });
     if(selected.val() == 9){

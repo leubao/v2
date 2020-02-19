@@ -23,8 +23,8 @@ function showReturnCode($status = false, $code = '1002', $data = [], $count = ''
         $return_data['msg'] = ReturnCode::$return_code[$code];
     }
     //当错误时记录日志 TODO
-    //return json_encode($return_data);
-    return json($return_data);
+    return json_encode($return_data);
+    //return json($return_data);
 }
 
 function ticketStatus($value='')

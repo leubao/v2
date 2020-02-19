@@ -34,8 +34,8 @@ class MsgController extends ManageBase {
 				'titp'=> 'warning',
 			);
 		}
-		//渠道退单申请
-		$refund = M('TicketRefund')->where(array('status'=>'1','product_id'=>$this->pid))->count();
+		//渠道退单申请 仅查询可售场次
+		$refund = M('TicketRefund')->where(array('status'=>'1','product_id'=>$this->pid,'plan_id'=>normal_plan()))->count();
 		if($refund <> '0'){
 			$info[] = array(
 				'title'  => '渠道退单申请',

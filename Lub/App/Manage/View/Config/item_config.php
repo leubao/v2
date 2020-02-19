@@ -4,16 +4,21 @@
   <div class="tabs-container" style="padding: 15px">
       <div class="tabs-left">
           <ul class="nav nav-tabs nav-stacked">
-              <li  class="active"><a data-toggle="tab" href="#wtab-8" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  商户设置</a></li>
+            <li  class="active"><a data-toggle="tab" href="#wtab-8" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  商户设置</a></li>
           </ul>
           <div class="tabs-content">
-              <div id="wtab-8" class="tab-pane active">
+            <div id="wtab-8" class="tab-pane active">
                 <div class="panel-body">
                     <fieldset style="height:100%;">
                       <legend>商户设置</legend>
                       <div style="height:94%; overflow:hidden;">
                       <table class="table  table-bordered">
                       <tbody>
+                        <tr>
+                          <td width="120px">商户名称:</td>
+                          <td><input type="text" name="item_name" value="{$vo.item_name}" size="40">
+                          </td>
+                        </tr>
                         <tr>
                           <td width="120px">年卡开启:</td>
                           <td><input type="radio" name="year_card" data-toggle="icheck" value="1" <eq name="vo['year_card']" value="1"> checked</eq> data-label="开启&nbsp;">
@@ -61,7 +66,7 @@
                       </div>
                     </fieldset>
                 </div>
-              </div>
+            </div>
           </div>
       </div>
   </div>                   

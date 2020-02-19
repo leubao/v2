@@ -7,12 +7,16 @@
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">产品类型:</label>
-    <input name="type" id="theatre" value="1" type="radio" <if condition=" $data['type'] == '1' ">checked</if>  onClick="$('.seat').css('display','');"> 剧院产品
-    <input name="type" id="scenic" value="2" type="radio" <if condition=" $data['type'] == '2' ">checked</if> onClick="$('.seat').css('display','none');"> 景区产品 
-    <input name="type" id="scenic" value="3" type="radio" <if condition=" $data['type'] == '3' ">checked</if> onClick="$('.seat').css('display','none');"> 漂流产品<span class="gray"> 注意操作顺序类型>场所</span>
+    <select name="type" id="thType" class="required" data-toggle="selectpicker" data-rule="required">
+      <option value="">请选择</option>
+      <option value="1" data-type="theatre">剧院产品</option>
+      <option value="2" data-type="scenic">景区产品</option>
+      <option value="3" data-type="scenic">漂流产品</option>
+      <option value="4" data-type="scenic">综合产品</option>
+    </select>
+    <span class="gray">剧院产品，注意操作顺序类型>场所</span>
   </div>
-  <tr>
-              
+  <tr>       
   <div class="form-group">
     <label class="col-sm-2 control-label">所属商户:</label>
     <select name="item_id" class="required" data-toggle="selectpicker" data-rule="required">
@@ -24,10 +28,10 @@
   <div class="form-group seat" style="display: none">
     <label class="col-sm-2 control-label">场所列表:</label>
     <select name="place_id" id="place" data-toggle="selectpicker">
-    <option>请选择</option>
-    <volist name="place" id="place">
-      <option value="{$place.id}">{$place.name}</option>
-    </volist>
+      <option>请选择</option>
+      <volist name="place" id="place">
+        <option value="{$place.id}">{$place.name}</option>
+      </volist>
     </select>
   </div>
   <div class="form-group seat" style="display: none">
@@ -36,16 +40,9 @@
 
     </select>
   </div>
-  <!--
-  <div class="form-group">
-    <label class="col-sm-2 control-label">所属商户:</label>
-    <input type="hidden" name="channel.id" value="">
-    <input type="text" name="channel.name" disabled value="" size="10" data-toggle="lookup" data-url="{:U('Manage/Index/public_channel');}" data-group="channel" data-width="600" data-height="445" data-title="渠道商" placeholder="渠道商">
-  </div>
-  -->
   <div class="form-group">
     <label class="col-sm-2 control-label">产品描述:</label>
-    <textarea name="content" cols="30" ></textarea>
+    <textarea name="content" cols="30"></textarea>
   </div>
   <div class="form-group">
     <label class="col-sm-2 control-label">状态:</label>
@@ -64,8 +61,22 @@
 </div>
 </form>
 <script type="text/javascript">
-$(document).ready(function(){
-    // 选择不同的场所调用不同的座椅模板
+$(document).ready(function() {
+  //监听类型切换
+  $('#thType').change(function(){
+    var selected = $(this).children('option:selected');
+    var type = selected.data('type');console.log(type);
+    if(type == 'theatre'){
+      $("#seat_list").attr("disabled", false);
+      $("#place").attr("disabled", false);
+      $(".seat").css('display','block');
+    }else{
+      $("#seat_list").attr("disabled", true);
+      $("#place").attr("disabled", true);
+      $(".seat").css('display','none');
+    }
+  });
+  // 选择不同的场所调用不同的座椅模板
   $("#place").change(function(){
     var place = $("#place").val();
     var ptype = $('input[name="type"]:checked').val();
@@ -74,13 +85,12 @@ $(document).ready(function(){
          type: "POST",
          url: "<?php echo U('Manage/place/template');?>",
          data: "placeid="+place,
-         success: function(msg){
+         success: function(msg){console.log(msg);
             $("#seat_list").empty();
             $("#seat_list").append(msg);
           }});
-    } else {
-    }
-        
-    });
-})
+      } else {
+    }  
+  });
+});
 </script>

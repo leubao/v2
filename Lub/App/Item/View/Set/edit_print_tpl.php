@@ -21,9 +21,8 @@
     <label class="col-sm-2 control-label">状态:</label>
     <select name="status" class="required" data-toggle="selectpicker" data-rule="required">
       <option value="">状态</option>
-      
-              <option value="1" <eq name="data.status" value='1'>selected</eq>>启用</option>
-              <option value="0" <eq name="data.status" value='0'>selected</eq>>禁用</option>
+      <option value="1" <eq name="data.status" value='1'>selected</eq>>启用</option>
+      <option value="0" <eq name="data.status" value='0'>selected</eq>>禁用</option>
   </select>
   </div>
 </div>
