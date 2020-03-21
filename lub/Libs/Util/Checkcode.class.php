@@ -71,7 +71,7 @@ class Checkcode {
     }
 
     //生成背景
-    private function createBg() {
+    private function createBg() { 
         $this->img = imagecreatetruecolor($this->width, $this->height);
         if (empty($this->background)) {
             $color = imagecolorallocate($this->img, mt_rand(157, 255), mt_rand(157, 255), mt_rand(157, 255));
@@ -112,6 +112,7 @@ class Checkcode {
 
     //输出
     public function output($regenerate = false) {
+        ob_clean();
         header('Pragma: public');
         header('Expires: 0');
         header('Cache-Control: must-revalidate, post-check=0, pre-check=0');

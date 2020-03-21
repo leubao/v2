@@ -6,15 +6,21 @@
  */
 namespace Wechat\Service;
 class Wticket {
-    /*获取销售计划*/ 
-    function getplan($pid){
+    /*获取销售计划
+    * @Author   zhoujing                 <zhoujing@leubao.com>
+    * @DateTime 2019-11-15T13:44:31+0800
+    * @param    inr                   $pid                  产品id
+    * @param    array                    $ticket               返回票型
+    * @return   [type]                                         [description]
+    */
+    function getplan($pid, $ticket = array()){
         $product = M('Product')->where(array('status'=>1,'id'=>$pid))->field('id')->select();
         $info['product'] = arr2string($product,'id');
-        //根据当前用户判断   若为散客  读取配置项  微信的价格政策
-        $user = session('user');//dump($user);
+        //根据当前用户判断   若为散客  读取配置项  微信的价格政策 
+        $user = session('user');
         $info['group']['price_group'] = $user['user']['pricegroup'];
         $info['scene'] = '4';
-        $plan = \Libs\Service\Api::plans($info);
+        $plan = \Libs\Service\Api::plans($info, '', '', $ticket);
         foreach ($plan['plan'] as $key => $value) {
             $plans['plan'][] = array(
                 'title' =>  $value['title'],
@@ -96,7 +102,8 @@ class Wticket {
         //保存openid
         session('openid',$openid);
         //写入必要的当前用户信息
-        $uinfo = Wticket::get_auto_auth($openid,$promote);load_redis('set','jss',$openid.json_encode($uinfo));
+        $uinfo = Wticket::get_auto_auth($openid,$promote);
+        
         if(!empty($uinfo['wechat']) && empty($reg)){
             //根据当前登录用户获取支付方式、价格政策、可售数量、单笔订单最大量 30
             //判断是否是政企渠道用户
@@ -143,7 +150,6 @@ class Wticket {
             $proconf = cache('ProConfig');
             $pid = session('pid');
             $proconf = $proconf[$pid][2];
-
             if(!empty($uinfo['id']) && !empty($uinfo['group']['type'])){
                 //二维码推广或分享购买链接
                 switch ($uinfo['group']['type']) {
@@ -172,8 +178,8 @@ class Wticket {
                     'id' => 2,
                     'openid' => $openid,
                     'maxnum' => '30',
-                    'guide'  =>  $uinfo['id'],
-                    'qditem'  => $uinfo['cid'] ? $uinfo['cid']:'0',
+                    'guide'  => $uinfo['id'],
+                    'qditem' => $uinfo['cid'] ? $uinfo['cid']:'0',
                     'scene'  => $scene,
                     'epay'   => $uinfo['group']['settlement'],//结算方式1 票面价结算2 底价结算
                     'channel'=> '0',
@@ -310,7 +316,7 @@ class Wticket {
             $map = array('openid'=>$open_id);
         }
         $winfo = M('WxMember')->where($map)->field('user_id,openid,unionid,channel')->find();
-        load_redis('set','127',json_encode($winfo));
+        
         $db = M('User');
         //if(!empty($winfo['user_id']) && $winfo['channel'] == '1'){
         if(!empty($winfo['user_id'])){

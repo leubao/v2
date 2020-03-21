@@ -9,12 +9,12 @@
 namespace Wechat\Controller;
 use Common\Controller\LubTMP;
 class NotifyController extends LubTMP {
+
     public function notify(){
         //处理业务逻辑
         $pay = & load_wechat('Pay');
 		// 获取支付通知
 		$notifyInfo = $pay->getNotify();
-        //load_redis('set','PayssOrder',$pay->errMsg);
         load_redis('lpush','PayOrder',json_encode($notifyInfo));
 		// 支付通知数据获取失败
 		if($notifyInfo===FALSE){
@@ -24,7 +24,6 @@ class NotifyController extends LubTMP {
 		    //支付通知数据获取成功
 		     if ($notifyInfo['result_code'] == 'SUCCESS' && $notifyInfo['return_code'] == 'SUCCESS') {
 		        // 支付状态完全成功，可以更新订单的支付状态了
-                load_redis('lpush','WechatPayOrder',$notifyInfo['out_trade_no']);
                 // 2、更新网银支付日志
                 $uppaylog = array('status'=>1,'out_trade_no'=>$notifyInfo['transaction_id']);
                 $paylog = D('Manage/Pay')->where(array('order_sn'=>$notifyInfo['out_trade_no'],'type'=>2))->save($uppaylog);
@@ -33,24 +32,26 @@ class NotifyController extends LubTMP {
                     'status'  => ['in',['11','2']],
                 ];
                 $oinfo = D('Item/Order')->where($orderMap)->relation(true)->find();
+                load_redis('lpush','GuiPay1',json_encode($orderMap).json_encode($oinfo));
                 if(!empty($oinfo)){
                     $info = array(
                         'seat_type' => '1',
                         'pay_type'  => '5'
                     );
                     $order = new \Libs\Service\Order;
-                    $status = $order->mobile_seat($info,$oinfo);
-                    load_redis('lpush','GuiPay',$status.'='.$order->error);
+                    $status = $order->mobile_seat($info, $oinfo);
+                    load_redis('lpush','GuiPay',$status.'='.json_encode($order->error));
                 }else{
                     $status = true;
                 }
                 if($status){
-                    $this->to_tplmsg($oinfo,$notifyInfo['sub_openid']);
+                   // $this->to_tplmsg($oinfo,$notifyInfo['sub_openid']);
                     //echo '<xml><return_code><![CDATA[SUCCESS]]></return_code><return_msg><![CDATA[OK]]></return_msg></xml>';
-                    return xml(['return_code' => 'SUCCESS', 'return_msg' => 'DEAL WITH SUCCESS']);
+                    
                 }else{
 
                 }
+                return xml(['return_code' => 'SUCCESS', 'return_msg' => 'DEAL WITH SUCCESS']);
 		        // @todo 
 		        // 返回XML状态，至于XML数据可以自己生成，成功状态是必需要返回的。
 		        // <xml>
@@ -109,7 +110,7 @@ class NotifyController extends LubTMP {
                 'tplmsg'=> $template,
                 'number'=> 1
             ];
-            load_redis('lpush','preMsgTpl',json_encode($msgtpl));
+            //load_redis('lpush','preMsgTpl',json_encode($msgtpl));
             //半个小时内发送五次 TODO
         }
         return $res;
