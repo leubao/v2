@@ -426,9 +426,9 @@ body{padding: 0px;
 /*底部版权*/
 .footer{
 	width:100%;
-	height:20px;
 	clear:both;
-	}
+    bottom: 0px;
+}
 .layout_footer{
     position: absolute;
     bottom: 0px;
