@@ -38,6 +38,9 @@ function activity_type($param,$type = null)
 		case '8':
 			$return = "预约销售";
 			break;
+		case '9':
+			$return = "限制区域限制场次";
+			break;
 	}
 	if($type){
 		return $return;

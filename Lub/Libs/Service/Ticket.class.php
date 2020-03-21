@@ -10,7 +10,7 @@ namespace Libs\Service;
 use Common\Model\Model;
 class Ticket extends \Libs\System\Service {
 
-	public function createTicket($sn)
+	public function createTicket($sn, $team = 1)
 	{
 		$map['order_sn'] = $sn;
 		$order = D('Item/Order')->where($map)->relation(true)->find();
@@ -79,6 +79,9 @@ class Ticket extends \Libs\System\Service {
 			case '3':
 				$table = 'drifting';
 				break;
+			case '4':
+				$table = 'scenic';
+				break;
 		}
 		$list = M(ucwords($table))->where(array('order_sn'=>$sn,'status'=>2))->select();
 		$count = count($list);//dump($list);
@@ -93,7 +96,8 @@ class Ticket extends \Libs\System\Service {
 				}else{
 					$print = $print + 1;
 				}
-				$sns = \Libs\Service\Encry::toQrData($v['id'],$order['id'],$plan['id'],$print);
+				//TODO  电子门票默认一团一票
+				$sns = \Libs\Service\Encry::toQrData($v['id'],$order['id'],$plan['id'],$print, $team);
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,

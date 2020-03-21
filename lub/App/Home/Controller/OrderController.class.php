@@ -28,13 +28,14 @@ class OrderController extends Base{
         }
 		$db = D('Order');
 		$where = array();
-        $start_time = I('start_time') ? I('start_time') : date('Y-m-d');
-        $end_time = I('end_time') ? I('end_time') : date('Y-m-d');
+        $start_time = I('start_time');// ? I('start_time') : date('Y-m-d');
+        $end_time = I('end_time');// ? I('end_time') : date('Y-m-d');
         $user_id = I('user');
         $product_id = I('product');
         $datetype = I('datetype') ? I('datetype') : '1';
         $status = I('status');
         $sn = I('sn');
+        $mobile = I('mobile');
         $pay = I('pay');
         //传递查询时间
         $this->assign('start_time',$start_time)
@@ -55,7 +56,7 @@ class OrderController extends Base{
         	$where =  ['channel_id' =>	$uinfo['cid']];
         }else{
         	$where = array(
-				'channel_id' =>	array(in,$this->get_channel()),
+				'channel_id' =>	array('in', $this->get_channel()),
 			);
         }
         if(!empty($user_id)){
@@ -81,7 +82,7 @@ class OrderController extends Base{
 	        $end_time = strtotime($end_time);
 	        $plantime = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
         	$planlist = M('Plan')->where(['plantime'=>$plantime,'status'=>['in','2,3,4']])->field('id')->select();
-        	$where['plan_id'] = array('in',implode(',',array_column($planlist,'id')));
+        	$where['plan_id'] = array('in',implode(',', array_column($planlist,'id')));
         	$order = 'plan_id DESC';
         }
         if (!empty($status)) {
@@ -90,13 +91,23 @@ class OrderController extends Base{
 		if(!empty($sn)){
 			$where['order_sn'] = $sn;
 		}
+		if(!empty($mobile)){
+			$where['phone'] = $mobile;
+		}
 		if(!empty($pay)) {
 			$where['pay'] = $pay;
 		}
 		if(!empty($product_id)){ 
 			$where['product_id'] = $product_id;
 		}
-		$user = M('User')->where(array('status'=>'1','cid'=>$uinfo['cid']))->field('id,nickname')->select();
+
+		$user = M('User')->where(array('status'=>'1','cid'=> array('in',$this->get_channel())))->field('id,cid,nickname')->select();
+		$crm = D('Crm')->where(array('id'=>array('in', $this->get_channel())))->field('id,name')->select();
+		$crm = array_column($crm, null, 'id');
+		foreach ($user as $k => &$v) {
+			$v['crm'] = $crm[$v['cid']]['name'];
+		}
+		
 		$product = M('Product')->field('id,name')->select();
 		$count = $db->where($where)->count();
 		$Page  = new \Home\Service\Page($count,20);
@@ -229,20 +240,21 @@ class OrderController extends Base{
 		//根据当前用户所属分组类型进行区分是政企还是企业或个人
 		if($uInfo['group']['type'] == '3'){
 			//政企
-			$sn = $order->channel($info,26,$uInfo,(int)$ginfo['act']);
+			$sn = $order->channel($info, 26, $uInfo, (int)$ginfo['act']);
 		}else{
 			//个人或企业 
-			$sn = $order->channel($info,22,$uInfo,(int)$ginfo['act']);
+			$sn = $order->channel($info, 22, $uInfo, (int)$ginfo['act']);
 		}
 		if($sn != false){
 			$return = array('statusCode' => '200','sn'=>$sn);
 		}else{
-			$return = array('statusCode' => '300','sn'=>$sn,'msg'=>$order->error);
+			$return = array('statusCode' => '300','sn'=>$sn, 'msg'=>$order->error);
 		}
 		//记录售票员日报表
 		die(json_encode($return));
 		return true;
 	}
+	//预约
 	function channelBooking()
 	{
 		$pinfo = $_POST['info'];
@@ -269,12 +281,14 @@ class OrderController extends Base{
 		$sn = get_order_sn($info['plan_id']);
 		$data = [
 			'order_sn'	=>	$sn,
+			'contact'	=>	$info['crm']['0']['contact'],
 			'channel_id'=>	$info['crm']['0']['qditem'],
 			'product_id'=>  $plan['product_id'],
 			'plan_id'	=>	$info['plan_id'],
 			'number'	=>	$seat['num'],
 			'money'		=>	$info['subtotal'],
 			'pay'		=>	0,
+			'type'      =>  1,
 			'info'		=>	json_encode($param)
 		];
 		$model = D('Booking');
@@ -430,6 +444,9 @@ class OrderController extends Base{
 			$ginfo = I('post.');
 			if(empty($ginfo)){
 				$this->error("参数错误!");
+			}
+			if(load_redis('get','lock_'.$ginfo['sn'])){
+				$this->error('订单锁定中~');
 			}
 			$info = Operate::do_read('Order',0,array('order_sn'=>$ginfo['sn'],'status'=>1),'','',true);
 			//增加场次时间判断 开演后就不让提交退单申请
@@ -598,7 +615,7 @@ class OrderController extends Base{
 		}
 	}
 	/**
-	 * 出票方式  订单出票
+	 * 出票方式  订单出票 
 	 */
 	function drawer(){
 		if(IS_POST){
@@ -620,12 +637,30 @@ class OrderController extends Base{
 			$ginfo = I('get.');//获取订单号
 			if(empty($ginfo)){
 				$this->erun('参数错误!');
-			}// 检测订单是否过期
+			}
+			$get_ticket_url = U('Home/Order/printTicket',['sn'=>$ginfo['sn'],'plan_id'=>$ginfo['plan_id'],'genre'=>1]);
+
+			if(load_redis('get','lock_'.$ginfo['sn'])){
+				$this->erun('订单锁定中~');
+			}
+			$procof = cache('ProConfig')[$ginfo['pid']]['1'];
+			// 检测订单是否过期
 			if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
-				$this->assign('data',$ginfo);//传递参数
+				//加载当前打印模板 活动订单的打印模板
+				if(!empty($ginfo['act'])){
+					//获取活动指定打印模板
+					$actPrint = D('Activity')->where(['id'=>$ginfo['act']])->getField('print_tpl');
+					if(empty($actPrint)){$actPrint = $procof['print_tpl'];}
+				}else{
+					//读取默认模板
+					$actPrint = $procof['print_tpl'];
+				}
+				$this->getPrintTpl($actPrint);
+				$this->assign('data',$ginfo)->assign('proconf', $procof);//传递参数
+				$this->assign('get_ticket_url',$get_ticket_url);
 				$this->display();
 			}else{
-				$this->erun("订单已过期，无法出票!");
+				$this->error("订单已过期，无法出票....");
 			}
 		}	
 				
@@ -639,6 +674,13 @@ class OrderController extends Base{
 		//订单状态校验
 		$order_type = order_type($ginfo['sn']);
 		$user = $ginfo['user'] ? $ginfo['user'] : 0;
+		if(load_redis('get','lock_'.$ginfo['sn'])){
+			$return = array(
+				'status' => '2',
+				'message' => '订单锁定中~'
+			);
+			die(json_encode($return));
+		}
 		//判断订单状态是否可执行此项操作
 		if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
 			$return = array(
@@ -760,6 +802,16 @@ class OrderController extends Base{
 		}
 		die(json_encode($return));
 	}
+
+	public function getPrintTpl($actPrint)
+	{
+		//读取模板渲染
+		$printTpl = D('Printer')->where(['id'=>$actPrint])->find();
+		if(empty($printTpl)){
+			$this->error("未找到打印模板!");
+		}
+		$this->assign('printTpl',$printTpl);
+	}
 	/**
 	 * 二次打印密码确认
 	 */
@@ -856,7 +908,7 @@ class OrderController extends Base{
         }else{
         	$where['channel_id'] =	array(in,$this->get_channel());
         }
-		$list = M('Order')->where($where)->field('order_sn,addsid,number,money,product_id,plan_id,user_id,status,createtime,type')->select();
+		$list = M('Order')->where($where)->field('order_sn,addsid,number,money,product_id,plan_id,user_id,status,createtime,take,phone,type')->select();
 		foreach ($list as $k => $v) {
    			$data[] = array(
    				'sn'		=>	$v['order_sn'],
@@ -932,5 +984,66 @@ class OrderController extends Base{
 		}
 		D('Belonging')->addAll($data);
 		return true;
+	}
+	/**
+	 * 预售登记
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2020-03-19T16:17:22+0800
+	 * @return   [type]                   [description]
+	 */
+	function booking(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			if(load_redis('get', $pinfo['__hash__'])){
+				$this->error('登记失败', U('Home/Order/booking'));
+			}
+			load_redis('setex', $pinfo['__hash__'], '1', 600);
+			//读取用户
+			$uInfo = \Home\Service\Partner::getInstance()->getInfo();
+			$product = explode('|', $pinfo['product']);
+			$sn = get_order_sn($product[0]);
+			$pinfo['product'] = $product;
+			$param = [
+				'info'	=>	$pinfo,
+				'uinfo'	=>	$uInfo
+			];
+			$data = [
+				'order_sn'	=>	$sn,
+				'contact'	=>	$pinfo['contact'],
+				'channel_id'=>	$uInfo['cid'],
+				'user_id'	=>  $uInfo['id'],
+				'product_id'=>  $product[0],
+				'plan_id'	=>	strtotime($pinfo['plantime']),
+				'number'	=>	(int)$pinfo['number'],
+				'money'		=>	0,
+				'pay'		=>	0,
+				'type'      =>  2,//按日期预约
+				'status'    =>  5,
+				'info'		=>	json_encode($param)
+			];
+			$model = D('Booking');
+
+			if($model->token(false)->create($data)){
+			    $result = $model->add(); // 写入数据到数据库 
+			    if($result){
+					$this->success('登记成功', U('Home/Order/booking'));
+				}else{
+					$this->error('登记失败', U('Home/Order/booking'));
+				}
+			}else{
+				$this->error('登记失败', U('Home/Order/booking'));
+			}
+		}else{
+			$product = D('Product')->where(['status'=>1,'type'=>1])->field('id, name, template_id')->select();
+			foreach ($product as $k => $v) {
+				$area = D('Area')->where(['template_id'=>$v['template_id'],'status'=>1])->field('id as areaid, name as area')->select();
+				foreach ($area as $ke => $va) {
+
+					$data[] = array_merge($v, $va);
+				}
+			}
+			$datetime = date('Y-m-d', strtotime('+4 day'));
+			$this->assign('product', $data)->assign('datetime', $datetime)->display();
+		}
 	}
 }

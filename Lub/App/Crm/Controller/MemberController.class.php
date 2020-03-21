@@ -360,9 +360,11 @@ class MemberController extends ManageBase{
 				$this->erun('未找到该会员!');
 			}
 			//到期时间大于三个月的，禁止操作 TODO  次卡未考虑
-			$timediff = timediff(date('Y-m-d'), date('Y-m-d',$info['endtime']), 'day');
-			if((int)$timediff['day'] > 90){
-				$this->erun('当前会员余额充足,暂不支持此项操作!');
+			if( $info['endtime'] > time() ){
+				$timediff = timediff(date('Y-m-d'), date('Y-m-d',$info['endtime']), 'day');
+				if((int)$timediff['day'] > 90){
+					$this->erun('当前会员余额充足,暂不支持此项操作!');
+				}
 			}
 			// TODO 续费只能续当前类型相同
 			$type = F('MemGroup');

@@ -226,6 +226,8 @@ class ProductController extends ManageBase{
 				'bonus'=>I('post.bonus'),
 				'income'=>I('post.income'),
 				'param'=>serialize(array('quota'=>$param['quota'],'ticket_print'=>$param['ticket_print'],'ticket_print_custom'=>$param['ticket_print_custom'],'present'=>isset($param['present']) ? $param['present'] : 0,'validity'=> isset($param['validity']) ? $param['validity'] : 0)),
+				'project' => isset($param['project']) ? json_encode($param['project']) : '{}',
+				'cknum' => isset($param['param']['cknum']) ? $param['param']['cknum'] : 1
 			);
 			if(Operate::do_add('TicketType',$data)){
 				$this->srun("新增成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
@@ -241,7 +243,9 @@ class ProductController extends ManageBase{
 					//剧院产品增加座位区域选择
 					$area = Operate::do_read('Area',1,array('template_id'=>$product['template_id'],'status'=>'1'),'',array('id','name','template_id','num','status'));
 					$this->assign('area',$area);
-						 
+				}
+				if($product['type'] == 4){
+					$this->getProject();
 				}
 				$this->assign('product_id',$product_id)->assign('gid',$group_id)->assign('ptype',$product['type']);
 				$this->display();
@@ -267,8 +271,10 @@ class ProductController extends ManageBase{
 				'ticket_print'=>$pinfo['param']['ticket_print'],
 				'ticket_print_custom'=>$pinfo['param']['ticket_print_custom'],
 				'present'=>isset($pinfo['param']['present']) ? $pinfo['param']['present'] : 0,
-				'validity'=> isset($pinfo['param']['validity']) ? $pinfo['param']['validity'] : 0
+				'validity'=> isset($pinfo['param']['validity']) ? $pinfo['param']['validity'] : 0,
+				'cknum' => isset($pinfo['param']['cknum']) ? $pinfo['param']['cknum'] : 1
 			);
+			$pinfo['project'] = isset($pinfo['project']) ? json_encode($pinfo['project']) : '{}';
 			$pinfo['param'] = serialize($param);
 			$model = D('Item/TicketType');
 			$status = $model->where(array('id'=>$pinfo['id']))->save($pinfo);
@@ -283,12 +289,16 @@ class ProductController extends ManageBase{
 			if(!empty($id)){
 				$data = Operate::do_read('TicketType',0,array('id'=>$id));
 				$data['param'] = unserialize($data['param']);
+				$data['project'] = json_decode($data['project'], true);
 				//当前产品类型
 				$product = Operate::do_read('Product',0,array('id'=>$product_id));
 				if($product['type'] == 1){
 					//剧院产品增加座位区域选择
 					$area = Operate::do_read('Area',1,array('template_id'=>$product['template_id'],'status'=>'1'),'',array('id','name','template_id','num','status'));
 					$this->assign('area',$area);
+				}
+				if($product['type'] == 4){
+					$this->getProject();
 				}
 				$group = Operate::do_read('TicketGroup',1,array('status'=>1));
 				$this->assign('data',$data)
@@ -321,7 +331,12 @@ class ProductController extends ManageBase{
 			$this->erun('参数错误!');
 		}
 	}
-
+	//关联项目
+	public function getProject()
+	{
+		$project = M('Project')->where(['status'=>1])->field('id,name')->select();
+		$this->assign('project', $project);
+	}
 	/**
 	 * 销售计划
 	 */	
@@ -356,7 +371,10 @@ class ProductController extends ManageBase{
 				case '1':
 					//剧场座椅区域信息
 					$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->order('listorder ASC')->select();
-					$this->assign('seat',$seat);
+					//判断是否启用场次模板
+					$tplPlan = D('Tplfield')->where(['product_id'=>$pinfo['id'],'status'=>1])->field('id,number,start,end')->order('sorting DESC')->select();
+					//dump($tplPlan);
+					$this->assign('seat',$seat)->assign('tplplan', $tplPlan);
 					break;
 				case '2':
 					//景区
@@ -462,15 +480,16 @@ class ProductController extends ManageBase{
 	    		'directly'		=>	$info['directly'],//电商直营
 	    		'electricity'	=>	$info['electricity'],//电商渠道
 			];
-			$status = D('Item/PinSales')->where(['plan_id'=>$info['plan_id']])->save($updata);
+			$status = D('Item/Plan')->where(['id'=>$info['plan_id']])->setField('quotas',$info['number']);
+			//$status = D('Item/PinSales')->where(['plan_id'=>$info['plan_id']])->save($updata);
 			if($status){
 				$this->srun("更新成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('更新失败!');
-			}
+			} 
 		}else {
 			$id  = I("get.id");
-			$plan = D('Plan')->where(['id'=>$id])->field('status')->find();
+			$plan = D('Plan')->where(['id'=>$id])->field('status,product_type,quotas')->find();
 			if($plan['status'] == '4'){
 				$this->erun('销售计划已过期，不允许此项操作...');
 			}
@@ -480,7 +499,7 @@ class ProductController extends ManageBase{
 				D('Item/Plan')->pin_sales_type($id,get_product('id'));
 				$info = D('Item/PinSales')->where(['plan_id'=>$id])->find();
 			}
-			$this->assign('data',$info)
+			$this->assign('data',$info)->assign('plan', $plan)
 				->display();
 		}	
 	}
@@ -657,6 +676,7 @@ class ProductController extends ManageBase{
 				$this->erun('计划状态不允许此项操作!');
 			}
 			if($db->where(array('id'=>$id))->setField('status',$status)){
+				$db->toAlizhiyouPlan($id, $info['product_id']);
 				$db->plan_cache();
 				$this->srun("操作成功!", array('tabid'=>$this->menuid.MODULE_NAME));
 			}else{
@@ -786,5 +806,37 @@ class ProductController extends ManageBase{
 		//$plan_id = I('');
 
 		$this->basePage();
+	}
+	//配置
+	public function pack_ticket()
+	{
+		try{
+			if(IS_POST){
+
+			}else{
+				//判断当前产品类型是否支持联票
+				// $product = D('Product')->where(['id'=>$this->pid])->find();
+				// if((int)$product['type'] <> 4){
+				// 	$this->erun('错误:当前产品类型不支持联票~');
+				// }
+				//获取分组
+				$group = D('TicketGroup')->where(['product_id'=>$this->pid,'status'=>1])->field('id,name')->select();
+				$this->assign('data',$group);
+				$this->display();
+			}
+			
+		}catch(Exception $e){
+			$this->erun('错误:'.$e->getMessage());
+		}
+	}
+	//编辑
+	public function pack_edit()
+	{
+		try{
+
+			$this->display();
+		}catch(Exception $e){
+			$this->erun('错误:'.$e->getMessage());
+		}
 	}
 }

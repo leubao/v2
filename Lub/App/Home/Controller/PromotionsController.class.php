@@ -85,13 +85,12 @@ class PromotionsController extends Base{
 				$this->assign('plantime',$plantime);
 				$this->assign('number',$info['param']['info']['number']);
 				$this->assign('pre_model',$info['param']['info']['pre_model']);
-				$tempate = 'pre';
+				$tempate = 'pre';dump($info['param']);
 				break;
 			default:
 				break;
 		}
-		$this->public_info_conf();		$this->public_info_conf();
-
+		$this->public_info_conf();
 		//售票类型
 		$pinfo = I('get.');
 		$today = date('Y-m-d');

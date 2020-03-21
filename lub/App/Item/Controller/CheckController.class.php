@@ -111,8 +111,6 @@ class CheckController extends ManageBase{
 					}else{
 						$return = 0;
 					}
-				}else{
-					return $count;
 				}
 				break;	
 		}

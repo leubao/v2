@@ -172,7 +172,7 @@ class Order extends \Libs\System\Service {
 			'phone'			=> $info['crm'][0]['phone'],//取票人手机
 			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
 			'take'			=> $info['crm'][0]['contact'],
-			'activity'		=> empty($info['param'][0]['activity']) ? 0 : $info['param'][0]['activity'],//活动标记
+			'activity'		=> $info['param'][0]['activity'],//活动标记
 		);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$newInfo = [
@@ -427,10 +427,11 @@ class Order extends \Libs\System\Service {
 		}else{
 			//景区漂流 套票
 			if((int)$param['param'][0]['atype'] === 5){
-				$status = Order::packTicket($oinfo, '', '', $channel_type, $info['pay_type']);
+				$status = Order::packTicket($oinfo,'','',$channel_type,$info['pay_type']);
 			}else{
-				$status = Order::quickScenic($oinfo, '', '', $channel_type, $info['pay_type']);
+				$status = Order::quickScenic($oinfo,'','',$channel_type,$info['pay_type']);
 			}
+			
 		}
 		return $status;
 	}
@@ -606,7 +607,7 @@ class Order extends \Libs\System\Service {
 			'phone'			=> $info['crm'][0]['phone'],//取票人手机
 			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
 			'take'			=> $info['crm'][0]['contact'],
-			'activity'		=> empty($info['param'][0]['activity']) ? 0 : $info['param'][0]['activity'],//活动标记	
+			'activity'		=> $info['param'][0]['activity'],//活动标记	
 		);
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
@@ -1038,8 +1039,8 @@ class Order extends \Libs\System\Service {
 			'phone'			=> $info['crm'][0]['phone'],//取票人手机
 			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
 			'take'			=> $info['crm'][0]['contact'],
-			'activity'		=> empty($info['param'][0]['activity']) ? 0 : $info['param'][0]['activity'],//活动标记	
-			'openid'		=> isset($uinfo['openid']) ? $uinfo['openid'] : ''
+			'activity'		=> $info['param'][0]['activity'],//活动标记	
+			'openid'		=> isset($user['openid']) ? $user['openid'] : ''
 		);
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
@@ -1246,6 +1247,14 @@ class Order extends \Libs\System\Service {
 			//构造数据
 			$i = 0;
 			for ($i=0; $i < (int)$value['num']; $i++) { 
+				//TODO 判断发送短信模板
+				if(in_array($value['priceid'], ['566','567'])){
+					$smsTpl = '99';
+				}elseif($value['priceid'] == '568'){
+					$smsTpl = '98';
+				}else{
+					$smsTpl = '1';
+				}
 				$printList[] = array(
 					'order_sn' => $info['order_sn'],
 					'plan_id'=>	$info['plan_id'],
@@ -1259,9 +1268,9 @@ class Order extends \Libs\System\Service {
 				);
 			}
 			if($proconf['ticket_sms'] == '1'){
-				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num']."张";
+				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num'];
 			}else{
-				$msg = $info['number']."张";
+				$msg = $info['number'];
 			}
 		}
 		//判断门票数据是否一致
@@ -1276,6 +1285,7 @@ class Order extends \Libs\System\Service {
 		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id,idcard')->select();
 		foreach ($saleList as $ks => $vs) {
 			$sale[$ks] = unserialize($vs['sale']);
+			
 			$dataList[] = array(
 					'ciphertext' =>	$vs['ciphertext'],
 					'priceid'=>	$sale[$ks]['priceid'],
@@ -1353,7 +1363,7 @@ class Order extends \Libs\System\Service {
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
 				}else{
-					Sms::order_msg($msgs,1);
+					Sms::order_msg($msgs, $smsTpl);
 				}
 			}
 			//后置处理
@@ -1737,6 +1747,7 @@ class Order extends \Libs\System\Service {
 			$pre = $model->table(C('DB_PREFIX').'pre_order')->add(array('order_sn'=>$info['order_sn'],'user_id'=>get_user_id(),'status'=>'1','createtime'=>$createtime));
 			$flag=true;$flags = true;$o_status = true;$no_sms = 1;
 		}
+		//dump($flag);dump($flags);dump($state);dump($o_status);dump($pre);
 		if($flag && $flags && $state && $o_status && $pre){
 			$model->commit();//提交事务
 			//发送成功短信

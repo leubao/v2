@@ -5,7 +5,7 @@
  * @Author: IT Work
  * @Date:   2019-11-22 20:16:34
  * @Last Modified by:   IT Work
- * @Last Modified time: 2019-11-22 21:40:29
+ * @Last Modified time: 2020-01-07 16:28:12
  */
 namespace Trust\Controller;
 use Think\Controller\JsonRpcController;
@@ -34,5 +34,10 @@ class JrpcController extends JsonRpcController {
     {
     	return CheckIn::closeTicket($data);
     }
-
+    //接收发号器推送过来的单号
+    public function post_sn($data)
+    {
+    	//1、接收发号服务推送过来的单号
+    	//2、作废过期的单号
+    }
 }

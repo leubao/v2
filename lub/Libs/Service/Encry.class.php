@@ -80,10 +80,20 @@ class Encry extends \Libs\System\Service {
     	$crc32 = dechex($code);
     	return $crc32;
     }
-
-    static public function toQrData($id,$orderid,$plan_id,$print='1')
+    /**
+     * 生成门票二维码
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-01-19T17:53:16+0800
+     * @param    int                   $id                   门票id
+     * @param    int                   $orderid              订单id
+     * @param    int                   $plan_id              销售计划id
+     * @param    int                   $print                打印次数
+     * @param    int                   $team                 1一人一票2一单一票
+     * @return   string
+     */
+    static public function toQrData($id,$orderid,$plan_id,$print='1',$team = '1')
     {
-        $string = $id.$orderid.$plan_id.$print;
+        $string = $id.$orderid.$plan_id.$print.$team;
 
         //计算校验位
         $digit = creatCheckDigit($string);
@@ -92,6 +102,7 @@ class Encry extends \Libs\System\Service {
             $orderid,
             $plan_id,
             $print,
+            $team,
             $digit
         ];
         $sn = putIdToCode($code, 24);

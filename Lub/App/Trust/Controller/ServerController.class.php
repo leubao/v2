@@ -117,7 +117,7 @@ class ServerController extends HproseController{
             case 'qr':
                 $qrInfo = \Libs\Service\Encry::getQrData($data['code']);
                 if(!$qrInfo){
-                    return ['status'=> false, 'code'  => 1000, 'data' => ['count'=>0], 'msg'   => '数据校验失败~'];
+                    return ['status'=> false, 'code'  => 1000, 'data' => [], 'msg'   => '数据校验失败~'];
                 } 
                 $map = ['id' => $qrInfo[1]];
                 break;
@@ -128,8 +128,7 @@ class ServerController extends HproseController{
         $map['product_id'] = $data['proId'];
         $order = D('Order')->where($map)->field('id,product_type,order_sn,plan_id,number,status')->order('createtime desc')->find();
         if(empty($order)){
-            $return = [ 'status'=> false, 'code'  => 1000, 'data'  => ['count'=>0], 'msg'   => '未找到有效订单信息'];
-            return $return;
+            $return = [ 'status'=> false, 'code'  => 1000, 'data'  => [], 'msg'   => '未找到有效订单信息'];
         }else{
             //获取产品配置
             $proconf = load_redis('get', 'check_proconf_'.$data['proId']);
@@ -275,7 +274,7 @@ class ServerController extends HproseController{
                 'status'=> false,
                 'code'  => 1000,
                 'data'  => [
-                    'count' =>  0
+                    'count' =>  '可用数：0张'
                 ],
                 'msg'   => '销售计划已暂停销售...'
             ];
@@ -313,13 +312,13 @@ class ServerController extends HproseController{
           'status'=> true,
           'code'  => 0,
           'data'  => [
-            'sn'    => $order['order_sn'],
-            'plan'  => planShow($order['plan_id'], 2, 1),
-            'number'=> $order['number'],
-            'count' => count($tickets),
-            'ticket'=> $tickets
+            'sn'    => '订单号：'.$order['order_sn'],
+            'plan'  => '使用日期：'.planShow($order['plan_id'], 2, 1),
+            'number'=> '数量：'.$order['number'],
+            'count' => '可用数：'.count($tickets)
           ],
-          'msg' =>  'success'
+          'ticket' => $tickets,
+          'msg' =>  '说明：获取成功'
         ];
         return $return;
     }
@@ -337,13 +336,24 @@ class ServerController extends HproseController{
             $field = ['seat_table','id','plantime','starttime','endtime','product_type'];
             $plan = D('Plan')->where(['id'=>$order['plan_id']])->field($field)->find();
         }
+        $return = [
+              'status'=> false,
+                'code'  => 1000,
+              'data'  => [
+                'sn'    => '订单号：123123121121',
+                'plan'  => '使用日期：2019-09-12(周四) 20:00',
+                'number'=> '数量：1张',
+                'count' => '可用数：1张'
+              ],
+              'ticket' => [],
+              'msg' =>  '说明：'.'success'
+            ];
+            return $return;
         if(empty($plan)){
             $return = [
                 'status'=> false,
                 'code'  => 1000,
-                'data'  => [
-                    'count' =>  0
-                ],
+                'data'  => [],
                 'msg'   => '销售计划已暂停销售...'
             ];
             return $return;
@@ -355,9 +365,7 @@ class ServerController extends HproseController{
             $return = [
                 'status'=> false,
                 'code'  => 1000,
-                'data'  => [
-                    'count' =>  0
-                ],
+                'data'  => [],
                 'msg'   => '未到检票时间...'
             ];
             return $return;
@@ -401,9 +409,7 @@ class ServerController extends HproseController{
             $return = [
                 'status'=> false,
                 'code'  => 1000,
-                'data'  => [
-                    'count' => 0,
-                ],
+                'data'  => [],
                 'msg'   =>  '核销失败,未找到可核销的门票'
             ];
             return $return;
@@ -434,9 +440,9 @@ class ServerController extends HproseController{
             'status'=> true,
             'code'  => 0,
             'data'  => [
-              'count'  => $ticket,
-              'sn'     => $order['order_sn'],
-              'usetime'=> planShow($order['plan_id'],32,1),
+              'count'  => '核销数量：'.$ticket,
+              'sn'     => '订单号：'.$order['order_sn'],
+              'usetime'=> '游玩日期：'.planShow($order['plan_id'],32,1),
             ],
             'msg'   =>  '成功核销'.$ticket.'张,剩余可核销'.$more."张"
           ];
@@ -445,9 +451,7 @@ class ServerController extends HproseController{
           $return = [
             'status'=> false,
             'code'  => 1000,
-            'data'  => [
-                'count' => 0,
-            ],
+            'data'  => [],
             'msg'   =>  '核销失败,请重试'
           ];
           return $return;

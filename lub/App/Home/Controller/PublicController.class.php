@@ -22,7 +22,8 @@ class PublicController extends Base{
     	if (Partner::getInstance()->id) {
             $this->redirect('Home/Index/index');
         }
-        $this->display();
+        $itemName = D("ConfigItem")->where(['varname'=>'item_name'])->cache('itemName',60)->getField('value');
+        $this->assign('title', $itemName)->display();
     }
 	
     //渠道登陆验证

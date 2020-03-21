@@ -1,45 +1,39 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>云鹿票务跳转提示</title>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<meta name="description" content="">
-	<link href="http://g.alicdn.com/sj/dpl/1.5.1/css/sui.min.css" rel="stylesheet">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>云鹿票务跳转提示</title>
+  <link rel="stylesheet" href="{$config_siteurl}static/layui/css/layui.css">
 </head>
-<style type="text/css">
-body{background-color:#efefef ;}
-.sui-container{background-color: #FFFFFF;}
-.m-t-20{margin-top: 20px;}
-.m-t-30{margin-top: 30px;}
-.lable-h-25{height: 25px;line-height: 25px;}
-.auto-center{margin-left: auto;margin-right: auto;}
-.h-450{height: 450px;}
-.tip-icon{width: 128px;height: 128px; margin-right: 20px;}
-.yes{background: url('./static/web/img/yes.png') no-repeat; float: left; }
-.no{background: url('./static/web/img/no.png') no-repeat; }
-.content{padding: 110px 0 0 110px;}
-.msg{float: left;padding: 20px 0 0 10px;}
+<style>
+.statusBox{ text-align: center; padding: 100px 0 50px; background: #fff}
+.title {font-size: 24px; color: rgba(0,0,0,.85);font-weight: 500;line-height: 32px;margin-bottom: 16px;} 
+.description {font-size: 14px;line-height: 22px;color: rgba(0,0,0,.45);margin-bottom: 24px;}
+.extra { background: #fafafa;padding: 24px;border-radius: 2px;text-align: left; margin: 0 auto 30px; width: 70%}
+.extra_t{font-size: 16px;color: rgba(0, 0, 0, 0.85); font-weight: 500;margin-bottom: 16px;}
+.extra_d{font-size: 15px;line-height: 1.5; color: rgba(0,0,0,.65);margin-top: 16px;}
+.extra_a{color: #1890ff; margin-left: 10px}
 </style>
 <body>
-  <div class="sui-container m-t-30 h-450">
-    <span class="span8 offset2 m-t-20 content">
-   		
-		<?php if(isset($message)) {?>
-		<div class="tip-icon yes"></div>
-		<div class="msg">
-   		<h1><?php echo($message); ?></h1>
-		<?php }else{?>
-		<div class="tip-icon no"></div>
-		<div class="msg">
-   		<h1><?php echo($error); ?></h1>
-		<?php }?>
-   		
-   		<p>页面自动 <a id="href" href="<?php echo($jumpUrl); ?>">跳转</a> 等待时间： <b id="wait"><?php echo($waitSecond); ?></p>
-   		</div>
-    </span>
+<div class="statusBox">
+  <!-- 提交成功 -->
+  <?php if(isset($message)) {?>
+  <div class="success">
+    <i class="layui-icon layui-icon-ok-circle" style="font-size: 100px; color: #5FB878;"></i>  
+    <div class="title"><?php echo($message); ?></div>
   </div>
+  <?php }else{?> 
 
+  <!-- 提交失败 -->
+  <div class="fail">
+    <i class="layui-icon layui-icon-close-fill" style="font-size: 100px; color: #f5222d;"></i>  
+    <div class="title"><?php echo($error); ?></div>
+    <div class="description">页面自动 <a id="href" href="<?php echo($jumpUrl); ?>">跳转</a> 等待时间： <b id="wait"><?php echo($waitSecond); ?></div>
+  </div> 
+  <?php }?>
+  <!--  -->
+</div>
 <script type="text/javascript">
 (function(){
 var wait = document.getElementById('wait'),href = document.getElementById('href').href;
@@ -53,4 +47,4 @@ var interval = setInterval(function(){
 })();
 </script>
 </body>
-</html
+</html>

@@ -15,54 +15,23 @@ use Payment\Client\Charge;
 class PayController extends Base{
     //订单支付
     public function index() {
-        /*
         if (IS_POST) {
-            //页面上通过表单选择在线支付类型，支付宝为alipay 财付通为tenpay
-            $paytype  = 'alipay';
-            //$paybank  = I('post.bank');
-            $order_id = I("post.order_id");
-            $money    = I("post.money");
-            $check    = M("Order")->where(array("order_sn"=>$order_id,"money"=>$money))->count(); //验证订单号以及金额正确
-            if($check == 1){
-                $pay = new \Think\Pay($paytype, C('payment.' . $paytype));
-                $order_no = $pay->createOrderNo();
-                $vo = new \Think\Pay\PayVo();
-                $vo->setBody("敦煌盛典演出票务")
-                    ->setFee($money) //支付金额
-                    ->setOrderNo($order_no)
-                    ->setTitle("敦煌盛典演出票务")
-                    ->setCallback("Home/Order/web_pay")
-                    ->setUrl(U("Home/Order/orderinfo"))
-                    ->setParam(array('sn' => $order_id,'pay_type'=>'4','seat_type'=>'1'));
-                echo $pay->buildRequestForm($vo);
-            }else{
-                $this->error("支付失败！");
-            }
-        } else {
-            //在此之前goods1的业务订单已经生成，状态为等待支付
-            /*$payinfo['callback'] = "Home/Order/web_pay";
-            $payinfo['money'] = '12';
-            $param = array('sn'=>'50420141102457');
-            $ab= R($payinfo['callback'], array('param' => $param));
-            dump($ab);*
-            $this->display();
-        }*/
-        if (IS_POST) {
-            $this->redirect('home.php?g=home&m=pay&a=index', $_POST);
+            $this->redirect('index.php?g=home&m=pay&a=index', $_POST);
         }
         $crm_id = I('id');//商户id
         //校验发送过来的商户是否是当前商户的子商户
         if(!check_crm_child($crm_id)){
             $this->error("未找到有效商户!");
         }
-        $type = I('type') ? I('type') : '0';
+        $type = I('type') ? I('type') : '';
         $channel = I('get.crm');
         if(empty($crm_id) || empty($channel)){$this->error("参数错误!");}
         /*查询条件START*/
         $start_time = I("starttime");
         $end_time   = I("endtime");
-        $this->assign("starttime",$start_time);
-        $this->assign("endtime",$end_time)->assign('channel',$channel);
+        $this->assign("starttime",$start_time)
+            ->assign("endtime",$end_time)
+            ->assign('crm',$channel);
         /*查询条件END*/
         if (!empty($start_time) && !empty($end_time)) {
             $start_time = strtotime($start_time);
@@ -77,7 +46,7 @@ class PayController extends Base{
         if(!empty($type)){
             $where['type'] = $type;
         }
-        $where["crm_id"] = array('in',agent_channel($crm_id));
+        $where["crm_id"] = array('in', agent_channel($crm_id));
         $db = D('CrmRecharge');
         $count = $db->where($where)->count();
         $Page  = new \Home\Service\Page($count,15);
@@ -85,7 +54,7 @@ class PayController extends Base{
         $list = $db->where($where)->order('id DESC')->limit($Page->firstRow.','.$Page->listRows)->select();
         $this->assign('data',$list)
             ->assign('page',$show)
-            ->assign("cid",$crm_id)
+            ->assign("id",$crm_id)
             ->assign("type",$type)
             ->display();
     }
@@ -305,6 +274,73 @@ class PayController extends Base{
             $uinfo = Partner::getInstance()->getInfo();
             $crm =  D('Crm')->where(['id'=>$uinfo['cid']])->field('id,cash,name')->find();
             $this->assign('crm',$crm)->display();
+        }
+    }
+    //渠道商二级退款
+    public function arefund()
+    {
+        if(IS_POST){
+            try {
+                $pinfo = I('post.');
+                $cash   = trim($pinfo['money']);   //当前充值金额
+                $id     = (int)$pinfo['crmid'];  //充值的客户id
+                $channel= (int)$pinfo['channel'];
+                $remark = trim($pinfo['remark']); //重置备注
+                $model = new \Think\Model();
+                $model->startTrans();
+                //判断是企业还是个人1企业4个人
+                if(!check_crm_child($id)){
+                    $model->rollback();
+                    $this->error("未找到有效商户!");
+                }
+                if($cash <= 0){
+                    $model->rollback();
+                    $this->error("退款金额必须大于0!");
+                }
+                $money =  D('Crm')->where(['id'=>$id])->getField('cash');
+                if (bccomp($cash, $money, 2) === 1) {
+                    $model->rollback();
+                    $this->error("退款金额大于可退金额!");
+                }
+                $crmData = array('cash' => array('exp','cash-'.$cash),'uptime' => time());
+                //渠道商客户
+                $c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
+                
+                //充值成功后，添加一条充值记录
+                $data = array(
+                    'order_sn'  =>  time(),
+                    'cash'      =>  $cash,
+                    'addsid'    =>  '2',
+                    'user_id'   =>  get_user_id(),
+                    'crm_id'    =>  $id,
+                    'createtime'=>  time(),
+                    'type'      =>  '5',
+                    'balance'   =>  balance($id,'1'),
+                    'tyint'     =>  '1',//客户类型1企业4个人
+                    'remark'    =>  $remark,
+                );      
+                $recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
+                if($c_pay && $recharge){
+                    $model->commit();//成功则提交crm=2&id=32
+                    $url = U('Home/Pay/index',array('id'=>$id,'crm'=>$channel));
+                    $this->success('退款成功!',$url);
+                }else{
+                    $model->rollback();//不成功，则回滚
+                    $this->error("退款失败!");
+                }
+            } catch (PayException $e) {
+                $this->error($e->errorMessage());;
+                exit;
+            }    
+        }else{
+            $crmid = I("cid");  //客户的id
+            $channel = I('channel');
+            if(empty($crmid) || empty($channel)){$this->error("参数错误，请重新选择商户!");}
+            $crm =  D('Crm')->where(['id'=>$crmid])->field('id,cash,name')->find();
+            $this->assign('crm',$crm);
+            //查询当前客户分组
+            $this->assign("cid",$crmid)->assign('channel',$channel);
+            $this->display();
         }
     }
 }

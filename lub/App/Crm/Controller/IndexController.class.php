@@ -169,21 +169,17 @@ class IndexController extends ManageBase{
 				'param'		=>	json_encode($param),
 				'uptime'	=>	time()
 			];
-			if($model->token(false)->create($data)){
-				$result = $model->where(['id'=>$pinfo['id']])->save(); // 写入数据到数据库
-    			if($result){
-    				//更新所有二级及二级员工的分组属性
-					//读取关系链接
-					$channel_agents_id = agent_channel($pinfo['id'],2);
-					if(!empty($channel_agents_id)){
-						$model->where(array('id'=>array('in',$channel_agents_id)))->setField(['groupid'=>$pinfo['groupid'],'param'=>$data['param']]);
-						//更新商户下所有员工所属的分组
-						$user_up = M('User')->where(array('cid'=>array('in',$channel_agents_id)))->setField('groupid',$pinfo['groupid']);
-					}
-        			$this->srun('更新成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
-    			}else{
-    				$this->erun('更新失败!'.$model->getError());
-    			}
+			$result = $model->where(['id'=>$pinfo['id']])->data($data)->save(); // 写入数据到数据库
+			if($result){
+				//更新所有二级及二级员工的分组属性
+				//读取关系链接
+				$channel_agents_id = agent_channel($pinfo['id'],2);
+				if(!empty($channel_agents_id)){
+					$model->where(array('id'=>array('in',$channel_agents_id)))->setField(['groupid'=>$pinfo['groupid'],'param'=>$data['param']]);
+					//更新商户下所有员工所属的分组
+					$user_up = M('User')->where(array('cid'=>array('in',$channel_agents_id)))->setField('groupid',$pinfo['groupid']);
+				}
+    			$this->srun('更新成功!',array('tabid'=>$this->menuid,'closeCurrent'=>true,'divid'=>$this->menuid));
 			}else{
 				$this->erun('更新失败!'.$model->getError());
 			}
@@ -541,7 +537,7 @@ class IndexController extends ManageBase{
 			$model->startTrans();
 			//判断是企业还是个人1企业4个人
 			$crmData = array('cash' => array('exp','cash+'.$cash),'uptime' => time());
-			if($channel == '1'){
+			if(in_array($channel, ['1','3'])){
 				//渠道商客户
 				$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$id))->setField($crmData);
 

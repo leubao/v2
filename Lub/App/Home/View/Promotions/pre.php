@@ -170,17 +170,17 @@
               </div>
               <p>
                 <label class="radio-inline">
-                  <input type="radio" name="pay_type" id="pay_type" value="2" > 授信额支付
+                  <input type="radio" name="pay_type" id="pay_type" value="2" checked> 授信额支付
                 </label>
-                <label class="radio-inline">
+                <!-- <label class="radio-inline">
                   <input type="radio" name="pay_type" id="pay_type" value="1" checked> 窗口现金支付
-                </label>
+                </label> -->
               </p>
-              <if condition="pre_model eq 2">
+              <?php if($pre_model == 2){ ?>
             <button type="button" class="btn btn-default" id="teamPrePay" data-toggle="modal">立即预约</button>
-            <else />
+            <?php }else{ ?>
             <button type="button" class="btn btn-default" id="bookingPay" data-toggle="modal">立即预约</button>  
-            </if>
+            <?php } ?>
             </div>
             <input id="sn" value="" type="hidden">
           </div>
@@ -310,11 +310,11 @@ var type = {$data['type']},
     product = {$data['product_id']};
 $(function() {
     empty_cart_ticket(); 
-    scenic_drifting_plan($("#plantime").val(),'4',{$data['product_id']},{$data.id});
+    scenic_drifting_plan($("#plantime").val(),'9',{$data['product_id']},{$data.id});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
         selectdate = $('#plantime').val();
         empty_cart_ticket();
-        scenic_drifting_plan(selectdate,'4',{$data['product_id']},{$data.id});
+        scenic_drifting_plan(selectdate,'9',{$data['product_id']},{$data.id});
     });
     /*活动门票*/
   $("#printActivty").bind("click",function(){

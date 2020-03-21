@@ -79,7 +79,7 @@ class ProductController extends Base{
 		$plantime = strtotime($pinfo['plantime']);
 		$pro_conf = $this->pro_conf($pinfo['product']);
 		/*开启预约,活动不需要*/
-		if($pro_conf['channel_pre_team'] > 0 && $pinfo['type'] <> 4){
+		if($pro_conf['channel_pre_team'] > 0 && $pinfo['type'] <> 9){
 			//读取可预约日期
 			$pretime = strtotime(date('Ymd',strtotime('+'.$pro_conf['channel_pre_team'].' day')));
 			if($plantime < $pretime){
@@ -119,7 +119,7 @@ class ProductController extends Base{
 					'name'  => '[第'.$v['games'].'场] '. date('H:i',$v['starttime']) .'-'. date('H:i',$v['endtime']),
 				);
 			}
-			if($v['product_type'] == '2'){
+			if(in_array($v['product_type'],['2','4'])){
 				$data[] = array(
 					'id'	=>  $v['id'],
 					'pid'   =>  '1',
@@ -161,7 +161,7 @@ class ProductController extends Base{
 	 * 快捷售票  获取区域票型
 	 */
 	public function quickPrice(){
-		$pinfo = json_decode($_POST['info'],true);
+		$pinfo = json_decode($_POST['info'], true);
 		if(empty($pinfo)){
 			$this->error('参数错误!');
 		}
@@ -175,6 +175,7 @@ class ProductController extends Base{
 		}
 		$plan = F('Plan_'.$pinfo['plan']);
 		$price_group  = $this->crm_price_group($uInfo['groupid'],$plan['product_id']);
+		$price = [];
 		/*
 		//根据分组加载价格
 		$tictype = pullprice($plan['id'],$type,$pinfo['area'],2,$price_group,$pinfo['sale']);
@@ -198,24 +199,56 @@ class ProductController extends Base{
 			$ainfo = D('Activity')->where($where)->field('id,type,param')->find();
 			$param = json_decode($ainfo['param'],true);
 			//在套票时直接加载活动中的价格
-			if((int)$ainfo['type'] === 5){
-				//判断活动的产品类型TODO
-				$number = D('Drifting')->where(['plan_id'=>$pinfo['plan']])->count();
-                //获取当前可售数量 TODO 目前不支持票面价和结算价
-                $area_num = $plan['quotas'] - $number;
-				$price = [
-					'id'		=>	$ainfo['id'],
-					'name'		=>	$param['info']['price']['name'],
-					'area_num' 	=>	$area_num, 
-					'area_nums' =>	$number,
-					'price'		=>	$param['info']['price']['price'],
-					'discount'	=>	$param['info']['price']['discount'],
-				];
+			if((int)$ainfo['type'] === 6){
+				//判断票型是否可售
+				$planParam = unserialize($plan['param']);
+				$state = true;
+				foreach ($param['info']['packages'] as $key => $value) {
+					if($plan['product_id'] == $value['product']){
+						//主产品票型不可用不显示，TODO子产品不可用时未判断
+						if(!in_array($value['ticket'], $planParam['ticket'])){
+							$state = false;
+						}
+					}
+					
+				}
+				if($state){
+					//判断活动的产品类型TODO
+					$number = D('Drifting')->where(['plan_id'=>$pinfo['plan']])->count();
+	                //获取当前可售数量 TODO 目前不支持票面价和结算价
+	                $area_num = $plan['quotas'] - $number;
+					$price = [
+						'id'		=>	$ainfo['id'],
+						'name'		=>	$param['info']['price']['name'],
+						'area_num' 	=>	$area_num, 
+						'area_nums' =>	$number,
+						'price'		=>	$param['info']['price']['price'],
+						'discount'	=>	$param['info']['price']['discount'],
+					];
+				}
 			}else{
 				$ticket = explode(',',$param['info']['ticket']);
 				$price = pullprice($pinfo['plan'],$type,$pinfo['area'],2,$price_group,$pinfo['seale'],$ticket);
 			}
-			
+			//判断是否设定活动库存 单场限额销售
+			if((int)$ainfo['type'] === 5 && isset($param['info']['number']) && !empty($param['info']['number'])){
+				if(!empty($price)){
+					foreach ($price as $k => $v) {
+						$where = [
+							'plan_id'=>$pinfo['plan'],
+							'status'=>['in', '1,9'],
+							'activity'=>$ainfo['id']
+						];
+						$area_nums = D('Order')->where($where)->sum('number');
+						$area_num = $param['info']['number'] - $area_nums;
+						//读取活动已售
+						$prices[$k] = $v;
+						$prices[$k]['area_num'] = $area_num;//可售
+						$prices[$k]['area_nums'] = $area_nums;
+					}
+					$price = $prices;
+				}
+			}
 		}
 
 		

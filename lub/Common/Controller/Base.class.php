@@ -36,11 +36,11 @@ class Base extends LubTMP {
         //验证登录
         $this->competence();
         $product = I('get.productid',0,intval);
-        //dump(D("Home/Menu")->getMenuList());
+        $itemName = D("ConfigItem")->where(['varname'=>'item_name'])->cache('itemName',60)->getField('value');
         $this->assign("SUBMENU_CONFIG", json_encode(D("Home/Menu")->getMenuList()));
         $this->assign('USER_INFO', json_encode($this->senuInfo()));
         $this->assign('PRO_CONF',json_encode($this->pro_conf($product)));
-        
+        $this->assign('title', $itemName);
         $this->assign('proconf',$this->pro_conf($product));
     }
     /**
@@ -103,7 +103,7 @@ class Base extends LubTMP {
             'role_id'=>'',
             'info'=>'',
             'rpassword'=>'',
-            );
+        );
         $return = array_diff_key($uinfo,$unset);
         return $return;
     } 

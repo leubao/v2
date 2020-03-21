@@ -44,7 +44,7 @@ class PlanModel extends Model{
 				return false;
 			}
 		}
-		if(in_array($data['product_type'],['2','3'])){
+		if(in_array($data['product_type'],['2','3','4'])){
 			//批量新增
 			if($data['addType'] == 'batch'){
 				$list = getDateFromRange($data['plantime'],$data['plantimes']);
@@ -113,7 +113,7 @@ class PlanModel extends Model{
 				'encry'	=> genRandomString(6,1),
 			);
 			$info[] = array_merge($infos,$infoAll);
-		}elseif($data['product_type'] == '2'){
+		}elseif(in_array($data['product_type'], ['2','4'])){
 			if($data['start']){
 				$status = '2';
 			}else{

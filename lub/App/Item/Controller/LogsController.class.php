@@ -87,35 +87,5 @@ class logsController extends ManageBase{
     public function cronlog(){
         M('CronLog');
     }
-    /*检票日志*/
-    function check_log(){
-        $where = array();
-        $start_time = I('start_time');
-        $end_time = I('end_time');
-        $type = I('type');
-        if (!empty($start_time) && !empty($end_time)) {
-            $this->assign('starttime',$start_time)
-                ->assign('endtime',$end_time);
-            $start_time = strtotime($start_time);
-            $end_time = strtotime($end_time) + 86399;
-            $where['datetime'] = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
-        }
-        if ($type != '') {
-            $where['type'] = array('eq', $type);
-        }
-        $db = M('Checklog');
-        $count = $db->where($where)->count();//查询满足要求的总记录数
-        $p = new \Item\Service\Page($count,20);
-        $currentPage = !empty($_REQUEST["pageNum"])?$_REQUEST["pageNum"]:1;
-        $firstRow = ($currentPage - 1) * 20;
-        $list = $db->where($where)->order("id DESC")->limit($firstRow . ',' . $p->listRows)->select();
-        /*分页设置赋值*/
-        $this->assign ( 'totalCount', $count )
-            ->assign ( 'numPerPage', $p->listRows)
-            ->assign ( 'currentPage', $currentPage)
-            ->assign("list",$list)
-            ->assign('type',$type)
-            
-            ->display();
-    }
+   
 }

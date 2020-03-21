@@ -919,7 +919,7 @@ function load_redis($apiport,$key,$value = '',$time = ''){
             break;
         case 'delete':
             //删除指定key
-            $return = $redis->delete($key);
+            $return = $redis->del($key);
             break;
     }
     return $return;

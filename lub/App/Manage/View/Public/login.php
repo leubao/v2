@@ -136,8 +136,12 @@
     		</form>
         </div>
 	</div>
-	<div class="bottom"> Copyright &copy; <?php echo date('Y');?>　<a href="http://www.leubao.com/" target="_blank">leubao.com</a> </div>
+	<div class="bottom"> Copyright &copy; <?php echo date('Y');?>　
+		<a href="http://www.leubao.com/" target="_blank">leubao.com</a> 
+		<p><a href="http://www.beian.miit.gov.cn" target="_blank">{$Config.icp}</a></p>
+	</div>
 </div>
+<?php //dump($Config); ?>
 <script type="text/javascript">
 $(function(){
 	$("#login_form").submit(function(){

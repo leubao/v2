@@ -4,6 +4,10 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <Managetemplate file="Home/Public/cssjs"/>
+<style type="text/css" media="screen">
+.form-inline .form-group{margin-bottom: 5px;}
+.form-inline .form-group .w135{width: 135px;}
+</style>
 </head>
 
 <body>
@@ -28,6 +32,17 @@
             </div>
             <div class="form-group">
               <input type="text" class="form-control" name="sn" id="sn" value="{$where['order_sn']}" placeholder="订单号">
+            </div>
+            <div class="form-group">
+              <input type="text" class="form-control" name="mobile" id="mobile" value="{$where['phone']}" placeholder="手机号">
+            </div>
+            <div class="form-group">
+              <select class="form-control w135" name="user">
+                <option value="">下单人</option>
+                <volist name='user' id="user">
+                <option value="{$user.id}" <if condition="$where['user_id'] eq $user['id']">selected="selected"</if>>{$user.crm} - {$user.nickname}</option>
+                </volist>
+              </select>
             </div>
             <div class="form-group">
               <select class="form-control" name="product">
@@ -60,19 +75,14 @@
             <div class="form-group">
               <select class="form-control" name="datetype">
                 <option value="1" <if condition="$datetype eq '1'">selected="selected"</if>>下单日期</option>
-                <option value="2" <if condition="$datetype eq '2'">selected="selected"</if>>演出日期</option>
+                <option value="2" <if condition="$datetype eq '2'">selected="selected"</if>>使用日期</option>
               </select>
             </div>
+            
             <div class="form-group">
-              <select class="form-control" name="user">
-                <option value="">下单人</option>
-                <volist name='user' id="user">
-                <option value="{$user.id}" <if condition="$where['user_id'] eq $user['id']">selected="selected"</if>>{$user.nickname}</option>
-                </volist>
-              </select>
+              <button type="submit" class="btn btn-default">查询</button>
+              <a type="button" href="{$export_url}" class="btn btn-default">导出</a>
             </div>
-            <button type="submit" class="btn btn-default">查询</button>
-            <a type="button" href="{$export_url}" class="btn btn-default">导出</a>
           </form>
 
         </div>
@@ -125,7 +135,7 @@
                 <if condition="is_order_plan($vo['plan_id'])">
                   <div class="btn-group btn-group-xs" role="group">
                     
-                      <a class="btn btn-default print <if condition="$vo['status'] neq '1'">disabled</if>" href="#" data-url="{:U('Home/Order/drawer',array('sn'=>$vo['order_sn'],'plan_id'=>$vo['plan_id']))}"><i class="glyphicon glyphicon-print"></i></a>
+                      <a class="btn btn-default print <if condition="$vo['status'] neq '1'">disabled</if>" href="#" data-url="{:U('Home/Order/drawer',array('pid'=>$vo['product_id'],'sn'=>$vo['order_sn'],'plan_id'=>$vo['plan_id']))}"><i class="glyphicon glyphicon-print"></i></a>
                     
                     <if condition="$proconf['refund'] eq '1'">
                       <a class="btn btn-default subtract <if condition="$vo['status'] neq '1'">disabled</if>" href="#" data-sn="{$vo['order_sn']}" data-num="{$vo['number']}" data-subtract="{$vo['subtract']}"><i class="glyphicon glyphicon-scissors"></i></a>
@@ -245,8 +255,9 @@ function subtract(id){
     </div>
     <!-- /.modal --> 
   
-  <Managetemplate file="Home/Public/footer"/>
+  
   <!--页脚--> 
 </div>
+<Managetemplate file="Home/Public/footer"/>
 </body>
 </html>

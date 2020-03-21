@@ -145,7 +145,7 @@ return array(
     'URL_PARAMS_FILTER' => false, // URL变量绑定过滤
     'URL_PARAMS_FILTER_TYPE' => '', // URL变量绑定过滤方法 如果为空 调用DEFAULT_FILTER
     'URL_404_REDIRECT' => '', // 404 跳转页面 部署模式有效
-    'URL_ROUTER_ON' => false, // 是否开启URL路由
+    'URL_ROUTER_ON' => true, // 是否开启URL路由
     'URL_ROUTE_RULES' => array(), // 默认路由规则 针对模块
     'URL_MAP_RULES' => array(), // URL映射定义规则
 

@@ -51,7 +51,6 @@ class Api extends \Libs\System\Service {
                 $list[$v]['plan'] = M('Plan')->where($where)->order('plantime ASC,games ASC')->field(array('id,plantime,product_type,starttime,endtime,games,param,product_id,quotas,seat_table'))->limit(7)->select();
             }
         }
-        load_redis('set','2123',json_encode($uinfo));
         $type = '1';
         if(isset($uinfo['user']['guide']) && $uinfo['user']['guide'] > 0){
             $type = '2';
@@ -68,18 +67,23 @@ class Api extends \Libs\System\Service {
                     $valu['num'] = M(ucwords($valu['seat_table']))->where(array('status'=>array('in','0')))->count();
                     $plan[] = $valu;
                 }else{
-                    $where = array('plan_id'=>$valu['id'],'product_id'=>$valu['product_id'],'status'=>array('in','2,99,66'));
-                    $number = D('Scenic')->where($where)->count();
-                    $area_num = $valu['quotas'] - $number;
-                    $area_nums = $number;
-                    //TODO $param['group']['price_group'] 梦里老家  强制为70
+                    $ticketParam = pullprice($valu['id'],$type,0,$param['scene'],$param['group']['price_group'], 1, $sealeTicket);
+                    if(!empty($ticketParam)){
+                        $valu['param'] = $ticketParam;
+                        $where = array('plan_id'=>$valu['id'],'product_id'=>$valu['product_id'],'status'=>array('in','2,99,66'));
+                        $number = D('Scenic')->where($where)->count();
+                        $area_num = $valu['quotas'] - $number;
+                        $area_nums = $number;
+                        //TODO $param['group']['price_group'] 梦里老家  强制为70
 
-                    $valu['param'] = pullprice($valu['id'],$type,0,$param['scene'],$param['group']['price_group'], 1, $sealeTicket);
+                        $valu['param'] = pullprice($valu['id'],$type,0,$param['scene'],$param['group']['price_group'], 1, $sealeTicket);
 
-                    $valu['title'] = planShow($valu['id'],5,1);
-                    $valu['product_id'] = $valu['product_id'];
-                    $valu['num'] = $area_num;
-                    $plan[] = $valu;
+                        $valu['title'] = planShow($valu['id'],5,1);
+                        $valu['product_id'] = $valu['product_id'];
+                        $valu['num'] = $area_num;
+                        $plan[] = $valu;
+                    }
+                    
                 }  
             }
             

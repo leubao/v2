@@ -546,24 +546,20 @@ function vendor($class, $baseUrl = '', $ext = '.php') {
         $baseUrl = VENDOR_PATH;
     return import($class, $baseUrl, $ext);
 }
+
 /**
  * 实例化模型类 格式 [资源://][模块/]模型
  * @param string $name 资源地址
  * @param string $layer 模型层名称
  * @return Think\Model
  */
-function D($name = '', $layer = '')
-{
-    if (empty($name)) {
+function D($name = '', $layer = '') {
+    if (empty($name))
         return new Think\Model;
-    }
-
     static $_model = array();
-    $layer         = $layer ?: C('DEFAULT_M_LAYER');
-    if (isset($_model[$name . $layer])) {
+    $layer = $layer? : C('DEFAULT_M_LAYER');
+    if (isset($_model[$name . $layer]))
         return $_model[$name . $layer];
-    }
-
     $class = parse_res_name($name, $layer);
     if (class_exists($class)) {
         $model = new $class(basename($name));

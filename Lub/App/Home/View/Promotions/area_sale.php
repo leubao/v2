@@ -50,7 +50,7 @@
           <h3 class="panel-title"><span class="glyphicon glyphicon-list-alt"></span> 订单信息</h3>
         </div>
         <div class="panel-body">
-          <p>说明：请正确填写游客身份证号码,游客将通过身份证过闸入园！</p>
+          <p>说明：{$data.remark}</p>
         </div>
         <ul class="list-group form-inline">
           <li class="list-group-item">
@@ -325,11 +325,11 @@ var type = {$data['type']},
     product = {$data['product_id']};
 $(function() {
     empty_cart_ticket();
-    scenic_drifting_plan($("#plantime").val(),'4',{$data['product_id']},{$data.id});
+    scenic_drifting_plan($("#plantime").val(),'9',{$data['product_id']},{$data.id});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
         selectdate = $('#plantime').val();
         empty_cart_ticket();
-        scenic_drifting_plan(selectdate,'4',{$data['product_id']},{$data.id});
+        scenic_drifting_plan(selectdate,'9',{$data['product_id']},{$data.id});
     });
     /*活动门票*/
   $("#printActivty").bind("click",function(){

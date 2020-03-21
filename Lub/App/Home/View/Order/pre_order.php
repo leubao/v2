@@ -119,8 +119,9 @@
     </div>
   </div>
   
-  <Managetemplate file="Home/Public/footer"/>
+  
   <!--页脚--> 
 </div>
+<Managetemplate file="Home/Public/footer"/>
 </body>
 </html>

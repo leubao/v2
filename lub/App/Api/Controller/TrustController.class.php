@@ -16,23 +16,57 @@ class TrustController extends LubTMP {
 	//信任地址验证
 	function _initialize(){
 		
-		parent::_initialize();
-		/*获取请求的url 
-		$get_url = get_url();
-		//不成功返回错误
-		dump($get_url);
-		//获取已经配置的url
-		if($get_url){
-			$return = array(
-				'status'=>	'0',
-				'msg'	=>	'不合法请求',
-			);
-			$this->ajaxReturn($return);
-		}*/
+		//parent::_initialize();
+
 	}
 	function index(){
-		echo "string";
-	}
+		// $sn = 'GEAoY4vbAUwJSzINc84LwQVv';
+		// // $wechat = & load_wechat('Extends',169,1);dump($wechat);
+ 	// // 	$snTosecret = putIdToCode($sn, 8);
+		// $lurl = U('Api/Index/ticket',['tid'=>$snTosecret]);
+  // //       $surl = $wechat->getShortUrl($lurl);
+  // 		$code = 'iFZmv5ERfdffsJG1Fy9ZdL&n6KQR7OlKGvLXVOR1To&Y#yWw3db3H1vVP#&iV';
+  //       dump(getCodeToId($sn, 24, $code));
+
+        vendor('jsonRPC.jsonRPCClient');
+        $client = new \jsonRPCClient('https://api.msg.alizhiyou.cn');
+        $param = [
+        	[
+        		'type'      =>  'remind',//briefing
+        		'openid'	=>	'ok-_50YZeFs8MA64CM2i7zhL1xj8',
+        		'content'   => [
+	                'first'  => [
+	                    'value' => '您有新的待处理订单,请您尽快前往云鹿票券综合管理平台处理',
+	                    'color' => '#4285f4'
+	                ],
+	                'keyword1'  => [
+	                    'value' => '1221211',
+	                    'color' => '#4285f4'
+	                ],
+	                'keyword2'  => [
+	                    'value' => '讯洲科技 周靖',
+	                    'color' => '#4285f4'
+	                ],
+	                'keyword3'  => [
+	                    'value' => '超量申请 2019年12月31日第二场普通票10张',
+	                    'color' => '#4285f4'
+	                ],
+	                'keyword4'  => [
+	                    'value' => date('Y-m-d H:i'),
+	                    'color' => '#4285f4'
+	                ],
+	                'remark' =>  [
+	                    'value' => '',
+	                    'color' => '#4285f4'
+	                ]
+	            ]
+        	]
+        ];
+        $result = $client->index('/msg/sendMsg', $param);
+        var_dump($result,'11'); // 结果：Hello, JsonRPC!
+        // $result = $client->test('ThinkPHP');
+        // var_dump($result); // 结果：Hello, ThinkPHP!
+    }
 	//信任计划获取
 	function get_plan(){
 		$ginfo = I('get.');
@@ -347,5 +381,47 @@ class TrustController extends LubTMP {
 			\Libs\Service\Check::check_red();
 			return true;	
 		}
+	}
+	/**
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2019-10-07T16:13:10+0800
+	 * @return  微信支付校验
+	 */
+	public function wx()
+	{
+		$list = D('Order')->where(['pay'=>5,'status'=>11])->field('order_sn,product_id')->limit(700)->order('id DESC')->select();
+
+		foreach ($list as $k => $v) {
+			$pay = & load_wechat('Pay', $v['product_id']);
+			//dump($pay->errMsg);
+			$reslut = $pay->queryOrder($v['order_sn']);
+			dump($reslut);
+			if($reslut['return_code'] === 'SUCCESS' && $reslut['result_code'] === 'SUCCESS'){
+				$this->uporder($v['order_sn'], $reslut['transaction_id']);
+			}
+		}
+
+	}
+	public function uporder($sn, $transaction)
+	{
+		$uppaylog = array('status'=>1, 'out_trade_no' => $transaction);
+        $paylog = D('Manage/Pay')->where(array('order_sn'=>$sn,'type'=>2))->save($uppaylog);
+        $orderMap = [
+            'order_sn'=> $sn,
+            'status'  => ['in',['11','2']],
+        ];
+        $oinfo = D('Item/Order')->where($orderMap)->relation(true)->find();
+        //dump($oinfo);
+        if(!empty($oinfo)){
+            $info = array(
+                'seat_type' => '1',
+                'pay_type'  => '5'
+            );
+            $order = new \Libs\Service\Order;
+            $status = $order->mobile_seat($info,$oinfo);
+            return $status;
+        }else{
+            $status = true;
+        }
 	}
 }

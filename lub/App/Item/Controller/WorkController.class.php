@@ -37,6 +37,7 @@ class WorkController extends ManageBase{
 				$template = 'index';
 				break;
 			case '2':
+			case '4':
 				//景区
 				$today = date('Y-m-d');
 				$template = 'drifting';
@@ -72,7 +73,7 @@ class WorkController extends ManageBase{
 					'name'  => '[第'.$v['games'].'场] '. date('H:i',$v['starttime']) .'-'. date('H:i',$v['endtime']),
 				);
 			}
-			if($v['product_type'] == '2'){
+			if(in_array($v['product_type'], ['2','4'])){
 				$data[] = array(
 					'id'	=>  $v['id'],
 					'pid'   =>  '1',
@@ -545,6 +546,7 @@ class WorkController extends ManageBase{
 				];
 				$ainfo = D('Activity')->where($where)->field('id,type,param')->find();
 				$param = json_decode($ainfo['param'],true);
+
 				//在套票时直接加载活动中的价格
 				if((int)$ainfo['type'] === 5){
 					//判断票型是否可售
@@ -574,8 +576,13 @@ class WorkController extends ManageBase{
 							'discount'	=>	$param['info']['price']['discount'],
 						];
 					}
+				}else if(in_array($ainfo['type'], ['1','2'])){
+					foreach ($param['info'] as $key => $value) {
+						$ticket[] = $value['ticket'];
+					}
+					$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1,$pinfo['seale'],$ticket);
 				}else{
-					$ticket = explode(',',$param['info']['ticket']);
+					$ticket = explode(',', $param['info']['ticket']);
 					$price = pullprice($pinfo['plan'],$pinfo['type'],$pinfo['area'],1,1,$pinfo['seale'],$ticket);
 				}
 			}

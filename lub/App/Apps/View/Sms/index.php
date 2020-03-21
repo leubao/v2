@@ -39,6 +39,7 @@
         <th align="center">目的号码</th>
         <th align="center">发送内容</th>
         <th align="center">数量</th>
+        <th align="center">状态</th>
         <th align="center">创建时间</th>
       </tr>
     </thead>
@@ -48,6 +49,7 @@
         <td align="center">{$vo.phone}</td>
         <td>{$vo.content|urldecode}</td>
         <td align="center">{$vo.num}</td>
+        <th align="center">{$vo.status|status}</th>
         <td align="center">{$vo.createtime|datetime}</td>
        </tr>
     </volist>

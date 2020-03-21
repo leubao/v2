@@ -77,6 +77,12 @@
                                 <td><input type="text" name="appsecret" value="66c9d92697c0496c1e72aa02f9ef2cf7" size="40">
                                 </td>
                               </tr>
+                              <tr>
+                                <td width="120px">ICP备案号:</td>
+                                <td><input type="text" name="icp" value="{$Site.icp}" size="40">
+                                <span class="remark">icp 备案号</span>
+                                </td>
+                              </tr>
                             </tbody>
                           </table>   
                         </div>

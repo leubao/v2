@@ -18,7 +18,8 @@ class PromotionsController extends ManageBase{
 	{
 		$map = [
 			'product_id'	=>	get_product('id'), 
-			'status'		=>	1
+			'status'		=>	1,
+			'_string'   	=>  "FIND_IN_SET(1,is_scene)"
 		];
 		$list = D('Activity')->where($map)->field('id,title,type,starttime,endtime,remark')->select();
 		$this->assign('data',$list)->display();
@@ -28,7 +29,7 @@ class PromotionsController extends ManageBase{
 	{
 		//读取活动
 		$info = D('Activity')->where(['id'=>$id])->find();
-		$info['param'] = json_decode($info['param'],true);
+		$info['param'] = json_decode($info['param'],true);dump($info);
 		//判断活动是否正在进行
 		if(!$this->check_active($info)){
 			$this->erun("活动已结束,或已经停用",array('tabid'=>$this->menuid.MODULE_NAME));
@@ -36,15 +37,16 @@ class PromotionsController extends ManageBase{
 		//根据活动类型加载
 		switch ($info['type']) {
 			case '1':
+				//买赠
 				$idcard = $info['param']['info']['card'];
 				$this->assign('idcard',json_encode($idcard));
-				$this->assign('type','1');
+				$this->assign('type',$info['is_team']);
 				$tempate = 'buy';
 				break;
 			case '3':
 				$idcard = $info['param']['info']['card'];
 				$this->assign('idcard',json_encode($idcard));
-				$this->assign('type','1');
+				$this->assign('type',$info['is_team']);
 				$tempate = 'area_sale';
 				break;
 			case '5':

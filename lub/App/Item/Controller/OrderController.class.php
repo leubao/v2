@@ -99,6 +99,9 @@ class OrderController extends ManageBase{
 				$get_ticket_url = U('Item/Order/printTicket',['sn'=>$ginfo['sn'],'plan_id'=>$ginfo['plan_id'],'genre'=>1]);
 				
 			}
+			if(load_redis('get','lock_'.$ginfo['sn'])){
+				$this->erun('订单锁定中~');
+			}//dump($ginfo);
 			$this->assign('get_ticket_url',$get_ticket_url);
 			if($return['status']){
 				$this->display($return['tpl']);
@@ -111,7 +114,15 @@ class OrderController extends ManageBase{
 		$ginfo = I('get.');
 		//订单状态校验
 		$order_type = order_type($ginfo['sn']);
+
 		$user = $ginfo['user'] ? $ginfo['user'] : 0;
+		if(load_redis('get','lock_'.$ginfo['sn'])){
+			$return = array(
+				'status' => '2',
+				'message' => '订单锁定中~'
+			);
+			die(json_encode($return));
+		}
 		//判断订单状态是否可执行此项操作
 		if(in_array($order_type['status'], array('0','2','3','7','8','11'))){
 			$return = array(
@@ -149,23 +160,31 @@ class OrderController extends ManageBase{
 		//更新门票打印状态
 		$model = new Model();
 		$model->startTrans();
-		switch ($plan['product_type']) {
-			case '1':
-				$table = $plan['seat_table'];
-				break;
-			case '2':
-				$table = 'scenic';
-				break;
-			case '3':
-				$table = 'drifting';
-				break;
+		// switch ($plan['product_type']) {
+		// 	case '1':
+		// 		$table = $plan['seat_table'];
+		// 		break;
+		// 	case '2':
+		// 		$table = 'scenic';
+		// 		break;
+		// 	case '3':
+		// 		$table = 'drifting';
+		// 		break;
+		// }
+		$table = $plan['seat_table'];
+		//判断是否打印已检门票
+		if((int)$this->procof['print_has'] === 1){
+			$where = array('order_sn'=>$ginfo['sn'],'status'=>2);
+		}else{
+			$where = array('order_sn'=>$ginfo['sn']);
 		}
-		$list = M(ucwords($table))->where(array('order_sn'=>$ginfo['sn']))->select();
+		$list = M(ucwords($table))->where($where)->select();
 		if($ginfo['type'] == '1'){
 			//一人一票
+			$orderId = D('Order')->where(['order_sn'=>$ginfo['sn']])->getField('id');
 			//读取门票列表
 			foreach ($list as $k=>$v){
-				$info[] = re_print($plan['id'],$plan['encry'],$v,$plan['product_id']);
+				$info[] = re_print($plan['id'],$plan['encry'],$v,$plan['product_id'],$orderId, $ginfo['type']);
 			}
 		}else{
 			//一单一票
@@ -193,8 +212,8 @@ class OrderController extends ManageBase{
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);
 				$print = $v['print'] ? $v['print'] : '1';
-				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],$print,$v['id'])."&".$oinfo['id']."^#";
-				
+				//$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],$print,$v['id'])."&".$oinfo['id']."^#";
+				$sn = \Libs\Service\Encry::toQrData($v['id'],$oinfo['id'],$plan['id'],$print,$ginfo['type']);
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
@@ -226,7 +245,7 @@ class OrderController extends ManageBase{
 			$type = '2';
 		}else{
 			//更新订单状态
-			$up_order = $model->table(C('DB_PREFIX'). order)->where(array('order_sn'=>$ginfo['sn']))->setField('status',9);
+			$up_order = $model->table(C('DB_PREFIX'). 'order')->where(array('order_sn'=>$ginfo['sn']))->setField('status',9);
 			//渠道订单发送取票短信
 			if($order_type['type'] == '2' || $order_type['type'] == '4'){
 				$this->to_sms($order_type['user_id'],$ginfo['sn'],$order_type['plan_id']);
@@ -326,7 +345,7 @@ class OrderController extends ManageBase{
 		if(check_sn($ginfo['sn'],$ginfo['plan_id'])){
 			$order_type = order_type($ginfo['sn']);
 			if($order_type['is_print'] == '1'){
-				$this->erun("该订单仅支持身份证入园,不能打印纸质门票!");
+				$this->erun("预定成功,电子凭证入园,无需要打印纸质门票!");
 			}
 			//判断订单状态是否可执行此项操作
 			if(in_array($order_type['status'], array('0','2','3','7','8','11'))){

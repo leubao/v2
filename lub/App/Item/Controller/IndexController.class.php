@@ -97,4 +97,5 @@ class IndexController extends ManageBase{
         $this->assign('phone',$phone)->assign('order',$order)->assign('ticket',$ticket)->assign('money',$money);
         $this->display();
     }
+    
 }

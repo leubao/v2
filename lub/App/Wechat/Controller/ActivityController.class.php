@@ -15,6 +15,32 @@ use Wechat\Service\Wticket;
 use Libs\Service\Order;
 use Payment\Client\Charge;
 class ActivityController extends LubTMP {
+
+    protected function _initialize() {
+        parent::_initialize();
+        $this->ginfo = I('get.');
+        $this->pid = $this->ginfo['pid'];
+        $this->user = $this->ginfo['u'];
+        $this->act = $this->ginfo['act'];
+        $this->param = $this->ginfo['param'];
+        if(empty($this->pid) && empty(session('pid'))){
+            $this->error("参数错误");
+        }
+        if(empty($this->pid)){
+            $this->pid = session('pid');
+        }else{
+            session('pid',$this->pid);
+        }
+        load_redis('set','userss',serialize(session('user')));
+        //加载产品配置信息
+        $proconf = get_proconf($this->pid,2);
+        $script = &  load_wechat('Script',$this->pid,1);
+        //获取JsApi使用签名，通常这里只需要传 $url参数  
+        //设置统一分享链接
+        $options = $script->getJsSign(U('Wechat/Activity/act',['pid'=>$this->pid,'act'=>$this->ginfo['act'],'u'=>$this->user]));
+
+        $this->assign('ginfo',$this->ginfo)->assign('proconf',$proconf)->assign('options',$options);
+    }
 	/**
      * 活动支持
      */
@@ -107,41 +133,220 @@ class ActivityController extends LubTMP {
         if(IS_POST){
             //创建订单
             $info = json_decode($_POST['info'],true);
-            //读取当前活动票型
-            $param = session('param');
-            $ticketType = F('TicketType'.$param['product']);
-            //获取当前区域活动配置
-            $area_set = $param['info'][$info['data'][0]['areaId']];
-            //重新构造请求订单
-            $info['data'] = array(
-                array('areaId'=>$info['data'][0]['areaId'],'priceid'=>$info['data'][0]['priceid'],'price'=>$ticketType[$area_set['price']]['discount'],'num'=>'1'),
-                 array('areaId'=>$info['data'][0]['areaId'],'priceid'=>(int)$ticketType[$area_set['prices']]['id'],'price'=>$ticketType[$area_set['prices']]['discount'],'num'=>'2'),
+            $act = M('Activity')->where(array('id'=>$info['param'][0]['activity'],'status'=>1))->field('id,title,type,param,product_id')->find();
+            if((int)$act['type'] === 1){
+                $ticketType = F('TicketType'.$act['product_id']);
+                //获取当前互动配置
+                $param = json_decode($act['param'], true);
+                $selectd = $param['info'][$info['data'][0]['areaId']];
+                $info['data'] = array(
+                    array('areaId'=>$info['data'][0]['areaId'],'priceid'=>$info['data'][0]['priceid'],'price'=>$ticketType[$selectd['price']]['discount'],'num'=>$info['data'][0]['num']),
+                    array('areaId'=>$info['data'][0]['areaId'],'priceid'=>(int)$ticketType[$selectd['prices']]['id'],'price'=>$ticketType[$selectd['prices']]['discount'],'num'=>$info['data'][0]['num']),
                 );
-            $info['subtotal'] =  $ticketType[$area_set['price']]['discount'];
-            //增加活动标记
-            $info['param'][0]['activity'] = $info['crm'][0]['qditem'];
-            $info['param'][0]['area'] = $info['data'][0]['areaId'];
+                $info['subtotal'] =  $ticketType[$selectd['price']]['discount'];
+                //增加活动标记
+                $info['param'][0]['activity'] = $info['param'][0]['activity'];
+                $info['param'][0]['settlement'] = 2;
+            }
+            if((int)$act['type'] === 3){
+                if(!$this->check_card($pinfo['info']['param'][0]['id_card'])){
+                    $return = array(
+                        'statusCode' => 300,
+                        'msg' => '该身份证已参加活动,不能重复参与',
+                    );
+                    die(json_encode($return));
+                }
+            }
+            if((int)$act['type'] === 9){
+                //读取当前活动票型
+                $param = session('param');
+                $ticketType = F('TicketType'.$param['product']);
+                //获取当前区域活动配置
+                $area_set = $param['info'][$info['data'][0]['areaId']];
+                //重新构造请求订单
+                $info['data'] = array(
+                    array('areaId'=>$info['data'][0]['areaId'],'priceid'=>$info['data'][0]['priceid'],'price'=>$ticketType[$area_set['price']]['discount'],'num'=>'1'),
+                     array('areaId'=>$info['data'][0]['areaId'],'priceid'=>(int)$ticketType[$area_set['prices']]['id'],'price'=>$ticketType[$area_set['prices']]['discount'],'num'=>'2'),
+                    );
+                $info['subtotal'] =  $ticketType[$area_set['price']]['discount'];
+                //增加活动标记
+                $info['param'][0]['activity'] = $info['crm'][0]['qditem'];
+                $info['param'][0]['area'] = $info['data'][0]['areaId'];
+            }
             $info = json_encode($info);
-          //  dump($info);
             //提交订单请求
-            $uinfo = session('user');//dump($uinfo);
-            $sn = \Libs\Service\Order::mobile($info,$uinfo['user']['scene'],$uinfo['user']);
-            
+            $uinfo = session('user');
+        
+            $order = new Order();
+            $sn = $order->mobile($info, $uinfo['user']['scene'],$uinfo['user']);
+           
             if($sn != false){
                 $return = array(
                     'statusCode' => 200,
-                    'url' => U('Wechat/Index/order',array('sn'=>$sn)),
+                    'url' => U('Wechat/Index/order',array('pid'=>$this->pid,'sn'=>$sn)),
                 ); 
             }else{
                 $return = array(
                     'statusCode' => 300,
                     'url' => '',
+                    'msg'   => $order->error
                 );  
             }
-            echo json_encode($return);
+            die(json_encode($return));
         }
     }
-    
+    //通用活动拉取
+    public function act()
+    {
+        $ginfo = I('get.');
+        if(empty($ginfo['act'])){
+            $this->error('页面不存在!');
+        }
+        $url = U('Wechat/Activity/act',['pid'=>$ginfo['pid'],'act'=>$ginfo['act'],'u'=>$ginfo['u']]);
+        session('user',null);//TODO  生产环境删除
+        
+        //判断用户是否登录   检查session 是否为空
+        $user = session('user');
+
+        if(empty($user['user']['openid']) || !empty($this->user)){
+           Wticket::tologin($this->ginfo);
+           $user = session('user');//dump($user);
+        }
+        
+        $this->check_login($url);
+
+        //根据活动拉取销售计划
+        $info = M('Activity')->where(array('id'=>$ginfo['act'],'status'=>1))->field('id,title,type,param,product_id')->find();
+        
+        if(empty($info)){
+           $this->error('活动已结束~');
+        }
+        $param = json_decode($info['param'], true);
+        $ticketType = F('TicketType'.$info['product_id']);
+        
+        //读取所有可售销售计划
+        $plan = D('Plan')->where(['status'=>2,'product_id'=>$info['product_id']])->field('id,param,seat_table,product_id,quotas')->select();
+        
+        if((int)$info['type'] === 1){
+            foreach ($param['info'] as $k => $v) {
+                $ticket = [
+                    $v['price'],
+                   // $v['prices']
+                ];
+            }
+            //买赠
+            foreach ($plan as $key => $value) {
+
+                $selectd = unserialize($value['param']);
+                $planTicket = array_intersect($ticket, $selectd['ticket']);
+
+
+                if(!empty($planTicket)){
+                    foreach ($planTicket as $ke => $va) {
+                        $selectdTicket = $ticketType[$va];
+                        $where = array('area'=> $selectdTicket['area'], 'status' => array('in','0'));
+                        $area_num = M(ucwords($value['seat_table']))->where($where)->count();
+
+                        $price[$value['id']][] = [
+                            'name'    => $selectdTicket['name'],
+                            'priceid' => $va,
+                            'area'    => $selectdTicket['area'],
+                            'money'   => $selectdTicket['price'],
+                            'moneys'  => $selectdTicket['discount'],
+                            'num'     => $area_num
+                        ];
+                        
+                        $plans[] = [
+                            'id'    =>  $value['id'],
+                            'title' =>  planShow($value['id'],5,1),
+                            'num'   =>  $area_num
+                        ];
+                    }
+                }
+            }
+            $global = [
+                'user' =>  $user['user'],
+                'plan' =>  $plans,
+                'area' =>  $price
+            ];
+            $tpl = 'buy';
+        }
+        if((int)$info['type'] === 3){
+            $ticket = explode(',', $param['info']['ticket']);
+            foreach ($plan as $key => $value) {
+                $selectd = unserialize($value['param']);
+                $planTicket = array_intersect($ticket, $selectd['ticket']);
+                if(!empty($planTicket)){
+                    foreach ($planTicket as $ke => $va) {
+                        $selectdTicket = $ticketType[$va];
+                        $where = array('area'=> $selectdTicket['area'], 'status' => array('in','0'));
+                        $area_num = M(ucwords($value['seat_table']))->where($where)->count();
+                        $price[$value['id']][] = [
+                            'name'    => $selectdTicket['name'],
+                            'priceid' => $va,
+                            'area'    => $selectdTicket['area'],
+                            'money'   => $selectdTicket['price'],
+                            'moneys'  => $selectdTicket['discount'],
+                            'num'     => $area_num
+                        ];
+                        $plans[] = [
+                            'id'    =>  $value['id'],
+                            'title' =>  planShow($value['id'],5,1),
+                            'num'   =>  $area_num
+                        ];
+                    }
+                }
+            }
+            $global = [
+                'user'  =>  $user['user'],
+                'maxnum'=>  isset($param['info']['number']) ? $param['info']['number'] : 1,
+                'plan' =>  $plans,
+                'area' =>  $price
+            ];
+            $idcard = $param['info']['card'];
+            $this->assign('idcard',json_encode($idcard));
+            $tpl = 'area';
+        }
+        
+        if((int)$info['type'] === 9){
+            //活动可售票型
+            $ticket = explode(',', $param['info']['ticket']);
+            foreach ($plan as $key => $value) {
+                $selectd = unserialize($value['param']);
+                $planTicket = array_intersect($ticket, $selectd['ticket']);
+                $where = array('plan_id'=>$value['id'],'product_id'=>$value['product_id'],'status'=>array('in','2,99,66'));
+                $number = D('Scenic')->where($where)->count();
+                $area_num = $value['quotas'] - $number;
+                if(!empty($planTicket)){
+                    foreach ($planTicket as $ke => $va) {
+                        $selectdTicket = $ticketType[$va];
+                        $price[$va] = [
+                            'name'    => $selectdTicket['name'],
+                            'priceid' => $va,
+                            'money'   => $selectdTicket['price'],
+                            'moneys'  => $selectdTicket['discount'],
+                            'num'     => $area_num
+                        ];
+                        $plans[$va][] = [
+                            'id'    =>  $value['id'],
+                            'title' =>  planShow($value['id'],5,1),
+                            'num'   =>  $area_num
+                        ];
+                    }
+                }
+            }
+            $global = [
+                'user' =>  $user['user'],
+                'plan' =>  $price,
+                'price'=>  $plans
+            ];
+            $tpl = 'area_plan';
+        }
+        $this->assign('goods_info',json_encode($global));
+        $this->assign('ginfo',$ginfo);
+        $this->assign('info',$info);
+        $this->display($tpl);   
+    }
     public function kill()
     {
         $ginfo = I('get.');
@@ -216,11 +421,13 @@ class ActivityController extends LubTMP {
         $ginfo = I('get.');
         $user = session('user');
         if(empty($user['user']['openid']) && !isset($ginfo['code'])){
-            //session('user',null);
+            //session('user',null);http://act.leubao.com/index.php?g=wechat&m=activity&a=act&act=131159&pid=67&u=
             $oauth = & load_wechat('Oauth',$ginfo['pid'],1);
             $urls = $oauth->getOauthRedirect($url, $state, 'snsapi_base');
             load_redis('set','check_login',date('Y-m-d H:i:s'));
             header('location:'. $urls);
+        }elseif(empty($user['user']['openid'])){
+            header('location:'. $url);
         }
     }
     
@@ -489,6 +696,22 @@ class ActivityController extends LubTMP {
         //
         for ($i=0; $i < 50; $i++) {
             $this->setTicketOrder();
+        }
+    }
+    //校验身份证
+    public function check_card($card)
+    {
+        $map = [
+            'createtime' => array('EGT', strtotime('2017-08-22')),
+            'status'    =>  ['in','1,9'],
+            'id_card'   =>  $card,
+            'activity'  =>  '1'
+        ];
+        $count = D('Order')->where($map)->count();
+        if($count == '0'){
+            return true;
+        }else{
+            return false;
         }
     }
     //转化实际订单

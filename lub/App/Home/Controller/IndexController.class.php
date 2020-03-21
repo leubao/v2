@@ -112,7 +112,7 @@ class IndexController extends Base{
 				if($list[$k] != false){
 					$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
 					$pre_team = $proConf[$v]['1']['channel_pre_team'];
-					$list[$k]['plan'] = $this->getPlanList($v,$pre_team);
+					$list[$k]['plan'] = $this->getPlanList($v, $pre_team);
 				}
 			}
 		}
@@ -120,14 +120,18 @@ class IndexController extends Base{
 		$this->assign('uinfo',$uInfo);
 		return $list;
 	}
-	public function getPlanList($product, $pre_team)
+	public function getPlanList($product, $pre_team = '')
 	{
 		if(empty($pre_team)){
-			$list = Operate::do_read('Plan',1,array('product_id'=>$product,'status'=>2),"plantime ASC,games ASC",array('id,product_id,plantime,games,seat_table'));
+			$list = Operate::do_read('Plan',1,array('product_id'=>$product,'status'=>2),"plantime ASC,games ASC", array('id,product_id,plantime,games,seat_table'));
+			$append = ['seale' => 1];
+			array_walk($list, function(&$v, $k, $a){
+                $v = array_merge($v, $a);
+            }, $append);
 		}else{
 			$plantime = strtotime(date('Y-m-d'));
 			$plan = Operate::do_read('Plan',1,array('product_id'=>$product,'status'=>2),"plantime ASC,games ASC",array('id,product_id,plantime,games,seat_table'));
-
+			//
 			foreach ($plan as $k => $v) {
 				if($plantime == $v['plantime']){
 					$list[$k] = $v;
@@ -148,7 +152,7 @@ class IndexController extends Base{
 		if(empty($area)){
 			D('Item/Province')->province_cache();
 			$area = F('Province');
-		}//dump(json_encode($area));
+		}
 		die(json_encode($area));
 	}
 }

@@ -326,11 +326,11 @@ var type = {$data['type']},
     product = {$data['product_id']};
 $(function() {
     empty_cart_ticket(); 
-    scenic_drifting_plan($("#plantime").val(),'4',{$data['product_id']},{$data.id});
+    scenic_drifting_plan($("#plantime").val(),'9',{$data['product_id']},{$data.id});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
         selectdate = $('#plantime').val();
         empty_cart_ticket();
-        scenic_drifting_plan(selectdate,'4',{$data['product_id']},{$data.id});
+        scenic_drifting_plan(selectdate,'9',{$data['product_id']},{$data.id});
     });
     /*活动门票*/
   $("#printActivty").bind("click",function(){

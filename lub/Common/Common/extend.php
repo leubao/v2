@@ -317,6 +317,7 @@ function seatOrder($param, $plan_id, $area_id = '', $type = NULL){
                     $table = $plan['seat_table'];
                     break;
                 case '2':
+                case '4':
                     $map = array('id'=>$param);
                     $table = 'scenic';
                     break;
@@ -357,6 +358,7 @@ function planShow($param,$stype = 1,$type=NULL){
             case '1':
                 $types = '1'.$stype;
                 break;
+            case '4':
             case '2':
                 $types = '2'.$stype;
                 break;
@@ -799,7 +801,11 @@ function crmName($param,$type=NULL){
     function get_order_sn($planid,$checkType = 1,$ticket_type = 1){
         $sn = load_redis('rPop','sn_library');
         if(!$sn){
-            $sn = substr(date('Ymd'),3).$checkType. $planid. str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
+            $date = substr(date('Ymd'),3);
+            if((int)substr($date, 1, 1) === 0){
+                $date = '8'.substr(date('Ymd'),4);
+            }
+            $sn = $date.$checkType. $planid. str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
         }
         return $sn;
     }
@@ -1628,17 +1634,27 @@ function crmName($param,$type=NULL){
     $encry 加密常量
     $data 待处理的数据
     */
-    function re_print($plan_id,$encry,$data,$orderId = ''){
+   /**
+    * @Author   zhoujing                 <zhoujing@leubao.com>
+    * @DateTime 2020-01-19T17:58:37+0800
+    * @param    int                   $plan_id              销售计划
+    * @param    string                   $encry                加密常量
+    * @param    array                   $data                 门票数据
+    * @param    int                   $orderId              订单id
+    * @param    integer                  $team                 1一人一票2一单一票
+    * @return   array
+    */
+    function re_print($plan_id, $encry, $data, $orderId = '', $team = 1){
         $plan = F('Plan_'.$plan_id);
         $proconf = cache('ProConfig');
         $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;
-        //原有闸机验票规则
+        //原有闸机验票规则 
         // $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
         
         // $sn = $code."^#";
 
-        $sn = \Libs\Service\Encry::toQrData($data['id'],$orderId,$plan_id,$print);
+        $sn = \Libs\Service\Encry::toQrData($data['id'],$orderId,$plan_id,$print,$team);
         
         //条码号
         if($proconf['barcode'] == '1'){
@@ -1662,7 +1678,11 @@ function crmName($param,$type=NULL){
             $end = date('H:i',strtotime("$statrtime -5 minute"));
             $start = date('H:i',strtotime("$end -30 minute"));
             $info['field'] = $start .'-'. $end;
+        }else{
+            $info['operating'] = date('H:i',$plan['starttime']) .'-'. date('H:i',$plan['endtime']);
         }
+        //运营时间
+        
         $info['number'] = 1;
         if(empty($info)){
             $info = array_merge($code,unserialize($data['sale']));
@@ -1887,6 +1907,11 @@ function crmName($param,$type=NULL){
                 $area_num = $plan['quotas'] - $number;
                 $area_nums = $number;
                 break;
+            case '4':
+                $number = D('Scenic')->where($where)->count();
+                $area_num = $plan['quotas'] - $number;
+                $area_nums = $number;
+                break;
         }
         $map = [
             'status'    =>  1,
@@ -1964,7 +1989,7 @@ function crmName($param,$type=NULL){
                         //一级代理商直接显示景区结算价格
                         if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16 && empty($sealeTicket)){
                             $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];//d//ump($ticket_level);
-                            $va['discount'] = $ticket_level[$va['id']]['discount'];/*结算价格*/
+                            $va['discount'] = empty($ticket_level[$va['id']]['discount']) ? $va['discount'] : $ticket_level[$va['id']]['discount'];/*结算价格*/
                         }
                     }
                     if($va['discount']){
@@ -2348,10 +2373,8 @@ function putIdToCode($value, $length = 6, $authCode = '')
     if(empty($authCode)){
         $authCode = C('AUTHCODE');
     }
-    
     $hashids = new Hashids\Hashids($authCode, $length);
     $hashID = $hashids->encode($value);
-
     return $hashID;
 }
 /**
@@ -2370,4 +2393,13 @@ function getCodeToId($value='', $length = 6, $authCode = '')
     $hashids = new Hashids\Hashids($authCode, $length);
     $decodeResult = $hashids->decode($value);
     return $decodeResult;
+}
+/**
+ * 判断奇偶数
+ * @param $n
+ * @return int
+ */
+function isOdd($n){
+    // $a & $b  And（按位与）    将把 $a 和 $b 中都为 1 的位设为 1。
+    return $n & 1;
 }

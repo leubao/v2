@@ -14,18 +14,20 @@
     <div class="col-lg-12">
       <div class="panel panel-default"> 
         <!-- Default panel contents -->
-        <div class="panel-heading"><span class="glyphicon glyphicon-th-list"></span> {$cid|crmName}资金流水
-          <div class="btn-group btn-group-xs" style="float:right;"> <a href="{:U('Home/Pay/to_up_cash',array('cid'=>$cid,'channel'=>$channel));}" class="btn btn-success" data-toggle="modal" data-target="#myModal"><span class="glyphicon glyphicon-plus"></span>充值</a></div>
+        <div class="panel-heading"><span class="glyphicon glyphicon-th-list"></span> {$id|crmName}资金流水
+          <div class="btn-group btn-group-xs" style="float:right;"> <a href="{:U('Home/Pay/to_up_cash',array('cid'=>$id,'channel'=>$crm));}" class="btn btn-success" data-toggle="modal" data-target="#myModal">充值</a>
+          <a href="{:U('Home/Pay/arefund',array('cid'=>$id,'channel'=>$crm));}" class="btn btn-default" data-toggle="modal" data-target="#myModal">退款</a>
+          </div>
         </div>
         <div class="panel-body">
-          <form class="form-inline" role="form" action="{:U('Home/User/index');}" method="post">
+          <form class="form-inline" role="form" action="{:U('Home/pay/index');}" method="post">
             <div class="form-group">
-              <input size="16" type="text" value="" readonly class="form-control form_date" name="start_time">
+              <input size="16" type="text" value="{$starttime}" readonly class="form-control form_date" name="starttime">
             </div>
             <div class="form-group">
               <div class="input-group">
                 <div class="input-group-addon">至</div>
-                <input size="16" type="text" value="" readonly class="form-control form_date" name="end_time">
+                <input size="16" type="text" value="{$endtime}" readonly class="form-control form_date" name="endtime">
               </div>
             </div>
             <div class="form-group">
@@ -37,7 +39,8 @@
                 <option value="4" <if condition="$where['type'] eq 4">selected</if>>退票</option>
               </select>
             </div>
-            <input type="hidden" name="cid" value="{$cid}"/>
+            <input type="hidden" name="crm" value="{$crm}"/>
+            <input type="hidden" name="id" value="{$id}"/>
             <button type="submit" class="btn btn-default">查询</button>
           </form>
         </div>
@@ -69,7 +72,7 @@
                 <td align="center">￥{$vo.cash}</td>
                 <td align="center">{$vo.user_id|userName}</td>
                 <td align="center"><?php echo D('Home/Crm')->where(array('id'=>$vo['crm_id']))->getField('name');?></td>
-                <td align="center"><a href="{:U('Home/Order/orderinfo',array('sn'=>$vo['order_sn'],'type'=>1));}" data-toggle="modal" data-target="#myModal">{$vo.order_sn}</a> <spanc class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="top" title="{$vo.remark}"></span></td>
+                <td align="center">{$vo.order_sn}<span class="glyphicon glyphicon-info-sign" data-toggle="tooltip" data-placement="top" title="{$vo.remark}"></span></td>
               </tr>
             </volist>
           </tbody>
