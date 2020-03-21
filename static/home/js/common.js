@@ -31,7 +31,7 @@ function scenic_drifting_plan(plantime,type,product,actid){
             if(rdata.statusCode == "200"){
                if(rdata.plan != null){
                     $.each(rdata.plan.children,function(idx,item){
-                        if(type == '2'){
+                        if(type == '2' || type == '4'){
                             content += "<li role='presentation'><a href='#' aria-controls='profile' data-id="+item.id+" data-type="+item.type+" role='tab' data-toggle='tab' onclick='getprice("+item.id+","+item.type+")'>"+item.name+"</a></li>";
                         }
                         if(type == '1'){
@@ -41,7 +41,7 @@ function scenic_drifting_plan(plantime,type,product,actid){
                             content += "<li role='presentation'><a href='#' aria-controls='profile' data-id="+item.id+" data-type="+item.type+" role='tab' data-toggle='tab' onclick='getprice("+item.id+","+item.type+",\""+item.tooltype+"\")'>"+item.name+"</a></li>";
                         }
                         //活动
-                        if(type == '4'){
+                        if(type == '9'){
                             content += "<li role='presentation'><a href='#' aria-controls='profile' data-id="+item.id+" data-type="+item.type+" role='tab' data-toggle='tab' onclick='getActivtyPrice("+item.id+","+actid+","+item.type+",\""+item.tooltype+"\")'>"+item.name+"</a></li>";
                         }
                     });
@@ -81,7 +81,7 @@ function getprice(plan,type,tooltype){
                               +"<td align='center'>"+ticket.area_num+"</td>"
                               +"</tr>";
                     }
-                    if(type == '2'){
+                    if(type == '2' || type == '4'){
                         content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                               +"<td align='center'>"+ticket.name+"</td>"
                               +"<td>"+show_price+"</td>"
@@ -107,6 +107,7 @@ function getprice(plan,type,tooltype){
 }
 //活动加载价格  根据销售计划加载价格
 function getActivtyPrice(plan,actid,type) {
+  console.log(type);
   var postData = 'info={"type":'+type+',"seale":2,"actid":'+actid+',"plan":'+plan+',"method":"activity"}',
       content = '',
       url = 'index.php?g=Home&m=Product&a=quickPrice';
@@ -137,14 +138,14 @@ function getActivtyPrice(plan,actid,type) {
                                 +"<td align='center'>"+ticket.area_num+"</td>"
                                 +"</tr>";
                         }
-                        if(type == '2'){
+                        if(type == '2' || type == '4'){
                           content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                                 +"<td align='center'>"+ticket.name+"</td>"
                                 +"<td>"+show_price+"</td>"
                                 +"<td align='center'>"+ticket.area_num+"</td>"
                                 +"</tr>";
                         }
-                        if(type == '3'){
+                        if(type == '3' || type == '9'){
                           content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                                 +"<td align='center'>"+ticket.name+"</td>"
                                 +"<td>"+show_price+"</td>"
