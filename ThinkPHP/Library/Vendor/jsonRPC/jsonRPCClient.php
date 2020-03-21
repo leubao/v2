@@ -91,8 +91,8 @@ class jsonRPCClient {
 	 * @param array $params
 	 * @return array
 	 */
-	public function __call($method,$params) {
-		
+	//public function __call($method,$params) { zj 修改 使之符合jsonrpc 要求
+	public function index($method,$params) {
 		// check
 		if (!is_scalar($method)) {
 			throw new Exception('Method name has no scalar value');
@@ -115,10 +115,11 @@ class jsonRPCClient {
 		
 		// prepares the request
 		$request = array(
-						'method' => $method,
-						'params' => $params,
-						'id' => $currentId
-						);
+			"jsonrpc"=> "2.0",
+			'method' => $method,
+			'params' => $params,
+			'id' => $currentId
+		);
 		$request = json_encode($request);
 		$this->debug && $this->debug.='***** Request *****'."\n".$request."\n".'***** End Of request *****'."\n\n";
 		

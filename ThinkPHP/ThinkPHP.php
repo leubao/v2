@@ -22,7 +22,8 @@ if (MEMORY_LIMIT_ON) {
 }
 
 // 版本信息
-const THINK_VERSION = '3.2.4';
+//const THINK_VERSION = '3.2.3';
+const THINK_VERSION = '2.1.3';
 
 // URL 模式定义
 const URL_COMMON   = 0; //普通模式
@@ -83,8 +84,9 @@ if (!IS_CLI) {
         if (IS_CGI) {
             //CGI/FASTCGI模式下
             $_temp = explode('.php', $_SERVER['PHP_SELF']);
-            define('_PHP_FILE_', rtrim($_SERVER['SCRIPT_NAME'], '/'));
+            //ZJ 获取$_SERVER['PHP_SELF']为空 .php
             //define('_PHP_FILE_', rtrim(str_replace($_SERVER['HTTP_HOST'], '', $_temp[0] . '.php'), '/'));
+            define('_PHP_FILE_', rtrim($_SERVER['SCRIPT_NAME'], '/'));
         } else {
             define('_PHP_FILE_', rtrim($_SERVER['SCRIPT_NAME'], '/'));
         }
