@@ -43,27 +43,7 @@ class StrUtil
 
         return $str;
     }
-    /** 
-     * js escape php 实现 
-     * @param $string           the sting want to be escaped 
-     * @param $in_encoding       
-     * @param $out_encoding 
-     * Author zhoujing     
-     */ 
-    public static function escape($string, $in_encoding = 'UTF-8',$out_encoding = 'UCS-2') { 
-        $return = ''; 
-        if (function_exists('mb_get_info')) { 
-            for($x = 0; $x < mb_strlen ( $string, $in_encoding ); $x ++) { 
-                $str = mb_substr ( $string, $x, 1, $in_encoding ); 
-                if (strlen ( $str ) > 1) { // 多字节字符 
-                    $return .= '%u' . strtoupper ( bin2hex ( mb_convert_encoding ( $str, $out_encoding, $in_encoding ) ) ); 
-                } else { 
-                    $return .= '%' . strtoupper ( bin2hex ( $str ) ); 
-                } 
-            } 
-        } 
-        return $return; 
-    }
+
     /**
      * 转成16进制
      * @param string $string
@@ -106,8 +86,11 @@ class StrUtil
             $beginStr = '-----BEGIN PUBLIC KEY-----';
             $endStr = '-----END PUBLIC KEY-----';
         }
-        $rsaKey = chunk_split(base64_encode($keyStr), 64, "\n");
-        $rsaKey = $beginStr . PHP_EOL . $keyStr . PHP_EOL . $endStr;
+        $keyStr = str_replace($beginStr, '', $keyStr);
+        $keyStr = str_replace($endStr, '', $keyStr);
+
+        $rsaKey = chunk_split($keyStr, 64, PHP_EOL);
+        $rsaKey = $beginStr . PHP_EOL . $rsaKey . $endStr;
 
         return $rsaKey;
     }

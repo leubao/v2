@@ -72,7 +72,7 @@ class IndexController extends Controller
         $map = "&type=3&price=1&scene=3&product=41";
         $url = $this->url.'api.php?m=trust&a=get_plan'.$map;
         $info = getHttpContent($url,1);
-        $plan = json_decode($info,true);dump($plan);
+        $plan = json_decode($info,true);
         $this->assign('area',json_encode($plan['info']['area']));
         $this->assign('plan',$plan['info']['plan']);
         

@@ -81,7 +81,7 @@ class WechatExtends extends Common
      */
     public function getShortUrl($long_url)
     {
-        if (!$this->access_token && !$this->getAccessToken()) {dump($long_url);
+        if (!$this->access_token && !$this->getAccessToken()) {
             return false;
         }
         $data = array('action' => 'long2short', 'long_url' => $long_url);

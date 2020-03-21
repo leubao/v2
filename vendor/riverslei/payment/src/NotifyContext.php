@@ -47,11 +47,8 @@ class NotifyContext
                 case Config::CMB_CHARGE:
                     $this->notify = new CmbNotify($config);
                     break;
-                case Config::CCB_CHARGE:
-                    $this->notify = new CcbNotify($config);
-                    break;
                 default:
-                    throw new PayException('当前仅支持：ALI_CHARGE WX_CHARGE CMB_CHARGE CCB_CHARGE 常量');
+                    throw new PayException('当前仅支持：ALI_CHARGE WX_CHARGE CMB_CHARGE 常量');
             }
         } catch (PayException $e) {
             throw $e;
