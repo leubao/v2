@@ -1,13 +1,7 @@
 <Managetemplate file="Wechat/Public/header"/>
 <div class="page">
   <header class="bar bar-nav">
-    <button class="button button-link button-nav pull-left"  ontouchend="window.history.back()">
-      <span class="icon icon-left"></span>
-    </button>
-    <button class="button button-link button-nav pull-right"  ontouchend="window.location.href='{:U('Wechat/Index/uinfo');}'">
-      <span class="icon icon-me"></span>
-    </button>
-    <h1 class="title">我的订单</h1>
+    <h1 class="title">我的门票</h1>
   </header>
   <div class="content pull-to-refresh-content" data-ptr-distance="55">
     <!-- 默认的下拉刷新层 -->
@@ -18,20 +12,24 @@
     <!-- 下面是正文 -->
     <div class="card-container">
       <volist name="data" id="vo">
-        <a href="{:U('Wechat/Index/order_info',array('sn'=>$vo['order_sn']));}" class="item-link item-content">
         <div class="card">
-            <div class="card-header">单号:{$vo.order_sn}<span class="pull-right">{$vo['status']|order_status}</span></div>
-
-            <div class="card-content">
-                <div class="card-content-inner">
-                    <b>日期场次:{$vo.plan_id|planShow='6'}</b>
-                    <p>金额:{$vo.money} 数量: {$vo.number}</p>
-                    <p>备注:{$vo.remark}</p>
-                    <p>创建时间:{$vo.createtime|datetime}</p>
-                </div>
+          <div class="card-header">单号:{$vo.order_sn}
+            <if condition="$vo['status'] == 1">
+            <a href="{:U('api/index/ticket',array('tid'=>$vo['sns']));}" class="external">
+            <span class="pull-right">{$vo['status']|order_status}</span>
+            </a>
+            <else />
+            <span class="pull-right">{$vo['status']|order_status}</span>
+            </if>
+          </div>
+          <div class="card-content">
+            <div class="card-content-inner">
+              <b>产品名称:{$vo.product_id|productName}</b>
+              <p>金额:{$vo.money} 数量: {$vo.number}</p>
+              <p>创建时间:{$vo.createtime|datetime}</p>
             </div>
+          </div>
         </div>
-        </a>
       </volist>
     </div>
   </div>

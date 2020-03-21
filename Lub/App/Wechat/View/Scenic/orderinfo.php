@@ -60,10 +60,6 @@
       </li>
     </ul>
   </div> 
-  <!--支付方式
-  <div class="content-block">
-      <p><a href="#" id="closeWindow" class="button button-big button-fill button-success">确定</a></p>
-  </div>  -->
   </div>
 
 </div>

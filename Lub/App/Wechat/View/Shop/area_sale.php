@@ -3,24 +3,18 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>{$product.name}</title>
+  <title>{$data.title}</title>
   <link rel="stylesheet" href="../static/layui/css/layui.css">
   <link rel="stylesheet" href="../static/css/layuiwap.css">
 </head>
 <body>
-<style>
-
-</style>
 <div class="section">
-  <div class='name'><i class="layui-icon layui-icon-fire" style="color: #F44336;"></i> {$product.name}</div>
-  <div class="tips">
-    <!-- <span class="layui-badge layui-bg-green">节假日开放</span>
-    <span class="layui-badge layui-bg-blue">周末开放</span> -->
-  </div>
+  <div class='name'><i class="layui-icon layui-icon-fire" style="color: #F44336;"></i> {$data.title}</div>
+ 
   <div class='pricebox'>
-    <span>价格 ￥</span>
-    <span class='price'>{$product.price}</span>
-    <span class='prices'>起</span>
+    <span>活动价 ￥</span>
+    <span class='price'>{$data.ticket.discount}</span>
+    <span class='prices'>￥{$data.ticket.price}</span>
   </div>
 </div>
 <div class="layui-form" lay-filter="reg-form">  
@@ -43,16 +37,20 @@
       <input type="number" class="num" value="1" id="num" disabled="" />
       <span class="add">+</span>
     </div>   
-  </div>  
-  <div class="fromsection"> 
-    <div class="layui-form-item">
+  </div> 
+  <div class="fromsection">           
+    <!-- <div class="layui-form-item">
       <input type="text" name="username" placeholder="请输入联系人" autocomplete="off" class="layui-input">
     </div>          
     <div class="layui-form-item">  
       <input type="tel" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+    </div>  -->
+    <div class="layui-form-item">
+        <input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard">
     </div> 
+    <div id="idcardBox"></div>
     <div class="layui-form-item layui-form-text">
-      <textarea name="remark" placeholder="请输入备注" class="layui-textarea"></textarea>
+        <textarea name="remark" placeholder="请输入内容" class="layui-textarea"></textarea>
     </div>
   </div>
   <div class="bottom">
@@ -60,18 +58,15 @@
     <button class="subbtn" lay-submit="" lay-filter="pay-submit">去支付</button>            
   </div>
 </div>
-
-
-<script src="../static/layui/layui.js"></script> 
+<script src="static/layui/layui.js"></script>
 <script>
 layui.use(['form','layer','laytpl'], function(){
-
   var $ = layui.$
   ,form = layui.form
-  ,layer = layui.layer
+  ,layer= layui.layer
   ,laytpl = layui.laytpl
   ,global = {$global};
-
+  //前后若干天可选，这里以7天为例
   var getPlantpl = document.getElementById('plantpl').innerHTML;
   var getPricetpl = document.getElementById('pricetpl').innerHTML;
 
@@ -88,7 +83,7 @@ layui.use(['form','layer','laytpl'], function(){
       param = '',
       toJSONString = '',
       postData = '',
-      activity = '0',
+      activity = {$data.id},
       subtotal = '0';
 
   $("#plan li").click(function(){
@@ -131,21 +126,19 @@ layui.use(['form','layer','laytpl'], function(){
       }
     } 
   });
-  //数量增加减少
-  $(".min").click(function(){
-    if(num > 1){
-      num = getNum() - 1;
-      updateNum();
-    }else{
-    }
-  });
-  $(".add").click(function(){
+  $(".add").click(function() {
     //判断是否选择日期和价格
     if(plan != 0 && price != 0){
       if(num < global['user']['maxnum']){
         //限制单笔订单最大数量*/
         num = getNum() + 1;
         updateNum();
+        var t = $(this).parent().find('input[class*=num]');
+        if(t.val()==""||undefined||null){
+          t.val(0);
+        }
+        t.val(parseInt(t.val()) + 1)
+        $("#idcardBox").append('<li class="layui-form-item"><input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard"></div></li>');
       }else{
         layer.msg("亲，您一次只能买这么多了!");
       }
@@ -156,7 +149,23 @@ layui.use(['form','layer','laytpl'], function(){
     }else{
       layer.msg("请选择日期和票价!");
     }
-  });
+    
+    
+  })
+  $(".min").click(function() {
+    var t = $(this).parent().find('input[class*=num]');
+    if(t.val()==""||undefined||null){
+      t.val(0);
+    }
+    t.val(parseInt(t.val()) - 1)
+    if(parseInt(t.val()) < 1) {
+      t.val(1);
+      layer.msg('不能再减啦~',{icon: 5});
+    }
+    updateNum();
+    $("#idcardBox").find("li:last").remove();
+  })
+
   function changeNum(t){
     $("#num").val();
   }
@@ -167,13 +176,8 @@ layui.use(['form','layer','laytpl'], function(){
   }
   //更新数量
   function updateNum(){
-    $("#num").val(num);
-    if(global.user.epay == 2){
-      subtotal = parseFloat(discount * parseInt(num));
-    }else{
-      subtotal = parseFloat(price * parseInt(num));
-    }
-    
+    // 活动直接底价结算
+    subtotal = parseFloat(discount * parseInt(num));
     $("#money").html(subtotal)
   }
   //获取数量
@@ -181,16 +185,29 @@ layui.use(['form','layer','laytpl'], function(){
     num = parseInt($("#num").val());
     return num;
   }
-  //监听提交
+
   form.on('submit(pay-submit)', function(data){
     if(plan == 0 || price == 0){
       layer.msg("请选择可用日期~");
       return false;
     }
     pay = '{"cash":0,"card":0,"alipay":0}';
-    param = '{"remark":"'+data.field.remark+'","activity":"'+activity+'","settlement":"'+global['user']['epay']+'"}';
-    crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"'+data.field.phone+'","contact":"'+data.field.username+'","memmber":"'+global['user']['memmber']+'"}';
-    var toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}'
+    param = '{"remark":"'+data.field.remark+'","activity":"'+activity+'","settlement":"2"}';
+    crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"","contact":"","memmber":"'+global['user']['memmber']+'"}';
+    var toJSONString = '';
+    var field = data.field;
+    var idcardList = [];
+    var length = $(".idcard").length;
+    $(".idcard").each(function(i, el) {
+      var fg  = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+      var idcard = $(this).val();
+      toJSONString = toJSONString + '{"areaId":'+area+',"priceid":'+ticket+',"idcard":"'+idcard+'","price":'+price+',"num":"1"}'+fg;
+    });
+    // if(is_array_unique(idcardList)){
+    //   layer.msg('身份证号码重复!');
+    //   return false;
+    // }
+
     postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
     $.ajax({
         type:'POST',
@@ -206,6 +223,9 @@ layui.use(['form','layer','laytpl'], function(){
         }
     });
   });
+  function is_array_unique(arr){
+    return /(\x0f[^\x0f]+)\x0f[\s\S]*\1/.test("\x0f"+arr.join("\x0f\x0f") +"\x0f");
+  }
 });
 </script>
 <script id="plantpl" type="text/html">

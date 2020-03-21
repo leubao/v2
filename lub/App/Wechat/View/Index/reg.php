@@ -1,4 +1,24 @@
 <Managetemplate file="Wechat/Public/header"/>
+<style type="text/css" media="screen">
+.codecall{
+  display: flex;
+  justify-content:center;
+  align-items:center;
+}
+ .btn {
+  border: 1px solid #b5272d;
+  background: #b5272d;
+  color: #fff;
+}
+.send_code {
+  text-align: center;
+  vertical-align: middle;
+
+} 
+.ct{
+  border: 1px solid #d0d0d0;background: #9d9d9d;
+}
+</style>
 <div class="page">
   <header class="bar bar-nav">
     <button class="button button-link button-nav pull-left"  ontouchend="window.history.back()">
@@ -36,9 +56,21 @@
         <li>
           <div class="item-content">
             <div class="item-inner">
-              <div class="item-title label">身份证号</div>
+              <div class="item-title label">验证码</div>
+              <div class="item-input codecall">
+                <input type="text" id="code" placeholder="验证码">
+                <button id="second" type="button" class="button btn send_code"/>获取验证码</button>
+              </div>
+            </div>
+          </div>
+        </li>
+        
+        <li>
+          <div class="item-content">
+            <div class="item-inner">
+              <div class="item-title label">行业选择</div>
               <div class="item-input">
-                <input type="text" id="legally" placeholder="身份证号">
+                <input type="text" id="industry" value="" placeholder="行业选择">
               </div>
             </div>
           </div>
@@ -53,21 +85,11 @@
             </div>
           </div>
         </li>
-        <li>
-          <div class="item-content">
-            <div class="item-inner">
-              <div class="item-title label">行业选择</div>
-              <div class="item-input">
-                <input type="text" id="industry" value="" placeholder="行业选择">
-              </div>
-            </div>
-          </div>
-        </li>
       </ul>
     </div>
     <div class="content-block">
       <div class="row">
-        <div class="col-100"><a href="#" type="submit" class="button button-big button-fill button-success sub">立即注册</a></div>
+        <div class="col-100"><a href="#" class="button button-big button-fill button-success sub">立即注册</a></div>
       </div>
     </div>
     </form>
@@ -80,30 +102,28 @@ $(function() {
   wx.ready(function(){wx.hideOptionMenu();});
   var openid = '{$data.user.openid}',
       groupid = '{$wechat.full_group}',
-      msg = '';
-  $(".sub").click(function(){
-    //验证输入
-    var name = $("#name").val(),
-        phone = $('#phone').val(),
-        legally = $("#legally").val(),
-        pwd = $("#pwd").val(),
-        industry = $("#industry").val();
-    if(name == '' || pwd == '' || legally == '' || industry == ''){
-      msg = "姓名、密码、身份证号、行业不能为空";
+      msg = '',
+      code = '',
+      name = '',
+      phone = '';
+  $("#second").click(function(event){
+    event.preventDefault(); 
+    code = $("#code").val();
+    name = $("#name").val();
+    phone = $('#phone').val();
+    if(name == '' || phone == ''){
+      msg = "姓名、密码、行业不能为空";
     }
     if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(phone)){
       msg = "手机号码格式不正确!";
     }
-    if(/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/.test(legally) == false){
-      msg = "身份证号码输入有误!";
-    }
     if(msg != ''){
       msgs(msg);msg = '';return false;
     }else{
-      //验证手机号是否可用
+      $(this).attr('disabled',true).text('发送中..');
       $.ajax({
         type:'GET',
-        url:'<?php echo U('Wechat/Index/phone');?>'+'&phone='+phone+'&legally='+legally,
+        url:'<?php echo U('Wechat/Index/send_code');?>'+'&phone='+phone,
         dataType:'json',
         timeout: 1500,
         error: function(){
@@ -111,17 +131,44 @@ $(function() {
         },
         success:function(data){
           if(data.statusCode == '200'){
-            post_server(name,pwd, phone, legally,groupid, openid,industry);
+            countDown();
           }else{
+            $('#second').removeAttr('disabled').text('获取验证码');
             $.toast(data.msg);
           }
         }
       });
-
     }
   });
-  function post_server(name,pwd,phone,legally,groupid,openid,industry){
-    var postData = 'info={"username":"'+name+'","password":"'+pwd+'","phone":"'+phone+'","legally":"'+legally+'","group":"'+groupid+'","industry":"'+industry+'","openid":"'+openid+'"}';
+  $(".sub").click(function(event){
+    event.preventDefault(); 
+    //验证输入
+    var pwd = $("#pwd").val(),
+        industry = $("#industry").val();
+      code = $("#code").val();
+      name = $("#name").val();
+      phone = $('#phone').val();
+    if(name == '' || phone == ''){
+      msg = "姓名、密码、行业不能为空";
+    }
+    if(code == ''){
+      msg = '验证码不能为空';
+    }
+    if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(phone)){
+      msg = "手机号码格式不正确!";
+    }
+    if(msg != ''){
+      msgs(msg);msg = '';return false;
+    }else{
+      //验证手机号是否可用
+      $(this).addClass('disabled').text('提交中..');
+      post_server(name,pwd, phone, code, groupid, openid,industry);
+    }
+  });
+  
+
+  function post_server(name,pwd,phone,code,groupid,openid,industry){
+    var postData = 'info={"username":"'+name+'","password":"'+pwd+'","phone":"'+phone+'","code":"'+code+'","group":"'+groupid+'","industry":"'+industry+'","openid":"'+openid+'"}';
     /*提交到服务器**/
     $.ajax({
         type:'POST',
@@ -138,11 +185,13 @@ $(function() {
                   location.href = data.url;
               });
             }else{
-                $.toast(data.msg);
+              $('.sub').removeClass('disabled').text('立即注册');
+              $.toast(data.msg);
             }
         }
     });
   }
+
   $("#industry").picker({
     toolbarTemplate: '<header class="bar bar-nav">\
     <button class="button button-link pull-right close-picker">确定</button>\
@@ -156,7 +205,19 @@ $(function() {
     ]
   });
 });
-
+function countDown() {
+  var n = 60;
+  var inta = setInterval(function(){
+      $('#second').addClass('ct').text(n+"s重新发送");
+      n--;
+      if (n < -1) {
+          // 清除定时器
+          clearInterval(inta);
+          $('#second').removeClass('ct').removeAttr('disabled').text('获取验证码');
+          n = 60;
+      }
+  },1000)
+}
 </script>
 </body>
 </html>

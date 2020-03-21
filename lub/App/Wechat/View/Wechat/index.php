@@ -7,7 +7,6 @@
               <li  class="active"><a data-toggle="tab" href="#wtab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  微信公众平台</a></li>
               <li class=""><a data-toggle="tab" href="#wtab-5" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  分享设置</a></li>
               <li class=""><a data-toggle="tab" href="#wtab-6" aria-expanded="false"><i class="fa fa-cc-visa"></i>  页面设置</a></li>
-              <li class=""><a data-toggle="tab" href="#wtab-7" aria-expanded="false"><i class="fa fa-cc-visa"></i>  微信支付</a></li>
           </ul>
           <div class="tabs-content">
               <div id="wtab-4" class="tab-pane active">
@@ -100,13 +99,6 @@
                       </table>
                       </div>
                     </fieldset>
-                    <!--主商户-->
-                    <input type="text" name="wx_appid" value="{$vo.wx_appid}">
-                    <input type="text" name="wx_mchid" value="{$vo.wx_mchid}">
-                    <input type="text" name="wx_mchkey" value="{$vo.wx_mchkey}">
-                    <input type="text" name="appsecret" value="{$vo.appsecret}">
-                    
-
                 </div>
               </div>
               <div id="wtab-5" class="tab-pane">
@@ -245,30 +237,7 @@
                       </fieldset>
                   </div>
               </div>
-              <div id="wtab-7" class="tab-pane">
-                <div class="panel-body">
-                
-                    <fieldset style="height:100%;">
-                      <legend>微信支付 -- 收款</legend>
-                      <div style="height:94%; overflow:hidden;">
-                      <table class="table  table-bordered">
-                      <tbody>
-                        <tr>
-                          <td width="120px">商户id:</td>
-                          <td><input type="text" name="wx_sub_mch_id" class="form-control" value="{$vo.wx_sub_mch_id}" size="20" placeholder="商户id">
-                          </td>
-                        </tr>
-                        <tr>
-                          <td width="120px">商户支付密钥Key:</td>
-                          <td><input type="text" name="wx_sub_mchkey" class="form-control" value="{$vo.wx_sub_mchkey}" size="40" placeholder="商户支付密钥Key">
-                          </td>
-                        </tr>
-                      </tbody>
-                      </table>
-                    </div>
-                    </fieldset>
-                    
-                </div>
+              
               </div>
           </div>
       </div>

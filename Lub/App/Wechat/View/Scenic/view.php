@@ -5,17 +5,48 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <title>{$product.name}</title>
   <link rel="stylesheet" href="../static/layui/css/layui.css">
-  <link rel="stylesheet" href="../static/css/layuiwap.css">
 </head>
 <body>
 <style>
-
+body{ background: #f2f2f2; padding-bottom: 50px}
+/*顶部活动票样式*/
+.section{ padding:10px; background: #fff; margin-bottom: 8px}
+.fromsection{ padding:15px; background: #fff; margin-bottom: 8px}
+.name{ font-size: 18px; }
+.tips{ margin: 8px 0 15px}
+.pricebox{ color:#F44336}
+.pricebox .price{ font-size:20px;margin-right:5px}
+.pricebox .prices{color: #666} 
+/*演出时间*/ 
+.now{border-color: #FF5722 !important;color: #FF5722 !important;}
+.sku_title{ display: block;font-size: 16px; margin-bottom:15px;}
+.ticket{ border-bottom: 1px solid #f2f2f2; background: #fff;padding: 10px; overflow: hidden;}
+.sku_content li{display: inline-block; height: 38px;line-height: 38px;padding: 0 10px;  border: 1px solid #C9C9C9; background-color: #fff; color: #555; white-space: nowrap; text-align: center; font-size: 14px;border-radius: 2px; cursor: pointer; margin-left: 5px;-webkit-tap-highlight-color: rgba(255, 255, 255, 0); margin-bottom: 7px;}
+/**/
+.left{ float: left; margin-top: 6px;}
+.right{ float: right; }
+/*数量加减样式*/ 
+.stepper { width: 117px; height: 35px; border: 1rpx solid #ccc; border-radius: 5px; border: 1px solid #eee}   
+.stepper span{ width: 35px; line-height: 35px; text-align: center;  float: left;}
+.stepper input { width: 45px;  height: 35px;  float: left; text-align: center; border: none; border-left: 1px solid #eee;border-right: 1px solid #eee; font-size: 16px} 
+/*预定须知*/
+.needsection{background: #fff; margin-bottom: 8px}
+.info-title{ padding:13px 10px; font-size: 16px ;border-bottom: 1px solid #f2f2f2; }
+.info li{  border-bottom: 1px solid #f7f7f7; padding: 10px 13px;}
+.info li p{ color: #999; line-height: 22px; font-size: 13px; margin-top: 5px}
+/*底部去支付*/
+.bottom{position: fixed;bottom: 0; left: 0; height: 50px; width: 100%; background: #fff; overflow: hidden; line-height: 50px; z-index: 99}
+.total{ float: left; width: 72%; text-align:right; padding-right:3%;color: #333}
+.total-small{color:#f55b5b;}
+.total-text{ color:#f55b5b;font-size:20px}
+.subbtn{ border-radius: 0;height: 100%; line-height: 50px;background: #f54343;color: #fff;border: none;width: 25%; font-size: 16px; }
+.subbtn::after{border: none;}
 </style>
 <div class="section">
   <div class='name'><i class="layui-icon layui-icon-fire" style="color: #F44336;"></i> {$product.name}</div>
   <div class="tips">
-    <!-- <span class="layui-badge layui-bg-green">节假日开放</span>
-    <span class="layui-badge layui-bg-blue">周末开放</span> -->
+    <span class="layui-badge layui-bg-green">节假日开放</span>
+    <span class="layui-badge layui-bg-blue">周末开放</span>
   </div>
   <div class='pricebox'>
     <span>价格 ￥</span>
@@ -46,10 +77,10 @@
   </div>  
   <div class="fromsection"> 
     <div class="layui-form-item">
-      <input type="text" name="username" placeholder="请输入联系人" autocomplete="off" class="layui-input">
+      <input type="text" name="username" placeholder="请输入联系人" lay-verify="required" autocomplete="off" class="layui-input">
     </div>          
     <div class="layui-form-item">  
-      <input type="tel" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+      <input type="tel" name="phone" placeholder="请输入手机号" lay-verify="required|phone" autocomplete="off" class="layui-input">
     </div> 
     <div class="layui-form-item layui-form-text">
       <textarea name="remark" placeholder="请输入备注" class="layui-textarea"></textarea>
@@ -194,7 +225,7 @@ layui.use(['form','layer','laytpl'], function(){
     postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
     $.ajax({
         type:'POST',
-        url:'<?php echo U('Wechat/Shop/create_order');?>',
+        url:'<?php echo U('Wechat/scenic/create_order');?>',
         data:postData,
         dataType:'json',
         success:function(data){

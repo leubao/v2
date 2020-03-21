@@ -3,40 +3,49 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>{$product.name}</title>
+  <title>{$data.title}</title>
   <link rel="stylesheet" href="../static/layui/css/layui.css">
   <link rel="stylesheet" href="../static/css/layuiwap.css">
 </head>
 <body>
 <style>
-
+.content img{
+  display: inline-block;
+  height: auto;
+  max-width: 100%;
+}
+.tip{
+  color: #F44336;
+  font-size: 10px
+}
 </style>
+<div class="layui-carousel" id="carousel">
+  <div carousel-item>
+    <img src="{$data.thumb}">
+  </div>
+</div>
+
 <div class="section">
-  <div class='name'><i class="layui-icon layui-icon-fire" style="color: #F44336;"></i> {$product.name}</div>
+  <div class='name'><i class="layui-icon layui-icon-fire" style="color: #F44336;"></i> {$data.title}
+	</div>
+
   <div class="tips">
-    <!-- <span class="layui-badge layui-bg-green">节假日开放</span>
-    <span class="layui-badge layui-bg-blue">周末开放</span> -->
+    <volist id="vo" name="data.tag">
+  	<span class="layui-badge layui-bg-blue">{$vo}</span>
+    </volist>
   </div>
   <div class='pricebox'>
     <span>价格 ￥</span>
-    <span class='price'>{$product.price}</span>
-    <span class='prices'>起</span>
+    <span class='price'>{$product.price}元</span>
+    <notempty name="$data.oprice">
+    <span class='prices'>原价{$data.oprice}元</span>
+    </notempty>
   </div>
 </div>
 <div class="layui-form" lay-filter="reg-form">  
   <div class="ticket">
-    <div class="sku_title">使用日期</div> 
-    <div class="sku_content" id="plan"> 
-    </div> 
-  </div> 
-  <div class="ticket">
-    <div class="sku_title">选择票型</div>
-    <div class="sku_content" id="price"> 
-      <li class="sku_value">请选择使用日期</li>
-    </div> 
-  </div>  
-  <div class="ticket">
-    <div class="sku_title left">数量(剩余:<span class="stock-num"></span>)</div>
+    <div class="sku_title left">购买数量
+      <span class="tip">({$data.desc})</span></div>
     <div class="stepper right">
       <span class="min">-</span>
       <!-- 数值 -->  
@@ -52,85 +61,96 @@
       <input type="tel" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
     </div> 
     <div class="layui-form-item layui-form-text">
-      <textarea name="remark" placeholder="请输入备注" class="layui-textarea"></textarea>
+      <input type="text" name="remark" placeholder="请输入备注" autocomplete="off" class="layui-input">
     </div>
   </div>
+  <div class="content">
+    {$data.content}
+  </div>
+  <notempty name="data.know">
+  <div class="needsection">
+	  <div class="info-title">预定须知</div>
+	  <ul class="info">
+      <volist id='vo' name="data.know">
+	  	<li>
+	      <div><i class="layui-icon {$vo.icon}"></i> {$vo.title}</div>
+	      <p>{$vo.content}</p>
+	    </li>
+      </volist>      
+	  </ul>
+	</div>
+    </notempty>
   <div class="bottom">
     <div class="total">订单金额：<span class='total-small'>￥</span><span class='total-text' id="money">0.00</span></div>
     <button class="subbtn" lay-submit="" lay-filter="pay-submit">去支付</button>            
   </div>
 </div>
 
-
 <script src="../static/layui/layui.js"></script> 
+<script type="text/javascript" src="http://res2.wx.qq.com/open/js/jweixin-1.6.0.js" charset="utf-8"></script>
+
 <script>
-layui.use(['form','layer','laytpl'], function(){
+layui.use(['form','layer','laytpl','carousel'], function(){
 
   var $ = layui.$
   ,form = layui.form
   ,layer = layui.layer
+  ,carousel = layui.carousel
   ,laytpl = layui.laytpl
   ,global = {$global};
-
-  var getPlantpl = document.getElementById('plantpl').innerHTML;
-  var getPricetpl = document.getElementById('pricetpl').innerHTML;
-
-  laytpl(getPlantpl).render(global, function(html){
-    document.getElementById('plan').innerHTML = html;
+  wx.config({
+    debug: false, // 开启调试模式,调用的所有api的返回值会在客户端alert出来，若要查看传入的参数，可以在pc端打开，参数信息会通过log打出，仅在pc端时才会打印。
+    appId: '{$options.appId}', // 必填，公众号的唯一标识
+    timestamp: '{$options.timestamp}', // 必填，生成签名的时间戳
+    nonceStr: '{$options.nonceStr}', // 必填，生成签名的随机串
+    signature: '{$options.signature}',// 必填，签名
+    jsApiList: ['updateAppMessageShareData','updateTimelineShareData'] // 必填，需要使用的JS接口列表
+  });
+  wx.checkJsApi({
+    jsApiList: ['updateAppMessageShareData','updateTimelineShareData'], // 需要检测的JS接口列表，所有JS接口列表见附录2,
+    success: function(res) {
+      //console.log(res);
+    }
   });
 
-  var plan = '0',
-      area = '0',
-      ticket = '0',
-      price = '0',
-      discount = '0',
-      num = '0',
+  wx.ready(function(){
+    var shareData = { 
+      title: '{$data.title}', // 分享标题
+      desc: '{$data.desc}', // 分享描述
+      link: '{$urls}', // 分享链接，该链接域名或路径必须与当前页面对应的公众号JS安全域名一致
+      imgUrl: '{$data.thumb}', // 分享图标
+      success: function (ret) {
+        // 设置成功
+       // console.log(ret);
+      }
+    };
+    wx.updateAppMessageShareData(shareData);
+    wx.updateTimelineShareData(shareData);
+  });
+
+  wx.error(function(res){
+    console.log('err');
+    console.log(res)
+  });
+  carousel.render({
+    elem: '#carousel'
+    ,width: '100%' //设置容器宽度
+    ,arrow: 'none' //始终显示箭头
+    ,indicator: 'none'
+    //,anim: 'updown' //切换动画方式
+  });
+
+  var plan = {$plan.id},
+      area = {$area.id},
+      ticket = {$area.id},
+      price = '{$area.price}',
+      discount = '{$area.discount}',
+      num = '{$area.area_num}',
       param = '',
       toJSONString = '',
       postData = '',
       activity = '0',
-      subtotal = '0';
-
-  $("#plan li").click(function(){
-    //检查当前被选择的元素是否已经有已选中的
-    $("#plan li").removeClass('now');
-    $(this).addClass('now');     
-    
-    //为当前选择加上
-    refreshNum();
-    area = 0;
-    plan = $(this).data('id');
-    num = $(this).data('num');
-    $(".stock-num").html(num);
-    $("#money").html(price)
-    var selectData = global.area;
-    
-    laytpl(getPricetpl).render(selectData[plan], function(html){
-      document.getElementById('price').innerHTML = html;
-    });
-  });  
-  $(document).on("click","#price li",function(){
-
-    //判断是否已经选择计划
-    if(!$(this).hasClass("unavailable")){
-      if(plan != 0){
-        $("#price li").removeClass('now');
-        $(this).addClass('now');
-        area = $(this).data('area');
-        ticket = $(this).data('priceid');
-        
-        price = $(this).data('price');
-        discount = $(this).data('discount');
-        num = $(this).data('num');
-        //更新可售数量  当为0时 禁用
-        $(".stock-num").html(num);
-        refreshNum();
-        updateNum();
-      }else{
-        layer.msg("请选择使用日期!",{time: 2000});
-      }
-    } 
-  });
+      subtotal = '{$area.discount}';
   //数量增加减少
   $(".min").click(function(){
     if(num > 1){
@@ -157,6 +177,7 @@ layui.use(['form','layer','laytpl'], function(){
       layer.msg("请选择日期和票价!");
     }
   });
+  refreshNum();
   function changeNum(t){
     $("#num").val();
   }
@@ -179,14 +200,25 @@ layui.use(['form','layer','laytpl'], function(){
   //获取数量
   function getNum(){
     num = parseInt($("#num").val());
+    updateNum();
     return num;
   }
   //监听提交
   form.on('submit(pay-submit)', function(data){
+
     if(plan == 0 || price == 0){
       layer.msg("请选择可用日期~");
       return false;
     }
+    if(data.field.username.length == 0){
+      layer.msg("请输入联系人~");
+      return false;
+    }
+    if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(data.field.phone)){
+      layer.msg("手机号码格式不正确~");
+      return false;
+    }
+    $(this).attr('disabled',"true");
     pay = '{"cash":0,"card":0,"alipay":0}';
     param = '{"remark":"'+data.field.remark+'","activity":"'+activity+'","settlement":"'+global['user']['epay']+'"}';
     crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"'+data.field.phone+'","contact":"'+data.field.username+'","memmber":"'+global['user']['memmber']+'"}';
@@ -207,27 +239,6 @@ layui.use(['form','layer','laytpl'], function(){
     });
   });
 });
-</script>
-<script id="plantpl" type="text/html">
-
-  {{#  layui.each(d.plan, function(index, item){ }}
-    
-  <li class="sku_value" data-id="{{ item.id }}" data-num="{{item.num}}">{{item.title}}</li>
-
-  {{#  }); }}
-
-  {{#  if(d.plan.length === 0){ }}
-    无数据
-  {{#  } }} 
-
-</script>
-<script id="pricetpl" type="text/html">
-  {{#  layui.each(d, function(index, item){ }}
-  <li class="sku_value {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.price }}" data-discount="{{ this.discount }}" data-area="{{ this.area }}" data-priceid="{{ this.id }}" data-num="{{ this.area_num }}">{{this.discount}}元 (<?php if($proconf['price_view'] == '2'){ ?>{{this.name}}{{this.remark}}<?php }else{ ?>{{this.name}} <?php }?>)</li>
-  {{#  }); }}
-  {{#  if(d.length === 0){ }}
-    <li class="sku_value">请选择使用日期</li>
-  {{#  } }}
 </script>
 </body>
 </html>

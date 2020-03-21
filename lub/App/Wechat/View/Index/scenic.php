@@ -1,350 +1,329 @@
-<!DOCTYPE html>
-<html>
-  <head>
-    <title>{$product.title}</title>
-    <meta charset="utf-8">
-	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
-	<meta name="description" content="">
-
-	<link rel="stylesheet" href="//cdn.bootcss.com/weui/0.4.3/style/weui.min.css">
-	<link rel="stylesheet" href="//cdn.bootcss.com/jquery-weui/0.8.0/css/jquery-weui.min.css">
-	<style type="text/css">
-	/* ==========================================================================
-   Component: Table
- ============================================================================ */
-table {
-  max-width: 100%;
-  background-color: transparent;
-  empty-cells: show;
+<Managetemplate file="Wechat/Public/header"/>
+<style type="text/css" media="screen">
+  .content p{font-size:0.8rem;line-height: 0.5rem;}
+  .content h4{margin:0.1rem;}
+  .content-block{margin:0rem;}
+  .mt2{margin-top: 0.2rem}
+  .button .button-red{
+    background-color: #a40000;
+  }
+  .button-red.button-fill {
+    color: #fff;
+    background-color: #a40000;
 }
-table code {
-  white-space: normal;
-}
-th {
-  text-align: left;
-}
-.am-table {
-  width: 100%;
-  margin-bottom: 1.6rem;
-  border-spacing: 0;
-  border-collapse: separate;
-}
-.am-table > thead > tr > th,
-.am-table > tbody > tr > th,
-.am-table > tfoot > tr > th,
-.am-table > thead > tr > td,
-.am-table > tbody > tr > td,
-.am-table > tfoot > tr > td {
-  padding: 0.7rem;
-  line-height: 1.6;
-  vertical-align: top;
-  border-top: 1px solid #ddd;
-}
-.am-table > thead > tr > th {
-  vertical-align: bottom;
-  border-bottom: 1px solid #ddd;
-}
-.am-table > caption + thead > tr:first-child > th,
-.am-table > colgroup + thead > tr:first-child > th,
-.am-table > thead:first-child > tr:first-child > th,
-.am-table > caption + thead > tr:first-child > td,
-.am-table > colgroup + thead > tr:first-child > td,
-.am-table > thead:first-child > tr:first-child > td {
-  border-top: 0;
-}
-.am-table > tbody + tbody tr:first-child td {
-  border-top: 2px solid #ddd;
-}
-/* Bordered version */
-.am-table-bordered {
-  border: 1px solid #ddd;
-  border-left: none;
-}
-.am-table-bordered > thead > tr > th,
-.am-table-bordered > tbody > tr > th,
-.am-table-bordered > tfoot > tr > th,
-.am-table-bordered > thead > tr > td,
-.am-table-bordered > tbody > tr > td,
-.am-table-bordered > tfoot > tr > td {
-  border-left: 1px solid #ddd;
-  /*&:first-child {
-          border-left: none;
-        }*/
-}
-.am-table-bordered > tbody > tr:first-child > th,
-.am-table-bordered > tbody > tr:first-child > td {
-  border-top: none;
-}
-.am-table-bordered > thead + tbody > tr:first-child > th,
-.am-table-bordered > thead + tbody > tr:first-child > td {
-  border-top: 1px solid #ddd;
-}
-/* Border-radius version */
-.am-table-radius {
-  border: 1px solid #ddd;
-  border-radius: 2px;
-}
-.am-table-radius > thead > tr:first-child > th:first-child,
-.am-table-radius > thead > tr:first-child > td:first-child {
-  border-top-left-radius: 2px;
-  border-left: none;
-}
-.am-table-radius > thead > tr:first-child > th:last-child,
-.am-table-radius > thead > tr:first-child > td:last-child {
-  border-top-right-radius: 2px;
-  border-right: none;
-}
-.am-table-radius > tbody > tr > th:first-child,
-.am-table-radius > tbody > tr > td:first-child {
-  border-left: none;
-}
-.am-table-radius > tbody > tr > th:last-child,
-.am-table-radius > tbody > tr > td:last-child {
-  border-right: none;
-}
-.am-table-radius > tbody > tr:last-child > th,
-.am-table-radius > tbody > tr:last-child > td {
-  border-bottom: none;
-}
-.am-table-radius > tbody > tr:last-child > th:first-child,
-.am-table-radius > tbody > tr:last-child > td:first-child {
-  border-bottom-left-radius: 2px;
-}
-.am-table-radius > tbody > tr:last-child > th:last-child,
-.am-table-radius > tbody > tr:last-child > td:last-child {
-  border-bottom-right-radius: 2px;
-}
-/* Zebra-striping */
-.am-table-striped > tbody > tr:nth-child(odd) > td,
-.am-table-striped > tbody > tr:nth-child(odd) > th {
-  background-color: #f9f9f9;
-}
-/* Hover effect */
-.am-table-hover > tbody > tr:hover > td,
-.am-table-hover > tbody > tr:hover > th {
-  background-color: #e9e9e9;
-}
-.am-table-compact > thead > tr > th,
-.am-table-compact > tbody > tr > th,
-.am-table-compact > tfoot > tr > th,
-.am-table-compact > thead > tr > td,
-.am-table-compact > tbody > tr > td,
-.am-table-compact > tfoot > tr > td {
-  padding: 0.4rem;
-}
-.am-table-centered > thead > tr > th,
-.am-table-centered > tbody > tr > th,
-.am-table-centered > tfoot > tr > th,
-.am-table-centered > thead > tr > td,
-.am-table-centered > tbody > tr > td,
-.am-table-centered > tfoot > tr > td {
-  text-align: center;
-}
-.am-table > thead > tr > td.am-active,
-.am-table > tbody > tr > td.am-active,
-.am-table > tfoot > tr > td.am-active,
-.am-table > thead > tr > th.am-active,
-.am-table > tbody > tr > th.am-active,
-.am-table > tfoot > tr > th.am-active,
-.am-table > thead > tr.am-active > td,
-.am-table > tbody > tr.am-active > td,
-.am-table > tfoot > tr.am-active > td,
-.am-table > thead > tr.am-active > th,
-.am-table > tbody > tr.am-active > th,
-.am-table > tfoot > tr.am-active > th {
-  background-color: #ffd;
-}
-.am-table > thead > tr > td.am-disabled,
-.am-table > tbody > tr > td.am-disabled,
-.am-table > tfoot > tr > td.am-disabled,
-.am-table > thead > tr > th.am-disabled,
-.am-table > tbody > tr > th.am-disabled,
-.am-table > tfoot > tr > th.am-disabled,
-.am-table > thead > tr.am-disabled > td,
-.am-table > tbody > tr.am-disabled > td,
-.am-table > tfoot > tr.am-disabled > td,
-.am-table > thead > tr.am-disabled > th,
-.am-table > tbody > tr.am-disabled > th,
-.am-table > tfoot > tr.am-disabled > th {
-  color: #999999;
-}
-.am-table > thead > tr > td.am-primary,
-.am-table > tbody > tr > td.am-primary,
-.am-table > tfoot > tr > td.am-primary,
-.am-table > thead > tr > th.am-primary,
-.am-table > tbody > tr > th.am-primary,
-.am-table > tfoot > tr > th.am-primary,
-.am-table > thead > tr.am-primary > td,
-.am-table > tbody > tr.am-primary > td,
-.am-table > tfoot > tr.am-primary > td,
-.am-table > thead > tr.am-primary > th,
-.am-table > tbody > tr.am-primary > th,
-.am-table > tfoot > tr.am-primary > th {
-  color: #0b76ac;
-  background-color: rgba(14, 144, 210, 0.115);
-}
-.am-table > thead > tr > td.am-success,
-.am-table > tbody > tr > td.am-success,
-.am-table > tfoot > tr > td.am-success,
-.am-table > thead > tr > th.am-success,
-.am-table > tbody > tr > th.am-success,
-.am-table > tfoot > tr > th.am-success,
-.am-table > thead > tr.am-success > td,
-.am-table > tbody > tr.am-success > td,
-.am-table > tfoot > tr.am-success > td,
-.am-table > thead > tr.am-success > th,
-.am-table > tbody > tr.am-success > th,
-.am-table > tfoot > tr.am-success > th {
-  color: #5eb95e;
-  background-color: rgba(94, 185, 94, 0.115);
-}
-.am-table > thead > tr > td.am-warning,
-.am-table > tbody > tr > td.am-warning,
-.am-table > tfoot > tr > td.am-warning,
-.am-table > thead > tr > th.am-warning,
-.am-table > tbody > tr > th.am-warning,
-.am-table > tfoot > tr > th.am-warning,
-.am-table > thead > tr.am-warning > td,
-.am-table > tbody > tr.am-warning > td,
-.am-table > tfoot > tr.am-warning > td,
-.am-table > thead > tr.am-warning > th,
-.am-table > tbody > tr.am-warning > th,
-.am-table > tfoot > tr.am-warning > th {
-  color: #F37B1D;
-  background-color: rgba(243, 123, 29, 0.115);
-}
-.am-table > thead > tr > td.am-danger,
-.am-table > tbody > tr > td.am-danger,
-.am-table > tfoot > tr > td.am-danger,
-.am-table > thead > tr > th.am-danger,
-.am-table > tbody > tr > th.am-danger,
-.am-table > tfoot > tr > th.am-danger,
-.am-table > thead > tr.am-danger > td,
-.am-table > tbody > tr.am-danger > td,
-.am-table > tfoot > tr.am-danger > td,
-.am-table > thead > tr.am-danger > th,
-.am-table > tbody > tr.am-danger > th,
-.am-table > tfoot > tr.am-danger > th {
-  color: #dd514c;
-  background-color: rgba(221, 81, 76, 0.115);
-}
-		.am-daymoney{
-		    width: 100%;
-		    display: block;    
-		}
-		.am-daymoney table{
-		    font-size: 12px;
-		    _display: inline;
-		    border-spacing: 0 7px;
-		    border-collapse: collapse;
-		    width: 100%;    
-		}
-		.am-daymoney caption{
-		    font-size: 1.9rem;
-		    color: #fff;
-		    background: #3bb4f2;     
-		}
-		.am-daymoney tbody td{
-		    cursor:pointer
-		}
-		.am-daymoney tbody td:hover{
-		    background: #eee !important;
-		}
-		.am-daymoney thead tr{   
-		    height: 25px;  
-		    color: #0c80ba;
-		}
-		.am-daymoney tbody tr{
-		    height: 55px;  
-		}
-		.am-daymoney-prev{
-		    cursor:pointer
-		}
-		.am-daymoney-next{
-		    cursor:pointer
-		}
-		.am-daymoney-month-head{
-		    color: #000;
-		}
-		.daymoney-month-body{
-		    color: #F60;
-		}
-		.am-primary .am-daymoney-month-head{
-		    color:#0c80ba; 
-		}
-	</style>
-  </head>
-
-  <body ontouchstart>
-
-	<div class="am-daymoney" id="calendar" style=" width: 500px;display: inline-block; height: auto;left:50%;">
-    </div> 
-
-    <div>
-        <hr data-am-widget="divider" style="" class="am-divider am-divider-default" />
-        <button id="prev" type="button" class="am-btn am-btn-primary">上月</button>
-        <button id="next" type="button" class="am-btn am-btn-primary">下月</button>
-        <button id="set" type="button" class="am-btn am-btn-primary">设置价格</button>
+</style>
+<script type="text/javascript">
+    var globals = {$goods_info};
+</script>
+<div class="page">
+  <header class="bar bar-nav">
+    <h1 class="title"><i class="iconfont">&#xe603</i>{$proconf.wx_page_title}</h1>
+    <if condition="empty($uinfo['promote'])">
+    <button class="button button-link button-nav pull-right"  ontouchend="window.location.href='{:U('Wechat/Index/uinfo');}'">
+    </if>
+      <span class="icon icon-me"></span>
+    </button>
+  </header>
+  <div class="content">
+    <div class="content-padded">
+      <h4><strong>【梦里老家】太子惊魂惊悚体验馆</strong></h4>
+      <p>一座穿越千年的古镇</p>
+      <p>一场非看不可的演出</p>
+      <p>尽在【梦里老家】</p>
+      <p>&nbsp;</p>
+      <p>营业时间:8:30 - 17:30</p>
+      <p>咨询电话: 0793-7377777</p>
     </div>
-    <div class="am-modal am-modal-alert" tabindex="-1" id="my-alert">
-        <div class="am-modal-dialog">
-            <div class="am-modal-hd">Amaze UI</div>
-            <div class="am-modal-bd" id="alert">
-            </div>
-            <div class="am-modal-footer">
-                <span class="am-modal-btn">确定</span>
-            </div>
-        </div>
+  <div class="content-block" style="margin-top: 1.5rem">
+    <p><a href="#" class="button button-big button-fill button-red open-goods-cart">立即购票</a></p>
+  </div>
+  <div class="content-padded">
+    <div valign="bottom" class="card-header color-white no-border no-padding">
+      <img class='card-cover' src="d/wap/w3.jpg">
     </div>
-    <!--end -->
-	<div id="inline-calendar"></div>
-  	<script src="//cdn.bootcss.com/jquery/1.11.0/jquery.min.js"></script>
-  	<script src="//cdn.bootcss.com/jquery-weui/0.8.0/js/jquery-weui.min.js"></script>
-  	<script type="text/javascript" src="static/js/daymoney.js"></script>
-  	<script type="text/javascript">
-
-  	$(function() {
-	    var daydata = '[{"day":"2016-04-10|228"},{"day":"2016-04-11|228"},{"day":"2016-04-12|228"},{"day":"2016-04-13|228"},{"day":"2016-04-14|258"},{"day":"2016-04-15|228"},{"day":"2016-04-16|228"},{"day":"2016-04-17|308"},{"day":"2016-04-19|228"},{"day":"2016-04-20|228"},{"day":"2016-04-22|228"},{"day":"2016-04-23|228"},{"day":"2016-04-24|228"},{"day":"2016-04-25|228"},{"day":"2016-04-26|228"},{"day":"2016-04-27|228"},{"day":"2016-04-28|558"},{"day":"2016-04-29|228"},{"day":"2016-05-01|228"},{"day":"2016-08-08|228"},{"day":"2016-08-09|228"},{"day":"2016-08-10|228"}]';
-	    var daymoney = $("#calendar").daymoney({
-	        'date':'{$default}', //加载时默认显示的月份，不填则显示当前月份
-	        daydata: daydata, 		//日期价格数据
-	        events: 'click', 		//监听事件，默认为click
-	        'style': {
-	            disabled: "am-disabled", 	//禁用日期样式[当前日期之前]
-            	active: "am-active", 		//激活日期样式[当前日期之后]
-            	today: "am-primary", 		//当天日期样式
-	        },
-	        'load': function(obj) { 		//加载完毕时触发
-	            //console.log('价格日历组件加载完毕');
-	        },
-	        'click': function(obj) {
-	        	//提交订单
-	        	ajax({
-	        		url:{:U('Wechat/Shop/order')},
-
-
-	        	});
-	        	/*点击日期触发
-	            var html = obj.data('date') + "的价格是:" + obj.data('money');
-	            $('#alert').html(html);
-	            $('#my-alert').modal('toggle');*/
-	        }
-	}).init();
-    //使用daymoney对象方法
-    $("#prev").click(function(){
-    	daymoney.prev();
+  </div>
+</div>
+  <!--内容-->
+</div>
+<!-- About Popup -->
+<div class="popup goods-cart">
+  <header class="bar bar-nav">
+    <a href="#" class="icon pull-right close-popup"><i class="iconfont">&#xe609</i></a>
+  </header>
+  <div class="sku-layout">
+    <div class="adv-opts layout-content">
+    <div class="goods-models js-sku-views block block-list block-border-top-none">
+      <dl class="clearfix block-item">
+        <dt class="model-title sku-sel-title">
+          <label>游玩日期：</label>
+        </dt>
+        <dd><?php //dump($uinfo);?>
+          <ul class="model-list sku-sel-list" id="plan">
+          </ul>
+        </dd>
+      </dl>
+      <dl class="clearfix block-item">
+        <dt class="model-title sku-sel-title">
+          <label>价格：</label>
+        </dt>
+        <dd>
+          <ul class="model-list sku-sel-list" id="price">
+            <li class="tag sku-tag pull-left ellipsis unavailable">请选择售票日期</li>
+          </ul>
+        </dd>
+      </dl>
+      <dl class="clearfix block-item">
+        <dt class="model-title sku-num pull-left">
+          <label>数量</label>
+        </dt>
+        <dd>
+          <dl class="clearfix">
+            <div class="quantity">
+              <button class="minus disabled" type="button" disabled="true"></button>
+              <input type="text" class="txt" value="1" id="num">
+              <button class="plus" type="button"></button>
+              <div class="response-area response-area-minus"></div>
+              <div class="response-area response-area-plus"></div>
+              <div class="txtCover"></div>
+            </div>
+            <div class="stock pull-right font-size-12">
+              <dt class="model-title stock-label pull-left">
+                <label>剩余: </label>
+              </dt>
+              <dd class="stock-num"> 0 </dd>
+            </div>
+      
+          </dl>
+        </dd>
+      </dl>
+      
+    </div>
+    <div class="btn">
+      <a href="#" class="button button-fill button-red button-big buy">下一步</a>
+    </div>
+  </div>
+  </div>
+</div>
+<!--产品信息区域-->
+<Managetemplate file="Wechat/Public/footer"/>
+<script type="text/javascript">
+  $(function() {
+    wx.ready(function(){
+        wx.onMenuShareAppMessage({
+            title: '{$proconf.wx_share_title}',
+            desc: '{$proconf.wx_share_desc}',
+            link: '{$urls}',
+            imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
+            trigger: function (res) {
+            },
+            success: function (res) {
+                alert('分享给好友成功');
+            },
+            cancel: function (res) {
+            },
+            fail: function (res) {
+                alert(JSON.stringify(res));
+            }
+        });
+        wx.onMenuShareTimeline({
+            title: '{$proconf.wx_share_title}',
+            desc: '{$proconf.wx_share_desc}',
+            link: '{$urls}',
+            imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
+            trigger: function (res) {
+            },
+            success: function (res) {
+            },
+            cancel: function (res) {
+            },
+            fail: function (res) {
+                alert(JSON.stringify(res));
+            }
+        });
     });
-    $("#next").click(function(){
-    	daymoney.next();
+    var getPlantpl = document.getElementById('plantpl').innerHTML;
+    var getPricetpl = document.getElementById('pricetpl').innerHTML;
+    laytpl(getPlantpl).render(globals, function(html){
+        document.getElementById('plan').innerHTML = html;
     });
-    $("#set").click(function(){
-    	daymoney.setmoney('2016-08-21',125,function(data){
-            $('#alert').html('已将'+data.day+'价格设置为'+data.money);
-            $('#my-alert').modal('toggle');   		
-    	});
+    var plan = '0',
+        area = '0',
+        ticket = '0',
+        price = '0',
+        discount = '0',
+        num = '0',
+        name = '',
+        phone = '',
+        card = '',
+        msg = '',
+        pay = '',
+        crm = '',
+        param = '',
+        toJSONString = '',
+        postData = '',
+        subtotal = '0',
+        remark = '';
+    $("#plan li").click(function(){
+      //检查当前被选择的元素是否已经有已选中的
+      $(".goods-models li").each(function(){
+        if($(this).hasClass("tag-orangef60 active")){ toggle($(this))};
+      });
+      //为当前选择加上
+      active($(this));
+      refreshNum();
+      plan = $(this).data('plan');
+      area = 0; 
+      ticket = 0;
+      price = 0;
+      $(".stock-num").html($(this).data('num'));
+      laytpl.fn = plan;
+      laytpl(getPricetpl).render(globals, function(html){
+        document.getElementById('price').innerHTML = html;
+      });
     });
-	});
-  	</script>
-  </body>
-  </html>
+    $(document).on("click","#price li",function(){
+       //判断是否已经选择计划
+      if(!$(this).hasClass("unavailable")){
+        if(plan != 0){
+          $("#price li").each(function(){
+            if($(this).hasClass("tag-orangef60 active")){ toggle($(this))};
+          });
+          area = $(this).data('area');
+          ticket = $(this).data('priceid');
+          price = $(this).data('price');
+          discount = $(this).data('discount');
+          num = $(this).data('num');
+          //更新可售数量  当为0时 禁用
+          $(".stock-num").html(num);
+          active($(this));
+          refreshNum();
+        }else{
+          $.toast("请选择游玩日期!");
+        }
+      } 
+    });
+    //删除选中状态
+    function toggle(t){t.toggleClass("tag-orangef60");t.toggleClass("active");}
+    //选中
+    function active(t){t.addClass("tag-orangef60");t.addClass("active");}
+    //删除选中
+    function deActive(t){t.removeClass("tag-orangef60");t.removeClass("active");}
+    //数量增加减少
+    $(".response-area-minus").click(function(){
+      if(num > 1){
+        num = getNum() - 1;
+        updateNum();
+      }else{
+        updateBtnStatus();
+      }
+    });
+    $(".response-area-plus").click(function(){
+      //判断是否选择日期和价格
+      if(plan != 0 && price != 0){
+        if(num < globals['user']['maxnum']){
+          //限制单笔订单最大数量
+          num = getNum() + 1;
+          updateNum();
+        }else{
+          $.toast("亲，您一次只能买这么多了!"+globals['user']['maxnum']);
+        }
+      }else if(plan == 0 && price == 0){
+        $.toast("请选择游玩日期和票型!");
+      }else{
+        $.toast("请选择游玩日期和票型!");
+      }
+    });
+    function changeNum(t){
+      $("#num").val();
+    }
+    //更换场次时重置页面
+    function refreshNum(){
+      $("#num").val('1');
+      getNum();
+      updateBtnStatus();
+    }
+    //更新数量
+    function updateNum(){
+        $("#num").val(num);
+        updateBtnStatus();
+    }
+    //更新数量增减状态
+    function updateBtnStatus(){
+      if(num > 1){
+        $('.minus').removeClass("disabled");
+        $('.minus').removeAttr("disabled");
+      }else{
+        $('.minus').addClass("disabled"),
+        $('.minus').attr("disabled", "true")
+      }
+    }
+    //获取数量
+    function getNum(){
+      num = parseInt($("#num").val());
+      return num;
+    }
+    
+    $(".buy").click(function(){
+      $(this).attr("disabled", true).val('提交中..');
+      msg = '';
+      if(plan.length == 0){
+        msg = "请选择销售日期!";
+      }
+      if(price == 0 || num == 0){
+        msg = "请选择票型并选择要购买的数量!";
+      }
+      if(msg != ''){$.toast(msg);return false;}
+      post_server(2);
+    });
+    /*验证身份证取票 type  1验证 2 不验证  */
+    function post_server(type,card){
+ 
+      subtotal = parseFloat(discount * parseInt(num));
+      remark = $('#remark').val();
+      /*获取支付相关数据*/
+      pay = '{"cash":0,"card":0,"alipay":0}';
+      param = '{"remark":"'+remark+'","settlement":"'+globals['user']['epay']+'"}';
+      crm = '{"guide":"'+globals['user']['guide']+'","qditem":"'+globals['user']['qditem']+'","phone":"'+phone+'","contact":"'+name+'","memmber":"'+globals['user']['memmber']+'"}';
+      toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}';
+      postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+      /*提交到服务器**/
+      $.ajax({
+          type:'POST',
+          url:'<?php echo U('Wechat/Index/scenic_order',$param);?>',
+          data:postData,
+          dataType:'json',
+          success:function(data){
+              if(data.statusCode == "200"){
+                  location.href = data.url;
+              }else{
+                  $.toast("下单失败!"+data.msg);
+              }
+          }
+      });
+    }
+  });
+  var text = "<p style='text-align:left'>1、该项目不适合高血压、低血压、心脏病患者、孕妇、怀抱婴儿者、酒醉者、刺激承受力差的游客游玩;<br>"+
+"2、高度在1.4米以下儿童，不适宜体验该项目;<br>"+
+"3、禁止损毁设备、攀爬、翻越建筑和围栏，按照红色指示路线行走，严禁逆行;<br>"+
+"4、请勿在项目内部追逐、打闹，遇到鬼怪演员请和睦相处;<br>"+
+"5、请妥善保管好您的随身物品;<br>"+
+"6、项目内部昏暗，不适宜穿高跟鞋、轮滑鞋等游客游玩;<br>"+
+"7、游玩过程中，如无法继续前行，请举起双手向前交叉，工作人员会带您重返文明世界。</p>";
+  $(document).on('click','.open-goods-cart', function () {
+    $.alert(text, '购票须知', function () {
+      $.popup('.goods-cart');
+    });
+  });
+</script>
+<script id="plantpl" type="text/html">
+{{# for(var i = 0, len = d.plan.length; i < len; i++){ }}
+    <li class="tag sku-tag pull-left ellipsis" data-plan="{{ d.plan[i].id }}" data-num="{{d.plan[i].num}}">{{ d.plan[i].title }}</li>
+{{# $(".stock-num").html(d.plan[i].num); } }}
+</script> 
+<script id="pricetpl" type="text/html">
+{{# $(d.area[laytpl.fn]).each(function(i){ }}
+  <li class="tag sku-tag pull-left ellipsis {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.price }}" data-discount="{{ this.discount }}" data-area="{{ this.area }}" data-priceid="{{ this.id }}" data-num="{{ this.area_num }}">{{this.discount}}元 (<?php if($proconf['price_view'] == '2'){ ?>{{this.name}}{{this.remark}}<?php }else{ ?>{{this.name}} <?php }?>)</li>
+{{#    });}}
+</script>
+</body>
+</html>

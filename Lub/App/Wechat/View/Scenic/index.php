@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <title>梦里老家演艺小镇购票服务</title>
+  <title>产品列表</title>
   <link rel="stylesheet" href="../static/layui/css/layui.css">
 </head>
 <body>
@@ -33,7 +33,7 @@ body{ background: #f2f2f2; padding-top: 10px}
       </div>
     </div>
     <div class="btn">
-      <a href="{:U('wechat/shop/view', array('pid' => $ginfo['pid'],'tid' => $vo['id'] ));}" class="layui-btn layui-btn-sm layui-btn-danger">立即预订</a>
+      <a href="{:U('wechat/scenic/view',array('pid'=>$vo['id']));}" class="layui-btn layui-btn-sm layui-btn-danger">立即预订</a>
     </div>
   </div>
   </volist>

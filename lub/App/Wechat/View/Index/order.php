@@ -20,7 +20,7 @@
             </ul>
           </div>
         </div>
-        <div class="card-footer price"> {$error}<span>优惠金额</span><span>{$data['info']['data']['poor']|format_money}</span></div>
+        <div class="card-footer price"> <span>优惠金额</span><span>{$data['info']['data']['poor']|format_money}</span></div>
         <div class="card-footer price"> <span>实付金额</span><span> ￥ {$data['money']}</span></div>
     </div>
     
@@ -48,10 +48,11 @@
       </li>
     </ul>
   </div> 
+
   <!--支付方式-->
   <if condition="$data.status neq '1' || $data.status neq '9' ">
   <div class="content-block">
-    <if condition="$data.type eq '2' || $data.type eq '8'">
+    <if condition="$data.type eq '2'">
     <p><a href="#" class="button button-big button-fill button-warning" id="credit">授信额支付 </a></p>
     </if>
     <if condition="$data.type eq '1' || $data.type eq '8' || $data.type eq '6'">
@@ -92,7 +93,6 @@
            'getBrandWCPayRequest', 
            {$wxpay|json_encode},
            function(res){
-             // 使用以上方式判断前端返回,微信团队郑重提示：res.err_msg将在用户支付成功后返回    ok，但并不保证它绝对可靠。 */
              if(res.err_msg == "get_brand_wcpay_request:ok"){
                 var link = "{:U('Wechat/Index/pay_success',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));}";
                 window.location.href=link;
@@ -100,6 +100,7 @@
            }
        ); 
     }
+
     /*窗口支付*/
     $(document).on('click', '#window_pay',function () {
       $.confirm("系统已成功为您预留座位，请尽快付款确认，或是演出前一小时到景区现金窗口付款，逾期座位不再保留。",
@@ -107,19 +108,19 @@
           var postData = 'info={"tomoney":"'+money+'","sn":"'+sn+'","pay_type":"1","seat_type":'+seat_type+'}';
           $.ajax({
             type:'POST',
-            url:'<?php echo U('Wechat/Index/window_pay',array('sn'=>$data['order_sn'],'pid'=>$ginfo['pid']));?>',
+            url:'<?php echo U('Wechat/Index/window_pay',array('param'=>$param));?>',
             data:postData,
             dataType:'json',
             timeout: 3500,
-            success:function(rdata){
-              if(rdata.statusCode == "200"){
-                location.href = rdata.url;
+            success:function(data){
+              if(data.statusCode == "200"){
+                location.href = data.url;
               }else{
-                $.alert("支付失败!"+rdata.msg+rdata.statusCode);
+                $.alert("支付失败!"+data.msg);
               }
             },
             error:function(data){
-              $.alert("支付失败!"+rdata.msg+rdata.statusCode);
+              $.alert("支付失败!"+data.msg);
             }
           });
         },
@@ -130,7 +131,7 @@
     });
     </if>
     /*授信额支付*/
-    <if condition="$data.type eq '2' || $data.type eq '8'">
+    <if condition="$data.type eq '2' ">
     $(document).on('click', '#credit',function () {
       $.confirm('订单金额:'+money, 
         function () {
@@ -140,11 +141,11 @@
                   url:'<?php echo U('Wechat/Index/pay');?>',
                   data:postData,
                   dataType:'json',
-                  success:function(rdata){
-                      if(rdata.statusCode == "200"){
-                        location.href = rdata.url;
+                  success:function(data){
+                      if(data.statusCode == "200"){
+                        location.href = data.url;
                       }else{
-                        $.toast("支付失败!"+rdata.msg);
+                        $.toast("支付失败!"+data.msg);
                       }
                   }
               });
@@ -155,7 +156,10 @@
       );
     });
     </if>
+
+    
   });
+  
 </script>
 </body>
 </html>
