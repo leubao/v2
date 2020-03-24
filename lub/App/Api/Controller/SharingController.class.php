@@ -20,16 +20,41 @@ class SharingController extends Controller {
 	    echo json_encode($return);
     }
     function temp(){
-    	$starttime = '2017-04-10 16:23:09';
-    	$endtime = date('Y-m-d H:i:s');
-    	$res = timediff($starttime,$endtime,'hour');
-    	echo $res['hour']/48;
-    	echo "<br/>";
-    	echo 96%48;
-    	$where = ['status'=>1,'level'=>16];
-    	$list = D('Crm/Crm')->where($where)->field('id,cash,product_id')->select();
-    	dump($list);
-    	dump($res);
+        //读取4月份所有订单，逐条查看是否有扣款
+        // $id = channel(6,16);
+        // $start_time = strtotime('2019-04-01');
+        // $end_time = strtotime('2019-04-30') + 86399;
+        // // $where = [
+        // //     'channel_id'    =>  ['in',$id],
+        // //     'createtime'   =>   array(array('EGT', $start_time), array('ELT', $end_time), 'AND')
+        // // ];
+        // //$list = D('order')->where($where)->field('order_sn')->select();
+        // // $li = M('CrmRecharge')->where(['crm_id'=>6,'createtime'   =>   array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),'type'=>2])->select();
+        // // dump($li);
+        // $h = M('CrmRecharge')->where(['crm_id'=>6,'createtime'   =>   array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),'type'=>2])->sum('cash');
+        // $c = M('CrmRecharge')->where(['crm_id'=>6,'createtime'   =>   array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),'type'=>1])->sum('cash');
+        // $t = M('CrmRecharge')->where(['crm_id'=>6,'createtime'   =>   array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),'type'=>4])->sum('cash');
+        // $y = 2571+$c+$t-$h;
+        // $data = [
+        //     'h' =>  $h,
+        //     'c' =>  $c,
+        //     't' =>  $t,
+        //     'y' =>  $y
+        // ];
+
+        // dump($data);
+//dump($list);
+        // foreach ($list as $key => $v) {
+        //     //查询是否有消费记录
+        //     $status = D('CrmRecharge')->where(['order_sn'=>$v['order_sn'],'status'=>2])->field('id')->sum('cash');
+        //     dump($status);
+        //     if($status){
+
+        //     }else{
+        //         echo $v['order_sn'].'<br>';
+        //     }
+        //  } 
+
     }
     //导出用户
     public function user()
@@ -60,6 +85,26 @@ class SharingController extends Controller {
         $work = 'a:8:{s:5:"appid";s:5:"14127";s:6:"appkey";s:32:"df50da2a0ac925733f739dd9b4aa34c5";s:4:"plan";s:3:"287";s:2:"sn";s:32:"e63c9fbebe7c834d40a60df3eac279c2";s:5:"money";s:4:"0.10";s:5:"oinfo";a:1:{i:0;a:4:{s:5:"price";s:4:"0.10";s:6:"areaId";s:2:"10";s:7:"priceid";s:3:"115";s:3:"num";s:1:"1";}}s:3:"crm";a:2:{s:5:"phone";s:11:"18631451216";s:7:"contact";s:6:"周靖";}s:5:"param";a:1:{s:6:"remark";s:8:"官网PC";}}';
         $return = unserialize($work);
         dump($return);
+    }
+    //批量生成订单号
+    function all_order(){
+        for ($i=0; $i < 30000; $i++) {
+            $int[] = '9'.genRandomString(6,1);
+        }
+        $array = array_unique($int);
+        foreach ($array as $k => $v) {
+            load_redis('lpush','sn_library',$v);
+        }
+    }
+    function shoturl(){
+        $wechat = & load_wechat('Extends',55,1);dump($wechat);
+        $sn = '8324108';
+        $lurl = U('Api/Index/ticket',['sn'=>$sn]);
+        $lurl = 'http://dp.wy-mllj.com/index.php?g=wechat&a=orderlist&pid=55';
+        $lurl = 'https://open.weixin.qq.com/connect/oauth2/authorize?appid=wx9f0c0097679e12ac&redirect_uri=http%3A%2F%2Ffy.leubao.com%2Findex.php%3Fs%3D%2Fwechat%2Findex%2Freg%2Fpid%2F55.html&response_type=code&scope=snsapi_userinfo&state=#wechat_redirect';
+        $surl = $wechat->getShortUrl($lurl);
+        dump($surl);
+        echo $surl;
     }
     /**
      * 系统更新
@@ -101,7 +146,7 @@ class SharingController extends Controller {
             if($ginfo['type']  == 1){
                 $count = M('ReportData')->where($map)->count();
                 if($count > 0){
-                    //$status = M('ReportData')->where($map)->delete();
+                    $status = M('ReportData')->where($map)->delete();
                     dump($status);
                 }else{
                     echo $v.'删除错误';
@@ -111,7 +156,7 @@ class SharingController extends Controller {
                 $count = M('ReportData')->where($map)->count();
                 dump($count);
                 if($count == 0){
-                    //$stat = \Libs\Service\Report::report($v,$map['product_id']);
+                    $stat = \Libs\Service\Report::report($v,$map['product_id']);
                     dump($seat);
                 }else{
                     echo $v.'生成错误';
@@ -353,6 +398,11 @@ class SharingController extends Controller {
         }
         echo $mon;*/
     }
+    //五台山  返利错误
+    public function wts()
+    {
+       
+    }
     public function seat_auto_group()
     {
         //写入分组信息
@@ -388,4 +438,38 @@ class SharingController extends Controller {
             }
         }
     }
+    /*批量实现渠道余额清空
+    public function all_withdr()
+    {
+        $list = D('Crm')->where(['cash'=>['gt',0]])->field('id,name,cash')->select();
+        foreach ($list as $k => $v) {
+            $this->re_action($v);
+        }
+        //dump($list);
+    }
+    public function re_action($data)
+    {
+        $model = new \Think\Model();
+        $model->startTrans();
+        $crmData = array('cash' => array('exp','cash-'.$data['cash']),'uptime' => time());
+        $c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$data['id']))->setField($crmData);
+        $data = array(
+            'cash'      =>  $data['cash'],
+            'user_id'   =>  '1',
+            'crm_id'    =>  $data['id'],
+            'createtime'=>  time(),
+            'type'      =>  '5',
+            'balance'   =>  balance($data['id'],1),
+            'tyint'     =>  1,//客户类型1企业4个人
+            'remark'    =>  '19年1月20日清空所有渠道商余额',
+        );  
+        $recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
+        if($c_pay && $recharge){
+            $model->commit();//成功则提交
+            echo 'ok<br />';
+        }else{
+            $model->rollback();//不成功，则回滚
+            echo 'err'.$data['name'].' <br />';
+        }
+    }*/
 }

@@ -211,14 +211,14 @@ class IndexController extends LubTMP {
            Wticket::tologin($this->ginfo);
            $user = session('user');
         }
-        //dump($user);dump($user);dump($user);dump($user);dump($this->ginfo);
+       // dump($user);dump($user);dump($user);dump($user);dump($this->ginfo);
         //判断是否已经在登录
         $this->check_login(U('Wechat/Index/show',array('pid'=>$this->pid,'u'=>$this->user,'param'=>$this->param)));
         //与数据比对、是否绑定渠道商\
         //根据当前用户属性  加载价格及座位
         $plan = Wticket::getplan($this->pid);
         $param = array('pid'=>$this->pid);
-        $goods_info = array_merge($plan,$user);
+        $goods_info = array_merge($plan,$user);//dump($goods_info);
         $this->wx_init($this->pid);
         session('pid',$this->pid);
         $urls = Wticket::reg_link($user['user']['id'],$this->pid);
@@ -233,14 +233,16 @@ class IndexController extends LubTMP {
             ->assign('urls',$urls)->assign('param',$param)->display($template);
     }
     function check_login($url){
+        $ginfo = I('get.');
         $user = session('user');
-
-        if(empty($user['user']['openid']) && !$this->ginfo['code']){
-            //session('user',null);
-            $oauth = & load_wechat('Oauth',$this->pid,1);
+        if(empty($user['user']['openid']) && !isset($ginfo['code'])){
+            //session('user',null);http://act.leubao.com/index.php?g=wechat&m=activity&a=act&act=131159&pid=67&u=
+            $oauth = & load_wechat('Oauth',$ginfo['pid'],1);
             $urls = $oauth->getOauthRedirect($url, $state, 'snsapi_base');
             load_redis('set','check_login',date('Y-m-d H:i:s'));
             header('location:'. $urls);
+        }elseif(empty($user['user']['openid'])){
+            header('location:'. $url);
         }
     }
     /**
@@ -283,14 +285,26 @@ class IndexController extends LubTMP {
     //我的订单
     function orderlist(){
         //加密参数
+        $ginfo = I('get.');
+        $url = U('Wechat/Index/orderlist',['pid'=>$ginfo['pid']]);
+        session('user',null);//TODO  生产环境删除
+        
+        //判断用户是否登录   检查session 是否为空
         $user = session('user');
+        if(empty($user['user']['openid']) || !empty($this->user)){
+           Wticket::tologin($this->ginfo);//dump($this->ginfo);
+           $user = session('user');
+        }
+        
+        $this->check_login($url);
+
         $uid = $user['user']['id'];
         if($uid <> 2){
-           $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id,number')->limit('30')->order('createtime DESC')->select();
+           $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id,number')->limit('50')->order('createtime DESC')->select();//dump($list);
            $this->wx_init($this->pid); 
         }
         
-        $this->assign('data',$list)->display();
+        $this->assign('user', $user)->assign('data',$list)->display();
     }
     //推广
     function promote(){
@@ -298,7 +312,7 @@ class IndexController extends LubTMP {
         $user = session('user');
         $uid = $user['user']['id'];
         $openid = $user['user']['openid'];
-        $urls = Wticket::reg_link($uid,$this->pid);//dump($urls);
+        $urls = Wticket::reg_link($uid,$this->pid);
         $base64_image_content = get_up_fxqr($openid,$this->pid);
         $this->wx_init($this->pid);
         $this->assign('qr',$base64_image_content)->assign('urls',$urls)->display();
@@ -348,7 +362,7 @@ class IndexController extends LubTMP {
             }
             if(!empty($user_id)){
                 $userdata = D('UserData')->add(array('user_id'=>$user_id,'wechat'=>'1','industry'=>industry($info['industry'],1)));
-                $updata = array('user_id'=>$user_id,'channel'=>'1');
+                $updata = array('user_id'=>$user_id);
                 D('WxMember')->where(array('openid'=>$info['openid']))->save($updata);
                 session('user',null);
                 $url = Wticket::reg_link($user_id,$this->pid);
@@ -575,7 +589,7 @@ class IndexController extends LubTMP {
             //确保一个账号只能绑定一个微信号码
             $state = M('WxMember')->where(array('user_id'=>$uinfo['id']))->find();
             if($uinfo != false && $state == false){
-                $updata = array('user_id'=>$uinfo['id'],'channel'=>'1');
+                $updata = array('user_id'=>$uinfo['id'], 'channel'=>'1');
                 if(M('WxMember')->where(array('openid'=>$pinfo['openid']))->save($updata)){
                     //更新用户微信状态
                     M('UserData')->where(array('user_id'=>$uinfo['id']))->setField('wechat',1);
@@ -583,7 +597,7 @@ class IndexController extends LubTMP {
                     session('user',null);
                     $return = array(
                         'statusCode' => 200,
-                        'url' => U('Wechat/Index/show',array('openid'=>$pinfo['openid'])),
+                        'url' => U('Wechat/Index/uinfo',array('pid'=>$this->pid))
                     ); 
                 }else{
                     $return = array(
@@ -602,8 +616,12 @@ class IndexController extends LubTMP {
             $ginfo = I('get.');
             Wticket::tologin($this->ginfo);
             $user = session('user');
-            if(!$user['user']['openid']){
+            if(empty($user['user']['openid'])){
                 $this->error("授权失败...");
+            }
+            $state = M('WxMember')->where(array('user_id'=>$user['user']['id'],'channel'=>1))->find();
+            if($state){
+                $this->error('已完成绑定请勿重复操作~', U('Wechat/Index/uinfo',array('pid'=>$this->pid)));
             }
             //查询是否已经绑定
             $this->assign('openid',$user['user']['openid'])->assign('type',$status)->display();
@@ -810,6 +828,7 @@ class IndexController extends LubTMP {
             $uinfo = session('user');
             $order = new Order();
             $sn = $order->mobile($info,$uinfo['user']['scene'],$uinfo['user']);
+            dump($order);
             if($sn != false){
                 $return = array(
                     'statusCode' => 200,
@@ -830,7 +849,7 @@ class IndexController extends LubTMP {
                 $this->error("订单状态不允许此项操纵");
             }else{
                 //根据订单属性判断是否需要加载微信支付 散客和政企通过微信购票
-                
+                if($info['type'] == '1' || $info['type'] == '6' || $info['type'] == '8'){
                     $user = session('user');
                     if(empty($user)){
                        $user = Wticket::tologin($this->ginfo);
@@ -846,12 +865,9 @@ class IndexController extends LubTMP {
                     $proconf = $proconf[$this->pid][2];
                     $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
-                    $product_name = product_name($this->pid,1);
-                    
-                    $pay = & load_wechat('Pay',$this->pid);
+                    $product_name = product_name($this->pid, 1);
+                    $pay = & load_wechat('Pay', $this->pid);//dump($pay);dump($user);
                     $prepayid = $pay->getPrepayId($user['user']['openid'], $product_name, $info['order_sn'], $money, $notify_url, $trade_type = "JSAPI",'',1);
-
-                    
                     
                     if($prepayid){
                         $options = $pay->createMchPay($prepayid);
@@ -859,9 +875,8 @@ class IndexController extends LubTMP {
                         // 创建JSAPI签名参数包，这里返回的是数组
                         $this->assign('error',$pay->errMsg.$pay->errCode);
                     }
-                    load_redis('set','aaaa',json_encode($options).json_encode($prepayid));
                     $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
-                
+                }
             }
             $this->assign('data',$info)->display();
         }
@@ -1265,5 +1280,17 @@ class IndexController extends LubTMP {
     public function map()
     {
         $this->display();
+    }
+    //新订单列表
+    public function olist()
+    {
+        $user = session('user');
+        $uid = $user['user']['id'];
+        if($uid <> 2){
+           $list = M('Order')->where(array('status'=>array('in','1,9'),'user_id'=>$uid))->field('order_sn,status,createtime,money,plan_id,number')->limit('30')->order('createtime DESC')->select();
+           $this->wx_init($this->pid); 
+        }
+        
+        $this->assign('data',$list)->display();
     }
 }

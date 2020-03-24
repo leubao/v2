@@ -160,7 +160,7 @@ class Refund extends \Libs\System\Service {
 					'product_id' => $info['product_id'],
 				);
 				$income = $model->table(C('DB_PREFIX')."other_income")->add($income_info);
-				if($income == false){echo "15";
+				if($income == false){
 					$model->rollback();return false;
 				}
 			}else{

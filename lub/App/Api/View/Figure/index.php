@@ -36,6 +36,24 @@
     	</tbody>
 	</table>
 	</div>
+	<div class="modal fade" id="loginModal" tabindex="-1" role="dialog" aria-labelledby="loginModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                    <h5 class="modal-title" id="exampleModalLabel">请输入查询密码</h5>
+                </div>
+                <div class="modal-body">
+                    <form id="loginForm" method="post" class='form-horizontal' data-toggle='validate'>
+                        <div class="form-group" style="padding: 0 10px">
+					      <input type="password" data-rule-required='true' class="form-control input-lg" id="pwd" name="pwd" placeholder="查询密码">
+					    </div>
+                        <button type="submit" id="loginBtn" class="btn btn-primary btn-lg btn-block"> 提 交 </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
     <script type="text/javascript" src="//g.alicdn.com/sj/lib/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="//g.alicdn.com/sui/sui3/0.0.18/js/sui.min.js"></script>
     <script>
@@ -62,6 +80,16 @@
 		                $(rdata.area).each(function(idx,area){
 		                  content += "<tr><td align='center'>"+area.name+"</td><td>"+area.number+"</td><td>"+area.nums+"</td><td>"+area.num+"</td></tr>";
 		                })
+		              }else{
+		              	$('#loginModal').modal({ 
+		              		keyboard: false, 
+		              		closebtn: false,
+							keyboard: true,
+							backdrop: 'static',
+							bgcolor : '#123456',
+							okbtn : '好的',
+							okHidden: function(e) {alert('点击确认后、dialog消失后的逻辑')}
+						});
 		              }
 		              $("#work_area").html(content); 
 		            }
@@ -70,6 +98,26 @@
 		    var error_msg = "<tr><td style='padding:15px;' colspan='3' align='center'><strong style='color:red;font-size:48px;'>请选日期</strong></td></tr>";
 		    $("#work_area").html(error_msg);
 		  }
+		  $("form").submit(function(e){
+			  $.ajax({
+	            url: '{:U('Api/Figure/login')}',
+	            type: 'POST',
+	            dataType: 'JSON',
+	            timeout: 1500,
+	            data: {'pwd': $('#pwd').val()},
+	            error: function(){
+	                alert('服务器请求超时，请检查网络...');
+	            },
+	            success: function(rdata){
+	              if(rdata.statusCode == '200'){
+	               window.location.reload();
+	              }else{
+	              	$.alert({title:'提示', body: rdata.msg});
+	              }
+	            }
+	        });
+			  return false;
+		  });
 		  //改变日期场次
 		  $('#wplan').change(function(){
 		    plan = $(this).children('option:selected').val();

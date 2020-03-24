@@ -49,9 +49,7 @@ class CheckcodeController extends LubTMP {
         $fontcolor = I('get.font_color', '', '');
         if ($fontcolor) {
             $checkcode->fontcolor = $fontcolor;
-        }
-
-        //显示验证码
+        }        //显示验证码
         $checkcode->output(I('refresh', false, ''));
         return true;
     }

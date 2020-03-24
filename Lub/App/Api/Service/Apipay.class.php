@@ -6,7 +6,7 @@
 // +----------------------------------------------------------------------
 // | Author: zhoujing <admin@leubao.com>
 // +----------------------------------------------------------------------
-namespace Api\Service;
+namespace Api\Service; 
 use Common\Model\Model;
 use Payment\Common\PayException;
 use Payment\Client\Charge;
@@ -21,6 +21,7 @@ class Apipay{
     public static function get_pay_qr($channel,$product_id,$payData){
       	$config = load_payment($channel,$product_id);
         try {
+            $payData = array_merge($payData, ['sub_appid' => $config['sub_appid'],'sub_mch_id' => $config['sub_mch_id']]);
 		    $ret = Charge::run($channel, $config, $payData);
 		} catch (PayException $e) {
 		    return $e->errorMessage();
@@ -40,10 +41,13 @@ class Apipay{
         PAYERROR--支付失败(其他原因，如银行返回失败)
      * @return [type] [description]
      */
-    public static function orderquery($channel,$product_id,$payData,$type = '1'){
+    public static function orderquery($channel, $product_id, $payData, $type = '1'){
         $config = load_payment($channel,$product_id);
         try {
+            $payData = array_merge($payData, ['sub_appid' => $config['sub_appid'],'sub_mch_id' => $config['sub_mch_id']]);
             $ret = Query::run($channel, $config, $payData);
+            load_redis('setex','qr_paoy_'.$payData['out_trade_no'],json_encode($ret),'3600');
+
             if($ret['is_success'] == 'T'){
                 if(in_array(strtoupper($ret['response']['trade_state']), ['REFUND','CLOSED','REVOKED','PAYERROR'])){
                     return ['state'=>'NOTPAY','msg'=>'支付超时,请前往售票窗口完成支付'];
@@ -62,9 +66,6 @@ class Apipay{
             if($ret['is_success'] == 'F'){
                 return ['state'=>'ERROR','msg'=>$ret['error']];
             }
-           // load_redis('setex','qr_pay_'.$payData['out_trade_no'],serialize($record),'3600');
-            
-
         } catch (PayException $e) {
           return $e->errorMessage();
           exit;
@@ -72,11 +73,11 @@ class Apipay{
     }
     //更新订单状态
     public static function up_order($sn){
-        //load_redis('setex','qr_pays222_'.$sn,'22','3600');
+        load_redis('setex','qr_pays222_'.$sn,'22','3600');
         //政企订单更新支付方式
         $oinfo = D('Item/Order')->where(['order_sn'=>$sn])->relation(true)->find();
-        //load_redis('setex','qr_pays2_'.$sn,serialize($oinfo).'oooo','3600');
-        if($oinfo['type'] == '6'){
+        load_redis('setex','qr_pays2_'.$sn,serialize($oinfo).'oooo','3600');
+        if($oinfo['type'] == '6' || $oinfo['status'] == '1'){
             //政企订单只更新支付方式
             D('Item/Order')->where(['order_sn'=>$sn])->setField('pay',5);
             $record = ['state'=>'SUCCESS','phone'=>$oinfo['phone']];

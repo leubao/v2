@@ -146,7 +146,6 @@ class Rebate extends \Libs\System\Service {
 						$teamData[] = array_merge($baseData,$changeData);
 					}
 				}
-				load_redis('set','adddata',serialize($teamData));
 				$status = $model->addAll($teamData);
 				if($status){
 					return $status;

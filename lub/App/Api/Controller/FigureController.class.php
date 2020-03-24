@@ -9,6 +9,25 @@
 namespace Api\Controller;
 use Think\Controller;
 class FigureController extends Controller{
+
+	public function login()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			if(empty($pinfo['pwd'])){
+				die(json_encode(['statusCode'=>300,'msg'=>'查询密码不能为空~']));
+			}
+			if($pinfo['pwd'] == '168168'){
+				session('fugure', 'welcome');
+				die(json_encode(['statusCode'=>200,'msg'=>'ok']));
+			}else{
+				die(json_encode(['statusCode'=>300,'msg'=>'查询密码有误~']));
+			}
+		}else{
+			session('fugure',null);
+			$this->display();
+		}
+	}
 	//加载所有区域及座位
 	function index(){
 		$ginfo = I('get.');
@@ -53,7 +72,11 @@ class FigureController extends Controller{
 			$pinfo = json_decode($_POST['info'],true);
 			$param = I('get.param',0,intval) ? I('get.param',0,intval) : '3';
 			$product = (string)base_convert(I('get.pid'),16,10);
-			$return = \Libs\Service\Api::get_plan($product,$pinfo,$param);
+			if(!session('fugure')){
+				$return = ['statusCode' => 300];
+			}else{
+				$return = \Libs\Service\Api::get_plan($product,$pinfo,$param);
+			}
 			die(json_encode($return));
 		}
 	}
@@ -240,86 +263,5 @@ class FigureController extends Controller{
                 break;     
             }
         }
-	}
-	//xmlto arr
-	function xml(){
-		/*$xml = "<PWBRequest> 
-		  <transactionName>SEND_CODE_REQ</transactionName>固定值 
-		  <header> 
-		    <application>SendCode</application>固定值 
-		    <requestTime>2016-12-20</requestTime> 
-		  </header>  
-		  <identityInfo> 
-		    <corpCode>TESTFX</corpCode>企业码 
-		    <userName>admin</userName>用户名
-		  </identityInfo>  
-		  <orderRequest> 
-		    <order> 
-		      <certificateNo>330182198804273139</certificateNo>身份证号 
-		      <linkName>庄工</linkName>联系人必填 
-		      <linkMobile>13625814109</linkMobile>必填 
-		      <orderCode>t20141204002226</orderCode>你们的订单编码（或别的），要求唯一，我回调你们通知检票完了的标识 
-		      <orderPrice>200.00</orderPrice>订单总价格 
-		      <groupNo/>团号 
-		      <payMethod/>支付方式值spot现场支付vm备用金，zyb智游宝支付 
-		      <ticketOrders> 
-		        <ticketOrder> 
-		          <orderCode>t2014120400222601</orderCode>必填你们的子订单编码 
-		          <credentials>实名制的必填，非实名制不填 
-		            <credential> 
-		              <name>帅哥</name> （真实姓名） 
-		              <id>330182198804273139</id> (实名制商品需要传多个身份证）
-		            </credential> 
-		          </credentials>  
-		          <price>100.00</price>票价，必填，线下要统计的 
-		          <quantity>1</quantity>必填票数量 
-		          <totalPrice>1.00</totalPrice>必填子订单总价 
-		          <occDate>2014-12-09</occDate>必填日期（游玩日期） 
-		          <goodsCode>20140331011721</goodsCode> 必填 商品编码，同票型编码 
-		          <goodsName>商品名称</goodsName> -----商品名称 
-		          <remark>商品名称</remark> -----备注
-		        </ticketOrder> 
-		      </ticketOrders> 
-		    </order> 
-		  </orderRequest> 
-		</PWBRequest>
-		";*/
-		$xml = "<PWBRequest>
-  <transactionName>SEND_THEATRE_ORDER_REQ</transactionName>
-  <header>
-    <application>SendCode</application>
-    <requestTime>2017-04-12 17:40:00</requestTime>
-  </header>
-  <identityInfo>
-    <corpCode>TESTFX</corpCode>
-    <userName>admin</userName>
-  </identityInfo>
-  <orderRequest>
-    <order>
-      <certificateNo>330182198804273139</certificateNo>
-      <linkName>测试票</linkName>
-      <linkMobile>18657197553</linkMobile>
-      <orderCode>2ddb9d2f7b4444e88222128a530efcd6</orderCode>
-      <orderPrice>1</orderPrice>
-      <payMethod>vm</payMethod>
-      <ticketOrders>
-        <ticketOrder>
-          <orderCode>2ddb9d2f7b4444e88222128a530efcd6</orderCode>
-          <totalPrice>10</totalPrice>
-          <price>10</price>
-          <quantity>5</quantity>
-          <occDate>2017-04-14 00:00:00</occDate>
-          <goodsCode>PTT20170406014570</goodsCode>
-          <goodsName>测试票</goodsName>
-        </ticketOrder>
-      </ticketOrders>
-      <showNo>201704060000001835</showNo>
-      <sessionCode>20170412004448</sessionCode>
-      <palyTime>19:00</palyTime>
-    </order>
-  </orderRequest>
-</PWBRequest>";
-		$arr = xmlToArray($xml);
-		dump($arr);
 	}
 }

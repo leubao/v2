@@ -26,9 +26,10 @@ class IndexController extends ApiBase {
         $pinfo = $_POST['data'];
         $pinfo = json_decode($pinfo,true);
         $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+
       if($appInfo != false){
         //获取销售计划
-        $info = Api::plans($appInfo);
+        $info = Api::plans($appInfo,'', $pinfo['datetime']);
         $return = array(
             'code'  => 200,
             'info'  => $info,
@@ -43,58 +44,125 @@ class IndexController extends ApiBase {
       $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
       echo json_encode($return);
     }
-    
+    //获取订单列表数据
+    public function api_order_list()
+    {
+      if(IS_POST){
+        $pinfo = $_POST['data'];
+        $pinfo = json_decode($pinfo,true);
+        $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+        if($appInfo != false){
+          $date = time();
+          //获取上次执行时间
+          $htime = F('SynchronizationTime');
+          if(empty($htime)){
+            $htime = strtotime('-15 minute');
+          }
+          $map = array(
+            'createtime' => array(
+              array('EGT', $htime), 
+              array('ELT', $date), 
+              'AND' 
+            ),
+            'product_type' => 1,
+            'status' => ['in', ['1','9']]
+          );
+          $list = [];//->where($map)
+          $field = [
+            'id',
+            'take',
+            'phone',
+            'order_sn',
+            'plan_id',
+            'createtime',
+            'number',
+            'uptime'
+          ];
+          $list = D('Order')->where(['product_type' => 1,'type'=>2,'status' => ['in', ['1','9']]])->field($field)->relation(true)->limit(10)->order('id desc')->select();
+          //获取销售计划
+          //$olanId = array_column($list, 'plan_id');
+          //获取表
+          
+          foreach ($list as $k => $v) {
+            $info = unserialize($v['info']);
+            $ticket = [];
+            foreach ($info['data'] as $ke => $va) {
+              $ticket[] = [
+                'area'   => areaName($va['areaId'], 1),
+                'price'  => $va['price'],
+                'idcard' => isset($va['idcard']) ? $va['idcard'] : '',
+                'seat'   => seatShow($va['seatid'], 1)
+              ];
+            }
+            $v['plan_id'] = planShow($v['plan_id'], 1,1);
+            $v['info'] = $ticket;
+            unset($v['id']);
+            $lists[] = $v;
+          }
+          $return = array(
+            'code'  => 200,
+            'info'  => $lists,
+            'msg' => 'OK',
+          );
+          echo json_encode($return);
+        }else{
+          $return = array('code' => 401,'info' => '','msg' => '认证失败');
+        }
+      }else{
+        $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+      }
+    }
     //api 订单写入
     function api_order(){
-        if(IS_POST){
-            $pinfo = $_POST['data'];
-            $pinfo = json_decode($pinfo,true);
-            $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']); 
-            if($appInfo != false){
-                if(!empty($pinfo['sn'])){
-                  //判断是否已下单
-                  $sn = $this->query_order(array('sn'=>$pinfo['sn'],'type'=>1));//dump($sn);
-                  if($sn != false){
-                    //已经下单直接返回
-                    $return = array(
-                        'code'  => 201,
-                        'info'  => $sn,
-                        'seat'  => sn_seat($sn),
-                        'msg'   => 'OK',
-                      );
-                  }else{
-                    //组合订单数据
-                    $info = $this->order_info($pinfo,$appInfo);
-                    //TODO API团队和API散客暂时按照支付方式来分  只记录不付费的51 API散客 52 API团队
-                    if($appInfo['is_pay'] == '1'){
-                      $scena = '51';
-                    }else{
-                      $scena = '52';
-                    }
-                    $order = new Order();
-                    $reOrder = $order->orderApi($info,$scena,$appInfo);
-                    if($reOrder){
-                      $return = array(
-                        'code'  => 200,
-                        'info'  => $reOrder['order_sn'],
-                        'seat'  => sn_seat($reOrder['order_sn']),
-                        'msg'   => 'OK',
-                      );
-                    }else{
-                      $return = array('code' => 403,'info' => $order->error,'msg' => '订单提交失败');
-                    }
-                  }
+      if(IS_POST){
+          $pinfo = $_POST['data'];
+          $pinfo = json_decode($pinfo,true);
+          $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']); 
+          if($appInfo != false){
+              if(!empty($pinfo['sn'])){
+                //判断是否已下单
+                $sn = $this->query_order(array('sn'=>$pinfo['sn'],'type'=>1));//dump($sn);
+                if($sn != false){
+                  //已经下单直接返回
+                  $return = array(
+                      'code'  => 201,
+                      'info'  => $sn,
+                      'seat'  => sn_seat($sn),
+                      'msg'   => 'OK',
+                    );
                 }else{
-                  $return = array('code' => 409,'info' => '','msg' => '终端标识不存在');
+                  //组合订单数据
+                  $info = $this->order_info($pinfo,$appInfo);
+                  //TODO API团队和API散客暂时按照支付方式来分  只记录不付费的51 API散客 52 API团队
+                  if($appInfo['is_pay'] == '1'){
+                    $scena = '51';
+                  }else{
+                    $scena = '52';
+                  }
+                  $order = new Order();
+                  $reOrder = $order->orderApi($info,$scena,$appInfo);
+                  if($reOrder){
+                    $return = array(
+                      'code'  => 200,
+                      'info'  => $reOrder['order_sn'],
+                      'seat'  => sn_seat($reOrder['order_sn']),
+                      'msg'   => 'OK',
+                    );
+                  }else{
+                    $return = array('code' => 403,'info' => $order->error,'msg' => '订单提交失败');
+                  }
                 }
-            }else{
-                $return = array('code' => 401,'info' => '','msg' => '认证失败');
-            }
-        }else{
-            $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
-        }
-        $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
-        echo json_encode($return);
+              }else{
+                $return = array('code' => 409,'info' => '','msg' => '终端标识不存在');
+              }
+          }else{
+              $return = array('code' => 401,'info' => '','msg' => '认证失败');
+          }
+      }else{
+          $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+      }
+      $this->recordLogindetect($pinfo['appid'],9,$return['code'],$return,$pinfo);
+      echo json_encode($return);
     }
     //库存查询
     function api_sku(){
@@ -425,7 +493,7 @@ class IndexController extends ApiBase {
             $info[] = re_print($plan['id'],$plan['encry'],$v);
           }
           //锁定时间根据门票数量来确定
-          $time = (int)$info['number']*1;
+          $time = (int)$info['number']*3;
           load_redis('setex','lock_'.$sn,'警告:订单正在出票,稍后再试...',$time);
         }
         if(in_array($info['pay'],['1','3','6'])){
@@ -597,7 +665,7 @@ class IndexController extends ApiBase {
     load_redis('setex', 'snnss', $sn .'1091', 37000);
       if(empty($sn) || checkIdCard($sn) == false){error_insert('400019');return false;}
       $map = array('id_card'=>$sn,'status'=>'1','pay'=>array('in','2,4,5'),'plan_id'=>array('in',normal_plan()));
-      $list = M('Order')->where($map)->field('order_sn,phone,number,plan_id')->select();
+      $list = M('Order')->where($map)->field('order_sn,phone,number,plan_id')->order('plan_id')->select();
       if(!empty($list)){
         foreach ($list as $key => $value) {
           $data[] = array(
@@ -1234,11 +1302,12 @@ class IndexController extends ApiBase {
   }
   public function ticket()
   {
-    $sn = I('get.sn');
+    $sn = I('get.tid');
     if(empty($sn)){
       $class = 'error';
     }else{
-      $ticket = \Libs\Service\Ticket::createTicket($sn);
+      $sn = getCodeToId($sn, 8);
+      $ticket = \Libs\Service\Ticket::createTicket($sn[0], 2);
       if($ticket['status']){
         $class = 'success';
       }else{
@@ -1380,5 +1449,12 @@ class IndexController extends ApiBase {
         }
       }
     }
+  }
+  public function getCodeToId()
+  {
+    $info = I('post.');
+    load_redis('set', '22', json_encode($info));
+    $qr = \Libs\Service\Encry::getQrData($info['content']);
+    die(json_encode($qr));
   }
 }
