@@ -175,7 +175,7 @@ function areaName($param,$type=NULL){
         if(!empty($area)){
             $name = $area[$param]['name'];
         }else{
-            $name = M('Area')->where(array('id'=>$param))->cache('area_name'.$param, 86400)>getField('name');
+            $name = M('Area')->where(array('id'=>$param))->cache('area_name'.$param, 86400)->getField('name');
         }
         if($type){
           return $name;
@@ -351,7 +351,7 @@ function planShow($param,$stype = 1,$type=NULL){
         if(!empty($plan)){
             $info = $plan;
         }else{
-           $info = M('Plan')->where(array('id'=>$param))->field('plantime,games,starttime,endtime,product_type')->cache('plan_show'.$param,259200)->find(); 
+           $info = M('Plan')->where(array('id'=>$param))->field('plantime,games,starttime,endtime,product_type')->cache('plan_show'.$param, 259200)->find(); 
         }
         //判断产品类型
         switch ($info['product_type']) {
