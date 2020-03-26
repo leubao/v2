@@ -16,38 +16,39 @@ class WechatController extends ManageBase{
     }
 	//微信账号设置
 	function index(){
-        $db = M("ConfigProduct");   //产品设置表 
-        $type = '2';
-        $product_id = (int)get_product('id');
-        $list = $db->where(array('product_id'=>$product_id,'type'=>$type))->select();
+
+        $db = M("ConfigItem");   //产品设置表 
+        $item_id = (int)get_item('id');
+        $type = '5';
+        $list = $db->where(array('item_id'=>$item_id,'type'=>$type))->select();
         foreach ($list as $k => $v) {
             $config[$v["varname"]] = $v["value"];
         }
         if(IS_POST){
-            $data = $_POST;
-            if (empty($data) || !is_array($data)) {
+            $pinfo = $_POST;
+            if (empty($pinfo) || !is_array($pinfo)) {
                 $this->erun('配置数据不能为空！');
                 return false;
             }
-            $diff_key = array_diff_key($config,$data);
-            foreach ($data as $key => $value) {
+            $diff_key = array_diff_key($config,$pinfo);
+            foreach ($pinfo as $key => $value) {
                 if (empty($key)) {
                     continue;
                 }
                 $saveData = array($config,);
                 $saveData["value"] = trim($value);
-                $count = $db->where(array("varname"=>$key,'type'=>$type,'product_id'=>$product_id))->count();
+                $count = $db->where(array("varname"=>$key,'type'=>$type,'item_id'=>$item_id))->count();
                 $ginfo = array();   
                 if ($count == 0) {//此前无此配置项
-                    if($key!="__hash__"&&$key!="product_id"&&$key!='type'){
+                    if($key!="__hash__"&&$key!="item_id"&&$key!='type'){
                         $ginfo["varname"] = $key;
                         $ginfo["value"]   = trim($value);
-                        $ginfo["product_id"] = $product_id;
-                        $ginfo["type"]  =   $type;
+                        $ginfo["item_id"] = $item_id;
+                        $ginfo["type"] = $type;
                         $add = $db->add($ginfo);
                     }
                 }else{
-                    if ($db->where(array("varname" => $key,'product_id'=>$product_id,'type'=>$type))->save($saveData) === false) {
+                    if ($db->where(array("varname" => $key,'item_id'=>$item_id,'type'=>$type))->save($saveData) === false) {
                         $this->erun("更新到{$key}项时，更新失败！");
                         return false;
                     }                   
@@ -57,14 +58,15 @@ class WechatController extends ManageBase{
             foreach ($diff_key as $key => $value) {
                 $saveData = array();
                 $saveData["value"] = '0';
-                $saveData["product_id"] = $product_id;
-                if ($db->where(array("varname" => $key,'type'=>$type))->save($saveData) === false) {
+                $saveData["item_id"] = $item_id;
+                $saveData["type"] = $type;
+                if ($db->where(array("varname" => $key))->save($saveData) === false) {
                     $this->erun("更新到{$key}项时，更新失败！");
                     return false;
                 }
             }
             D('Common/Config')->config_cache();
-            $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME));    
+            $this->srun("配置成功!", array('tabid'=>$this->menuid.MODULE_NAME));   
         }else{
             //获取价格分组
             $price = M('TicketGroup')->where(array('status'=>1,'product_id'=>$product_id))->field('id,name')->select();
@@ -77,6 +79,7 @@ class WechatController extends ManageBase{
             $active = $oauth->getOauthRedirect(U('Wechat/Index/acty',array('pid'=>$product_id,'act'=>1)), $state, 'snsapi_base');
             $uinfo = $oauth->getOauthRedirect(U('Wechat/Index/uinfo',array('pid'=>$product_id)), $state, 'snsapi_base');
             $uorder = $oauth->getOauthRedirect(U('Wechat/Index/orderlist',array('pid'=>$product_id)), $state, 'snsapi_base');
+            
             $this->assign('price',$price)
                 ->assign('view',$view)
                 ->assign('reg',$reg)
