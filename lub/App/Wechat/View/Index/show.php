@@ -1,6 +1,12 @@
 <Managetemplate file="Wechat/Public/header"/>
+<style type="text/css" media="screen">
+  .content p{font-size:0.8rem;line-height: 0.5rem;}
+  .content h4{margin:0.1rem;}
+  .content-block{margin:0rem;}
+  .mt2{margin-top: 0.2rem}
+</style>
 <script type="text/javascript">
-    var global = {$goods_info};
+    var globals = {$goods_info};
 </script>
 <div class="page">
   <header class="bar bar-nav">
@@ -11,17 +17,16 @@
       <span class="icon icon-me"></span>
     </button>
   </header>
-
-  <nav class="bar bar-tab bar-height">
-      <div class="btn"><a href="#" class="button button-big button-fill button-warning open-goods-cart">立即预定</a></div>
-  </nav>
-  <div class="swiper-container">
-    <div class="swiper-wrapper">
-        <div class="swiper-slide"><img src="d/wap/1.jpg"></div>
+  <div class="content">
+    <div class="content-padded">
+      <div valign="bottom" class="card-header color-white no-border no-padding">
+        <img class='card-cover' src="https://img.alizhiyou.com/310.jpg">
+      </div>
     </div>
-    <!-- Add Pagination 
-    <div class="swiper-pagination"></div>-->
-  </div>
+    <div class="content-block" style="margin-top: 1.5rem">
+      <p><a href="#" class="button button-big button-fill button-warning open-goods-cart">立即购票</a></p>
+    </div>
+</div>
   <!--内容-->
 </div>
 <!-- About Popup -->
@@ -36,7 +41,7 @@
         <dt class="model-title sku-sel-title">
           <label>演出时间：</label>
         </dt>
-        <dd>
+        <dd><?php //dump($uinfo);?>
           <ul class="model-list sku-sel-list" id="plan">
           </ul>
         </dd>
@@ -65,12 +70,14 @@
               <div class="response-area response-area-plus"></div>
               <div class="txtCover"></div>
             </div>
+            <!--
             <div class="stock pull-right font-size-12">
               <dt class="model-title stock-label pull-left">
                 <label>剩余: </label>
               </dt>
               <dd class="stock-num"> 0 </dd>
             </div>
+            -->
           </dl>
         </dd>
       </dl>
@@ -92,6 +99,7 @@
               <input data-valid-type="text" required="" tabindex="2" id="phone" name="phone" type="text" class="txt js-message font-size-14">
             </dd>
           </dl>
+          <!--
           <dl class="clearfix">
             <dt class="pull-left">
               <label for="ipt-2">身份证</label>
@@ -100,6 +108,7 @@
               <input data-valid-type="text" tabindex="3" id="card" name="card" type="text" class="txt js-message font-size-14">
             </dd>
           </dl>
+          -->
           <dl class="clearfix">
             <dt class="pull-left">
               <label for="ipt-2">留言</label>
@@ -163,10 +172,9 @@
             }
         });
     });
-
     var getPlantpl = document.getElementById('plantpl').innerHTML;
     var getPricetpl = document.getElementById('pricetpl').innerHTML;
-    laytpl(getPlantpl).render(global, function(html){
+    laytpl(getPlantpl).render(globals, function(html){
         document.getElementById('plan').innerHTML = html;
     });
     var plan = '0',
@@ -195,12 +203,12 @@
       active($(this));
       refreshNum();
       plan = $(this).data('plan');
-      area = 0; 
+      area = 0;
       ticket = 0;
       price = 0;
       $(".stock-num").html($(this).data('num'));
       laytpl.fn = plan;
-      laytpl(getPricetpl).render(global, function(html){
+      laytpl(getPricetpl).render(globals, function(html){
         document.getElementById('price').innerHTML = html;
       });
     });
@@ -223,7 +231,7 @@
         }else{
           $.toast("请选择演出日期!");
         }
-      } 
+      }
     });
     //删除选中状态
     function toggle(t){t.toggleClass("tag-orangef60");t.toggleClass("active");}
@@ -243,7 +251,7 @@
     $(".response-area-plus").click(function(){
       //判断是否选择日期和价格
       if(plan != 0 && area != 0 && price != 0){
-        if(num < global['user']['maxnum']){
+        if(num < globals['user']['maxnum']){
           //限制单笔订单最大数量
           num = getNum() + 1;
           updateNum();
@@ -287,18 +295,18 @@
       num = parseInt($("#num").val());
       return num;
     }
-    
+
     $(".buy").click(function(){
+      $(this).attr("disabled", true).val('提交中..');
       //验证输入
       name = $("#name").val().replace(/ /g,''),
       phone = $("#phone").val(),
-      card = $("#card").val().replace(/ /g,''),
+      /*card = $("#card").val().replace(/ /g,''),*/
       msg = '';
-      //alert(price.length);
       if(plan.length == 0){
         msg = "请选择销售日期!";
       }
-      if(price == 0 || num == 0){
+      if(price.length == 0 || num == 0){
         msg = "请选择票型并选择要购买的数量!";
       }
       if(name.length == 0){
@@ -308,12 +316,29 @@
         msg = "手机号码格式不正确!";
       }
       if(msg != ''){$.toast(msg);return false;}
+      /*
+      if(card.length == 0){
+        $.prompt('亲，您确定不用身份证取票这一高逼格的功能吗?',
+          function (value) {
+            post_server(1,value);
+          },
+          function (value) {
+            post_server(2);
+          }
+        );
+      }else{
+        if(/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/.test(card) == false){
+          msg = "身份证号码输入有误!";
+        }else{
+          post_server(2,card);
+        }
+      }*/
       post_server(2);
     });
     /*验证身份证取票 type  1验证 2 不验证  */
     function post_server(type,card){
       //计算金额
-      if(global['user']['epay'] == '1'){
+      if(globals['user']['epay'] == '1'){
         subtotal = parseFloat(price * parseInt(num));
       }else{
         subtotal = parseFloat(discount * parseInt(num));
@@ -321,7 +346,7 @@
       remark = $('#remark').val();
       $.ajax({
         type:'GET',
-        url:'<?php echo U('Wechat/Index/quota');?>'+'&plan='+plan+'&cid='+global['user']['qditem']+'&num='+num,
+        url:'<?php echo U('Wechat/Index/quota');?>'+'&plan='+plan+'&cid='+globals['user']['qditem']+'&num='+num,
         dataType:'json',
         timeout: 1500,
         error: function(){
@@ -331,8 +356,8 @@
             if(data.statusCode == "200"){
               /*获取支付相关数据*/
               pay = '{"cash":0,"card":0,"alipay":0}';
-              param = '{"remark":"'+remark+'","settlement":"'+global['user']['epay']+'"}';
-              crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"'+phone+'","contact":"'+name+'","memmber":"'+global['user']['memmber']+'"}';
+              param = '{"remark":"'+remark+'","settlement":"'+globals['user']['epay']+'"}';
+              crm = '{"guide":"'+globals['user']['guide']+'","qditem":"'+globals['user']['qditem']+'","phone":"'+phone+'","contact":"'+name+'","memmber":"'+globals['user']['memmber']+'"}';
               toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}';
               postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
               /*提交到服务器**/
@@ -353,7 +378,7 @@
               $.toast('配额不足，请联系渠道负责人');
             }
         }
-      }); 
+      });
     }
   });
   var text = "<p style='text-align:left'>1、1.2米以下儿童可免费进场但无座；1.2米以上请购成人票。<br>"+
@@ -370,12 +395,11 @@
 {{# for(var i = 0, len = d.plan.length; i < len; i++){ }}
     <li class="tag sku-tag pull-left ellipsis" data-plan="{{ d.plan[i].id }}" data-num="{{d.plan[i].num}}">{{ d.plan[i].title }}</li>
 {{# $(".stock-num").html(d.plan[i].num); } }}
-</script> 
+</script>
 <script id="pricetpl" type="text/html">
 {{# $(d.area[laytpl.fn]).each(function(i){ }}
   <li class="tag sku-tag pull-left ellipsis {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.money }}" data-discount="{{ this.moneys }}" data-area="{{ this.area }}" data-priceid="{{ this.priceid }}" data-num="{{ this.num }}">{{this.money}}元 (<?php if($proconf['price_view'] == '2'){ ?>{{this.name}}{{this.remark}}<?php }else{ ?>{{this.pricename}} <?php }?>)</li>
 {{#    });}}
 </script>
-
 </body>
 </html>

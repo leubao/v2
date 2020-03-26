@@ -39,12 +39,7 @@
           <div class="item-media"><i class="icon icon-emoji"></i></div>
           <div class="item-inner">
             <div class="item-title">账户余额:{$data.cash}元</div>
-          </div>
-        </li>
-        <li class="item-content">
-          <div class="item-media"><i class="icon icon-emoji"></i></div>
-          <div class="item-inner">
-            <div class="item-title">有效售出:{$ocount}张</div>
+            <div class="item-after"><span class="pull-right"><a href="{:U('Wechat/Index/mention');}" class="external">提现</a>|<a href="{:U('Wechat/Index/mention_list');}" class="external">提现记录</a></span></div>
           </div>
         </li>
        </if>
@@ -57,13 +52,13 @@
       <div class="list-block">
         <ul>
           <li>
-            <a href="{:U('Wechat/Index/orderlist');}" class="item-link item-content external">
+            <a href="{:U('Wechat/Shop/orderlist', array('pid'=>44));}" class="item-link item-content external">
               <div class="item-media"><i class="icon icon-code"></i></div>
               <div class="item-inner">
                 <div class="item-title">我的订单</div>
               </div>
             </a>
-          </li>
+          </li> 
           
           
           <li>
