@@ -410,8 +410,7 @@ class WorkController extends ManageBase{
 
 				}else{
 					$this->erun('失败:'.$bookingModel->getError());
-				}
-				
+				}	
 			}
 		    
 
@@ -429,20 +428,54 @@ class WorkController extends ManageBase{
 			if(empty($sn)){
 				$this->erun('参数错误!');
 			}
-			//$data = $this->getOrder($sn);
-			$data = D('Booking')->where(['order_sn'=>$sn,'status'=>5])->find();
-
+			$product_id = get_product('id');
+			//$data = $this->getOrder($sn);,'status'=>5
+			$data = D('Booking')->where(['order_sn'=>$sn])->find();
+			$info = json_decode($data['info'], true);
+			
 			if($data == false){
 				$this->erun("未找到相应订单或该订单已完成审核...");
 			}else{
-				//获取当前所有可售计划
-				$plan = D('Plan')->where(['status'=>2,'product_id'=>get_product('id')])->field('id,plantime,starttime,games')->select();
+				//判断是预约还是预售
+				if((int)$data['type'] === 1){
+					//获取当前所有可售计划
+					$map = ['status'=>2,'product_id'=>$product_id];
+					$tpl = 'edit_pre_order';
+				}else{
+					$map = [
+						'plantime' => $data['plan_id'],
+						'status'=>2,
+						'product_id'=> $product_id
+					];
+					$tpl = 'edit_booking_order';
+				}
+
+				
+				$crm = D('Crm')->where(['id'=>$data['channel_id']])->field('id,groupid')->find();
+
+				$group = D('CrmGroup')->where(['id'=>$crm['groupid']])->getField('price_group');
+				$where = [
+					'group_id'	=>	['in', explode(',', $group)], 
+					'product_id'=>	$product_id,
+					'status'	=>	1,
+					'area'		=>	$info['info']['product'][1]
+				];
+				$ticket = D('TicketType')->where($where)->field('id as price_id,area,name,price,discount')->find();
+				$plan = D('Plan')->where($map)->field('id,param,plantime,starttime,games')->select();
+				foreach ($plan as $k => $v) {
+					$param = unserialize($v['param']);
+					if(in_array($ticket['price_id'], $param['ticket'])){
+						$v['area_name'] = areaName($ticket['area'], 1);
+ 						$plans[] = array_merge($v, $ticket);
+					}
+				}
+
 				$info = json_decode($data['info'],true);
 
 				$this->assign('data',$data)
 					->assign('info',$info['info'])
-					->assign('plan',$plan)
-					->display();
+					->assign('plan',$plans);
+				$this->display($tpl);
 			}
 		}
 	}

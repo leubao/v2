@@ -7,7 +7,6 @@
               <li class="active"><a data-toggle="tab" href="#sys-tab-1" aria-expanded="true"><i class="fa fa-codepen"></i> 系统配置</a></li>
               <li class=""><a data-toggle="tab" href="#sys-tab-2" aria-expanded="false"><i class="fa fa-print"></i> 邮件设置</a></li>
               <li class=""><a data-toggle="tab" href="#sys-tab-3" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  版权信息</a></li>
-              <li class=""><a data-toggle="tab" href="#sys-tab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  短信网关</a></li>
           </ul>
           <div class="tabs-content">
               <div id="sys-tab-1" class="tab-pane active">
@@ -173,29 +172,6 @@
                               <input type="text" name="website" value="{$Site.website}"  class="form-control" size="30">
                             </div>
                             
-                        </div>
-                      </fieldset>
-                  </div>
-              </div>
-              <div id="sys-tab-4" class="tab-pane">
-                  <div class="panel-body">
-                      <fieldset style="height:100%;">
-                        <legend>短信网关</legend>
-                        <div style="height:94%; overflow:hidden;">
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label">短信网关:</label>
-                              <select name="sms_type" class="required" data-toggle="selectpicker" data-rule="required">
-                                <option value="1">阿里智游 云信</option>
-                              </select>
-                            </div>
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label">账号:</label>
-                              <input type="text" name="sms_account" value="{$Site.sms_account}" class="form-control" size="30" />
-                            </div>
-                            <div class="form-group">
-                              <label class="col-sm-2 control-label">秘钥:</label>
-                              <input type="text" name="sms_key" value="{$Site.sms_key}" class="form-control" size="20">
-                            </div>
                         </div>
                       </fieldset>
                   </div>
