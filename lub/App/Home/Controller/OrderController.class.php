@@ -289,6 +289,7 @@ class OrderController extends Base{
 			'money'		=>	$info['subtotal'],
 			'pay'		=>	0,
 			'type'      =>  1,
+			'status'	=>	2,
 			'info'		=>	json_encode($param)
 		];
 		$model = D('Booking');
@@ -994,10 +995,10 @@ class OrderController extends Base{
 	function booking(){
 		if(IS_POST){
 			$pinfo = I('post.');
-			if(load_redis('get', $pinfo['__hash__'])){
-				$this->error('登记失败', U('Home/Order/booking'));
-			}
-			load_redis('setex', $pinfo['__hash__'], '1', 600);
+			// if(load_redis('get', $pinfo['__hash__'])){
+			// 	$this->error('登记失败~', U('Home/Order/booking'));
+			// }
+			// load_redis('setex', $pinfo['__hash__'], '1', 600);
 			//读取用户
 			$uInfo = \Home\Service\Partner::getInstance()->getInfo();
 			$product = explode('|', $pinfo['product']);

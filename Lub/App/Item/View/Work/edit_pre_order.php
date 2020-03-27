@@ -109,6 +109,7 @@
   </tbody>
   </table>
 </div>
+<input type="hidden" value="pre" name="action"></input>
 <input type="hidden" value="{$data.order_sn}" name="sn"></input>
 <div class="bjui-pageFooter">
   <ul>

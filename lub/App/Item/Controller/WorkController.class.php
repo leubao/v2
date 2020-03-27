@@ -330,107 +330,40 @@ class WorkController extends ManageBase{
 			if(!isset($pinfo['model']) || empty($pinfo['model'])){
 				$this->erun("操作类型不能为空...");
 			}
-			//读取订单
-			foreach ($pinfo['priceid'] as $ke => $va) {
-				$new[$va] = (int)$pinfo['price_num'][$ke];
+			if(!isset($pinfo['action']) || empty($pinfo['action'])){
+				$this->erun("操作类型不能为空...");
+			}
+			if(empty($pinfo['plan'])){
+				$this->erun("请选择销售计划...");
 			}
 			$data = D('Booking')->where(['order_sn'=>$pinfo['sn'],'status'=>5])->find();
-			$info = json_decode($data['info'], true);
+			$data['info'] = json_decode($data['info'], true);
 			if($data == false){
 				$this->erun("未找到相应订单或该订单已完成审核...");
 			}
-			//更新数量
-			foreach ($info['info']['data'] as $k => $v) {
-				$newArea[$v['priceid']] = [
-					'areaId'	=>	$v['areaId'],
-					'priceid'	=>	$v['priceid'],
-					'price'		=>	$v['price'],
-					'num'		=>	$new[$v['priceid']],
-					'idcard'	=>	isset($v['idcard']) ? $v['idcard'] : 0
-				];
+			$model = D('Booking');
+			//预约处理
+			if($pinfo['action'] === 'pre'){
+				$status = $model->pre_order($data, $pinfo);
+			}
+			//预售处理
+			if($pinfo['action'] === 'booking'){
+				$status = $model->pre_booking($data, $pinfo);
+			}
+			if($status){
+				$this->srun("操作成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun('操作失败:'.$model->getError());
 			}
 
-			$order = new \Libs\Service\Order();
-			$areaSeat = $order->area_group($newArea,$data['product_id'],$info['info']['param'][0]['settlement'],1,'');
-			//更新订单
-			$newInfo = [
-				'order_sn'		=> $data['order_sn'],
-				'subtotal'		=> $areaSeat['money'],
-				'plan_id'		=> $pinfo['plan'],
-				'checkin'		=> $info['info']['checkin'],
-				'data'			=> $newArea,
-				'crm'			=> $info['info']['crm'],				
-				'param'			=> $info['info']['param'],	
-			];
-			//暂存订单
-			$param = [
-				'info'	=>	$newInfo,
-				'uinfo'	=>	$info['uinfo'],
-				'act'	=>	$info['act']
-			];
-			$newData = [
-				'id'			=> $data['id'],
-				'plan_id'		=> $pinfo['plan'],
-				'number'		=> $areaSeat['num'],
-				'money' 		=> $areaSeat['money'],
-				'info'			=> json_encode($param)
-			];
-			$bookingModel = D('Booking');
-			if($pinfo['model'] == 'staging'){
-
-				if($bookingModel->token(false)->create($newData)){
-				    $result = $bookingModel->save(); // 写入数据到数据库 
-				    if($result){
-						$this->srun("暂存成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-					}else{
-						$this->erun('暂存失败!');
-					}
-				}else{
-					$this->erun('失败:'.$bookingModel->getError());
-				}
-			}
-			if($pinfo['model'] == 'push'){
-				$newData['status'] = 1;
-				//推送订单
-				if($bookingModel->token(false)->create($newData)){
-				    $result = $bookingModel->save(); // 写入数据到数据库 
-				    if($result){
-				    	$status = $order->channel(json_encode($newInfo),27,$info['uinfo'],8,$data['pay']);
-				    	
-				    	if($status){
-				    		$this->srun("订单推送成功",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-				    	}else{
-				    		$bookingModel->where(['id'=>$data['id']])->setField('status', '5');
-				    		$this->erun('订单推送失败:'.$order->error);
-				    	}
-						
-					}else{
-						$this->erun('预约更新失败!');
-					}
-
-				}else{
-					$this->erun('失败:'.$bookingModel->getError());
-				}	
-			}
-		    
-
-			
-			//修改日志
-			$editOrderLog = [
-				'user_id'	=>	get_user_id(),
-				'order_sn'	=>	$pinfo['sn'],
-				'createtime'=>	time(),
-				'status'	=>	''
-			];
-			//M('OrderData')->where(array('order_sn'=>$sn))->setField('number',$number);
 		}else{
 			$sn = I('id');
 			if(empty($sn)){
 				$this->erun('参数错误!');
 			}
 			$product_id = get_product('id');
-			//$data = $this->getOrder($sn);,'status'=>5
-			$data = D('Booking')->where(['order_sn'=>$sn])->find();
+			//$data = $this->getOrder($sn);
+			$data = D('Booking')->where(['order_sn'=>$sn,'status'=>5])->find();
 			$info = json_decode($data['info'], true);
 			
 			if($data == false){

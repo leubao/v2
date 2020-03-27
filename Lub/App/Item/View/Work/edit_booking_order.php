@@ -20,9 +20,9 @@
       
       <tr>
         <td>联系人</td>
-        <td>{$info['contact']} </td>
+        <td><input type="text" class="form-control" name="contact" value="{$info['contact']}" data-rule="required"></td>
         <td>手机</td>
-        <td>{$info['mobile']}</td>
+        <td><input type="text" class="form-control" name="mobile" value="{$info['mobile']}" data-rule="required"></td>
       </tr>
       <tr>
         <td>渠道商(业务员)</td>
@@ -44,7 +44,6 @@
         <td>支付方式</td>
         <td>
         	<notempty name="pay">
-
 			{$data.pay|pay}
 			</notempty> 
 			<select class="required" name="pay" data-toggle="selectpicker">
@@ -52,14 +51,11 @@
 				<option value="1" <eq name="data.pay" value="1">selected</eq>>现金 </option>
 				<option value="2" <eq name="data.pay" value="2">selected</eq>>授信额</option>
 			</select>
-			
-        	
         </td>
       </tr>
       <tr>
         <td>销售计划</td>
-        <td colspan="3">
-        	
+        <td>
           <empty name="plan">
           	登记日期未扎到销售计划
           </empty>	
@@ -71,7 +67,9 @@
 	          </option>
 	        </volist>
 	      </select>
-
+		</td>
+		<td>数量</td>
+        <td>
 	      <input type="number" class="form-control" name="number" value="{$data.number}" size="20" data-rule="required">
         </td>
       </tr>
@@ -93,6 +91,7 @@
     </tbody>
   </table>
 </div>
+<input type="hidden" value="booking" name="action"></input>
 <input type="hidden" value="{$data.order_sn}" name="sn"></input>
 <div class="bjui-pageFooter">
   <ul>
