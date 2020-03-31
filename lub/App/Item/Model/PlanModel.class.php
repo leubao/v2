@@ -25,7 +25,7 @@ class PlanModel extends Model{
 		if($data['product_type'] == '1'){
 			//是否模板
 			if($data['addType'] == 'batch'){
-				$tpl = D('Tplfield')->where(['id'=>$data['tplid']])->find();
+				$tpl = D('Tplfield')->where(['id' => $data['tplid']])->find();
 				$starttime = $data['plantime'].' '.$tpl['start'];
 				$starttime = strtotime($starttime);
 				$endtime = $data['plantime'].' '.$tpl['end'];
@@ -210,19 +210,16 @@ class PlanModel extends Model{
 			$param = array(
 				'seat' => $seat,
 				'ticket' => $ticket,
-				'goods'	=>	$goods,
 				'auto_group' => $a_g,//自动排座分组排序
 			);
 		}elseif($type == '2'){
 			$param = array(
 				'seat' => $seat,
-				'goods'	=>	$goods,
 				'ticket' => $ticket,
 			);
 		}else{
 			$param = array(
 				'tooltype' => $seat,
-				'goods'	=>	$goods,
 				'ticket' => $ticket,
 			);
 		}

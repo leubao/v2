@@ -6,10 +6,11 @@ namespace Home\Controller;
 
 use Common\Controller\Base;
 
-class WechatController extends Base{
+class WechatController extends Base
 {
     //当前用户可售的票型
     function index(){
+        
         $this->display();
     }
     //产品详情

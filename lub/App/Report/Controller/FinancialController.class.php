@@ -533,46 +533,6 @@ class FinancialController extends ManageBase{
 		$this->assign('data',$data)->assign('map',$map)->assign('product_id',$map['product_id'])->display();
 	}
 	/**
-	 * 提现管理
-	 * TODO  支付宝转账和微信转账
-	 */
-	function manage_cash(){
-		$starttime = I('starttime') ? I('starttime') : date('Y-m-d',time());
-		$type = I('type') ? I('type') : '2';
-		$work = I('work') ? I('work') : '1';
-		if(empty($starttime)){$this->erun('参数错误');}
-		//传递查询条件
-		$this->assign('starttime',$starttime);
-		//导出条件
-	    $export_map = array();
-		$where['datetime'] = date('Ymd',strtotime($starttime));
-		if($work == '2'){
-			$where['price_id'] = array('not in',zero_ticket());
-		}elseif($work == '3'){
-			$where['price_id'] = array('in',zero_ticket());
-		}
-		$where['status'] = '1';
-		$export_map = $where;
-		$export_map['report']	= 'today';
-		$export_map['type']	= $type;
-		if($type == '1'){
-			//明细
-			$this->basePage('ReportData',$where);
-		}else{
-			$list = Operate::do_read('ReportData',1,$where,array('plantime ASC,games'));
-			//根据计划汇总
-			//$plan_fold = Report::plan_fold($list);
-			//根据票型汇总
-			$ticket_fold = Report::day_fold($list);
-			//用于报表模板导出
-			S('Today'.get_user_id(),$ticket_fold);
-			//退票记录 TODO
-			$this->assign('data',$ticket_fold);
-		}
-		$this->assign('type',$type)->assign('work',$work)->assign('export_map',$export_map)
-			->display();
-	}
-	/**
 	 * 渠道商月度销售汇总
 	 * @Author   zhoujing   <zhoujing@leubao.com>
 	 * @DateTime 2017-08-28

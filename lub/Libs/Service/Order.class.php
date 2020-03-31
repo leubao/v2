@@ -69,6 +69,7 @@ class Order extends \Libs\System\Service {
 												'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
 												'games'=>$plan['games'],
 												'priceid'=>$v['priceid'],
+												'mouth' => self::print_mouth($plan['product_id'], $v['seatid']),
 												'priceName'=>$ticketType[$v['priceid']]['name'],
 												'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
 												'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
@@ -172,7 +173,7 @@ class Order extends \Libs\System\Service {
 			'phone'			=> $info['crm'][0]['phone'],//取票人手机
 			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
 			'take'			=> $info['crm'][0]['contact'],
-			'activity'		=> $info['param'][0]['activity'],//活动标记
+			'activity'		=> empty($info['param'][0]['activity']) ? 0 : $info['param'][0]['activity'],//活动标记
 		);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$newInfo = [
@@ -249,6 +250,7 @@ class Order extends \Libs\System\Service {
 				'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 											'area'=>areaName($v['areaId'],1),
 											'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
+											'mouth' => self::print_mouth($plan['product_id'], $v['seatid']),
 											'games'=>$plan['games'],
 											'priceid'=>$v['priceid'],
 											'priceName'=>$ticketType[$v['priceid']]['name'],
@@ -427,11 +429,10 @@ class Order extends \Libs\System\Service {
 		}else{
 			//景区漂流 套票
 			if((int)$param['param'][0]['atype'] === 5){
-				$status = Order::packTicket($oinfo,'','',$channel_type,$info['pay_type']);
+				$status = Order::packTicket($oinfo, '', '', $channel_type, $info['pay_type']);
 			}else{
-				$status = Order::quickScenic($oinfo,'','',$channel_type,$info['pay_type']);
+				$status = Order::quickScenic($oinfo, '', '', $channel_type, $info['pay_type']);
 			}
-			
 		}
 		return $status;
 	}
@@ -453,7 +454,7 @@ class Order extends \Libs\System\Service {
 		 		break;
 		 	case 8:
 		 		//前台预约推送,直接排座
-		 		return Order::quick_order($info,$scena,$uinfo,1,1,$act); 
+		 		return Order::quick_order($info, $scena, $uinfo, 2, 1, $act); 
 		 		break;
 		 	default:
 		 		return Order::quick_order($info,$scena,$uinfo,2,2,$act); 
@@ -607,7 +608,7 @@ class Order extends \Libs\System\Service {
 			'phone'			=> $info['crm'][0]['phone'],//取票人手机
 			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
 			'take'			=> $info['crm'][0]['contact'],
-			'activity'		=> $info['param'][0]['activity'],//活动标记	
+			'activity'		=> empty($info['param'][0]['activity']) ? 0 : $info['param'][0]['activity'],//活动标记	
 		);
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
@@ -1039,8 +1040,8 @@ class Order extends \Libs\System\Service {
 			'phone'			=> $info['crm'][0]['phone'],//取票人手机
 			'sub_type'		=> $info['sub_type'] ? $info['sub_type'] : 2,//补贴对象
 			'take'			=> $info['crm'][0]['contact'],
-			'activity'		=> $info['param'][0]['activity'],//活动标记	
-			'openid'		=> isset($user['openid']) ? $user['openid'] : ''
+			'activity'		=> empty($info['param'][0]['activity']) ? 0 : $info['param'][0]['activity'],//活动标记	
+			'openid'		=> isset($uinfo['openid']) ? $uinfo['openid'] : ''
 		);
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
@@ -1201,11 +1202,8 @@ class Order extends \Libs\System\Service {
 		$ticketType = F('TicketType'.$plan['product_id']);
 		//构造打印数据
 		//$dataList = Order::create_print($info['order_sn'],$info['info']['data']['area'],$plan);
-		if($plan['product_type'] == '2'){
-			$table = 'scenic';
-		}else{
-			$table = 'drifting';
-		}
+		
+		$table = $plan['seat_table'];
 		$map = array('plan_id' => $info['plan_id'],'status'=>'0');
 		foreach ($info['info']['data']['area'] as $key => $value) {
 			/*判断是否联合售票*/
@@ -1247,14 +1245,6 @@ class Order extends \Libs\System\Service {
 			//构造数据
 			$i = 0;
 			for ($i=0; $i < (int)$value['num']; $i++) { 
-				//TODO 判断发送短信模板
-				if(in_array($value['priceid'], ['566','567'])){
-					$smsTpl = '99';
-				}elseif($value['priceid'] == '568'){
-					$smsTpl = '98';
-				}else{
-					$smsTpl = '1';
-				}
 				$printList[] = array(
 					'order_sn' => $info['order_sn'],
 					'plan_id'=>	$info['plan_id'],
@@ -1268,9 +1258,9 @@ class Order extends \Libs\System\Service {
 				);
 			}
 			if($proconf['ticket_sms'] == '1'){
-				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num'];
+				$msg = $msg.$ticketType[$value['priceid']]['name'].$value['num']."张";
 			}else{
-				$msg = $info['number'];
+				$msg = $info['number']."张";
 			}
 		}
 		//判断门票数据是否一致
@@ -1285,7 +1275,6 @@ class Order extends \Libs\System\Service {
 		$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,sale,price_id,idcard')->select();
 		foreach ($saleList as $ks => $vs) {
 			$sale[$ks] = unserialize($vs['sale']);
-			
 			$dataList[] = array(
 					'ciphertext' =>	$vs['ciphertext'],
 					'priceid'=>	$sale[$ks]['priceid'],
@@ -1363,7 +1352,7 @@ class Order extends \Libs\System\Service {
 				if($info['pay'] == '1' || $info['pay'] == '3'){
 					Sms::order_msg($msgs,6);
 				}else{
-					Sms::order_msg($msgs, $smsTpl);
+					Sms::order_msg($msgs,1);
 				}
 			}
 			//后置处理
@@ -1633,6 +1622,7 @@ class Order extends \Libs\System\Service {
 						'plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 						'area'=>areaName($vs['area'],1),
 						'seat'=>Order::print_seat($vs['seat'],$plan['product_id'],$ticketType[$sale[$ks]['priceid']]['param']['ticket_print'],$ticketType[$sale[$ks]['priceid']]['param']['ticket_print_custom']),
+						'mouth' => self::print_mouth($plan['product_id'], $vs['seat']),
 						'games'=>$plan['games'],
 						'priceid'=>$sale[$ks]['priceid'],
 						'priceName'=>$ticketType[$sale[$ks]['priceid']]['name'],
@@ -1747,7 +1737,6 @@ class Order extends \Libs\System\Service {
 			$pre = $model->table(C('DB_PREFIX').'pre_order')->add(array('order_sn'=>$info['order_sn'],'user_id'=>get_user_id(),'status'=>'1','createtime'=>$createtime));
 			$flag=true;$flags = true;$o_status = true;$no_sms = 1;
 		}
-		//dump($flag);dump($flags);dump($state);dump($o_status);dump($pre);
 		if($flag && $flags && $state && $o_status && $pre){
 			$model->commit();//提交事务
 			//发送成功短信
@@ -2022,6 +2011,7 @@ class Order extends \Libs\System\Service {
 				'sale' => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 										'area'=>areaName($vs['area'],1),
 										'seat'=>Order::print_seat($vs['seat'],$plan['product_id'],$ticketType[$sale[$ks]['priceid']]['param']['ticket_print'],$ticketType[$sale[$ks]['priceid']]['param']['ticket_print_custom']),
+										'mouth' => self::print_mouth($plan['product_id'], $vs['seat']),
 										'games'=>$plan['games'],
 										'priceid'=>$sale[$ks]['priceid'],
 										'priceName'=>$ticketType[$sale[$ks]['priceid']]['name'],
@@ -2287,20 +2277,23 @@ class Order extends \Libs\System\Service {
 				'seat' => $v['seatid'],
 				'status' => array('not in','2,99'), //政企订单可排预留座位,
 			);
+			$sale = array(
+				'plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
+				'area'=>areaName($v['areaId'],1),
+				'seat'=>Order::print_seat($v['seatid'], $plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'], $ticketType[$v['priceid']]['param']['ticket_print_custom']),
+				'mouth' => self::print_mouth($plan['product_id'], $v['seatid']),
+				'games'=>$plan['games'],
+				'priceid'=>$v['priceid'],
+				'priceName'=>$ticketType[$v['priceid']]['name'],
+				'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
+				'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
+			);
 			$data = array(
 				'order_sn' => $oinfo['order_sn'],
 				'soldtime' => $createtime,
 				'status'   => '2',
 				'price_id' => $v['priceid'],
-				'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
-											'area'=>areaName($v['areaId'],1),
-											'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
-											'games'=>$plan['games'],
-											'priceid'=>$v['priceid'],
-											'priceName'=>$ticketType[$v['priceid']]['name'],
-											'price'=>$ticketType[$v['priceid']]['price'],/*票面价格*/
-											'discount'=>$ticketType[$v['priceid']]['discount'],/*结算价格*/
-									)),//售出信息 票型  单价
+				'sale'	   => serialize($sale),//售出信息 票型  单价
 			);
 			/*重组座位数据*/
 			$seatData[$k] = array(
@@ -2733,27 +2726,124 @@ class Order extends \Libs\System\Service {
 		}else{
 			$seat = $seats[0].'排'.$seats[1].'号';
 		}
-		if($proconf['print_mouth'] == '1'){
-			return Order::print_mouth($seats[0]).$seat;
-		}else{
-			return $seat;
-		}
+		return $seat;
+		// if($proconf['print_mouth'] == '1'){
+		// 	return Order::print_mouth($seats[0]).$seat;
+		// }else{
+			
+		// }
 	}
 	/**
 	 * 自定义入场口
 	 * @param  int $row 座位排号
 	 * @return [type]      [description]
 	 */
-	function print_mouth($row){
-		//$map = "<=10|10<$row<=17|18<=$row<21";
-		if($row <= '10'){
-			return "一楼";
-		}elseif('10'<$row && $row<='17'){
-			return "二楼";
-		}elseif('17'<$row && $row<='21'){
-			return "三楼";
+	static function print_mouth($product_id, $seat){
+		$proconf = cache('ProConfig');
+		$proconf = $proconf[$product_id]['1'];
+		if($proconf['print_mouth'] == '1'){
+			$seats = explode('-', $seat);
+			$c1Arr = [
+				'1-29',
+				'1-31',
+				'1-33',
+				'1-35',
+				'2-29','2-31','2-33','2-35',
+				'3-29','3-31','3-33','3-35',
+				'4-33','4-31','4-35',
+				'5-31','5-33','5-35',
+				'6-31',
+				'6-33',
+				'6-35',
+				'7-33',
+				'7-35',
+				'8-35'
+			];
+			$c2Arr = [
+				'2-30','2-32','2-34','2-36','2-38','2-40',
+				'3-30','3-32','3-34','3-36','3-38','3-40',
+				'4-30','4-32','4-34','4-36','4-38','4-40',
+				'5-32','5-34','5-36','5-38','5-40',
+				'6-34','6-36','6-38','6-40',
+				'7-34','7-36','7-38','7-40',
+				'8-34','8-36','8-38','8-40',
+				'9-36','9-38','9-40',
+				'10-36','10-38','10-40',
+				'11-38','11-40',
+				'12-40',
+				'13-40',
+				'14-40',
+			];
+			$c3Arr = [
+				'17-39','17-41',
+				'18-39','18-41',
+				'19-41',
+				'21-41',
+				'22-41',
+				'23-41',
+				'24-41',
+				'25-39','25-41',
+				'26-39','26-41',
+				'27-39','27-41',
+				'28-39','28-41',
+				'29-39','29-41',
+				'30-39','30-41',
+				'31-39','31-41',
+			];
+			$c4Arr = [
+				'18-40',
+				'22-40',
+				'24-40',
+				'25-40',
+				'26-38','26-40',
+				'27-40',
+				'28-40',
+				'29-40',
+				'30-40',
+				'31-40',
+			];
+			if(isOdd((int)$seats[1])){
+				//单号
+				if($seats[0] > 16){
+					//北一
+					if((int)$seats[1] > 43 || in_array($seat, $c3Arr)){
+						$area = 'C3区';
+					}elseif(18 < $seats[0] && $seats[0] < 27){
+						$area = 'B区';
+					}
+					return '北一口' .$area;
+				}else{
+					if((int)$seats[1] > 35 || in_array($seat, $c1Arr)){
+						$area = 'C1区';
+					}else{
+						$area = 'C区';
+					}
+					return '北二口 ' .$area;
+				}
+			}else{
+				//双号
+				if($seats[0] > 16){
+					if((int)$seats[1] > 40 || in_array($seat, $c4Arr)){
+						$area = 'C4区';
+					}elseif(18 < $seats[0] && $seats[0] < 27){
+						$area = 'B区';
+					}
+					return '南一口' .$area;
+				}else{
+					if((int)$seats[1] > 40 || in_array($seat, $c2Arr)){
+						$area = 'C2区';
+					}else{
+						$area = 'C区';
+					}
+					return '南二口' .$area;
+				}
+			}
+		}else{
+			return '';
 		}
+		
 	}
+
 	/**
 	 * 判断是不是新的游客
 	 *@param $phone 电话

@@ -46,6 +46,20 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">全局实名制:</td>
+                                <td>
+                                <input type="radio" name="is_real" data-toggle="icheck" value="1" <eq name="vo['is_real']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="is_real" data-toggle="icheck" value="0" <eq name="vo['is_real']" value="0"> checked</eq> data-label="关闭">
+                                </td>
+                              </tr>
+                              <tr>
+                                <td width="120px">开启一单一付:</td>
+                                <td>
+                                <input type="radio" name="is_single_pay" data-toggle="icheck" value="1" <eq name="vo['is_single_pay']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="is_single_pay" data-toggle="icheck" value="0" <eq name="vo['is_single_pay']" value="0"> checked</eq> data-label="关闭">
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">退过期票:</td>
                                 <td>
                                 <input type="radio" name="plan_refund" data-toggle="icheck" value="0" <eq name="vo['plan_refund']" value="0"> checked</eq> data-label="开启&nbsp;">

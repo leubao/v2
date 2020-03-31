@@ -84,19 +84,6 @@
           </div>
         </div>
       </div>
-      <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="heading3">
-          <h4 class="panel-title"> <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="false" aria-controls="collapse3"> 小商品 </a> </h4>
-        </div>
-        <div id="collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
-          <div class="panel-body">
-            <volist name="goods" id="goods" mod="3">
-                <input type="checkbox" checked="checked" data-toggle="icheck" name="goods[]" value="{$goods.id}" data-label="{$goods.title}">
-                  <eq name="mod" value="2"><br/></eq>
-            </volist>
-          </div>
-        </div>
-      </div>
     </div>
   <elseif condition="in_array($pinfo['type'],['2','4'])" />
     <div class="form-group">
@@ -178,19 +165,6 @@
           </div>
         </div>
       </div>
-      <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="heading3">
-          <h4 class="panel-title"> <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="false" aria-controls="collapse3"> 小商品 </a> </h4>
-        </div>
-        <div id="collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
-          <div class="panel-body">
-            <volist name="goods" id="goods" mod="3">
-                <input type="checkbox" checked="checked" data-toggle="icheck" name="goods[]" value="{$goods.id}" data-label="{$goods.title}">
-                  <eq name="mod" value="2"><br/></eq>
-            </volist>
-          </div>
-        </div>
-      </div>
     </div>
 
   <elseif condition="$pinfo['type'] eq '3'" />
@@ -248,19 +222,7 @@
               </div>
             </div>
           </div>
-          <div class="panel panel-default">
-        <div class="panel-heading" role="tab" id="heading3">
-          <h4 class="panel-title"> <a class="collapsed" role="button" data-toggle="collapse" data-parent="#accordion" href="#collapse3" aria-expanded="false" aria-controls="collapse3"> 小商品 </a> </h4>
-        </div>
-        <div id="collapse3" class="panel-collapse collapse" role="tabpanel" aria-labelledby="heading3">
-          <div class="panel-body">
-            <volist name="goods" id="goods" mod="3">
-                <input type="checkbox" checked="checked" data-toggle="icheck" name="goods[]" value="{$goods.id}" data-label="{$goods.title}">
-                  <eq name="mod" value="2"><br/></eq>
-            </volist>
-          </div>
-        </div>
-      </div>
+          
         </div>
   </if>
   </div>
