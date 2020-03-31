@@ -2106,7 +2106,7 @@ function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
         //生成二维码
         \Libs\Service\Qrcode::createQrcode($data,$name,$logo,$level,$size);
     }
-    $image_info = getimagesize($image_file);
+    $image_info = getimagesize($image_file);dump($image_file);
     $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
     return $base64_image_content;
 }
@@ -2115,10 +2115,10 @@ function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
  * @param  [type] $openid openID
  * @return [type]         [description]
  */
-function get_up_fxqr($openid,$pid){
+function get_up_fxqr($openid, $pid){
     //$pid = get_product('id') ? get_product('id') : '43';
     $model = D('WxMember');
-    $info = $model->where(['openid'=>$openid])->field('openid,user_id,headimgurl')->find();dump($info);
+    $info = $model->where(['openid'=>$openid])->field('openid,user_id,headimgurl')->find();
     $logo_path = SITE_PATH."d/upload/viplogo/";
     $logo = $logo_path.'u-logo-'.$info['user_id'].'.png';
     if(!file_exists($logo)){
@@ -2140,8 +2140,8 @@ function get_up_fxqr($openid,$pid){
     //生成新的二维码
     $param = $pid."&".$info['user_id']."&qrcode";
     $param = \Libs\Util\Encrypt::authcode($param,'ENCODE');
-    //$url = U('Wechat/Index/show',array('u'=>$info['user_id'],'pid'=>$pid,'param'=>$param));
-    $url = U('Wechat/Activity/act',['pid'=>$pid,'act'=>'131159','u'=>$info['user_id'],'param'=>$param]);
+    $url = U('Wechat/Index/show',array('u'=>$info['user_id'],'pid'=>$pid,'param'=>$param));
+    //$url = U('Wechat/Activity/act',['pid'=>$pid,'act'=>'131159','u'=>$info['user_id'],'param'=>$param]);
     return qr_base64($url,'u-'.$info['user_id'],$logo,'M','6');
 }
 /**
