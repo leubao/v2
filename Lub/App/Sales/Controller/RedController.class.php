@@ -87,16 +87,16 @@ class RedController extends ManageBase{
    	public function delete()
    	{
    		$id = I('get.id',0,intval);
-		if(!empty($id)){
-			$updata = array('status'=>'0','update_time' => time());
-			$status = D('Sales/RedTpl')->where(array('id'=>$id))->setField($updata);
-			if($status){
-				$this->srun('作废成功',array('tabid'=>$this->menuid.MODULE_NAME));
-			}else{
-				$this->erun('作废失败!');
-			}
-		}else{
-			$this->erun('参数错误!');
-		}
+  		if(!empty($id)){
+  			$updata = array('status'=>'0','update_time' => time());
+  			$status = D('Sales/RedTpl')->where(array('id'=>$id))->setField($updata);
+  			if($status){
+  				$this->srun('作废成功',array('tabid'=>$this->menuid.MODULE_NAME));
+  			}else{
+  				$this->erun('作废失败!');
+  			}
+  		}else{
+  			$this->erun('参数错误!');
+  		}
    	}
 }

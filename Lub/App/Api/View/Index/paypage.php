@@ -31,7 +31,7 @@
     </div>
     <script type="text/javascript" src="//g.alicdn.com/sj/lib/jquery/dist/jquery.min.js"></script>
     <script type="text/javascript" src="//g.alicdn.com/sui/sui3/0.0.18/js/sui.min.js"></script>
-    <script type="text/javascript" src="static/js/qrcode.min.js"></script>
+    <script type="text/javascript" src="http://static.leubao.com/qrcode.min.js"></script>
     <script>
       $('#wxpay').click(function(){
           var sn = "{$sn}",
@@ -82,8 +82,8 @@
       function qrView(qrdata){
         var qrcode = new QRCode('qr_view', { 
           text: qrdata, 
-          width: 256, 
-          height: 256, 
+          width: 200, 
+          height: 200, 
           colorDark : '#000000', 
           colorLight : '#ffffff', 
           correctLevel : QRCode.CorrectLevel.H 
