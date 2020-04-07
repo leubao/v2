@@ -1453,8 +1453,68 @@ class IndexController extends ApiBase {
   public function getCodeToId()
   {
     $info = I('post.');
-    load_redis('set', '22', json_encode($info));
     $qr = \Libs\Service\Encry::getQrData($info['content']);
     die(json_encode($qr));
+  }
+  /**
+   * 返回已入园
+   * @Author   zhoujing                 <zhoujing@leubao.com>
+   * @DateTime 2020-04-08T00:09:55+0800
+   * @return                      [description]
+   */
+  function getIntopark(){
+    if(IS_POST){
+      $pinfo = I('post.');
+      if(isset($pinfo['plan']) || empty($pinfo['plan'])){
+        $return = [
+          'status'=> false,
+          'code'  => 0,
+          'data'  => [],
+          'msg'   =>  '参数有误'
+        ];
+        die(json_encode($return));
+      }
+
+      $pinfo = json_decode($pinfo,true);
+      $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+
+      if(!$appInfo){
+        $return = array('code' => 401,'info' => '','msg' => '认证失败');
+        die(json_encode($return));
+      }
+
+      $plan = F('Plan_'.$pinfo['plan']);
+      if(empty($plan)){
+        $plan = D('plan')->where(['id'=>$pinfo['plan']])->field('id,seat_table,product_type')->find();
+      }
+      if(empty($plan)){
+        $return = [
+          'status'=> false,
+          'code'  => 0,
+          'data'  => [],
+          'msg'   =>  '参数有误'
+        ];
+        die(json_encode($return));
+      }
+      if((int)$plan['product_type'] === 1){
+        $map = ['status'=>99];
+        $where = ['status' => 2];
+      }else{
+        $map = ['plan_id'=>$pinfo['plan'],'status'=>99];
+        $where = ['plan_id'=>$pinfo['plan'], 'status' => 2];
+      }
+      $checkin = D($plan['seat_table'])->where($map)->sum('number');
+      $stayin = D($plan['seat_table'])->where($where)->sum('number');
+      $return = [
+        'status'=> true,
+        'code'  => 200,
+        'data'  => [
+          'checkin' => $checkin,
+          'stayin'  => $stayin
+        ],
+        'msg'   =>  'ok'
+      ];
+      die(json_encode($return));
+    }
   }
 }

@@ -1375,9 +1375,12 @@ function crmName($param,$type=NULL){
     * @param $table string 座位表名称
     * @param $scene int 销售场景 根据销售场景设置销售数量
     */
-    function area_price($param,$table,$price_group,$scene){
+    function area_price($param,$table,$price_group,$scene,$ticket = array()){
+        if(empty($ticket)){
+            $ticket = $param['ticket'];
+        }
         foreach ($param['seat'] as $key => $value) {
-            $price = price($value,$price_group,$scene,$param['ticket']);
+            $price = price($value,$price_group,$scene,$ticket);
             if($price){
                 foreach ($price as $k => $v) {
                     $remark = print_remark($v['remark'],$v['product_id']);
@@ -1405,7 +1408,7 @@ function crmName($param,$type=NULL){
     * @param $ticket array  当前场次允许的票型
     */
     function price($area,$price_group,$scene,$ticket){
-        $map = array('status'=>'1','area'=>$area, 'group_id'=>$price_group,'id'=>array('in',implode(',',$ticket)));
+        $map = array('status'=>'1','area'=>$area, 'group_id'=>array('in', $price_group),'id'=>array('in',implode(',',$ticket)));
         $map['_string']="FIND_IN_SET(".$scene.",scene)";
         $list = M('TicketType')->where($map)->field(array('id'=>'priceid','price'=>'money','discount'=>'moneys','name','product_id','remark'))->select();
         return $list;

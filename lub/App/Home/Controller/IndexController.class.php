@@ -112,7 +112,12 @@ class IndexController extends Base{
 				if($list[$k] != false){
 					$list[$k]['area'] = Operate::do_read('Area',1,array('template_id'=>$list[$k]['template_id']),'listorder ASC',array('id','name'));
 					$pre_team = $proConf[$v]['1']['channel_pre_team'];
-					$list[$k]['plan'] = $this->getPlanList($v, $pre_team);
+					$plan = $this->getPlanList($v, $pre_team);
+					if(!empty($plan)){
+						$list[$k]['plan'] = $plan;
+					}else{
+						unset($list[$k]);
+					}
 				}
 			}
 		}

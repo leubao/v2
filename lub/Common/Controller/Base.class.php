@@ -35,7 +35,7 @@ class Base extends LubTMP {
         parent::_initialize();
         //验证登录
         $this->competence();
-        $product = I('get.productid',0,intval);
+        $product = I('get.pid',0,intval);
         $itemName = D("ConfigItem")->where(['varname'=>'item_name'])->cache('itemName',60)->getField('value');
         $this->assign("SUBMENU_CONFIG", json_encode(D("Home/Menu")->getMenuList()));
         $this->assign('USER_INFO', json_encode($this->senuInfo()));
