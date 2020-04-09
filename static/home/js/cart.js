@@ -232,6 +232,7 @@ $(function(){
 			  	  $("#totalcash").text(total);
 			  	  $("#tomoney").attr('value',total);
 			  	  $("#sn").attr('value',data.sn);
+			  	  //payPopup();
 			  	}else{
 			  	  $("#error").text("订单创建失败!");
 			  	  $("#myModal2").modal('show');  //出票失败的提示
@@ -243,6 +244,20 @@ $(function(){
       }
     }
   });
+  //订单支付弹窗
+  
+  function payPopup() {
+  	var payPopup = layer.open({
+	    type: 1,
+	    title: '订单支付',
+	    content: $('#payment')
+	});
+	if(screen() > 0){
+
+	}else{
+	  	layer.full(payPopup);
+	}
+  }
   //立即预定  付款  但不排座
   $("#pre").bind("click",function(){
 	var rstr = "",
@@ -350,13 +365,17 @@ $(function(){
 			dataType:'json',
 			success:function(data){
 			  if(data.statusCode == "200"){
-				$("#myModal").modal('show');
+				//$("#myModal").modal('show');
 				//获取当前商户的可用余额
 				money();
 				var total = $("#subtoal",window.parent.document).html();
 				$("#totalcash").text(total);
 				$("#tomoney").attr('value',total);
 				$("#sn").attr('value',data.sn);
+				layer.open({
+				  type: 2, 
+				  content: $('#payment')
+				});
 			  }else{
 				$("#error").text("订单创建失败!");
 				$("#myModal2").modal('show');  //出票失败的提示
@@ -835,6 +854,10 @@ $("#bookingPay").bind("click", function() {
 				  var content = "订单<a href='index.php?g=Home&m=Order&a=orderinfo&type=2&sn="+data.sn+"' target='_blank'>"+data.sn+"</a>创建成功!</a>";
 				  $("#succ_info").html(content);
 				  $("#success").modal('show');
+				  layer.open({
+					type: 2, 
+					content: 'http://sentsin.com'
+				  }); 
 			  }else{
 				$("#error").text("订单提交失败!");
 				$("#myModal2").modal('show');  //出票失败的提示

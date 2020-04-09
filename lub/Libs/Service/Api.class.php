@@ -61,7 +61,7 @@ class Api extends \Libs\System\Service {
             
             foreach ($value['plan'] as $ke => $valu) {
                 if((int)$valu['product_type'] === 1){
-                    $valu['param'] = area_price(unserialize($valu['param']),$valu['seat_table'],$param['group']['price_group'],$param['scene']);
+                    $valu['param'] = area_price(unserialize($valu['param']),$valu['seat_table'],$param['group']['price_group'],$param['scene'], $sealeTicket);
                     $valu['title'] = planShow($valu['id'],4,1);
                     $valu['product_id'] = $valu['product_id'];
                     $valu['num'] = M(ucwords($valu['seat_table']))->where(array('status'=>array('in','0')))->count();

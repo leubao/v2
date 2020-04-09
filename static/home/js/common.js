@@ -146,7 +146,7 @@ function getActivtyPrice(plan,actid,type) {
                                 +"</tr>";
                         }
                         if(type == '3' || type == '9'){
-                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
+                          content += "<tr id='tro_"+ticket.id+"_"+ticket.id+"' class='tro' data-id='"+ticket.id+"' data-area='"+ticket.area_id+"' data-name='"+ticket.name+"' data-discount='"+ticket.discount+"' data-price='"+ticket.price+"'>"
                                 +"<td align='center'>"+ticket.name+"</td>"
                                 +"<td>"+show_price+"</td>"
                                 +"<td align='center'>"+ticket.area_num+"</td>"
@@ -268,4 +268,17 @@ function check_idcard_area(code,area,actid) {
  */
 function is_array_unique(arr){
   return /(\x0f[^\x0f]+)\x0f[\s\S]*\1/.test("\x0f"+arr.join("\x0f\x0f") +"\x0f");
+}
+function screen(){
+  $win = $(window);
+  var width = $win.width();
+  if(width >= 1200){
+    return 3; //大屏幕
+  } else if(width >= 992){
+    return 2; //中屏幕
+  } else if(width >= 768){
+    return 1; //小屏幕
+  } else {
+    return 0; //超小屏幕
+  }
 }

@@ -1306,7 +1306,7 @@ class Order extends \Libs\System\Service {
 					//$up_quota = \Libs\Service\Quota::up_full_quota($quota_num,$oInfo['crm'][0]['qditem'],$info['plan_id'],$oInfo['param'][0]['area']);
 				}
 				if($up_quota == '400'){
-					error_insert('400012');
+					$this->error = '400018 : 配额消耗失败';
 					$model->rollback();
 					return false;
 				}
@@ -1366,6 +1366,7 @@ class Order extends \Libs\System\Service {
 			return ['order_sn' => $info['order_sn'],'act'=> $oInfo['param'][0]['activity']];
 		}else{
 			error_insert('400006');
+			$this->error = '400006 : 订单创建失败';
 			$model->rollback();//事务回滚
 			return false;
 		}	
