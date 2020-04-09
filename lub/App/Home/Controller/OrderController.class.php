@@ -317,6 +317,7 @@ class OrderController extends Base{
 			$pinfo = $_POST['info'];
 			$info = json_decode($pinfo,true);
 			$oinfo = Operate::do_read('Order',0,array('order_sn'=>$info['sn']),'','',true);
+			
 			if(empty($info) || empty($oinfo)){die(json_encode(array('statusCode' => '300')));}
 			//@印象大红袍
 			/*if($oinfo['status'] == '5'){
@@ -357,6 +358,11 @@ class OrderController extends Base{
 		}else{
 			return false;
 		}
+	}
+	function payment(){
+		//微信扫码支付
+		
+		//微信公众号支付
 	}
 	//
 	public function booking_pay()

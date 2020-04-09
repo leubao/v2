@@ -14,7 +14,7 @@
   <ol class="breadcrumb">
     <li><a href="{:U('Home/Index/index');}">首页</a></li>
     <li><a href="{:U('Home/Index/product');}">售票</a></li>
-    <li class="active">{$info['productid']|product_name}</li>
+    <li class="active">{$info['pid']|product_name}</li>
   </ol>
   <input type="hidden" id="channel_id" value="{$uinfo['cid']}"/>
   <div class="input-group col-md-5">
@@ -144,11 +144,11 @@
         endDate : new Date()
     });
     empty_cart_ticket();
-    scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['productid']});
+    scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['pid']});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
         selectdate = $('#plantime').val();
         empty_cart_ticket();
-        scenic_drifting_plan(selectdate,{$info['type']},{$info['productid']});
+        scenic_drifting_plan(selectdate,{$info['type']},{$info['pid']});
     });
   });
   </script>
@@ -389,7 +389,7 @@
 <script type="text/javascript">
 
 var type = {$info['type']},
-    product = {$info['productid']};
+    product = {$info['pid']};
 /*网银支付*/
 $('#webpay').click(function(){
     $("#pay_money").val($("#tomoney").val()); //订单金额

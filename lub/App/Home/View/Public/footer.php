@@ -13,8 +13,23 @@
     </div>
   </div>
   <!-- /.modal --> 
+</foooter>
+<!--支付-->
+<div id="payment">
+    <div class="">当前订单总计：<strong>￥</strong><strong id="totalcash">0.00</strong></div>
+    <div class="">账户可用余额：<strong>￥</strong><strong id="money"></strong></div>
+    <div class="action">
+    	<if condition="$uinfo['group']['type'] neq '3'">
+			<button type="button" class="btn btn-success" id="balancePay">余额支付</button>
+    	<else />
+			<button type="button" class="btn btn-success" id="govPay">立即预订</button>
+    	</if>
+    	
+    	<button type="button" class="btn btn-success" id="wxpay">微信支付</button>
+	</div>
+</div>
 <script src="{$config_siteurl}static/layer/layer.js"></script>
-<script src="{$config_siteurl}static/home/js/common.js?=<?php echo  rand(100,999);?>"></script>
+<script src="{$config_siteurl}static/home/js/common.js?=?v={$Config.js_version}"></script>
 <script>
 //弹窗每次重新加载
 $("#myModal").on("hidden.bs.modal", function() {$(this).removeData("bs.modal");});
@@ -65,4 +80,3 @@ $(function () {
   $('[data-toggle="tooltip"]').tooltip()
 });
 </script> 
-</foooter>

@@ -15,7 +15,7 @@
 <ol class="breadcrumb">
   <li><a href="{:U('Home/Index/index');}">首页</a></li>
   <li><a href="{:U('Home/Index/product');}">售票</a></li>
-  <li class="active">{$info['productid']|product_name}</li>
+  <li class="active">{$info['pid']|product_name}</li>
   <li class="active">{$plan['id']|planShow}</li>
 </ol>
 <input type="hidden" id="channel_id" value="{$uinfo['cid']}"/>
@@ -372,13 +372,13 @@
 </div> 
 </body>
 </html>
-<script src="{$config_siteurl}static/home/js/cart.js?=<?php echo  rand(100,999);?>"></script>
+<script src="{$config_siteurl}static/home/js/cart.js?v={$Config.js_version} <?php echo time(); ?>"></script>
 <script type="text/javascript">
 /*根据座位区域，显示相关票型*/
 var type = {$info['type']},
     plan = {$plan['id']},
     real = 0,
-    product = {$info['productid']};
+    product = {$info['pid']};
 function showtype(t){
   var id1    = t.id.split("_");
   var areaid = id1[1];

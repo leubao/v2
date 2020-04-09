@@ -77,6 +77,12 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">Javascript版本:</td>
+                                <td><input type="text" name="js_version" value="{$Site.js_version}" size="40">
+                                <span class="remark">版本号</span>
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">ICP备案号:</td>
                                 <td><input type="text" name="icp" value="{$Site.icp}" size="40">
                                 <span class="remark">icp 备案号</span>

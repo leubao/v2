@@ -21,7 +21,7 @@ class ProductController extends Base{
 
 	}
 	function index2(){
-		$product_id = I("get.productid",0,intval);    //产品id
+		$product_id = I("get.pid",0,intval);    //产品id
 		$itemid     = I("get.itemid",0,intval);       //商户id
 		$list = D("TicketType")->Distinct(true)->field("lub_area.name,lub_area.id")->join('RIGHT JOIN lub_area ON lub_ticket_type.area = lub_area.id')->where(array("lub_ticket_type.product_id"=>$product_id))->select();
 		/*判断是否有不受区域限制的票型*/
@@ -33,7 +33,7 @@ class ProductController extends Base{
 		}
 
 		$this->assign("list",$list)
-			->assign("productid",$product_id)
+			->assign("pid",$product_id)
 			->assign("itemid",$itemid)
 			->assign('uInfo',session("uInfo"))
 			->display();
@@ -43,7 +43,7 @@ class ProductController extends Base{
 		if(empty($ginfo)){$this->error('参数错误!');}
 		if(if_plan($ginfo['plan_id']) == false){$this->error('抱歉，该场次已停止销售!');}
 		$map = array(
-			'product_id'=>$ginfo['productid'],
+			'product_id'=>$ginfo['pid'],
 			'status'=>2,//状态必为售票中
 			'id' => (int)$ginfo['plan_id'],
 			'games' => (int)$ginfo['games'] ? (int)$ginfo['games'] : 1 ,
@@ -51,7 +51,7 @@ class ProductController extends Base{
 		//取得今天计划的ID
 		$plan = Operate::do_read('Plan',0,$map);
 		session('plan',$plan);//缓存	
-		$this->public_info_conf($ginfo['plan_id'],$ginfo['productid']);
+		$this->public_info_conf($ginfo['plan_id'],$ginfo['pid']);
 		$this->assign('plan',$plan) 
 			 ->assign('area',unserialize($plan['param']))
 			 ->assign('info',$ginfo)
@@ -62,7 +62,7 @@ class ProductController extends Base{
 	/*景区售票*/
 	function scenic(){
 		$ginfo = I('get.');
-		if(empty($ginfo['productid'])){$this->error('参数错误!');}
+		if(empty($ginfo['pid'])){$this->error('参数错误!');}
 		//默认日期
 		$plantime = date('Y-m-d');
 		//选择计划
@@ -329,9 +329,9 @@ class ProductController extends Base{
 		/*
 		$ginfo = [
 			'type'	=>	'1',
-			'productid' => '43'
+			'pid' => '43'
 		];*/
-		//if(empty($ginfo['productid'])){$this->error('参数错误!');}
+		//if(empty($ginfo['pid'])){$this->error('参数错误!');}
 		//默认日期
 		$plantime = date("Y-m-d",strtotime("+1 day"));
 		//选择计划
@@ -351,10 +351,10 @@ class ProductController extends Base{
 	/**
 	 * 渠道售票公共信息
 	 * @param  int $plan_id   计划id
-	 * @param  int $productid 产品id
+	 * @param  int $pid 产品id
 	 * @return [type]            [description]
 	 */
-	function public_info_conf($plan_id = '',$productid = ''){
+	function public_info_conf($plan_id = '',$pid = ''){
 		$uinfo = Partner::getInstance()->getInfo();
 		//获得常用联系人
 		$map = array(
@@ -363,7 +363,7 @@ class ProductController extends Base{
 		);
 		//检测是否开启配额个人不检测配额 TODO  现在判断不好
 		if($this->proconf['quota'] && $type == '1'){
-			\Libs\Service\Quota::check_quota($plan_id,$productid,$uinfo['cid']);
+			\Libs\Service\Quota::check_quota($plan_id,$pid,$uinfo['cid']);
 		}
 		$list = Operate::do_read('CommonContact',1,$map);
 		//判断是否限制区域销售 根据当前用户判定

@@ -394,12 +394,10 @@ class ProductController extends ManageBase{
 			}
 			//票型价格信息
 			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
-			//商品
-			$goods = D('Goods')->where(array('status'=>'1'))->field('id,title')->select();
+			//商品s
 			$this->assign('group',$ticket)
 			     ->assign('pinfo',$pinfo)
 			     ->assign('plantime',date('Y-m-d',$plantime))
-			     ->assign('goods',$goods)
 				 ->display();
 		}
 	}
@@ -441,7 +439,7 @@ class ProductController extends ManageBase{
 							break;
 					}
 					//票型价格信息
-					$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$product_id,'status'=>'1'))->select();//dump($ticket[0]);
+					$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$product_id,'status'=>'1'))->select();
 					$this->assign('group',$ticket)
 						 ->assign('pid',$product_id)
 					     ->assign('pinfo',$pinfo);
@@ -458,9 +456,14 @@ class ProductController extends ManageBase{
 	 */
 	function plandel(){
 		$id  = I("get.id");
-		$map = array("id"=>$id,"status"=>1);
-		$del = Operate::do_del("Plan",$map);
+		$order = D('Order')->where(['plan_id'=>$id,'status'=>['in',['1','6','9','7']]])->count();
+
+		if($order > 0){
+			$this->erun('删除失败,该场次已经产生销售~!');
+		}
+		$del = D('Plan')->where(['id'=>$id])->delete();
 		if ($del){
+			$booking = D('Booking')->where(['plan_id'=>$id])->setField('status', 0);
 			$this->srun("删除成功!", array('tabid'=>$this->menuid.MODULE_NAME));
 		}else {
 			$this->erun('删除失败!');
@@ -525,34 +528,6 @@ class ProductController extends ManageBase{
 			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$info['product_id'],'status'=>'1'))->select();
 			$infos = unserialize($info['param']);
 			$this->assign('group',$ticket)
-				->assign('data',$infos)
-				->assign('pid',$id)
-				->display();
-		}	
-	}
-	/**
-	 * 更新可用小商品
-	 * @return [type] [description]
-	 */
-	function plan_goods(){
-		if(IS_POST){
-			$info = I('post.');
-			$infos = Operate::do_read("Plan",0,array('id'=>$info['plan_id']));
-			$param = unserialize($infos['param']);
-			$param['goods'] = $info['goods'];
-			if(Operate::do_up("Plan",array('id'=>$info['plan_id']),'',array('param'=>serialize($param)))){
-				$this->srun("更新成功!", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
-			}else{
-				$this->erun('更新失败!');
-			}
-		}else {
-			$id  = I("get.id");
-			$map = array("id"=>$id);
-			$info = Operate::do_read("Plan",0,$map);
-			//票型价格信息
-			$goods = D('Goods')->where(array('product_id'=>$info['product_id'],'status'=>'1'))->field('id,title')->select();
-			$infos = unserialize($info['param']);
-			$this->assign('goods',$goods)
 				->assign('data',$infos)
 				->assign('pid',$id)
 				->display();

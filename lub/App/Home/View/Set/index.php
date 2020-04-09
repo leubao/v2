@@ -16,7 +16,7 @@
 <ol class="breadcrumb">
   <li><a href="{:U('Home/Index/index');}">首页</a></li>
   <li><a href="{:U('Home/Index/product');}">售票</a></li>
-  <li class="active">{$productid|product_name}</li>
+  <li class="active">{$pid|product_name}</li>
 </ol>
 <div class="row">
   <div class="col-md-2">

@@ -29,7 +29,7 @@ class PromotionsController extends ManageBase{
 	{
 		//读取活动
 		$info = D('Activity')->where(['id'=>$id])->find();
-		$info['param'] = json_decode($info['param'],true);dump($info);
+		$info['param'] = json_decode($info['param'],true);
 		//判断活动是否正在进行
 		if(!$this->check_active($info)){
 			$this->erun("活动已结束,或已经停用",array('tabid'=>$this->menuid.MODULE_NAME));

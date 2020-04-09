@@ -61,7 +61,7 @@ class UserModel extends RelationModel {
         //强制场景为客户端
         $map['is_scene'] = 3;
         $map['status'] = '1';
-        $uInfo = $this->where($map)->find();//dump($uInfo);
+        $uInfo = $this->where($map)->field('email,createtime,create_time,update_time,remark,last_login_time,last_login_ip', true)->find();//dump($uInfo);
         if (empty($uInfo)) {
             return false;
         }
@@ -69,10 +69,13 @@ class UserModel extends RelationModel {
         if (!empty($password) && $this->hashPassword($password, $uInfo['verify']) != $uInfo['password']) {
             return false;
         }
+        //过滤敏感信息
+        $uInfo = array_diff_key($uInfo, ['password'=>'','verify'=>'','legally'=>'','uptime'=>'']);
         //查询所属分组信息
         $group = M('CrmGroup')->where(array('id'=>$uInfo['groupid']))->field('id,name,price_group,type,settlement,param')->find();
         $group['param'] = json_decode($group['param'], true);
         $uInfo['group'] = $group;
+
         if($uInfo['group']['type'] <> '4'){
             //查询所属商户相关信息
             $crm = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,agent,itemid,f_agents,param')->find();
@@ -91,6 +94,7 @@ class UserModel extends RelationModel {
                 $uInfo['crm']['cash'] = balance($cid);
             }
         }
+
         return $uInfo;
     }
     

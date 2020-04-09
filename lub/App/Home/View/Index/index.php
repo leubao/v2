@@ -15,11 +15,11 @@
     </div>
     <if condition="$notice neq '1'">
     <div class="panel panel-default">
-  <div class="panel-body">
-    <span class="glyphicon glyphicon-volume-up"></span> <a href="{:U('Home/Index/notice_info',array('id'=>$notice['id']));}" target="_bank">通知：{$notice.title}  [{$notice.createtime|date="Y-m-d",###}]</a>
-  </div>
-</div>
-</if>
+      <div class="panel-body">
+        <span class="glyphicon glyphicon-volume-up"></span> <a href="{:U('Home/Index/notice_info',array('id'=>$notice['id']));}" target="_bank">通知：{$notice.title}  [{$notice.createtime|date="Y-m-d",###}]</a>
+      </div>
+    </div>
+    </if>
     <div class="table-responsive">
       <volist name="data" id="vo">
       <if condition="$vo.type eq '1'">
@@ -62,9 +62,9 @@
                 <td align="center"><a href="{:U('Home/Index/seale',array('plan'=>$plan['id']));}" data-toggle="modal" data-target="#myModal"><?php echo M('QuotaUse')->where(array('plan_id'=>$plan['id'],'channel_id'=>$uinfo['cid']))->getField('number')?></a></td>
                 <td align="center">
                   <if condition="$plan.seale eq 1">
-                  <a href="{:U('Home/Product/index',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即售票</a>
+                  <a href="{:U('Home/Product/index',array('pid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即售票</a>
                   <else />
-                  <a href="{:U('Home/Product/pre_order',array('productid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即预约</a>
+                  <a href="{:U('Home/Product/pre_order',array('pid'=>$vo['id'],'itemid'=>$vo['item_id'],'plan_id'=>$plan['id'],'games'=>$plan['games'],'type'=>$vo['type']));}">立即预约</a>
                   </if>
                 </td>    
               </tr>
@@ -87,7 +87,7 @@
                   <h3>产品名称：{$vo.name}</h3>
                   <p>{$vo.content}</p>
                   <div class="btn-group btn-group-justified">
-                      <a href="{:U('Home/Product/scenic',array('type'=>$vo['type'],'productid'=>$vo['id'],'itemid'=>$vo['item_id']))}" class="btn btn-primary" role="button" >立即购票</a>
+                      <a href="{:U('Home/Product/scenic',array('type'=>$vo['type'],'pid'=>$vo['id'],'itemid'=>$vo['item_id']))}" class="btn btn-primary" role="button" >立即购票</a>
                   </div>
               </div>
           </div>

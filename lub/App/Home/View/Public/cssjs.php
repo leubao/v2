@@ -13,4 +13,14 @@
 <script src="{$config_siteurl}static/home/js/tendina.min.js"></script>
 <!-- 引入自定义样式文件-->
 <link rel="stylesheet" href="{$config_siteurl}static/home/css/core.css">
+<link rel="stylesheet" href="../static/layui/css/layui.css">
 <title>{$title} 渠道版  - by LubTMP v1.0</title>
+<style type="text/css" media="screen">
+#payment{
+	display: none;
+	padding: 20px;
+}
+.action{
+	margin-top: 10px;
+}
+</style>
