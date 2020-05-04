@@ -387,6 +387,10 @@ $(function() {
           }
           idcardList.push(idcardThis);
         });
+        if(is_array_unique(idcardList)){
+            layer.msg('身份证号码重复!');
+            return false;
+        }
         //TODO 循环体内返回中断执行不行
         if(!re){
            return false;
@@ -398,13 +402,9 @@ $(function() {
             var idcard = idcardList[i];
             toJSONString = toJSONString + '{"areaId":"'+obj.data('area')+'","idcard":"'+idcard+'","priceid":' +obj.data('priceid')+',"price":'+parseFloat(obj.data('price'))+',"num":"1"}'+fg; 
         });
-        if(is_array_unique(idcardList)){
-            layer.msg('身份证号码重复!');
-            return false;
-        }
+        
         nums = idcardList.length;
         if(PRO_CONF.quota && actQuota > 0){
-          console.log(actQuota);
           if(checkQuota(nums, plan)){
             //配额不足
             layer.msg("配额不足，请联系渠道负责人!");

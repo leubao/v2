@@ -21,7 +21,7 @@ class ActivityModel extends Model {
     {
     	$actInfo = json_decode(load_redis('get','actInfo_'.$id), true);
     	if(empty($actInfo)){
-    		$actInfo = D('Activity')->where(['status'=>2,'id'=>$id])->field('createtime,remark,update,sort',true)->find();
+    		$actInfo = D('Activity')->where(['status'=>1,'id'=>$id])->field('createtime,remark,update,sort',true)->find();
     		$actInfo['param'] = json_decode($actInfo['param'], true);
     		load_redis('setex','actInfo_'.$id, json_encode($actInfo), 86400);
     	}

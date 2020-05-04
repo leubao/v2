@@ -110,7 +110,7 @@ class OrderController extends Base{
 		
 		$product = M('Product')->field('id,name')->select();
 		$count = $db->where($where)->count();
-		$Page  = new \Home\Service\Page($count,20);
+		$Page  = new \Home\Service\Page($count, 20);
 		$show  = $Page->show();
 		$list = $db->where($where)->limit($Page->firstRow.','.$Page->listRows)->order($order)->select();
 		//统计数量和金额

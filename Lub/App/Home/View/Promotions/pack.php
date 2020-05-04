@@ -341,6 +341,7 @@ $(function() {
       city = '35',
       activety = {$data.id},
       id_card = '',
+      real = {$data['real']},
       plan = $('#planID').val(),
       remark = $("#remark").val();
 
@@ -381,19 +382,27 @@ $(function() {
           length =  $("#cart tr").length,
           num = 0,
           nums= 0;
-         if(length === 0){
-            layer.msg("请选择要售出的票型!");
-            return false;
-         }
+        if(length === 0){
+          layer.msg("请选择要售出的票型!");
+          return false;
+        }
+        let idcardList = [];
         $("#cart tr").each(function(i){
-            var fg  = i+1 < length ? ',':' ';
+            var fg  = i+1 < length ? ',':' ';/*判断是否增加分割符*/
             var ids = this.id.split("_");
-            var area = $("#areaid"+ids[1]).val();
+            var obj = $(this);
+            //是否开启实名制
+            if(real === 1){
+              var idcard = idcardList[i];
+              toJSONString = toJSONString + '{"areaId":"'+obj.data('area')+'","idcard":"'+idcard+'","priceid":' +obj.data('priceid')+',"price":'+parseFloat(obj.data('price'))+',"num":"1"}'+fg; 
+            }else{
+              var area = $("#areaid"+ids[1]).val();
 
-            nums = parseInt(nums)+parseInt($("#qnum_"+ids[1]).val());
-            toJSONString = toJSONString + '{"areaId":"'+$("#areaid"+ids[1]).val()+'","priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
+              nums = parseInt(nums)+parseInt($("#qnum_"+ids[1]).val());
+              toJSONString = toJSONString + '{"areaId":"'+$("#areaid"+ids[1]).val()+'","priceid":' +ids[1]+',"price":'+parseFloat($("#price_"+ids[1]).html())+',"num":"'+$("#qnum_"+ids[1]).val()+'"}'+fg;
+            }
+            
         });
-        
         /*获取支付相关数据 */
         var guide = $("#guideid").attr("value");/*渠道商登录时为业务员ID默认为当前登录用户导游登录时为导游id,*/
         var itemid = $("#channel_id").attr("value");/*渠道商登录时为渠道商id导游登录时默认为散客 导游的id*/

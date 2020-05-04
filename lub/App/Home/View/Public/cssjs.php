@@ -14,7 +14,7 @@
 <!-- 引入自定义样式文件-->
 <link rel="stylesheet" href="{$config_siteurl}static/home/css/core.css">
 <link rel="stylesheet" href="../static/layui/css/layui.css">
-<title>{$title} 渠道版  - by LubTMP v1.0</title>
+<title>{$title} 渠道版  - by LubTMP v2.0</title>
 <style type="text/css" media="screen">
 #payment{
 	display: none;

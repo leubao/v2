@@ -350,7 +350,21 @@ class ActivityController extends ManageBase{
 	 //编辑活动
 	 //删除活动  订单表中增加活动标记
 	function delete(){
-
+		$id = I('get.id',0,intval);
+		if(!empty($id)){
+			$count = D('Order')->where(['activity'=>$id])->find();
+			if($count){
+				$this->erun('该活动已经生效，不能删除!');
+			}
+			$del = D('Item/Activity')->where(['id'=>$id])->delete();
+			if($del){
+				$this->srun('删除成功',array('tabid'=>$this->menuid.MODULE_NAME));
+			}else{
+				$this->erun('删除失败!');
+			}
+		}else{
+			$this->erun('参数错误!');
+		}
 	}
 	//编辑活动页面
 	function activity_page(){

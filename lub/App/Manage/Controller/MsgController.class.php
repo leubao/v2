@@ -47,7 +47,7 @@ class MsgController extends ManageBase {
 			);
 		}
 		/*查询新订单*/
-		$newOrder = M('Order')->where(['status'=>1,'product_id'=>$this->pid])->count();
+		$newOrder = M('Order')->where(['createtime' => array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),'status'=>1,'product_id'=>$this->pid])->count();
 		if($newOrder <> '0'){
 			$info[] = array(
 				'title'  => '新订单接入',

@@ -85,7 +85,7 @@ class PromotionsController extends Base{
 				$this->assign('plantime',$plantime);
 				$this->assign('number',$info['param']['info']['number']);
 				$this->assign('pre_model',$info['param']['info']['pre_model']);
-				$tempate = 'pre';dump($info['param']);
+				$tempate = 'pre';
 				break;
 			default:
 				break;

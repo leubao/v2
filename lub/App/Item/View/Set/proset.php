@@ -350,6 +350,13 @@
                           </td>
                         </tr>
                         <tr>
+                          <td width="120px">会话key:</td>
+                          <td>
+                            <input type="text" name="authcode" value="{$vo.authcode}" size="20">
+                            <span class="remark">此配置不可随意更改</span>
+                          </td>
+                        </tr>
+                        <tr>
                           <td width="120px">检票时间:</td>
                           <td>开园前<input type="text" name="checktimeS" value="{$vo.checktimeS}" size="10">闭园前<input type="text" name="checktimeE" value="{$vo.checktimeE}" size="10">
                           </td>

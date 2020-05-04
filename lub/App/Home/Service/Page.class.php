@@ -46,7 +46,7 @@ class Page{
         $this->listRows   = $listRows;  //设置每页显示行数
         $this->parameter  = empty($parameter) ? $_GET : $parameter;
         $this->nowPage    = empty($_GET[$this->p]) ? 1 : intval($_GET[$this->p]);
-        $this->nowPage    = $this->nowPage>0 ? $this->nowPage : 1;
+        $this->nowPage    = $this->nowPage > 0 ? $this->nowPage : 1;
         $this->firstRow   = $this->listRows * ($this->nowPage - 1);
     }
 
@@ -67,7 +67,7 @@ class Page{
      * @return string
      */
     private function url($page){
-        return str_replace(strtolower(urlencode('[PAGE]')), $page, $this->url);
+        return str_replace(strtoupper(urlencode('[PAGE]')), $page, $this->url);
     }
 
     /**

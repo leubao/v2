@@ -199,7 +199,7 @@ class ProductController extends Base{
 			$ainfo = D('Activity')->where($where)->field('id,type,param')->find();
 			$param = json_decode($ainfo['param'],true);
 			//在套票时直接加载活动中的价格
-			if((int)$ainfo['type'] === 6){
+			if((int)$ainfo['type'] === 5){
 				//判断票型是否可售
 				$planParam = unserialize($plan['param']);
 				$state = true;
@@ -219,6 +219,7 @@ class ProductController extends Base{
 	                $area_num = $plan['quotas'] - $number;
 					$price = [
 						'id'		=>	$ainfo['id'],
+						'area_id'   =>  $ainfo['id'],
 						'name'		=>	$param['info']['price']['name'],
 						'area_num' 	=>	$area_num, 
 						'area_nums' =>	$number,
