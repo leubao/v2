@@ -189,6 +189,20 @@
     </table>
     </if>
     <!--预约销售-->
+    <!--窗口促销-->
+    <if condition="$data['type'] eq '10'">
+    
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>可售票型:</td><td colspan="3"><input class="area" type="hidden" name="ticket.id" value="">
+    <input type="text" class="area" name="ticket.name" readonly value="" size="57" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+        </tbody>
+      </table>
+    
+    </if>
+    
   </div>
   <input name="type" value="{$data['type']}" type="hidden">
   <input name="id" value="{$data.id}" type="hidden">

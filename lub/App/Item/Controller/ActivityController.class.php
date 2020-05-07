@@ -29,7 +29,7 @@ class ActivityController extends ManageBase{
 	 function add(){
 	 	if(IS_POST){
 	 		$pinfo = I('post.');
-	 		if(!in_array($pinfo['type'],['1','2','3','4','5','6','7','8','9'])){
+	 		if(!in_array($pinfo['type'],['1','2','3','4','5','6','7','8','9','10'])){
 	 			$this->erun("请选择活动类型~!");
 	 		}
 	 		//TODO  活动类型多样化之后.....  买赠
@@ -113,6 +113,10 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['today']	= $pinfo['today'];
 	 			$info['pre_model'] = $pinfo['pre_model'] ? $pinfo['pre_model'] : '2';
+	 		}
+	 		//窗口促销
+	 		if(in_array((int)$pinfo['type'],['10'])){
+	 			$info['ticket'] = $pinfo['ticket_id'];
 	 		}
 	 		$param = array(
 	 			'info' =>  $info,
@@ -274,6 +278,10 @@ class ActivityController extends ManageBase{
 	 			$info['today']	= $pinfo['today'];
 	 			$info['pre_model'] = $pinfo['pre_model'];
 	 		}
+	 		//窗口促销
+	 		if((int)$pinfo['type'] === 10){
+	 			$info['ticket'] = $pinfo['ticket_id'];
+	 		}
 	 		//开启范围
 	 		if($pinfo['scope']){
 	 			$actinfo = $this->get_activity($pinfo['id']);
@@ -320,7 +328,7 @@ class ActivityController extends ManageBase{
 	 			$this->assign('card',$card);
 	 		}
 	 		//组团销售
-	 		if(in_array($info['type'], ['4','6','8','7'])){
+	 		if(in_array($info['type'], ['4','6','8','7','10'])){
 	 			$ticket = explode(',',$info['param']['info']['ticket']);
 	 			foreach ($ticket as $k => $v) {
 	 				$name[] = ticketName($v,1);

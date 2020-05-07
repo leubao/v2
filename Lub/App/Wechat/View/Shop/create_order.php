@@ -5,7 +5,7 @@
   </header>
   <div class="content">
     <div class="card">
-        <!-- <div class="card-header">{$data.plan_id|planShow}</div> -->
+        <div class="card-header">{$data.plan_id|planShow}</div>
         <div class="card-content">
           <div class="list-block">
             <ul>

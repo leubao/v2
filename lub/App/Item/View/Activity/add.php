@@ -34,6 +34,7 @@
                 <option value="7" data-area="kill">限时秒杀</option>
                 <option value="8" data-area="pre">预约销售</option>
                 <option value="9" data-area="area">限制区域限制场次</option>
+                <option value="10" data-area="window">窗口促销</option>
               </select>
             </td>
             <td>
@@ -259,6 +260,17 @@
       </table>
     </div>
     <!--预约销售-->
+    <!--窗口促销-->
+    <div id="window" style="display:none">
+      <table class="table table-striped table-bordered">
+        <tbody>
+          <tr>
+            <td>可售票型:</td><td colspan="3"><input class="area" type="hidden" name="ticket.id" value="">
+    <input type="text" class="area" name="ticket.name" readonly value="" size="57" data-toggle="lookup" data-url="{:U('Manage/Index/public_get_price',array('ifadd'=>1));}" data-group="ticket" data-width="600" data-height="445" data-title="票型名称" placeholder="票型名称"><span class="remark">如果是多个票型，请勾选追加</span></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div id="remark" class="remark"></div>
   </div>
   <input name="product_id" value="{$product_id}" type="hidden">

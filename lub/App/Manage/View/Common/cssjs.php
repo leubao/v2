@@ -22,7 +22,7 @@
 <script src="//static.leubao.com/bjui/js/jquery.cookie.js"></script>
 <!-- BJUI.all 分模块压缩版 -->
 <script src="//static.leubao.com/bjui/js/bjui-all.js"></script>
-<script src="//static.leubao.com/js/common.js"></script>
+<script src="//static.leubao.com/js/common.js?v={$Config.js_version}"></script>
 <!-- plugins -->
 <!-- swfupload for uploadify && kindeditor -->
 <script src="//static.leubao.com/bjui/plugins/swfupload/swfupload.min.js"></script>

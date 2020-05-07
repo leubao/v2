@@ -1,405 +1,306 @@
-<Managetemplate file="Wechat/Public/header"/>
-<style type="text/css" media="screen">
-  .content p{font-size:0.8rem;line-height: 0.5rem;}
-  .content h4{margin:0.1rem;}
-  .content-block{margin:0rem;}
-  .mt2{margin-top: 0.2rem}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <title>{$product.name}</title>
+  <link rel="stylesheet" href="../static/layui/css/layui.css">
+  <link rel="stylesheet" href="../static/css/layuiwap.css?v=20200507">
+</head>
+<body>
+<style>
+.content img{
+  display: inline-block;
+  height: auto;
+  max-width: 100%;
+}
+.tip{
+  color: #F44336;
+  font-size: 10px
+}
 </style>
-<script type="text/javascript">
-    var globals = {$goods_info};
-</script>
-<div class="page">
-  <header class="bar bar-nav">
-    <h1 class="title"><i class="iconfont">&#xe603</i>{$proconf.wx_page_title}</h1>
-    <if condition="empty($uinfo['promote'])">
-    <button class="button button-link button-nav pull-right"  ontouchend="window.location.href='{:U('Wechat/Index/uinfo');}'">
-    </if>
-      <span class="icon icon-me"></span>
-    </button>
-  </header>
-  <div class="content">
-    <div class="content-padded">
-      <div valign="bottom" class="card-header color-white no-border no-padding">
-        <img class='card-cover' src="https://img.alizhiyou.com/310.jpg">
-      </div>
-    </div>
-    <div class="content-block" style="margin-top: 1.5rem">
-      <p><a href="#" class="button button-big button-fill button-warning open-goods-cart">立即购票</a></p>
-    </div>
-</div>
-  <!--内容-->
-</div>
-<!-- About Popup -->
-<div class="popup goods-cart">
-  <header class="bar bar-nav">
-    <a href="#" class="icon pull-right close-popup"><i class="iconfont">&#xe609</i></a>
-  </header>
-  <div class="sku-layout">
-    <div class="adv-opts layout-content">
-    <div class="goods-models js-sku-views block block-list block-border-top-none">
-      <dl class="clearfix block-item">
-        <dt class="model-title sku-sel-title">
-          <label>演出时间：</label>
-        </dt>
-        <dd><?php //dump($uinfo);?>
-          <ul class="model-list sku-sel-list" id="plan">
-          </ul>
-        </dd>
-      </dl>
-      <dl class="clearfix block-item">
-        <dt class="model-title sku-sel-title">
-          <label>演出票价：</label>
-        </dt>
-        <dd>
-          <ul class="model-list sku-sel-list" id="price">
-            <li class="tag sku-tag pull-left ellipsis unavailable">请选择售票日期</li>
-          </ul>
-        </dd>
-      </dl>
-      <dl class="clearfix block-item">
-        <dt class="model-title sku-num pull-left">
-          <label>数量</label>
-        </dt>
-        <dd>
-          <dl class="clearfix">
-            <div class="quantity">
-              <button class="minus disabled" type="button" disabled="true"></button>
-              <input type="text" class="txt" value="1" id="num">
-              <button class="plus" type="button"></button>
-              <div class="response-area response-area-minus"></div>
-              <div class="response-area response-area-plus"></div>
-              <div class="txtCover"></div>
-            </div>
-            <!--
-            <div class="stock pull-right font-size-12">
-              <dt class="model-title stock-label pull-left">
-                <label>剩余: </label>
-              </dt>
-              <dd class="stock-num"> 0 </dd>
-            </div>
-            -->
-          </dl>
-        </dd>
-      </dl>
-      <div class="block-item block-item-messages">
-        <div class="sku-message">
-          <dl class="clearfix">
-            <dt class="pull-left">
-              <label for="ipt-0"><sup class="required">*</sup>姓名</label>
-            </dt>
-            <dd class="comment-wrapper clearfix">
-              <input data-valid-type="text" required="" tabindex="1" id="name" name="name" type="text" class="txt js-message font-size-14">
-            </dd>
-          </dl>
-          <dl class="clearfix">
-            <dt class="pull-left">
-              <label for="ipt-1"><sup class="required">*</sup>电话</label>
-            </dt>
-            <dd class="comment-wrapper clearfix">
-              <input data-valid-type="text" required="" tabindex="2" id="phone" name="phone" type="text" class="txt js-message font-size-14">
-            </dd>
-          </dl>
-          <!--
-          <dl class="clearfix">
-            <dt class="pull-left">
-              <label for="ipt-2">身份证</label>
-            </dt>
-            <dd class="comment-wrapper clearfix">
-              <input data-valid-type="text" tabindex="3" id="card" name="card" type="text" class="txt js-message font-size-14">
-            </dd>
-          </dl>
-          -->
-          <dl class="clearfix">
-            <dt class="pull-left">
-              <label for="ipt-2">留言</label>
-            </dt>
-            <dd class="comment-wrapper clearfix item-input">
-             <input data-valid-type="text" tabindex="3" id="remark" name="remark" type="text" class="txt js-message font-size-14" value="">
-            </dd>
-          </dl>
-        </div>
-      </div>
-    </div>
-    <div class="btn">
-      <a href="#" class="button button-fill button-warning button-big buy">下一步</a>
-    </div>
-  </div>
+<div class="layui-carousel" id="carousel">
+  <div carousel-item>
+    <img src="../d/wap/21.jpg">
   </div>
 </div>
-<!--产品信息区域-->
-<Managetemplate file="Wechat/Public/footer"/>
-<script type="text/javascript">
-  $(function() {
-    wx.ready(function(){
-      /*
-        wx.checkJsApi({
-            jsApiList: [
-                'onMenuShareAppMessage',
-            ]
-        });
-        wx.showMenuItems({
-            menuList: ['menuItem:share:appMessage','menuItem:share:timeline']
-        });*/
-        wx.onMenuShareAppMessage({
-            title: '{$proconf.wx_share_title}',
-            desc: '{$proconf.wx_share_desc}',
-            link: '{$urls}',
-            imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
-            trigger: function (res) {
-            },
-            success: function (res) {
-                alert('分享给好友成功');
-            },
-            cancel: function (res) {
-            },
-            fail: function (res) {
-                alert(JSON.stringify(res));
-            }
-        });
-        wx.onMenuShareTimeline({
-            title: '{$proconf.wx_share_title}',
-            desc: '{$proconf.wx_share_desc}',
-            link: '{$urls}',
-            imgUrl: '{$config_siteurl}static/images/wshare_{$pid}.jpg',
-            trigger: function (res) {
-            },
-            success: function (res) {
-            },
-            cancel: function (res) {
-            },
-            fail: function (res) {
-                alert(JSON.stringify(res));
-            }
-        });
+<div class="section">
+  <div class='name'><i class="layui-icon layui-icon-fire" style="color: #F44336;"></i> {$product.name}</div>
+ 
+  <!-- <div class='pricebox'>
+    <span>活动价 ￥</span>
+    <span class='price'>{$data.ticket.discount}</span>
+    <span class='prices'>￥{$data.ticket.price}</span>
+  </div> -->
+</div>
+<div class="layui-form" lay-filter="reg-form">  
+  <div class="ticket">
+    <div class="sku_title">使用日期</div> 
+    <div class="sku_content" id="plan"> 
+    </div> 
+  </div> 
+  <div class="ticket">
+    <div class="sku_title">选择票型</div>
+    <div class="sku_content" id="price"> 
+      <li class="sku_value">请选择使用日期</li>
+    </div> 
+  </div>  
+  <div class="ticket">
+    <div class="sku_title left">数量(剩余:<span class="stock-num"></span>)</div>
+    <div class="stepper right">
+      <span class="min">-</span>
+      <!-- 数值 -->  
+      <input type="number" class="num" value="1" id="num" disabled="" />
+      <span class="add">+</span>
+    </div>   
+  </div> 
+  <div class="fromsection">           
+    <div class="layui-form-item">
+      <input type="text" name="username" placeholder="请输入联系人" autocomplete="off" class="layui-input">
+    </div>          
+    <div class="layui-form-item">  
+      <input type="tel" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
+    </div>
+    <div class="layui-form-item">
+        <input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard">
+    </div> 
+    <div id="idcardBox"></div>
+    <div class="layui-form-item layui-form-text">
+        <textarea name="remark" placeholder="请输入内容" class="layui-textarea"></textarea>
+    </div>
+  </div>
+  <div class="needsection">
+    <div class="info-title">预定须知</div>
+    <ul class="info">
+      <li>
+        <div><i class="layui-icon {$vo.icon}"></i> 1、1.2米以下儿童可免费进场但无座；1.2米以上请购成人票。</div>
+        <p>{$vo.content}</p>
+      </li>
+      <li>
+        <div><i class="layui-icon {$vo.icon}"></i> 2、门票一旦售出，恕不退换。</div>
+        <p>{$vo.content}</p>
+      </li>  
+      <li>
+        <div><i class="layui-icon {$vo.icon}"></i> 3、请观众提前30分钟检票入场，对号入座，如遇开演请听从工作人员安排。</div>
+        <p>{$vo.content}</p>
+      </li>
+      <li>
+        <div><i class="layui-icon {$vo.icon}"></i> 4、任何通过微信购买门票的人均认为已经阅读、理解并接受了以上条款。</div>
+        <p>{$vo.content}</p>
+      </li>  
+      
+    </ul>
+  </div>
+  <div class="bottom">
+    <div class="total">订单金额：<span class='total-small'>￥</span><span class='total-text' id="money">0.00</span></div>
+    <button class="subbtn" lay-submit="" lay-filter="pay-submit">去支付</button>            
+  </div>
+</div>
+<script src="static/layui/layui.js"></script>
+<script>
+layui.use(['form','layer','laytpl','carousel'], function(){
+  var $ = layui.$
+  ,form = layui.form
+  ,layer= layui.layer
+  ,laytpl = layui.laytpl
+  ,carousel = layui.carousel
+  ,global = {$goods_info};console.log(global);
+  //前后若干天可选，这里以7天为例
+  var getPlantpl = document.getElementById('plantpl').innerHTML;
+  var getPricetpl = document.getElementById('pricetpl').innerHTML;
+
+  laytpl(getPlantpl).render(global, function(html){
+    document.getElementById('plan').innerHTML = html;
+  });
+
+  carousel.render({
+    elem: '#carousel'
+    ,width: '100%' //设置容器宽度
+    ,arrow: 'none' //始终显示箭头
+    ,indicator: 'none'
+    //,anim: 'updown' //切换动画方式
+  });
+
+  var plan = '0',
+      area = '0',
+      ticket = '0',
+      price = '0',
+      discount = '0',
+      num = '0',
+      param = '',
+      toJSONString = '',
+      postData = '',
+      subtotal = '0';
+
+  $("#plan li").click(function(){
+    //检查当前被选择的元素是否已经有已选中的
+    $("#plan li").removeClass('now');
+    $(this).addClass('now');     
+    
+    //为当前选择加上
+    refreshNum();
+    area = 0;
+    plan = $(this).data('id');
+    num = $(this).data('num');
+    $(".stock-num").html(num);
+    $("#money").html(price)
+    var selectData = global.area;
+    
+    laytpl(getPricetpl).render(selectData[plan], function(html){
+      document.getElementById('price').innerHTML = html;
     });
-    var getPlantpl = document.getElementById('plantpl').innerHTML;
-    var getPricetpl = document.getElementById('pricetpl').innerHTML;
-    laytpl(getPlantpl).render(globals, function(html){
-        document.getElementById('plan').innerHTML = html;
-    });
-    var plan = '0',
-        area = '0',
-        ticket = '0',
-        price = '0',
-        discount = '0',
-        num = '0',
-        name = '',
-        phone = '',
-        card = '',
-        msg = '',
-        pay = '',
-        crm = '',
-        param = '',
-        toJSONString = '',
-        postData = '',
-        subtotal = '0',
-        remark = '';
-    $("#plan li").click(function(){
-      //检查当前被选择的元素是否已经有已选中的
-      $(".goods-models li").each(function(){
-        if($(this).hasClass("tag-orangef60 active")){ toggle($(this))};
-      });
-      //为当前选择加上
-      active($(this));
-      refreshNum();
-      plan = $(this).data('plan');
-      area = 0;
-      ticket = 0;
-      price = 0;
-      $(".stock-num").html($(this).data('num'));
-      laytpl.fn = plan;
-      laytpl(getPricetpl).render(globals, function(html){
-        document.getElementById('price').innerHTML = html;
-      });
-    });
-    $(document).on("click","#price li",function(){
-       //判断是否已经选择计划
-      if(!$(this).hasClass("unavailable")){
-        if(plan != 0){
-          $("#price li").each(function(){
-            if($(this).hasClass("tag-orangef60 active")){ toggle($(this))};
-          });
-          area = $(this).data('area');
-          ticket = $(this).data('priceid');
-          price = $(this).data('price');
-          discount = $(this).data('discount');
-          num = $(this).data('num');
-          //更新可售数量  当为0时 禁用
-          $(".stock-num").html(num);
-          active($(this));
-          refreshNum();
-        }else{
-          $.toast("请选择演出日期!");
-        }
-      }
-    });
-    //删除选中状态
-    function toggle(t){t.toggleClass("tag-orangef60");t.toggleClass("active");}
-    //选中
-    function active(t){t.addClass("tag-orangef60");t.addClass("active");}
-    //删除选中
-    function deActive(t){t.removeClass("tag-orangef60");t.removeClass("active");}
-    //数量增加减少
-    $(".response-area-minus").click(function(){
-      if(num > 1){
-        num = getNum() - 1;
+  });  
+  $(document).on("click","#price li",function(){
+
+    //判断是否已经选择计划
+    if(!$(this).hasClass("unavailable")){
+      if(plan != 0){
+        $("#price li").removeClass('now');
+        $(this).addClass('now');
+        area = $(this).data('area');
+        ticket = $(this).data('priceid');
+        
+        price = $(this).data('price');
+        discount = $(this).data('discount');
+        num = $(this).data('num');
+        //更新可售数量  当为0时 禁用
+        $(".stock-num").html(num);
+        refreshNum();
         updateNum();
       }else{
-        updateBtnStatus();
+        layer.msg("请选择使用日期!",{time: 2000});
       }
-    });
-    $(".response-area-plus").click(function(){
-      //判断是否选择日期和价格
-      if(plan != 0 && area != 0 && price != 0){
-        if(num < globals['user']['maxnum']){
-          //限制单笔订单最大数量
-          num = getNum() + 1;
-          updateNum();
-        }else{
-          $.toast("亲，您一次只能买这么多了!");
+    } 
+  });
+  $(".add").click(function() {
+    //判断是否选择日期和价格
+    if(plan != 0 && price != 0){
+      if(num < global['user']['maxnum']){
+        //限制单笔订单最大数量*/
+        num = getNum() + 1;
+        updateNum();
+        var t = $(this).parent().find('input[class*=num]');
+        if(t.val()==""||undefined||null){
+          t.val(0);
         }
-      }else if(plan == 0 && area == 0){
-        $.toast("请选择演出日期和演出票价!");
-      }else if(area == 0){
-        $.toast("请选择演出票价!");
+        t.val(parseInt(t.val()) + 1)
+        $("#idcardBox").append('<li class="layui-form-item"><input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard"></div></li>');
       }else{
-        $.toast("请选择演出日期和演出票价!");
+        layer.msg("亲，您一次只能买这么多了!");
       }
+    }else if(plan == 0 && area == 0){
+      layer.msg("请选择日期和票价!");
+    }else if(area == 0){
+      layer.msg("请选择票价!");
+    }else{
+      layer.msg("请选择日期和票价!");
+    } 
+  })
+  $(".min").click(function() {
+    num = getNum() - 1;
+    updateNum();
+    var t = $(this).parent().find('input[class*=num]');
+    if(t.val()==""||undefined||null){
+      t.val(0);
+    }
+    t.val(parseInt(t.val()) - 1)
+    if(parseInt(t.val()) < 1) {
+      t.val(1);
+      layer.msg('不能再减啦~',{icon: 5});
+    }
+    $("#idcardBox").find("li:last").remove();
+  })
+
+  function changeNum(t){
+    $("#num").val();
+  }
+  //更换场次时重置页面
+  function refreshNum(){
+    $("#num").val('1');
+    getNum();
+  }
+  //更新数量
+  function updateNum(){
+    // 活动直接底价结算
+    subtotal = parseFloat(discount * parseInt(num));
+    $("#money").html(subtotal)
+  }
+  //获取数量
+  function getNum(){
+    num = parseInt($("#num").val());
+    return num;
+  }
+
+  form.on('submit(pay-submit)', function(data){
+    if(plan == 0 || price == 0){
+      layer.msg("请选择可用日期~");
+      return false;
+    }
+    if(data.field.username.length == 0){
+      layer.msg("请输入联系人~");
+      return false;
+    }
+    if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(data.field.phone)){
+      layer.msg("手机号码格式不正确~");
+      return false;
+    }
+    pay = '{"cash":0,"card":0,"alipay":0}';
+    param = '{"remark":"'+data.field.remark+'","activity":"","settlement":"2"}';
+    crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"'+data.field.phone+'","contact":"'+data.field.username+'","memmber":"'+global['user']['memmber']+'"}';
+    var toJSONString = '';
+    var field = data.field;
+    var idcardList = [];
+    var length = $(".idcard").length;
+    $(".idcard").each(function(i, el) {
+      var fg  = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+      var idcard = $(this).val();
+      toJSONString = toJSONString + '{"areaId":'+area+',"priceid":'+ticket+',"idcard":"'+idcard+'","price":'+price+',"num":"1"}'+fg;
     });
-    function changeNum(t){
-      $("#num").val();
-    }
-    //更换场次时重置页面
-    function refreshNum(){
-      $("#num").val('1');
-      getNum();
-      updateBtnStatus();
-    }
-    //更新数量
-    function updateNum(){
-        $("#num").val(num);
-        updateBtnStatus();
-    }
-    //更新数量增减状态
-    function updateBtnStatus(){
-      if(num > 1){
-        $('.minus').removeClass("disabled");
-        $('.minus').removeAttr("disabled");
-      }else{
-        $('.minus').addClass("disabled"),
-        $('.minus').attr("disabled", "true")
-      }
-    }
-    //获取数量
-    function getNum(){
-      num = parseInt($("#num").val());
-      return num;
+    if(is_array_unique(idcardList)){
+      layer.msg('身份证号码重复!');
+      return false;
     }
 
-    $(".buy").click(function(){
-      $(this).attr("disabled", true).val('提交中..');
-      //验证输入
-      name = $("#name").val().replace(/ /g,''),
-      phone = $("#phone").val(),
-      /*card = $("#card").val().replace(/ /g,''),*/
-      msg = '';
-      if(plan.length == 0){
-        msg = "请选择销售日期!";
-      }
-      if(price.length == 0 || num == 0){
-        msg = "请选择票型并选择要购买的数量!";
-      }
-      if(name.length == 0){
-        msg = "姓名不能为空";
-      }
-      if(!/^(0|86|17951)?(13[0-9]|15[012356789]|18[0-9]|14[57]|17[0-9])[0-9]{8}$/.test(phone)){
-        msg = "手机号码格式不正确!";
-      }
-      if(msg != ''){$.toast(msg);return false;}
-      /*
-      if(card.length == 0){
-        $.prompt('亲，您确定不用身份证取票这一高逼格的功能吗?',
-          function (value) {
-            post_server(1,value);
-          },
-          function (value) {
-            post_server(2);
-          }
-        );
-      }else{
-        if(/^(\d{15}$|^\d{18}$|^\d{17}(\d|X|x))$/.test(card) == false){
-          msg = "身份证号码输入有误!";
-        }else{
-          post_server(2,card);
-        }
-      }*/
-      post_server(2);
-    });
-    /*验证身份证取票 type  1验证 2 不验证  */
-    function post_server(type,card){
-      //计算金额
-      if(globals['user']['epay'] == '1'){
-        subtotal = parseFloat(price * parseInt(num));
-      }else{
-        subtotal = parseFloat(discount * parseInt(num));
-      }
-      remark = $('#remark').val();
-      $.ajax({
-        type:'GET',
-        url:'<?php echo U('Wechat/Index/quota');?>'+'&plan='+plan+'&cid='+globals['user']['qditem']+'&num='+num,
+    postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+    $.ajax({
+        type:'POST',
+        url:'<?php echo U('Wechat/Index/order');?>',
+        data:postData,
         dataType:'json',
-        timeout: 1500,
-        error: function(){
-          $.toast('服务器请求超时，请检查网络...');
-        },
         success:function(data){
             if(data.statusCode == "200"){
-              /*获取支付相关数据*/
-              pay = '{"cash":0,"card":0,"alipay":0}';
-              param = '{"remark":"'+remark+'","settlement":"'+globals['user']['epay']+'"}';
-              crm = '{"guide":"'+globals['user']['guide']+'","qditem":"'+globals['user']['qditem']+'","phone":"'+phone+'","contact":"'+name+'","memmber":"'+globals['user']['memmber']+'"}';
-              toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}';
-              postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-              /*提交到服务器**/
-              $.ajax({
-                  type:'POST',
-                  url:'<?php echo U('Wechat/Index/order',$param);?>',
-                  data:postData,
-                  dataType:'json',
-                  success:function(data){
-                      if(data.statusCode == "200"){
-                          location.href = data.url;
-                      }else{
-                          $.toast("下单失败!");
-                      }
-                  }
-              });
+                location.href = data.url;
             }else{
-              $.toast('配额不足，请联系渠道负责人');
+                layer.msg("下单失败:"+data.msg);
             }
         }
-      });
-    }
-  });
-  var text = "<p style='text-align:left'>1、1.2米以下儿童可免费进场但无座；1.2米以上请购成人票。<br>"+
-  "2、门票一旦售出，恕不退换。<br >"+
-  "3、请观众提前30分钟检票入场，对号入座，如遇开演请听从工作人员安排。<br>"+
-  "4、任何通过微信购买门票的人均认为已经阅读、理解并接受了以上条款。</p>";
-  $(document).on('click','.open-goods-cart', function () {
-    $.alert(text, '购票须知', function () {
-      $.popup('.goods-cart');
     });
   });
+  function is_array_unique(arr){
+    return /(\x0f[^\x0f]+)\x0f[\s\S]*\1/.test("\x0f"+arr.join("\x0f\x0f") +"\x0f");
+  }
+});
 </script>
 <script id="plantpl" type="text/html">
-{{# for(var i = 0, len = d.plan.length; i < len; i++){ }}
-    <li class="tag sku-tag pull-left ellipsis" data-plan="{{ d.plan[i].id }}" data-num="{{d.plan[i].num}}">{{ d.plan[i].title }}</li>
-{{# $(".stock-num").html(d.plan[i].num); } }}
+
+  {{#  layui.each(d.plan, function(index, item){ }}
+    
+  <li class="sku_value" data-id="{{ item.id }}" data-num="{{item.num}}">{{item.title}}</li>
+
+  {{#  }); }}
+
+  {{#  if(d.plan.length === 0){ }}
+    无数据
+  {{#  } }} 
+
 </script>
 <script id="pricetpl" type="text/html">
-{{# $(d.area[laytpl.fn]).each(function(i){ }}
-  <li class="tag sku-tag pull-left ellipsis {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.money }}" data-discount="{{ this.moneys }}" data-area="{{ this.area }}" data-priceid="{{ this.priceid }}" data-num="{{ this.num }}">{{this.money}}元 (<?php if($proconf['price_view'] == '2'){ ?>{{this.name}}{{this.remark}}<?php }else{ ?>{{this.pricename}} <?php }?>)</li>
-{{#    });}}
+  {{#  layui.each(d, function(index, item){ }}
+  <li class="sku_value {{# if(this.num == '0'){ }}unavailable{{# } }}" data-price="{{ this.money }}" data-discount="{{ this.moneys }}" data-area="{{ this.area }}" data-priceid="{{ this.priceid }}" data-num="{{ this.num }}">{{this.moneys}}元 (<?php if($proconf['price_view'] == '2'){ ?>{{this.name}}{{this.remark}}<?php }else{ ?>{{this.name}} <?php }?>)</li>
+  {{#  }); }}
+  {{#  if(d.length === 0){ }}
+    <li class="sku_value">请选择使用日期</li>
+  {{#  } }}
 </script>
 </body>
 </html>

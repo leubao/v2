@@ -15,61 +15,52 @@ class Sms extends \Libs\System\Service {
 	function order_msg($info,$type = '1'){
 		 $title=$info['title'];//订单信息
 		 $num = $info['num'];
-		 $sn=$info['sn'];//10位$remark订单详情
+		 $sn = substr($info['sn'],0,1).substr($info['sn'],-6);
 		 $remark = $info['remark'];
 		 $crminfo = $info['crminfo'];
 		 switch ($type) {
 		 	case '1':
-		 		$msg = $title.$remark;
-				 //$message = urlencode("您已购".$msg.",单号".$sn.",请凭单号到景区售票处兑换门票【极地海洋公园】");
-				 $message = "您已购买".$title.",".$remark.",订单号".$sn.",请凭订单号到售票厅取票窗。【又见五台山】";
-		 		
+		 		$message = "【".$info['product']."】您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票";
 		 		break;
 		 	case '3':
 		 		$datetime = date('Y年m月d日H：i：s');
 		 		$datetime = substr($datetime,2);
-		 		$message = "您购买的".$title."极地海洋公园门票，单号为".$sn."，于".$datetime."出票。【极地海洋公园】";
+		 		$message = urlencode("您购买的".$title."印象承德帝苑梦华门票，单号为".$sn."，于".$datetime."出票。【帝苑梦华】");
 		 		break;
 		 	case '4':
 		 		//整场退票
-		 		$message = "您购买".$title."极地海洋公园演出门票".$num."张，因天气等不可抗力因素取消，请联系您的购买渠道办理退票。详询5208888。【极地海洋公园】";
+		 		$message = urlencode("您购买".$title."印象承德帝苑梦华演出门票".$num."张，因天气等不可抗力因素取消，请联系您的购买渠道办理退票。详询4006630930。【帝苑梦华】");
 		 		break;
 		 	case '6':
 		 		//代订订单短信模板
-		 		$msg = $title.$remark;
-		 		$message = "您预定".$msg."，单号".$sn."，请到茶博园游客中心票务处或南门牌坊票务处付款取票【极地海洋公园】";
+		 		$message = "您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票【".$info['product']."】";
 		 		break;
 		 	case '7':
-		 		//领导短信
+		 		//领导短信 剧场
 		 		$area = $info['area'];
 		 		$channel = $info['channel'];
-		 		$message = $title."共".$num."张，其中".$area."。".$channel."。【极地海洋公园】";
-				break;
-			case '8':
-		 		//活动短信
-		 		$msg = $title.$remark;
-		 		//您已预定{字符}，订单号{字符}，请到景区入场口刷身份证入园【极地海洋公园】
-				$message = "您已预定".$msg."，订单号".$sn."，请到景区入场口刷身份证入园【极地海洋公园】";
-				break;
-			case '10':
-		 		//领导短信
-		 		$area = $info['area'];
+		 		$message = $title."共".$num."张，其中".$area."。".$channel."。【".$info['product']."】";
+		 		break;
+		 	case '8':
+		 		//分销账号审核
+		 		$message = urlencode($title."您申请的《帝苑梦华》销售账号已经通过审核,请遵守相关销售协议【帝苑梦华】");
+		 		break;
+		 	case '9':
+		 		//微信企业支付
+		 		$message = urlencode("您的提现申请已通过,订单:".$sn."提现金额:".$info['money'].",元,已存入您的微信钱包中，请注意查收【帝苑梦华】");
+		 		break;
+		 	case '10':
+		 		//领导短信 剧场
 		 		$channel = $info['channel'];
-		 		$message = $title."共".$num."张，其中".$area."。".$channel."。【极地海洋公园】";
-				break;
-		 	case '11':
-		 		//低余额提醒
-		 		$money = $info['money'];
-		 		$moneys = $info['moneys'];
-		 		$message = "尊敬的用户".$title.",您的账户余额已不足".$money."元,请您及时充值,当前余额".$moneys."元。【极地海洋公园】";
+		 		$message = "【".$info['product']."】".$title."共".$num."张，其中".$channel;
 		 		break;
 		 	default:
-		 		$message = "您已购买".$title."极地海洋公园演出门票".$num."张，订单号".$sn."，请凭订单号到景区指定窗口兑换门票。【极地海洋公园】";
-		 		break;
+		 		$message = urlencode("您已购买".$title.",".$info['product']."门票".$remark.",订单号".$sn.",请凭单号到景区售票处兑换门票【".$info['product']."】");
 		 }
 		 $parameter = "mobile=".$info['phone']."&content=".$message;
-		 //$status = Sms::SAEsendmsg($parameter);
-		 //$status = Sms::sendmsg235($info['phone'],$message);
+		 /*
+		 $status = Sms::SAEsendmsg($parameter);
+		 Sms::local_sms($info['phone'],$sn, urldecode($message),$status,$type);*/
 		 $status = Sms::alizhiyou($info['phone'],$message);
 		 Sms::local_sms($info['phone'],$sn, urldecode($message),$status,$type);
 		 return $status;
@@ -79,26 +70,9 @@ class Sms extends \Libs\System\Service {
 		 $ream = $info['rema'];//错误说明
 		 $code = $info['code'];//错误代码
 		 //$message = urlencode("【数字承德】警告".$title."门票".$num."张订单号".$sn."，请您凭订单号在景区售票处兑换纸质门票！");
-		 $message = urlencode("警告".$title."执行".$rema."时出错，错误代码".$code."【极地海洋公园】");
+		 $message = urlencode("警告".$title."执行".$rema."时出错，错误代码".$code."【帝苑梦华】");
 		 $parameter = "mobile=".$info['phone']."&content=".$message;
 		 return Sms::SAEsendmsg($parameter);
-	}
-	/*短信发送本地记录
-	* @param $phone 目标号码
-	* @param $content 短信内容
-	* @param $status 短信发送状态
-	* @param $type 短信类型
-	*/
-	function local_sms($phone,$sn = null,$content,$status,$type){
-		M('SmsLog')->add(array(
-			'order_sn'=> $sn,
-			'phone' => $phone,
-			'content'=>$content,
-			'status'=>$status,
-			'type'=>$type,
-			'createtime'=>time(),
-			));
-		return true;
 	}
 	private  function alizhiyou($mobile,$msg)
 	{
@@ -108,7 +82,7 @@ class Sms extends \Libs\System\Service {
 			'code' => '222'
 		];
 		$postFields = json_encode($postFields);
-		$url = 'https://api.alizhiyou.com/sms/tomsg';
+		$url = 'https://api.pro.alizhiyou.com/sms/tomsg';
 		$ch = curl_init ();
 		curl_setopt( $ch, CURLOPT_URL, $url ); 
 		curl_setopt( $ch, CURLOPT_HTTPHEADER, array(
@@ -136,6 +110,47 @@ class Sms extends \Libs\System\Service {
 		curl_close ( $ch );
 		return $result;
 	}
+	/*短信发送本地记录
+	* @param $phone 目标号码
+	* @param $content 短信内容
+	* @param $status 短信发送状态
+	* @param $type 短信类型
+	*/
+	function local_sms($phone,$sn = null,$content,$status,$type){
+		M('SmsLog')->add(array(
+			'order_sn'=> $sn,
+			'phone' => $phone,
+			'content'=>$content,
+			'status'=>$status,
+			'type'=>$type,
+			'createtime'=>time(),
+			));
+		return true;
+	}
+	/*微信模板消息发送模板消息 TODO
+     * {{first.DATA}}
+     * 订单号：{{OrderID.DATA}}
+     * 产品名称：{{PkgName.DATA}}
+     * 使用日期：{{TakeOffDate.DATA}}
+     * {{remark.DATA}}
+    */
+    function to_tplmsg($info,$tplmsgid){
+        $attach = unserialize($info['attach']);
+        $template = array(
+            'touser'=>$info['openid'],//指定用户openid
+            'template_id'=>$tplmsgid,
+            'url'   =>  $info['url'],
+            'data'=>array(
+                'first'=>array('value'=>'您好，您的门票订单已预订成功。'."\n"),
+                'OrderID' =>array('value'=>$info['out_trade_no'],'color'=>'#5cb85c'),
+                'PkgName'=>array('value'=>$attach['product_name'],'color'=>'#5cb85c'),
+                'TakeOffDate'=>array('value'=>$attach['plan']."\n",'color'=>'#5cb85c'),
+                'remark'=>array('value'=>$this->tplremark), 
+            )
+        );
+        //发送模板消息
+        $res = $this->api->sendTemplateMessage($template);
+    }
 	/*sae bechtech
 	 * accesskey ：用户接入KEY 
 	 * secretkey ：用户接入密钥 
@@ -150,7 +165,8 @@ class Sms extends \Libs\System\Service {
 		curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE); 
 		$res = curl_exec( $ch );
 		curl_close( $ch );
-	   // $res  = curl_error( $ch );
+	    $res  = curl_error( $ch );
+		//var_dump($res);
 		//var_dump($url);
 		return $res;	
 	}
@@ -163,7 +179,7 @@ class Sms extends \Libs\System\Service {
 			'account'  =>  'N4202325',
 			'password' => '4aYuPt2eGHefdc',
 			'msg' => $msg,
-			'phone' => $mobile, 
+			'phone' => $mobile,
 			'report' => 'true'
 		];
 		$postFields = json_encode($postFields);

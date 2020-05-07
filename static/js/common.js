@@ -353,9 +353,6 @@ function check_idcard_area(code,area,actid,number) {
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
         var site = code.substr(0,length);
-        //var log = 'length:'+length+'code:'+code+'site:'+site+'item:'+area[i]+'area:'+area.length;
-        //console.log(log);
-        //console.log(area);
         if(site === area[i]){
           //发送到服务器验证 TODO
           $.ajax({
@@ -404,6 +401,6 @@ function is_array_unique(arr){
         }
         $printBox.html($contentBox.html()).height("auto");
         window.print();
-        $printBox.empty();//加上这句来清空printBox。
+        //$printBox.empty();//加上这句来清空printBox。
     }
 })(jQuery);

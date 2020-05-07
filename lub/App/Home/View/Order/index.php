@@ -90,7 +90,7 @@
         <table class="table table-condensed table-hover table-responsive table-bordered table-vcenter">
           <colgroup>
           <col width="145px">
-          <col>
+          
           <col>
           <col>
           <col>
@@ -103,7 +103,7 @@
           <thead>
             <tr>
               <td align="center">订单号</td>
-              <td align="center">产品名称</td>
+              
               <td align="center">预约日期</td>
               <td align="center">数量</td>
               <td align="center" class="hidden-xs">金额</td>
@@ -120,8 +120,15 @@
           <tbody>
             <volist name="data" id="vo">
               <tr >
-                <td align="center" ><a href="{:U('Home/Order/orderinfo',array('sn'=>$vo['order_sn'],'type'=>1));}" data-toggle="modal" data-target="#myModal">{$vo.order_sn}</a></td>
-                <td align="center" >{$vo.product_id|product_name}</td>
+                <td align="center">
+                  <p><a href="{:U('Home/Order/orderinfo',array('sn'=>$vo['order_sn'],'type'=>1));}" data-toggle="modal" data-target="#myModal">{$vo.order_sn}</a></p>
+                  
+                  <if condition="$vo['status'] eq 1">
+                    <p>
+                      <a href="{:U('Home/Order/up_order_idcard',array('sn'=>$vo['order_sn'],'type'=>1));}" data-toggle="modal" data-target="#myModal">证件号</a>
+                    </p>
+                  </if>
+                </td>
                 <td align="center" >{$vo.plan_id|planShow}</td>
                 <td align="center" >{$vo.number}</td>
                 <td align="center" >{$vo.money}</td>
@@ -151,7 +158,6 @@
               </tr>
             </volist>
             <tr>
-              <td align="center" ></td>
               <td align="center" ></td>
               <td align="right" >合计:</td>
               <td align="center" >{$info['num']}</td>

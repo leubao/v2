@@ -807,12 +807,12 @@ class Order extends \Libs\System\Service {
 					'createtime' => $createtime,
 				);
 			}
-			//判断门票数据是否一致
-			if((int)count($printList) <> (int)$info['number']){
-				$model->rollback();//事务回滚
-				$this->error = '400018 : 出票失败';
-				return false;
-			}
+			//判断门票数据是否一致 TODO 套票存在问题
+			// if((int)count($printList) <> (int)$info['number']){
+			// 	$model->rollback();//事务回滚
+			// 	$this->error = '400018 : 出票失败，数量有误';
+			// 	return false;
+			// }
 			//批量新增数据
 			$state = $model->table(C('DB_PREFIX').$table)->where($map)->lock(true)->addAll($printList);
 			//获取售票信息
@@ -1263,12 +1263,12 @@ class Order extends \Libs\System\Service {
 				$msg = $info['number']."张";
 			}
 		}
-		//判断门票数据是否一致
-		if((int)count($printList) <> (int)$info['number']){
-			$model->rollback();//事务回滚
-			$this->error = '400018 : 出票失败';
-			return false;
-		}
+		//判断门票数据是否一致 TODO套票时有问题
+		// if((int)count($printList) <> (int)$info['number']){
+		// 	$model->rollback();//事务回滚
+		// 	$this->error = '400018 : 出票失败，数量有误';
+		// 	return false;
+		// }
 		//批量新增数据
 		$state = $model->table(C('DB_PREFIX').$table)->where($map)->lock(true)->addAll($printList);
 		//获取售票信息

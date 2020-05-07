@@ -22,7 +22,7 @@
 <script src="{$config_siteurl}static/js/jquery.cookie.js"></script>
 <!-- BJUI.all 分模块压缩版 -->
 <script src="{$config_siteurl}static/bjui/js/bjui-all.js"></script>
-<script src="{$config_siteurl}static/js/common.js"></script>
+<script src="{$config_siteurl}static/js/common.js?v={$Config.js_version}"></script>
 <!-- plugins -->
 <!-- swfupload for uploadify && kindeditor -->
 <script src="{$config_siteurl}static/bjui/plugins/swfupload/swfupload.min.js"></script>

@@ -222,14 +222,14 @@ class IndexController extends LubTMP {
         $this->wx_init($this->pid);
         session('pid',$this->pid);
         $urls = Wticket::reg_link($user['user']['id'],$this->pid);
-        $produt = D('Product')->where(['id'=>$this->pid])->cache(true)->field('type')->find();
-        if($produt['type'] == 1){
+        $product = D('Product')->where(['id'=>$this->pid])->cache(true)->field('name,type')->find();
+        if($product['type'] == 1){
             $template = 'show';
         }else{
             $template = 'scenic';
         }
         //限制单笔订单最大数
-        $this->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
+        $this->assign('product', $product)->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
             ->assign('urls',$urls)->assign('param',$param)->display($template);
     }
     function check_login($url){
@@ -800,9 +800,10 @@ class IndexController extends LubTMP {
                        $money = $info['money']*100; 
                     }
                     //$money = 1;
-                    $proconf = cache('ProConfig');
-                    $proconf = $proconf[$this->pid][2];
-                    $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
+                    // $proconf = cache('ProConfig');dump(cache('Config'));
+                    // $proconf = $proconf[$this->pid][2];
+                    $config = cache('Config');
+                    $notify_url = $config['siteurl'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
                     $product_name = product_name($this->pid,1);
                     $pay = & load_wechat('Pay',$this->pid);
@@ -815,7 +816,7 @@ class IndexController extends LubTMP {
                     }
                     $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                 }
-            }
+            }dump($info);
             $this->assign('data',$info)->display();
         }
     }

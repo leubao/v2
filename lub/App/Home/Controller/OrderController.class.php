@@ -395,6 +395,7 @@ class OrderController extends Base{
 				$area[$value['priceid']]['areaname'] = areaName($value['areaId'],1);
 				$area[$value['areaId']]['num'] = $area[$value['areaId']]['num']+1;
 			}
+			
 		}else{
 			foreach ($info['info']['data'] as $key => $value) {
 				$area[$value['priceid']]['area'] = $value['priceid'];
@@ -406,7 +407,7 @@ class OrderController extends Base{
 			}else{
 				$table = 'Drifting';
 			}
-			$ticket = M($table)->where(array('order_sn'=>$sn))->field('id,price_id,ciphertext,status,checktime')->select();
+			$ticket = M($table)->where(array('order_sn'=>$sn))->field('id,price_id,idcard,ciphertext,status,checktime')->select();
 			$this->assign('ticket',$ticket);
 		}
 		//取消订单
@@ -1044,5 +1045,53 @@ class OrderController extends Base{
 			$datetime = date('Y-m-d', strtotime('+4 day'));
 			$this->assign('product', $data)->assign('datetime', $datetime)->display();
 		}
+	}
+	/**
+	 * 更新身份证号码
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2020-05-05T22:36:38+0800
+	 * @return   [type]                   [description]
+	 */
+	public function up_order_idcard(){
+		if(IS_POST){
+			$pinfo = I('post.');
+			$order = new \Libs\Service\EditOrder;
+			if(!isset($pinfo['sn']) || empty($pinfo['sn'])){
+				$this->error("参数错误!");
+			}
+			if(!isset($pinfo['seat']) || empty($pinfo['seat'])){
+				$this->error("参数有误!");
+			}
+			$result = $order->upIdcardOrder(trim($pinfo['sn']), $pinfo);
+			if($result){
+				$this->success("更新成功~");
+			}else{
+				$this->error($order->error);
+			}
+		}else{
+			$ginfo = I('get.');
+			if(empty($ginfo)){
+				$this->error("参数错误!");
+			}
+			$order = D('Order')->where(['order_sn'=>$ginfo['sn'],'status'=>1])->field('id,order_sn,plan_id')->find();
+			if(empty($order)){
+				$this->error("订单状态不支持此项操作!");
+			}
+			$plan = F('Plan_'.$order['plan_id']);
+			if(empty($plan)){
+				$plan = D('Plan')->where(['id' => $order['plan_id']])->field('id,seat_table')->find();
+			}
+			$ticket = M($plan['seat_table'])->where(['order_sn'=>$order['order_sn'],'status'=>2])->field('id,seat,idcard')->select();
+			$ticketL = [];
+			foreach ($ticket as $k => $v) {
+				if(!empty($v['idcard'])){
+					$ticketL[] = $v;
+				}
+			}
+			$this->assign('ticket', $ticketL);
+			$this->assign('order',$order);
+			$this->display();
+		}
+		
 	}
 }
