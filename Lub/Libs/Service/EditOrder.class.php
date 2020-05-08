@@ -4,7 +4,7 @@
  * @Author: IT Work
  * @Date:   2020-05-05 12:12:38
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-05-06 21:59:47
+ * @Last Modified time: 2020-05-08 13:19:39
  */
 namespace Libs\Service; 
 use Org\Util\Date;
@@ -53,7 +53,7 @@ class EditOrder extends \Libs\System\Service {
 				}
 				if(isset($ticket[$k])){
 					//校验是否可用
-					if($this->checkIdCard($v, $order['activity'])){
+					if($this->checkIdCard($v, $order['activity'], $sn)){
 						$upState = $model->table(C('DB_PREFIX'). $plan['seat_table'])->where(array('id'=>$k,'status' => 2))->setField('idcard', $v);
 						if(!$upState){
 							//记录错误
@@ -64,7 +64,7 @@ class EditOrder extends \Libs\System\Service {
 							$seat[$seatid]['idcard'] = $v;
 						}
 					}else{
-						$this->error = $v.'更新失败~';
+						$this->error = $v.'已经参加过活动~';
 						return false;
 					}
 				}
@@ -91,8 +91,8 @@ class EditOrder extends \Libs\System\Service {
     /**
      * 校验身份证号
     */
-    public function checkIdCard($idcard, $activity){
-    	$map = ['idcard' => $idcard, 'activity_id' => $activity];
+    public function checkIdCard($idcard, $activity, $sn){
+    	$map = ['idcard' => $idcard, 'activity_id' => $activity, 'order_sn'=>[NEQ,$sn]];
 		$count = (int)D('IdcardLog')->where($map)->count();
 		if($count > 0){
 			//读取活动
