@@ -109,7 +109,6 @@ class Api extends \Libs\System\Service {
             $map['plantime'] = $plantime;
             $plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,quotas,plantime,starttime,endtime,games')->select();
         }
-       // dump($map);
         
         //拉取坐席
         if($ginfo == '1'){
@@ -166,15 +165,17 @@ class Api extends \Libs\System\Service {
                     case '2':
                         $tooltype = '00';
                         $name = date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']);
+
                         break;
                     case '3':
                         $tooltype = tooltype($param['tooltype'],1);
                         $name = '[第'.$v['games'].'趟-'.$tooltype.'] '. date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']);
-                        $number = D('Drifting')->where($where)->count();
-                        //获取当前可售数量
-                        $nums = $v['quotas'] - $number;
+                        
                         break;
                 }
+                $number = D($v['seat_table'])->where($where)->count();
+                //获取当前可售数量
+                $nums = $v['quotas'] - $number;
                 $area[] = array(
                     'tooltype' => $tooltype,
                     'name'  => $name,

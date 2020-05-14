@@ -228,7 +228,7 @@ function check_idcard(code) {
  * @return   {[type]}                            [description]
  */
 function check_idcard_area(code,area,actid) {
-    var length = 0,retu = '';
+    var length = 0,retu = true;
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
         var site = code.substr(0,length);

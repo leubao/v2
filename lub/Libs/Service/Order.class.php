@@ -446,7 +446,6 @@ class Order extends \Libs\System\Service {
 		}
 		//获取订单初始数据
 		$scena = Order::is_scena($scena, $is_pay);
-		
 		switch ((int)$act) {
 		 	case 5:
 		 		//多产品组合套票
@@ -549,7 +548,7 @@ class Order extends \Libs\System\Service {
 		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){$this->error = "400005 : 销售计划已暂停销售...";return false;}
 		$seat = Order::pack_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['param'][0]['activity'],$channel);
-		//dump($seat);
+		
 		/*景区*/
 		if($plan['product_type'] <> '1'){
 			if($this->check_salse_num($info['plan_id'],$plan['quotas'],$plan['seat_table'],$seat['num']) == '400'){
@@ -764,15 +763,15 @@ class Order extends \Libs\System\Service {
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		
-		$ainfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('id,type,param')->find();
+		$ainfo = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->field('id,type,real,param')->find();
 		$aparam = json_decode($ainfo['param'],true);
-
+		//存储已写入的门票 当实名制时有效
+		$ids = [];
 		foreach ($info['info']['data']['area'] as $key => $value) {
 			//获取销售计划
 			if((int)$info['product_id'] != (int)$value['product']){
-
 				$plan_id = D('Plan')->where(['plantime'=> $plan['plantime'],'status'=>2,'product_id'=>$value['product']])->getField('id');
-				$plan = F('Plan_'.$plan_id);//dump($plan);
+				$plan = F('Plan_'.$plan_id);
 			}else{
 				$plan = F('Plan_'.$info['plan_id']);
 			}
@@ -808,15 +807,22 @@ class Order extends \Libs\System\Service {
 				);
 			}
 			//判断门票数据是否一致 TODO 套票存在问题
-			// if((int)count($printList) <> (int)$info['number']){
-			// 	$model->rollback();//事务回滚
-			// 	$this->error = '400018 : 出票失败，数量有误';
-			// 	return false;
-			// }
+			
+			if(!$ainfo['real'] && (int)count($printList) <> (int)$info['number']){
+				$model->rollback();//事务回滚
+				$this->error = '400017 : 出票失败，数量有误';
+				return false;
+			}
 			//批量新增数据
 			$state = $model->table(C('DB_PREFIX').$table)->where($map)->lock(true)->addAll($printList);
-			//获取售票信息
-			$saleList = $model->table(C('DB_PREFIX').$table)->where(array('order_sn'=>$info['order_sn']))->field('id,ciphertext,plan_id,sale,price_id,idcard')->select();
+			//获取售票信息 开启实名制时读最后一次循环
+			if($ainfo['real'] && !empty($ids)){
+				$amap = array('order_sn'=>$info['order_sn'], 'id' => array('notin', $ids));
+			}else{
+				$amap = array('order_sn'=>$info['order_sn']);
+			}
+			$saleList = $model->table(C('DB_PREFIX').$table)->where($amap)->field('id,ciphertext,plan_id,sale,price_id,idcard')->select();
+			
 			foreach ($saleList as $ks => $vs) {
 				$sale[$ks] = unserialize($vs['sale']);
 				$dataList[] = array(
@@ -829,6 +835,7 @@ class Order extends \Libs\System\Service {
 						'plan_id' => $vs['plan_id'],
 						'child_ticket' => arr2string($child_t,'priceid'),
 					);
+				$ids[] = $vs['id'];
 				//统计身份证号
 				$idcard[] = [
 					'plan_id'		=>	$vs['plan_id'],
@@ -2489,9 +2496,9 @@ class Order extends \Libs\System\Service {
 					'product'=>$ve['product'],
 					'priceid'=>$ve['ticket'],
 					'price'=>$ticket[$ve['ticket']]['price'],
+					'idcard' => $v['idcard'],
 					'num'=>$v['num']
 				);
-
 				
 				$money = Order::amount($ve['ticket'],$v['num'],$v['areaId'],$ve['product'],$settlement,$channel);
 				if($money){
