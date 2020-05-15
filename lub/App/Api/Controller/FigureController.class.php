@@ -72,11 +72,12 @@ class FigureController extends Controller{
 			$pinfo = json_decode($_POST['info'],true);
 			$param = I('get.param',0,intval) ? I('get.param',0,intval) : '3';
 			$product = (string)base_convert(I('get.pid'),16,10);
-			if(!session('fugure')){
-				$return = ['statusCode' => 300];
-			}else{
-				$return = \Libs\Service\Api::get_plan($product,$pinfo,$param);
-			}
+			// if(!session('fugure')){
+			// 	$return = ['statusCode' => 300];
+			// }else{
+			// 	$return = \Libs\Service\Api::get_plan($product,$pinfo,$param);
+			// }
+			$return = \Libs\Service\Api::get_plan($product,$pinfo,$param);
 			die(json_encode($return));
 		}
 	}

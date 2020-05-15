@@ -4,7 +4,7 @@ namespace Libs\Service;
  * @Author: IT Work
  * @Date:   2019-12-18 23:35:56
  * @Last Modified by:   IT Work
- * @Last Modified time: 2019-12-20 16:24:32
+ * @Last Modified time: 2020-04-24 23:58:38
  */
 class Jxcity extends \Libs\System\Service {
 	
@@ -14,7 +14,7 @@ class Jxcity extends \Libs\System\Service {
     	//查询前一天数据
     	if($total === 0){
     		$day = date('Ymd', strtotime($day));
-    		$plan = M('Plan')->where(array('plantime'=>$day))->field('id')->select();
+    		$plan = M('Plan')->where(array('plantime'=>$day,'product_id'=>43))->field('id')->select();
     		$total = D('Order')->where(['plan_id'=>['in', array_column($plan, 'id')]])->sum('number');
     	}
     	$body = [[
@@ -44,6 +44,7 @@ class Jxcity extends \Libs\System\Service {
     			array('ELT', $date), 
     			'AND' 
     		),
+            'product_id' => 43,
     		'status' => ['in', ['1','9']]
     	);
     	$total = D('Order')->where($map)->sum('number');
@@ -78,9 +79,10 @@ class Jxcity extends \Libs\System\Service {
     	$map = array(
     		'createtime' => array(
     			array('EGT', strtotime(date('Y-m-d', $date))), 
-    			array('ELT', $date), 
+    			array('ELT', $date),
     			'AND' 
     		),
+            'product_id' => 43,
     		'status' => ['in', ['9']]
     	);
     	$total = D('Order')->where($map)->sum('number');

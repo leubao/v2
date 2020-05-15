@@ -12,15 +12,441 @@ use Libs\Service\Api;
 use Libs\Service\Order;
 use Common\Model\Model;
 use Libs\Service\Report;
+use Libs\Service\ArrayUtil;
+
 class TempController extends ApiBase {
+
+  function tongpiao(){
+    //1、基于主体读取统票订单
+   //  $list = D('Order')->where(['activity'=>58,'createtime'=>['gt',strtotime('20200501')],'status'=>['in', ['1','9']]])->field('id,order_sn,number,money')->select();
+   //  $olist = D('OrderData')->where(['oid'=>['in', array_column($list, 'id')]])->select();
+   // dump($list);
+   //  foreach ($olist as $k => $v) {
+   //    $info = unserialize($v['info']);
+   //    $ids = array_column($info['data'], 'id');
+   //    $ids = array_unique($ids);
+   //    $data = [];
+   //    foreach ($info['data'] as $key => $value) {
+
+   //      if(in_array($value['id'], $ids)){
+   //        $ids = array_diff($ids, [$value['id']]);
+   //        $data[] = $value;
+   //        dump($value);
+   //      }
+   //    }
+   //    $info['data'] = $data;
+   //    dump($v);
+   //    dump($info);
+   //    D('OrderData')->where(['oid'=>$v['oid']])->setField('info', serialize($info));
+   //    //dump($info);
+   //  }
+    //2、重新计算统票总数
+    // foreach ($list as $k => $v) {
+    //   $dlist = D('Drifting')->where(['order_sn'=>$v['order_sn']])->select();
+    //   dump($dlist);
+    //   if($v['number'] === count($dlist)){
+    //     echo $v['number'].'='.$count.'='.$v['order_sn'].'<br />';
+    //   }
+    // }
+    //3、更新总数
+  }
+
+  function get_temp_seat(){
+    //读取模板
+    $area = D('Area')->where(['status'=>1,'template_id'=>32])->field('id,name,seat,seats,seatid')->select();
+    $row = [];
+    $col = [];
+    $seatid = [];
+    foreach ($area as $k => $v) {
+      $seat = unserialize($v['seats']);
+      $rows = str_replace("','", ",", $seat['rows']);
+      $cols = str_replace("','", ",", $seat['columns']);
+      if(!empty($row)){
+        $row = array_merge($row, explode(',', $rows));
+      }else{
+        $row = explode(',', $rows);
+      }
+
+      if(!empty($col)){
+        $col = array_merge($col, explode(',', $cols));
+      }else{
+        $col = explode(',', $cols);
+      }
+
+      //合并已存在的座位
+      if(empty($seatid)){
+        $seatid = unserialize($v['seatid']);
+      }else{
+        $seatid = array_merge($seatid, unserialize($v['seatid']));
+      }
+      
+    }dump($seatid);
+    //去重
+    $row = array_unique($row);
+    $col = array_unique($col);
+    //dump($row);dump($col);
+    //排序
+    sort($row);
+    sort($col);  
+    //获取首尾
+    //判断是否区分单双号 TODO
+    $odd = [];
+    $even = [];
+    $rowList = [];
+    $colList = [];
+    foreach ($col as $k => $v) {
+      if($v%2 !== 0){
+        $odd[] = $v;
+      }else{
+        $even[] = $v;
+      }
+    }
+    //奇数降序，
+    asort($odd);
+    //偶数升序
+    arsort($even);
+    //集合
+    $colList = array_merge($even,$odd);
+    //判断朝向 TODO
+    $rowList = rsort($rowList);
+    //生成座位
+    foreach ($rowList as $key => $value) {
+      foreach ($colList as $k => $v) {
+        //判断是否存在座位
+        
+        $seatList[$value][] = [
+          'row'     => $value,  
+          'col'     => $v,
+          'is_seat' => $is_seat,
+          'bgColor' => $bgColor,
+          'seat'    => $value.'-'.$v,
+        ];
+      }
+    }
+
+  }
+  function get_seat_list(){
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type, sign, timestamp, Authorization, X-Requested-With, token');
+    $row = 35;
+    $col = 50;
+    $rowList = [];
+    $colList = [];
+    $odd = [];
+    $even = [];
+    //格式化列
+    for ($i=1; $i < $col+1; $i++) { 
+      if($i%2 !== 0){
+        $odd[] = $i;
+      }else{
+        $even[] = $i;
+        
+      }
+    }
+    //奇数降序，
+    asort($odd);
+    //偶数升序
+    arsort($even);
+    //集合
+    $colList = array_merge($even,$odd);
+    //格式化行
+    for ($i=1; $i < $row+1; $i++) { 
+      $rowList[] = $i;
+    }
+    rsort($rowList);
+    //TODO判断是从上到下 还是从下道上
+   
+    //生成座位
+    foreach ($rowList as $key => $value) {
+      foreach ($colList as $k => $v) {
+        if($v%2 === 0 || $value%2 !== 0){
+          $is_seat = true;
+        }else{
+          $is_seat = false;
+        }
+        if($value%2 === 0 && $v%2 === 0){
+          $bgColor = 'red';
+        }
+        $seatList[$value][] = [
+          'row'     => $value,  
+          'col'     => $v,
+          'is_seat' => $is_seat,
+          'bgColor' => $bgColor,
+          'seat'    => $value.'-'.$v,
+        ];
+      }
+    }
+    rsort($seatList);
+    $return = [
+      "code" => 200,
+      "data" => [
+        'row' =>  $rowList,
+        'col' =>  $colList,
+        'seat_list' => $seatList
+      ],
+      "msg" => 'ok'
+    ];
+    die(json_encode($return));
+  }
+  //获取销售计划
+  function get_plan_list()
+  {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type, sign, timestamp, Authorization, X-Requested-With, token');
+    $plan = D('Plan')->where(['status'=>2])->field('id,plantime,starttime,endtime,games')->select();
+    foreach ($plan as $k => $v) {
+      $v['title'] = planShow($v['id'], 1, 1);
+    }
+    $return = [
+      "code" => 200,
+      "data" => $plan,
+      "msg" => 'ok'
+    ];
+    die(json_encode($return));
+  }
+  public function cs_link()
+  {
+      // $start = 1;
+      // $end = 100;
+      // $row = 31;
+      // $map = [
+      //   'status' => ['in','1,9'],
+      //   'pay'    => 5,
+      //   'product_id' => 44,
+      //   'type' => 8,
+      //   'id' => ['gt','117060']
+      // ];
+      // $order = D('order')->where($map)->field('order_sn,id')->select();
+      // dump($order);
+        //短信发送测试
+        // $msg = [
+        //   'phone' => '13463652179',
+        //   'sn'  =>  '12312312',
+        //   'product' => '青龙大瀑布',
+        //   'title' => '青龙瀑布0801',
+        //   'remark' => '青龙大瀑布',
+        //   'num' => '22'
+        // ];
+        //  \Libs\Service\Sms::order_msg($msg,'1');
+      
+      // foreach ($order as $key => $value) {
+      //   load_redis('lpush','PreOrder',$value['order_sn']);
+      // }
+      //批量生成报表
+      // $dateList = getDateFromRange('20200301','20200424');
+      // foreach ($dateList as $key => $value) {
+      //   $date = date('Ymd',strtotime($value));
+        
+      //   $return = \Libs\Service\Report::report($date); 
+      //   echo $date .'='.$return;
+      // }
+      // $list = [
+
+      // ];
+      // $sn = '3181192757201';
+      // $order = D('order_data')->where(['order_sn'=>$sn])->find();
+      // $info = unserialize($order['info']);
+      // foreach ($info['data'] as $key => $v) {
+      //   $v['priceid'] = 567;
+      //   $v['discount'] = 269;
+      //   $data[] = $v;
+      //   $idx[] = $v['id'];
+      // }
+      // $info['data'] = $data;
+      // D('order_data')->where(['order_sn'=>$sn])->setField('info', serialize($info));
+      // D('scenic')->where(['order_sn'=>$sn])->setField('price_id', 567);
+      // dump($order);
+      // for ($i = $start; $i < $end; $i++) {
+      //   if($i%2 == 0){
+      //     $a[] = $i;
+      //   }else{
+      //     $b[] = $i;
+      //   }
+      //   // for ($rr = 1; $rr < $row; $rr++) { 
+      //   //   if($i%2 == 0){
+      //   //     $seatArr[$rr][$i] = $rr.'-'.$i;
+      //   //   }else{
+      //   //     $seatArr[$rr][$i] = $rr.'-'.$i;
+      //   //   }
+      //   // }
+      // }
+      // rsort($b);
+      // $com = array_merge($b,$a);
+      // for ($rr = 1; $rr < $row; $rr++) { 
+      //   foreach ($com as $key => $value) {
+      //     $seatArr[$value][$rr] = $rr.'-'.$value;
+      //   }
+      // }
+      // //var_dump($a,$b);
+      // dump(array_merge($b,$a));
+      // echo json_encode($seatArr);
+      // $sn = I('get.sn');
+      // $ticket = \Libs\Service\Ticket::createTicket($sn);
+      
+      // $qr = \Libs\Service\Encry::getQrData($ticket['sns']);
+      // var_dump($ticket, $qr);
+      // $plan = D('Plan')->where(['status'=>2])->select();
+
+      // //dump($plan);
+      // foreach ($plan as $k => $v) {
+      //   $product = D('Product')->where(['id'=>$v['product_id']])->field('id,idCode')->cache('productData', 3600)->find();
+      //   $param = unserialize($v['param']);
+      //   //dump($param);
+      //   if(in_array($v['status'], ['1','3','4'])){
+      //     $status = false;
+      //   }else{
+      //     $status = true;
+      //   }
+      //   $plans[] = [
+      //     'id'        =>  $v['id'],
+      //     'plantime'  =>  $v['plantime'],
+      //     'starttime' =>  $v['starttime'],
+      //     'endtime'   =>  $v['endtime'],
+      //     'ticket'    =>  $param['ticket'],
+      //     'status'    =>  $status
+      //   ];
+      //   $postData = [
+      //     'product' =>  $product['idcode'],
+      //     'plan'    =>  $plans
+      //   ];
+      //   vendor('Hprose.HproseHttpClient');
+      //   $client = new \HproseHttpClient('https://api.leubao.com/open/yunlu/start', false);
+      //   // 或者采用
+      //   //$data = ['time' => date('Y-m-d H:i:s'),'work' => '99'];
+      //   $result = $client->post_plan($postData);
+      //   dump($result);
+        //删除已过期的Redis
+        // $plantime = strtotime('2020-01-01');
+        // $plan = D('Plan')->where(['plantime'=>['lt',$plantime],'status'=>'4'])->field('id,seat_table')->select();
+        // foreach ($plan as $k => $v) {
+        //   $name_group = 'seat_group_'.$v['seat_table'];
+        //   load_redis('delete', $name_group);
+        //   $seat_table = 'seat_'.$v['seat_table'];
+        //   load_redis('delete', $seat_table);
+        // }
+      
+        
+    // $plan = D('Plan')->where(['status'=>2])->field('id,product_id,plantime')->select();
+    // // dump($plan);
+    // foreach ($plan as $k => $v) {
+    //   $starttime = date('Y-m-d', $v['plantime']). '20:30:00';
+    //   $endtime = date('Y-m-d', $v['plantime']). '21:30:00';
+    //   //$endtime = strtotime($endtime);dump($endtime);
+    //   $updata = [
+    //     'starttime' =>  strtotime($starttime),
+    //     'endtime'   =>  strtotime($endtime)
+    //   ];
+    //   D('Plan')->where(['id'=>$v['id']])->save($updata);
+    // }
+
+    // $sn = '9738411';
+    // $wechat = & load_wechat('Extends',100,1);dump($wechat);
+    // $snTosecret = putIdToCode($sn, 8);
+    // $sn = getCodeToId($snTosecret, 8);
+    // $lurl = U('Api/Index/ticket',['tid'=>$snTosecret]);
+    // $surl = $wechat->getShortUrl($lurl);
+    // dump($surl);
+    // $list = D("Order")->field('order_sn,product_id')->select();
+    // foreach ($list as $k => $v) {
+    //   D('Scenic')->where(['order_sn'=>$v['order_sn']])->setField('product_id', $v['product_id']);
+    // }
+    //删除已过期的Redis
+    // $plantime = strtotime('2019-07-01');
+    // $plan = D('Plan')->where(['plantime'=>['gt',$plantime],'status'=>'4'])->field('id,seat_table')->select();
+    // foreach ($plan as $k => $v) {
+    //   $name_group = 'seat_group_'.$v['seat_table'];
+    //   load_redis('delete', $name_group);
+    //   $seat_table = 'seat_'.$v['seat_table'];
+    //   load_redis('delete', $seat_table);
+    //}
+    // $url = 'https://api.pro.alizhiyou.com/sgqibU2WZ8.txt';
+    // $status = getHttpContent($url, 'GET');
+    // $url = 'https://api.leubao.com/ctrip';
+    // $status = getHttpContent($url, 'POST');
+    // dump($status);
+    //  $sn = '907011372167120';
+    //  $snTosecret = putIdToCode($sn, 8);
+    // $qrInfo = ['18512','5911','3722','1','8'];
+    //   (int)$position = array_key_last($qrInfo);
+    //   dump($qrInfo);dump($position);
+    //     $string = '';
+    //     foreach ($qrInfo as $k => $v) {
+    //         if($k < $position){
+    //             $string .= $v;
+    //         }
+    //     }
+
+    //  dump(creatCheckDigit($string));
+    // $scret = getCodeToId($snTosecret, 8);
+    // dump($scret);
+    // $lurl = U('Api/Index/ticket',['tid'=>$snTosecret]);
+    // dump($lurl);
+  }
   public function index()
   {
-        $list = D('IdcardLog')->field('idcard')->order('id desc')->select();
-        foreach ($list as $key => $value) {
-          $ab[] = $value['idcard'];
+     
+        $nextId = '46704';
+        
+        $date = date('Ymd');
+        //load_redis('delete', 'notice_sn_'.$date);
+        $datetime = strtotime($date);
+      //获取API下单的订单号
+        $olist = D('Order')->where(['createtime'=>['gt', $datetime], 'status'=>9, 'addsid'=>5])->field('id,order_sn,number')->order('id desc')->select();
+        //二维数组转一维数组
+        $nSnArr = array_column($olist,'order_sn');
+        //获取今天已通知的sn
+        $snList = load_redis('lrange','notice_sn_'.$date,0,-1);
+        dump($snList);
+        if(empty($snList)){
+            $diffSn = $nSnArr;
+            //判断
+            $hdate = date('Ymd', strtotime('-1 day'));
+            $hSn = load_redis('lsize', 'notice_sn_'.$hdate);
+            if($hSn > 0){
+              load_redis('delete', 'notice_sn_'.$date);
+            }
+        }else{
+            //取得差集
+            $diffSn = array_diff($nSnArr,$snList);
         }
-        dump(array_count_values($ab));
+        foreach ($olist as $k => $v) {
+            if(in_array($v['order_sn'], $diffSn)){
+                //load_redis('lpush','notice_sn_'.date('Ymd'), $v['order_sn']);
+            }
+        }
+        //dump($diffSn);
   }
+  /**
+     * 设置签名
+     * @author helei
+     */
+    public function setSign($data)
+    {
+        $values = ArrayUtil::removeKeys($data, ['sign','appkey']);
+
+        $values = ArrayUtil::arraySort($values);
+
+        $signStr = ArrayUtil::createLinkstring($values);
+
+        $values['sign'] = $this->makeSign($signStr,$data['appkey']);
+        return $values;
+    }
+    /**
+     * 签名算法实现 目前签名算法支持md5
+     * @param string $signStr 签名字符串
+     * @param string $appeky app秘钥
+     * @return string
+     */
+    protected function makeSign($signStr,$appkey)
+    {
+        $signStr .= '&key=' . $appkey;
+        $sign = md5($signStr);
+        return strtoupper($sign);
+    }
         //测试计划接入
     function c_plan(){
       $url = "http://ticket.leubao.com/api.php?a=api_plan";
@@ -39,28 +465,29 @@ class TempController extends ApiBase {
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
         'money' =>  '0.01',
-        'plan'  =>  '3413',
-        'sn'    =>  get_order_sn('9999'),
+        'plan'  =>  '3659',
+        'sn'    =>  get_order_sn('3299'),
         'oinfo' =>  array('0'=>array('areaId'=>'151','priceid'=>'34','price'=>'0.01','num'=>'1')),
         'crm'   =>  array('contact'=>'联系人','phone'=>'18631451216'),
         'param' =>  array('remark'=>'备注..')
       );
       $post['data'] = json_encode($post);
       $aa = $this->curl_server($url,$post);
-      dump(json_encode($aa));
+      dump($aa);
     }
+
     //测试通用order
     function c_booking_order(){
       $url = "http://ticket.leubao.com/api.php?a=api_booking_order";
       $post = array(
         'appid' => '26628',
         'appkey'=> '8613f25b1f2691c8a1db85f1cb095d29',
-        'money' =>  '0.1',
+        'money' =>  '0.01',
         'product_id' => '41',
-        'datetime'  =>  '2017-02-28',
-        'sn'    =>  get_order_sn('9999'),
-        'oinfo' =>  array(array('priceid'=>'34','price'=>'0.1','num'=>'1')),
-        'crm'   =>  array('contact'=>'联系人','phone'=>'18631451216','id_card'=>'1304231988909171234'),
+        'datetime'  =>  '2018-09-30',
+        'sn'    =>  get_order_sn('13999'),
+        'oinfo' =>  array(array('priceid'=>'34','price'=>'0.01','num'=>'1')),
+        'crm'   =>  array('contact'=>'联系人','phone'=>'18631451216','id_card'=>''),
         'param' =>  array('remark'=>'备注..')
       );
       $post['data'] = json_encode($post);
@@ -460,6 +887,18 @@ class TempController extends ApiBase {
         }
         
         //dump($return);
+    }
+    public function correction()
+    {
+        //读取单条记录之后所有相关记录  
+        //将其余额全部机上6763
+        $where = [
+          'id'    =>  ['egt',59028],
+          'crm_id'=>  '20'
+        ];
+        //$list = D('CrmRecharge')->where($where)->field('id,crm_id')->select();
+        //echo count($list).'<br>';
+        //echo D('CrmRecharge')->where($where)->setInc('balance',6763);
     }
     /*
     向服务端发送验证请求

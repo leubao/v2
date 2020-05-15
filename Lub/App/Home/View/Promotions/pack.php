@@ -333,13 +333,14 @@ $(function() {
         scenic_drifting_plan(selectdate,'9',{$data['product_id']},{$data.id});
     });
     /*活动门票*/
-  $("#printActivty").bind("click",function(){
+  $("#printActivty").bind("click", function(){
     var rstr = "",
       vmima = "",
       vMobile = "",
       tour = '1', 
       city = '35',
       activety = {$data.id},
+      activety_area = [],
       id_card = '',
       real = {$data['real']},
       plan = $('#planID').val(),
@@ -387,6 +388,29 @@ $(function() {
           return false;
         }
         let idcardList = [];
+        let re = true;
+        $("#cart .idcard").each(function(){
+          //去除空格
+          var idcardThis = $.trim($(this).val());
+          //判断身份证是否可用
+          if(!check_idcard(idcardThis)){
+            layer.msg('身份证号'+idcardThis+'有误!');
+            re = false;
+            return false;
+          }else if(!check_idcard_area(idcardThis,activety_area,activety)){
+            layer.msg('身份证号'+idcardThis+'该地区不参加活动或该用户已参加过活动!');
+            re = false;
+            return false;
+          }
+          idcardList.push(idcardThis);
+        });
+        if(is_array_unique(idcardList)){
+            layer.msg('身份证号码重复!');
+            return false;
+        }
+        if(!re){
+           return false;
+        } 
         $("#cart tr").each(function(i){
             var fg  = i+1 < length ? ',':' ';/*判断是否增加分割符*/
             var ids = this.id.split("_");

@@ -95,7 +95,7 @@ class CheckController extends Base{
 					//读取活动
 					$actInfo = D('Item/Activity')->getActInfo($ginfo['actid']);
 					$number = (int)$actInfo['param']['info']['number'];
-					//var_dump($number > 0, $count > $number,$number,$count);
+					var_dump($number > 0, $count > $number,$number,$count);
 					if($number > 0){
 						if($count >= $number){
 							$return = 0;
