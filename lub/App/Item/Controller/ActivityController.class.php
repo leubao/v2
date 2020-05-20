@@ -67,11 +67,13 @@ class ActivityController extends ManageBase{
 	 			$info['card'] = $card;
 	 			$info['voucher'] = $pinfo['voucher'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		//组团销售
 	 		if((int)$pinfo['type'] === 4){
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		//多产品套票
 	 		if((int)$pinfo['type'] === 5){
@@ -88,12 +90,14 @@ class ActivityController extends ManageBase{
 	 				'price' =>  $pinfo['price'],
 	 				'discount' => $pinfo['discount']
 	 			];
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		//单场限额
 	 		if((int)$pinfo['type'] === 6){
 	 			
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		//限时秒杀
 	 		if((int)$pinfo['type'] === 7){
@@ -103,6 +107,7 @@ class ActivityController extends ManageBase{
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		//预约销售
 	 		if((int)$pinfo['type'] === 8){
@@ -113,10 +118,12 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['today']	= $pinfo['today'];
 	 			$info['pre_model'] = $pinfo['pre_model'] ? $pinfo['pre_model'] : '2';
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		//窗口促销
 	 		if(in_array((int)$pinfo['type'],['10'])){
 	 			$info['ticket'] = $pinfo['ticket_id'];
+	 			$info['limit'] = $pinfo['limit'];
 	 		}
 	 		$param = array(
 	 			'info' =>  $info,
@@ -196,6 +203,7 @@ class ActivityController extends ManageBase{
 	 			$info['card'] = $actinfo['param']['info']['card'];
 	 			$info['voucher'] = $actinfo['param']['info']['voucher'];
 	 			$info['ticket'] = $actinfo['param']['info']['ticket'];
+	 			
 	 		}
 	 		//组团销售 单场限额
 	 		if(in_array($pinfo['type'], ['4','6'])){
@@ -209,11 +217,13 @@ class ActivityController extends ManageBase{
 	 			$info['today']	= $actinfo['param']['info']['today'];
 	 			$info['pre_model'] = $actinfo['param']['info']['pre_model'];
 	 		}
+	 		$info['limit'] = $actinfo['param']['info']['limit'];
 	 		$info['scope'] = $scope;//参与范围
 	 		$param = array(
 	 			'info' =>  $info,
 	 		);
 	 		if(D('Item/Activity')->where(['id'=>$pinfo['id']])->setField('param',json_encode($param))){
+	 			load_redis('delete','actInfo_'.$pinfo['id']);
 	 			$this->srun("更新成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 	 		}else{
 	 			$this->erun("更新失败!");
@@ -287,6 +297,7 @@ class ActivityController extends ManageBase{
 	 			$actinfo = $this->get_activity($pinfo['id']);
 	 			$info['scope'] = $actinfo['param']['info']['scope'];
 	 		}
+	 		$info['limit'] = $pinfo['limit'];
 	 		$data = array(
 	 			'id'	=>	$pinfo['id'],
 	 			'title'	=>	$pinfo['title'],
@@ -309,6 +320,7 @@ class ActivityController extends ManageBase{
 		 		$data['param'] = json_encode($param);
 	 		}
 	 		if(D('Item/Activity')->save($data)){
+	 			load_redis('delete','actInfo_'.$pinfo['id']);
 	 			$this->srun("更新成功!",array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 	 		}else{
 	 			$this->erun("更新失败!");

@@ -227,7 +227,7 @@ function check_idcard(code) {
  * @param    {objct}      area                  允许区域
  * @return   {[type]}                            [description]
  */
-function check_idcard_area(code,area,actid) {
+function check_idcard_area(code,area,actid,plan) {
     var length = 0,retu = true;
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
@@ -239,7 +239,7 @@ function check_idcard_area(code,area,actid) {
             type: 'GET',
             dataType: 'JSON',
             async:false,
-            data: {'ta': '31','idcard': code, 'actid': actid},
+            data: {'ta': '31','idcard': code, 'actid': actid, 'plan': plan},
             error: function(){
               layer.msg('服务器请求超时，请检查网络...');
             },

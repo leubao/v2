@@ -56,10 +56,11 @@
               <span class="remark">限制渠道商参与</span>
             </td>
             <td>实名制入园:</td><td>
-              <select name="real" class="required" data-toggle="selectpicker" data-rule="required">
+              <select name="real" id="real" class="required" data-toggle="selectpicker" data-rule="required">
                 <option value="1">开启</option>
                 <option value="0" selected>关闭</option>
               </select>
+              
               <span class="remark">下单时需要输入身份证</span>
             </td>
         </tr>
@@ -73,11 +74,14 @@
                   </volist>
                 </select>
             </td>
-            <td>配额校验:</td>
-            <td><select name="is_quota" class="required" data-toggle="selectpicker" data-rule="required">
-                <option value="1">开启</option>
-                <option value="0" selected>关闭</option>
-              </select><span class="remark">下单时受配额限制</span>
+            <td>身份证校验:</td>
+            <td>
+              <span id="real_limit" style="display: none;">
+                <select name="limit" id="limit" data-toggle="selectpicker">
+                  <option value="1" selected>按活动限制</option>
+                  <option value="2">按销售计划限制</option>
+                </select>
+              </span>
             </td>
         </tr>
         <tr>
@@ -90,7 +94,13 @@
             </select></td>
         </tr>
         <tr>
-          <td>备注:</td><td colspan="3"><input type="text" name="remark" placeholder="如:备注" value="" size="50"></td>
+          <td>配额校验:</td>
+            <td><select name="is_quota" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1">开启</option>
+                <option value="0" selected>关闭</option>
+              </select><span class="remark">下单时受配额限制</span>
+            </td>
+          <td>备注:</td><td><input type="text" name="remark" placeholder="如:备注" value="" size="40"></td>
         </tr>
       </tbody>
     </table>
@@ -300,5 +310,15 @@ $(document).ready(function() {
       $('#remark').html('票型配合销售计划来实现票型限制场次销售');
     }
   });
+  $('#real').change(function() {
+    var real = $(this).children('option:selected').val();
+    if(real == 1){
+      $('#real_limit').css('display', 'block');
+      $('#limit').attr("disabled",false);
+    }else{
+      $('#real_limit').css('display', 'none');
+      $('#limit').attr("disabled",true);
+    }
+  })
 });
 </script>

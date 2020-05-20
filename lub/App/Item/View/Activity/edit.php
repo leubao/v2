@@ -38,6 +38,22 @@
             </td>
         </tr>
         <tr>
+            <td>参与范围:</td>
+            <td><select name="scope" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1" <if condition="$data['scope'] eq 1">selected</if>>开启</option>
+                <option value="0" <if condition="$data['scope'] eq 0">selected</if>>关闭</option>
+              </select>
+              <span class="remark">限制渠道商参与</span>
+            </td>
+            <td>实名制入园:</td><td>
+              <select name="real" id="real" class="required" data-toggle="selectpicker" data-rule="required">
+                <option value="1" <if condition="$data['real'] eq 1">selected</if>>开启</option>
+                <option value="0" <if condition="$data['real'] eq 0">selected</if>>关闭</option>
+              </select>
+              <span class="remark">下单时需要输入身份证</span>
+            </td>
+        </tr>
+        <tr>
           <td>
             开启团队售票:
           </td>
@@ -48,25 +64,17 @@
               <option value="1" <if condition="$data['is_team'] eq 1">selected</if>>关闭</option>
             </select>
           </td>
-          <td></td>
-          <td></td>
-        </tr>
-        <tr>
-            <td>参与范围:</td>
-            <td><select name="scope" class="required" data-toggle="selectpicker" data-rule="required">
-                <option value="1" <if condition="$data['scope'] eq 1">selected</if>>开启</option>
-                <option value="0" <if condition="$data['scope'] eq 0">selected</if>>关闭</option>
-              </select>
-              <span class="remark">限制渠道商参与</span>
-            </td>
-            <td>实名制入园:</td><td>
-              <select name="real" class="required" data-toggle="selectpicker" data-rule="required">
-                <option value="1" <if condition="$data['real'] eq 1">selected</if>>开启</option>
-                <option value="0" <if condition="$data['real'] eq 0">selected</if>>关闭</option>
-              </select>
-              <span class="remark">下单时需要输入身份证</span>
+          <td>身份证校验:</td>
+            <td>
+              <span id="real_limit" <if condition="$data['real'] eq 0">style="display: none;"</if>>
+                <select name="limit" id="limit" data-toggle="selectpicker">
+                  <option value="1" <if condition="$data['param']['info']['limit'] eq 1">selected</if>>按活动限制</option>
+                  <option value="2" <if condition="$data['param']['info']['limit'] eq 2">selected</if>>按销售计划限制</option>
+                </select>
+              </span>
             </td>
         </tr>
+        
         <tr>
             <td>排序:</td><td><input type="text" name="sort" value="{$data.sort}" size="15"></td>
             <td>状态:</td><td>
@@ -213,3 +221,17 @@
     </ul>
   </div>
 </form>
+<script type="text/javascript">
+$(document).ready(function() {
+  $('#real').change(function() {
+    var real = $(this).children('option:selected').val();
+    if(real == 1){
+      $('#real_limit').css('display', 'block');
+      $('#limit').attr("disabled",false);
+    }else{
+      $('#real_limit').css('display', 'none');
+      $('#limit').attr("disabled",true);
+    }
+  })
+});
+</script>

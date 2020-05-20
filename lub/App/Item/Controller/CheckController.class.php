@@ -100,18 +100,19 @@ class CheckController extends ManageBase{
 		}
 		switch ($ginfo['ta']){
 			case 31:
-				$map = ['idcard'=>trim($ginfo['idcard']),'activity_id'=>$ginfo['actid']];
-				$count = D('IdcardLog')->where($map)->count();
-				if($count > 0){
-					//读取活动
-					$actInfo = D('Activity')->getActInfo($ginfo['actid']);
-					$number = $actInfo['param']['info']['number'];
-					if($number > 0 && $number >= $count){
-						$return = 1;
-					}else{
-						$return = 0;
-					}
-				}
+				$return = verifyIdCard($ginfo);
+				// $map = ['idcard'=>trim($ginfo['idcard']),'activity_id'=>$ginfo['actid']];
+				// $count = D('IdcardLog')->where($map)->count();
+				// if($count > 0){
+				// 	//读取活动
+				// 	$actInfo = D('Activity')->getActInfo($ginfo['actid']);
+				// 	$number = $actInfo['param']['info']['number'];
+				// 	if($number > 0 && $number >= $count){
+				// 		$return = 1;
+				// 	}else{
+				// 		$return = 0;
+				// 	}
+				// }
 				break;	
 		}
 		if(empty($return)){

@@ -158,18 +158,18 @@ class Api extends \Libs\System\Service {
                 $param = unserialize($v['param']);
                 $where = [
                     'plan_id'=>$v['id'],
-                    'product_id'=>$v['product_id'],
+                   // 'product_id'=>$product_id,
                     'status'=>['in','2,99,66']
                 ];
                 switch ($v['product_type']) {
                     case '2':
                         $tooltype = '00';
-                        $name = date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']);
+                        $name = date('H:i',$v['starttime']).'-'.date("H:i",$v['endtime']);
 
                         break;
                     case '3':
                         $tooltype = tooltype($param['tooltype'],1);
-                        $name = '[第'.$v['games'].'趟-'.$tooltype.'] '. date('H:m',$v['starttime']).'-'.date("H:m",$v['endtime']);
+                        $name = '[第'.$v['games'].'趟-'.$tooltype.'] '. date('H:i',$v['starttime']).'-'.date("H:i",$v['endtime']);
                         
                         break;
                 }

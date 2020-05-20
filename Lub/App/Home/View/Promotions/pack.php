@@ -397,7 +397,7 @@ $(function() {
             layer.msg('身份证号'+idcardThis+'有误!');
             re = false;
             return false;
-          }else if(!check_idcard_area(idcardThis,activety_area,activety)){
+          }else if(!check_idcard_area(idcardThis,activety_area,activety,plan)){
             layer.msg('身份证号'+idcardThis+'该地区不参加活动或该用户已参加过活动!');
             re = false;
             return false;

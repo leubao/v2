@@ -2406,3 +2406,35 @@ function isOdd($n){
     // $a & $b  And（按位与）    将把 $a 和 $b 中都为 1 的位设为 1。
     return $n & 1;
 }
+/**
+ * 校验身份证
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2020-05-20T00:31:56+0800
+ * @param    [type]                   $info                 [description]
+ * @return   [type]                                         [description]
+ */
+function verifyIdCard($info){
+    $actInfo = D('Item/Activity')->getActInfo($info['actid']);
+    $number = (int)$actInfo['param']['info']['number'];
+    if((int)$actInfo['param']['info']['limit'] === 1){
+        $map = ['idcard'=>trim($info['idcard']),'activity_id'=>$info['actid']];
+    }else{
+        $map = ['idcard'=>trim($info['idcard']),'plan_id'=>$info['plan']];
+    }
+    $count = (int)D('IdcardLog')->where($map)->count();
+    if($count > 0){
+        //读取活动
+        if($number > 0){
+            if($count >= $number){
+                $return = 0;
+            }else{
+                $return = 1;
+            }
+        }else{
+            $return = 1;
+        }
+    }else{
+        $return = 1;
+    }
+    return $return;
+}
