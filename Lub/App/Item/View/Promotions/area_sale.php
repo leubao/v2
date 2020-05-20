@@ -230,15 +230,13 @@ function promotions_server(){
     let idcardList = [];
     let idError = true;
     $("#promotions-price-select .idcard").each(function(){
-      var idcardThis = $(this).val(); 
-      //console.log(check_idcard(idcardThis));
-      //console.log(check_idcard_area(idcardThis,activety_area,activety));
+      var idcardThis = $(this).val();
       //判断身份证是否可用
       if(!check_idcard(idcardThis)){
         $(this).alertmsg('error','身份证号'+idcardThis+'有误!');
         idError = false;
         return false;
-      }else if(!check_idcard_area(idcardThis,activety_area,activety)){
+      }else if(!check_idcard_area(idcardThis,activety_area, activety, 1, plan)){
         $(this).alertmsg('error','身份证号'+idcardThis+'该地区不参加活动或该用户已参加过活动!');
         idError = false;
         return false;

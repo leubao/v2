@@ -115,7 +115,7 @@ class CheckController extends ManageBase{
 				// }
 				break;	
 		}
-		if(empty($return)){
+		if($return > 0){
 			die(json_encode(['msg'=>'身份证号可用','status'=>true]));
 		}else{
 			die(json_encode(['msg'=>$msg ? $msg : '已存在','status'=>false]));

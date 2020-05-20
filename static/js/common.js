@@ -348,8 +348,8 @@ function check_idcard(code) {
  * @param {int} number 单用户限额
  * @return   {[type]}                            [description]
  */
-function check_idcard_area(code,area,actid,number) {
-    var length = 0, retu = false;//console.log(actid);
+function check_idcard_area(code,area,actid,number,plan) {
+    var length = 0, retu = false;
     for (var i = 0; i < area.length; i++) {
         length = area[i].length;
         var site = code.substr(0,length);
@@ -360,7 +360,7 @@ function check_idcard_area(code,area,actid,number) {
             type: 'GET',
             dataType: 'json',
             async:false,
-            data: {'ta': '31','idcard': code, 'actid': actid},
+            data: {'ta': '31','idcard': code, 'actid': actid, 'plan': plan},
             error: function(){
               layer.msg('服务器请求超时，请检查网络...');
             },
