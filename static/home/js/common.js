@@ -229,35 +229,45 @@ function check_idcard(code) {
  */
 function check_idcard_area(code,area,actid,plan) {
     var length = 0,retu = true;
-    for (var i = 0; i < area.length; i++) {
+    if(area.length > 0){
+      for (var i = 0; i < area.length; i++) {
         length = area[i].length;
         var site = code.substr(0,length);
         if(site === area[i]){
           //发送到服务器验证 TODO
-          $.ajax({
-            url: 'index.php?g=Home&m=Check&a=public_check_idcard',
-            type: 'GET',
-            dataType: 'JSON',
-            async:false,
-            data: {'ta': '31','idcard': code, 'actid': actid, 'plan': plan},
-            error: function(){
-              layer.msg('服务器请求超时，请检查网络...');
-            },
-            success:function(rdata){
-              if(rdata.status){
-                retu = true;
-              }else{
-                retu = false;
-              }
-            }
-          });
+          let map = {'ta': '31','idcard': code, 'actid': actid, 'plan': plan};
+          retu = ajaxIdCard(map);
+          break;
+        }else{
+          retu = false;
         }
+      }
+    }else{
+      let map = {'ta': '31','idcard': code, 'actid': actid, 'plan': plan};
+      retu = ajaxIdCard(map);
     }
     if(retu){
       return true;
     }else{
       return false;
     }
+}
+function ajaxIdCard(data) {
+  var retu = false;
+  $.ajax({
+    url: 'index.php?g=Home&m=Check&a=public_check_idcard',
+    type: 'GET',
+    dataType: 'JSON',
+    async:false,
+    data: data,
+    error: function(){
+      layer.msg('服务器请求超时，请检查网络...');
+    },
+    success:function(rdata){
+      retu = rdata.status;
+    }
+  });
+  return retu;
 }
 /**
  * @Company  承德乐游宝软件开发有限公司
