@@ -36,7 +36,7 @@ class UserController extends Base{
 		if (!empty($start_time) && !empty($end_time)) {
             $start_time = strtotime($start_time);
             $end_time = strtotime($end_time) + 86399;
-            $where['createtime'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
+            $where['create_time'] = array(array('GT', $start_time), array('LT', $end_time), 'AND');
         }
         if ($status != '') {
             $where['status'] = array(array('NEQ',2),array('EQ',$status), 'AND');

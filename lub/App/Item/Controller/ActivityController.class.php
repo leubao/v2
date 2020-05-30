@@ -68,12 +68,14 @@ class ActivityController extends ManageBase{
 	 			$info['voucher'] = $pinfo['voucher'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		//组团销售
 	 		if((int)$pinfo['type'] === 4){
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		//多产品套票
 	 		if((int)$pinfo['type'] === 5){
@@ -91,13 +93,14 @@ class ActivityController extends ManageBase{
 	 				'discount' => $pinfo['discount']
 	 			];
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		//单场限额
 	 		if((int)$pinfo['type'] === 6){
-	 			
 	 			$info['number'] = $pinfo['number'];
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		//限时秒杀
 	 		if((int)$pinfo['type'] === 7){
@@ -108,6 +111,7 @@ class ActivityController extends ManageBase{
 	 			$info['number'] = $pinfo['number'];
 	 			$info['rule']	= $pinfo['kill'];
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		//预约销售
 	 		if((int)$pinfo['type'] === 8){
@@ -119,11 +123,13 @@ class ActivityController extends ManageBase{
 	 			$info['today']	= $pinfo['today'];
 	 			$info['pre_model'] = $pinfo['pre_model'] ? $pinfo['pre_model'] : '2';
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		//窗口促销
 	 		if(in_array((int)$pinfo['type'],['10'])){
 	 			$info['ticket'] = $pinfo['ticket_id'];
 	 			$info['limit'] = $pinfo['limit'];
+	 			$info['is_control'] = $pinfo['is_control'];
 	 		}
 	 		$param = array(
 	 			'info' =>  $info,
@@ -218,6 +224,7 @@ class ActivityController extends ManageBase{
 	 			$info['pre_model'] = $actinfo['param']['info']['pre_model'];
 	 		}
 	 		$info['limit'] = $actinfo['param']['info']['limit'];
+	 		$info['is_control'] = $pinfo['is_control'];
 	 		$info['scope'] = $scope;//参与范围
 	 		$param = array(
 	 			'info' =>  $info,
@@ -298,6 +305,7 @@ class ActivityController extends ManageBase{
 	 			$info['scope'] = $actinfo['param']['info']['scope'];
 	 		}
 	 		$info['limit'] = $pinfo['limit'];
+	 		$info['is_control'] = $pinfo['is_control'];
 	 		$data = array(
 	 			'id'	=>	$pinfo['id'],
 	 			'title'	=>	$pinfo['title'],

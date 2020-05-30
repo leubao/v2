@@ -1073,9 +1073,16 @@ class OrderController extends Base{
 			if(empty($ginfo)){
 				$this->error("参数错误!");
 			}
-			$order = D('Order')->where(['order_sn'=>$ginfo['sn'],'status'=>1])->field('id,order_sn,plan_id')->find();
+			$order = D('Order')->where(['order_sn'=>$ginfo['sn'],'status'=>1])->field('id,order_sn,plan_id,activity')->find();
 			if(empty($order)){
 				$this->error("订单状态不支持此项操作!");
+			}
+			//判断当前活动是否支持更新
+			$actParam = D('Activity')->where(['id'=>$info['info']['param'][0]['activity']])->getField('param');
+			$actParam = json_decode($actParam, true);
+			$isControl = isset($actParam['info']['is_control']) ? $actParam['info']['is_control'] : 0;
+			if(!empty($isControl)){
+				$this->error("该活动暂不支持身份证修改!");
 			}
 			$plan = F('Plan_'.$order['plan_id']);
 			if(empty($plan)){

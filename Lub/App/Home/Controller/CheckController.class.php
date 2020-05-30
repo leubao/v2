@@ -90,27 +90,9 @@ class CheckController extends Base{
 		switch ($ginfo['ta']){
 			case 31:
 				$return = verifyIdCard($ginfo);
-				// $map = ['idcard'=>trim($ginfo['idcard']),'activity_id'=>$ginfo['actid'],'plan_id'=>$ginfo['plan']];
-				// $count = (int)D('IdcardLog')->where($map)->count();
-				// if($count > 0){
-				// 	//读取活动
-				// 	$actInfo = D('Item/Activity')->getActInfo($ginfo['actid']);
-				// 	$number = (int)$actInfo['param']['info']['number'];
-				// 	if($number > 0){
-				// 		if($count >= $number){
-				// 			$return = 0;
-				// 		}else{
-				// 			$return = 1;
-				// 		}
-				// 	}else{
-				// 		$return = 1;
-				// 	}
-				// }else{
-				// 	$return = 1;
-				// }
 				break;	
 		}
-		if($return > 0){
+		if($return){
 			die(json_encode(['msg'=>'身份证号可用','status'=>true]));
 		}else{
 			die(json_encode(['msg'=>$msg ? $msg : '已存在','status'=>false]));

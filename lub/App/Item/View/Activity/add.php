@@ -85,6 +85,19 @@
             </td>
         </tr>
         <tr>
+            <td>渠道预控:</td>
+            <td>
+              <select name="is_control" data-toggle="selectpicker">
+                <option value="0" selected>不可预控</option>
+                <option value="1">可预控</option>
+              </select>
+              <span class="remark">下单成功后身份证是否可修改</span>
+            </td>
+            <td></td>
+            <td>
+            </td>
+        </tr>
+        <tr>
             <td>排序:</td><td><input type="text" name="sort" value="0" size="15"></td>
             <td>状态:</td><td>
               <select name="status" class="required" data-toggle="selectpicker" data-rule="required">

@@ -564,6 +564,7 @@ function checkIdCard($idcard){
         return false;
     }
 }
+
 /*返回去除敏感信息的客户信息
 *@param $uinfo 包含敏感信息的
 */

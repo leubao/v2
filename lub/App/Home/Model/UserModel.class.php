@@ -61,7 +61,8 @@ class UserModel extends RelationModel {
         //强制场景为客户端
         $map['is_scene'] = 3;
         $map['status'] = '1';
-        $uInfo = $this->where($map)->field('email,createtime,create_time,update_time,remark,last_login_time,last_login_ip', true)->find();//dump($uInfo);
+        $uInfo = $this->where($map)->field('email,create_time,update_time,remark,last_login_time,last_login_ip', true)->find();
+        //dump($uInfo);
         if (empty($uInfo)) {
             return false;
         }

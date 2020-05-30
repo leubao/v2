@@ -1550,12 +1550,14 @@ class Order extends \Libs\System\Service {
 				/*校验身份证号码是否正确*/
 				$id_card = $v['idcard'] ? strtoupper($v['idcard']) : 0;
 				if(!empty($id_card)  && (int)$info['param'][0]['cert_type'] === 1){
-					if(!checkIdCard($id_card)){
+					$verifyIdCard = verifyIdCard(['actid'=>$oInfo['param'][0]['activity'],'plan'=>$plan['id'],'idcard'=>$id_card]);
+					if(!checkIdCard($id_card) && !$verifyIdCard){
 						$this->error = '400030 : 身份证号码有误...';
 						$model->rollback();
 						return false;
 						break;
 					}
+					//单场
 				}
 				$data = array(
 					'order_sn'=> $info['order_sn'],
@@ -1950,7 +1952,6 @@ class Order extends \Libs\System\Service {
 		$ticketType = F("TicketType".$plan['product_id']);//dump($seat);
 		foreach ($seat['area'] as $k=>$v){
 			//检测是否有足够的座位 TODO   智能排座
-			
 			if(!empty($plan_param['auto_group'])){
 				$auto[$k] = Autoseat::auto_group($plan_param['auto_group'],$v['areaId'],$v['num'],$plan['product_id'],$plan['seat_table']);
 			}else{
@@ -2067,7 +2068,7 @@ class Order extends \Libs\System\Service {
 		if($crmInfo['group']['settlement'] == '1'){
 			load_redis('lpush','PreOrder',$info['order_sn']);
 		}
-		//dump($flag);dump($flags);dump($state);dump($ostate);//dump($in_team);
+		//dump($flag);dump($flags);dump($state);dump($ostate);
 		if($state && $flag && $flags && $ostate){
 			$model->commit();//提交事务
 			//发送成功短信

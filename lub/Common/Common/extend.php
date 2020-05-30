@@ -2426,15 +2426,15 @@ function verifyIdCard($info){
         //读取活动
         if($number > 0){
             if($count >= $number){
-                $return = 0;
+                $return = false;
             }else{
-                $return = 1;
+                $return = true;
             }
         }else{
-            $return = 1;
+            $return = true;
         }
     }else{
-        $return = 1;
+        $return = true;
     }
     return $return;
 }
