@@ -179,6 +179,14 @@
                                 </td>
                               </tr>
                               <tr>
+                                <td width="120px">门票URL:</td>
+                                <td><input type="radio" name="qr_url" data-toggle="icheck" value="1" <eq name="vo['qr_url']" value="1"> checked</eq> data-label="开启&nbsp;">
+                                <input type="radio" name="qr_url" data-toggle="icheck" value="0" <eq name="vo['qr_url']" value="0"> checked</eq> data-label="关闭">
+                                <input type="text" name="ticket_url" value="{$vo.ticket_url}" placeholder="门票URL">
+                                <span class="remark">扫码核销二维码进入网页或小程序</span>
+                                </td>
+                              </tr>
+                              <tr>
                                 <td width="120px">打印已入园门票:</td>
                                 <td><input type="radio" name="print_has" data-toggle="icheck" value="1" <eq name="vo['print_has']" value="1"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="print_has" data-toggle="icheck" value="0" <eq name="vo['print_has']" value="0"> checked</eq> data-label="关闭">
@@ -194,7 +202,6 @@
                               <tr>
                                 <td width="120px">默认打印模板:</td>
                                 <td>
-                                  
                                   <select name="print_tpl" data-toggle="selectpicker">
                                     <option value="">打印模板</option>
                                     <volist name="printer" id='pri'>
@@ -347,6 +354,14 @@
                           <td>
                             <input type="text" name="validity" value="{$vo.validity}" size="10">
                             <span class="remark">此配置景区模式下有效</span>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">实名制入园:</td>
+                          <td>
+                            <input type="radio" name="check_real" data-toggle="icheck" value="1" <eq name="vo['check_real']" value="1"> checked</eq> data-label="开启&nbsp;">
+                            <input type="radio" name="check_real" data-toggle="icheck" value="0" <eq name="vo['check_real']" value="0"> checked</eq> data-label="关闭">
+                            <span class="remark">强制完成实名认证</span>
                           </td>
                         </tr>
                         <tr>

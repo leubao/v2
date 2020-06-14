@@ -11,6 +11,7 @@ if (version_compare(PHP_VERSION, '5.3.0', '<')) {
 	header("Content-type: text/html; charset=utf-8");
     die('PHP环境不支持，使用本系统需要 PHP > 5.3.0 版本才可以~ !');
 }
+
 /*当前目录路径*/
 define('SITE_PATH', getcwd() . '/');
 //项目路径

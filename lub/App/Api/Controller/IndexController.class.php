@@ -479,7 +479,7 @@ class IndexController extends ApiBase {
       }
       //排除禁止打印的订单
       $map['is_print'] = 0;
-      $info = M('Order')->where($map)->field('plan_id,product_id,order_sn,status,money,number,take,type,pay,phone')->find();
+      $info = M('Order')->where($map)->field('id,plan_id,product_id,order_sn,status,money,number,take,type,pay,phone')->find();
       if(empty($info)){
         return false;
       }
@@ -490,7 +490,7 @@ class IndexController extends ApiBase {
           if(empty($plan)){return false;}
           $list = M(ucwords($plan['seat_table']))->where(array('status'=>2,'order_sn'=>$info['order_sn'],'print'=>array('eq',0)))->select();
           foreach ($list as $k=>$v){
-            $info[] = re_print($plan['id'],$plan['encry'],$v);
+            $info[] = re_print($plan['id'],$plan['encry'],$v,$info['product_id'], $info['id']);
           }
           //锁定时间根据门票数量来确定
           $time = (int)$info['number']*3;
@@ -1450,12 +1450,14 @@ class IndexController extends ApiBase {
       }
     }
   }
+  //根据加密信息返回数据
   public function getCodeToId()
   {
     $info = I('post.');
     $qr = \Libs\Service\Encry::getQrData($info['content']);
     die(json_encode($qr));
   }
+  
   /**
    * 返回已入园
    * @Author   zhoujing                 <zhoujing@leubao.com>

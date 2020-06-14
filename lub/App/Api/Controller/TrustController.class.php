@@ -424,4 +424,183 @@ class TrustController extends LubTMP {
             $status = true;
         }
 	}
+
+	/**
+   * 实名认证时展示详情
+   * @Author   zhoujing                 <zhoujing@leubao.com>
+   * @DateTime 2020-06-04T14:40:31+0800
+   * @return   [type]                   [description]
+   */
+  public function getTicketInfo()
+  {
+  	// header('Access-Control-Allow-Origin: *');
+  	// header('Access-Control-Allow-Credentials: true');
+  	// header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); //允许的请求类型
+   //  header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept");
+   	$ginfo = I('get.');
+    if(empty($ginfo['qr'])){
+      $return = [
+        'status'=> false,
+        'code'  => 401,
+        'data'  => [],
+        'msg'   => '参数有误~'
+      ];
+      die(json_encode($return));
+    }
+    $content = $ginfo['qr'];//substr($gifno['qr'],-24,24);
+    $qr = \Libs\Service\Encry::getQrData($content);
+    if(!$qr){
+      $return = [
+        'status'=> false,
+        'code'  => 401,
+        'data'  => [],
+        'msg'   => '未找到有效门票~'
+      ];
+      die(json_encode($return));
+    }
+    //读取销售计划
+    $plan = F('Plan_'.$qr[2]);
+    if(empty($plan)){
+      $return = [
+        'status'=> false,
+        'code'  => 401,
+        'data'  => [],
+        'msg'   => '该场次已停用~'
+      ];
+      die(json_encode($return));
+    }
+    //读取门票详情
+    $ticket = D($plan['seat_table'])->where(['id'=>$qr[0]])->field('order_sn,seat,idcard,price_id,print,area,sale,status,soldtime,checktime,number')->find();
+    $sale = unserialize($ticket['sale']);  
+    if(empty($ticket)){
+      $return = [
+        'status'=> false,
+        'code'  => 401,
+        'data'  => [],
+        'msg'   => '未找到有效门票~'
+      ];
+      die(json_encode($return));
+    }
+    if($ticket['status'] <> 99){
+      if(empty($ticket['idcard'])){
+        $is_real = false;
+      }else{
+        $is_real = true;
+      }
+      $data = [
+          'is_real'=> $is_real,
+          'serial' => $content,//二维码信息
+          'plan'   => planShow($qr[2], 4, 1),
+          'sn'     => $ticket['order_sn'],
+          'price'  => $sale['price'],
+          'idcard' => $is_real ? substr_replace($ticket['idcard'], '**********',6,10) : '',
+          'status' => seat_status($ticket['status'],1),
+          'area'   => isset($ticket['area']) ? areaName($ticket['area'],1) : '',
+          'seat'   => isset($ticket['area']) ? seatShow($ticket['seat'],1) : '',
+          'number' => $ticket['number'] ? $ticket['number'] : '1',
+          'act'    => '',//活动票
+          'team'   => '',//团队
+          'object' => ''//票型
+        ];
+      $return = [
+        'status'=> true,
+        'code'  => 0,
+        'data'  => $data,
+        'msg'   => 'ok'
+      ];
+      die(json_encode($return));
+    }else{
+      $return = [
+        'status'=> false,
+        'code'  => 401,
+        'data'  => [],
+        'msg'   => '门票已核销~'
+      ];
+      die(json_encode($return));
+    }
+  }
+  //实名制绑定
+  public function realBinding()
+  {
+	$pinfo = I('post.');
+	$qr = \Libs\Service\Encry::getQrData($pinfo['qr']);
+	//读取销售计划
+    $plan = F('Plan_'.$qr[2]);
+    if(empty($plan)){
+      $return = [
+        'status'=> false,
+        'code'  => 401,
+        'data'  => [],
+        'msg'   => '该场次已停用~'
+      ];
+      die(json_encode($return));
+    }
+	//判断是否重复
+	if(checkIdCard($pinfo['idcard'])){
+		$map = ['idcard'=>$pinfo['idcard'],'plan'=>$qr[2]];
+		if(verifyIdCard($map,2)){
+			$order = D('Order')->where(['id'=>$qr[1]])->field('id,order_sn,activity')->find();
+			if(empty($order)){
+				$return = [
+					'status'=> false,
+					'code'  => 404,
+					'data'  => $qr,
+					'msg'   => '订单获取失败~'
+				];
+				die(json_encode($return));
+			}
+			$ticket = D($plan['seat_table'])->where(['id'=>$qr[0]])->setField('idcard', $pinfo['idcard']);
+			if(!$ticket){
+				$return = [
+					'status'=> false,
+					'code'  => 401,
+					'data'  => [],
+					'msg'   => '身份证绑定失败~'
+				];
+				die(json_encode($return));
+			}
+			$insert = [
+				'plan_id'       =>  $qr[2],
+				'order_sn'      =>  $order['order_sn'],
+				'idcard'        =>  $pinfo['idcard'],
+				'number'        =>  1,
+				'activity_id'   =>  $order['activity']
+			];
+			$state = D('IdcardLog')->add($insert);
+			if($state){
+				$return = [
+			    	'status'=> true,
+			    	'code'  => 0,
+			    	'data'  => $state,
+			    	'msg'   => '完成绑定~'
+				];
+				die(json_encode($return));
+			}else{
+				$return = [
+					'status'=> false,
+					'code'  => 401,
+					'data'  => [],
+					'msg'   => '身份证绑定失败~'
+				];
+				die(json_encode($return));
+			}
+		}else{
+			$return = [
+				'status'=> false,
+				'code'  => 401,
+				'data'  => [],
+				'msg'   => '该身份证已完成绑定~'
+			];
+			die(json_encode($return));
+		}
+	}else{
+		$return = [
+			'status'=> false,
+			'code'  => 401,
+			'data'  => [],
+			'msg'   => '身份证号码有误~'
+		];
+		die(json_encode($return));
+	}
+  }
 }

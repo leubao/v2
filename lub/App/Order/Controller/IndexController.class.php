@@ -200,8 +200,7 @@ class IndexController extends ManageBase {
 	{
 		$map = [];
 		$rest = $this->get_order_map();
-		$map = array_merge($rest['map'],$map);
-		
+		//$map = array_merge($rest['map'],$map);
 		$this->basePage('Booking',$map,array('createtime'=>'DESC'));
 		$this->display();
 	}

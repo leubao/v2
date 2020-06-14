@@ -1551,7 +1551,7 @@ class Order extends \Libs\System\Service {
 				$id_card = $v['idcard'] ? strtoupper($v['idcard']) : 0;
 				if(!empty($id_card)  && (int)$info['param'][0]['cert_type'] === 1){
 					$verifyIdCard = verifyIdCard(['actid'=>$oInfo['param'][0]['activity'],'plan'=>$plan['id'],'idcard'=>$id_card]);
-					if(!checkIdCard($id_card) && !$verifyIdCard){
+					if(!checkIdCard($id_card) || !$verifyIdCard){
 						$this->error = '400030 : 身份证号码有误...';
 						$model->rollback();
 						return false;

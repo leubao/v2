@@ -94,7 +94,6 @@ class Encry extends \Libs\System\Service {
     static public function toQrData($id,$orderid,$plan_id,$print='1',$team = '1')
     {
         $string = $id.$orderid.$plan_id.$print.$team;
-
         //计算校验位
         $digit = creatCheckDigit($string);
         $code = [

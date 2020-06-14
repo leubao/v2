@@ -57,7 +57,7 @@
         <td>销售计划</td>
         <td>
           <empty name="plan">
-          	登记日期未扎到销售计划
+          	登记日期未找到销售计划
           </empty>	
           <select class="required" name="plan" data-toggle="selectpicker">
 	        <volist name="plan" id="vo">

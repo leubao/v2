@@ -182,6 +182,7 @@ class OrderController extends ManageBase{
 		if($ginfo['type'] == '1'){
 			//一人一票
 			$orderId = D('Order')->where(['order_sn'=>$ginfo['sn']])->getField('id');
+
 			//读取门票列表
 			foreach ($list as $k=>$v){
 				$info[] = re_print($plan['id'],$plan['encry'],$v,$plan['product_id'],$orderId, $ginfo['type']);

@@ -821,7 +821,7 @@ function & load_wechat($type = '',$product_id = '',$submch = '') {
  */
 function load_payment($pay = '',$itemid = ''){
     //获取收银配置
-    $config = cache('Config');
+    $config = cache('ItemConfig')[$itemid][2];
     //微信支付
     if(stripos($pay, 'wx') !== false){
         $options = [
@@ -841,7 +841,7 @@ function load_payment($pay = '',$itemid = ''){
             'fee_type'          => 'CNY',// 货币类型  当前仅支持该字段
             'notify_url'        => $config['siteurl'].'notify/wx',
             //'redirect_url'      => '',// 如果是h5支付，可以设置该值，返回到指定页面
-            'return_raw'        => true,// 在处理回调时，是否直接返回原始数据，默认为true 
+            'return_raw'        => false,// 在处理回调时，是否直接返回原始数据，默认为true 
         ];
     }
     if(stripos($pay,'ccb') !== false){

@@ -893,7 +893,7 @@ function crmName($param,$type=NULL){
     * @param $sn 单号 长度为14
     * return true false
     */
-    function sn_length($sn = null){
+    function sn_length($sn = ''){
         if(empty($sn)){return false;}
         if(strlen($sn) > '10'){
             return true;
@@ -1647,18 +1647,17 @@ function crmName($param,$type=NULL){
     * @param    integer                  $team                 1一人一票2一单一票
     * @return   array
     */
-    function re_print($plan_id, $encry, $data, $orderId = '', $team = 1){
+    function re_print($plan_id, $encry, $data, $product_id = '', $orderId = '', $team = 1){
         $plan = F('Plan_'.$plan_id);
         $proconf = cache('ProConfig');
         $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;
-        //原有闸机验票规则 
-        // $code = \Libs\Service\Encry::encryption($plan_id,$data['order_sn'],$encry,$data['area'],$data['seat'],$print,$data['id']);
-        
-        // $sn = $code."^#";
-
         $sn = \Libs\Service\Encry::toQrData($data['id'],$orderId,$plan_id,$print,$team);
         
+        //是否启用qr_url
+        if(!empty($proconf['qr_url'])){
+            $sn = $proconf['ticket_url'].$sn;
+        }
         //条码号
         if($proconf['barcode'] == '1'){
             $barcode = $data['area'].\Libs\Service\Encry::seat_fold($data['seat']).$plan_id;
@@ -2109,7 +2108,7 @@ function qr_base64($data,$name,$logo = '',$level = 'L',$size = '4'){
         //生成二维码
         \Libs\Service\Qrcode::createQrcode($data,$name,$logo,$level,$size);
     }
-    $image_info = getimagesize($image_file);dump($image_file);
+    $image_info = getimagesize($image_file);
     $base64_image_content = "data:{$image_info['mime']};base64," . chunk_split(base64_encode(file_get_contents($image_file)));
     return $base64_image_content;
 }
@@ -2409,18 +2408,25 @@ function isOdd($n){
 /**
  * 校验身份证
  * @Author   zhoujing                 <zhoujing@leubao.com>
- * @DateTime 2020-05-20T00:31:56+0800
- * @param    [type]                   $info                 [description]
+ * @DateTime 2020-06-04T16:38:19+0800
+ * @param    array                   $info                 
+ * @param    integer                  $type                 1活动限制2场次限制
  * @return   [type]                                         [description]
  */
-function verifyIdCard($info){
-    $actInfo = D('Item/Activity')->getActInfo($info['actid']);
-    $number = (int)$actInfo['param']['info']['number'];
-    if((int)$actInfo['param']['info']['limit'] === 1){
-        $map = ['idcard'=>trim($info['idcard']),'activity_id'=>$info['actid']];
+function verifyIdCard($info, $type = 1){
+    if($type === 1){
+        $actInfo = D('Item/Activity')->getActInfo($info['actid']);
+        $number = (int)$actInfo['param']['info']['number'];
+        if((int)$actInfo['param']['info']['limit'] === 1){
+            $map = ['idcard'=>trim($info['idcard']),'activity_id'=>$info['actid']];
+        }else{
+            $map = ['idcard'=>trim($info['idcard']),'plan_id'=>$info['plan']];
+        }
     }else{
+        $number = 1;
         $map = ['idcard'=>trim($info['idcard']),'plan_id'=>$info['plan']];
     }
+    
     $count = (int)D('IdcardLog')->where($map)->count();
     if($count > 0){
         //读取活动

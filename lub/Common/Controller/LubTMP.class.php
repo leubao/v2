@@ -30,7 +30,7 @@ class LubTMP extends \Think\Controller {
     }
 
     //初始化
-    protected function _initialize() {
+    protected function _initialize(){
         $this->config = cache("Config");
         $this->initSite($this->config);
         //默认跳转时间
