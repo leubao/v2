@@ -393,13 +393,15 @@ class WorkController extends ManageBase{
 					'status'	=>	1,
 					'area'		=>	$info['info']['product'][1]
 				];
-				$ticket = D('TicketType')->where($where)->field('id as price_id,area,name,price,discount')->find();
+				$ticket = D('TicketType')->where($where)->field('id as price_id,area,name,price,discount')->select();
 				$plan = D('Plan')->where($map)->field('id,param,plantime,starttime,games')->select();
 				foreach ($plan as $k => $v) {
 					$param = unserialize($v['param']);
-					if(in_array($ticket['price_id'], $param['ticket'])){
-						$v['area_name'] = areaName($ticket['area'], 1);
- 						$plans[] = array_merge($v, $ticket);
+					foreach ($ticket as $key => $value) {
+						if(in_array($value['price_id'], $param['ticket'])){
+							$v['area_name'] = areaName($value['area'], 1);
+	 						$plans[] = array_merge($v, $value);
+						}
 					}
 				}
 

@@ -479,7 +479,7 @@ class IndexController extends ApiBase {
       }
       //排除禁止打印的订单
       $map['is_print'] = 0;
-      $info = M('Order')->where($map)->field('id,plan_id,product_id,order_sn,status,money,number,take,type,pay,phone')->find();
+      $info = M('Order')->where($map)->field('id,plan_id,order_sn,status,money,number,take,type,pay,phone,product_id')->find();
       if(empty($info)){
         return false;
       }
@@ -490,7 +490,7 @@ class IndexController extends ApiBase {
           if(empty($plan)){return false;}
           $list = M(ucwords($plan['seat_table']))->where(array('status'=>2,'order_sn'=>$info['order_sn'],'print'=>array('eq',0)))->select();
           foreach ($list as $k=>$v){
-            $info[] = re_print($plan['id'],$plan['encry'],$v,$info['product_id'], $info['id']);
+            $info['ticket'][] = re_print($plan['id'],$plan['encry'],$v,$info['product_id'], $info['id']);
           }
           //锁定时间根据门票数量来确定
           $time = (int)$info['number']*3;
@@ -510,6 +510,7 @@ class IndexController extends ApiBase {
             $info['code'] = '211';
             $info['qrurl'] = $payQr['info'];
             $info['pid'] = $info['product_id'];
+            unset($info['product_id']);
           }else{
             return false;
           }
@@ -1519,4 +1520,137 @@ class IndexController extends ApiBase {
       die(json_encode($return));
     }
   }
+  /**
+   * 网页获取打印信息
+   * @Author   zhoujing                 <zhoujing@leubao.com>
+   * @DateTime 2020-06-17T18:24:46+0800
+   * @return   [type]                   [description]
+   */
+  public function post_web_print()
+  {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); //允许的请求类型
+    header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization, sign, timestamp");
+    if(IS_POST){
+      $pinfo = json_decode(file_get_contents('php://input'), true);
+      $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+
+      if($appInfo != false && $pinfo['type'] != false){
+        //加锁
+        $sn = $pinfo['type'] == '1' ? $pinfo['sn'] : get_sn_api($pinfo['card']);
+        $lock_sn = load_redis('get','lock_'.$sn);
+        if(!empty($lock_sn)){
+          die(json_encode(['code' => 415,'info' => '','msg' => '订单锁定中...']));
+        }
+        switch ($pinfo['type']) {
+          case '1':
+            if($this->print_check($pinfo['sn'],$pinfo['phone']) != false){
+              $ticket_info = $this->ticket_info($pinfo['sn'],$appInfo['id'],'1');
+              if($ticket_info != false){
+                if($ticket_info['code'] == '211'){
+                  $return = array('code' => 211,'info' => $ticket_info,'msg' => '请完成支付');
+                }else{
+                  $return = array('code' => 200,'info' => $ticket_info,'msg' => '门票信息获取成功');
+                }
+              }else{
+                $return = array('code' => 411,'info' => '','msg' => '门票信息获取失败1');
+              }
+            }else{
+              $return = array('code' => 410,'info' => '','msg' => '取票密码错误');
+            }
+            break;
+          case '2':
+            $ticket_info = $this->ticket_info($pinfo['card'],$appInfo['id'],'2');
+            if($ticket_info != false){
+              $return = array('code' => 200,'info' => $ticket_info,'msg' => '门票信息获取成功');
+            }else{
+              $return = array('code' => 411,'info' => '','msg' => '门票信息获取失败2');
+            }
+            break;
+        }
+      }else{
+        $return = array('code' => 401,'info' => '','msg' => '认证失败');
+      }
+    }else{
+        $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+    }
+    die(json_encode($return));
+  }
+
+  public function get_print_tpl()
+  {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); //允许的请求类型
+    header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization, sign, timestamp");
+    if(IS_POST){
+      $pinfo = json_decode(file_get_contents('php://input'), true);
+      $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+      $proconf = cache('ProConfig')[$appInfo['product']][1];
+      if($appInfo != false){
+
+        $printTpl = D('Printer')->where(['id'=>$proconf['print_tpl']])->find();
+        $return = array('code' => 200,'info' => $printTpl,'msg' => '门票信息获取成功');
+      }else{
+        $return = array('code' => 401,'info' => '','msg' => '认证失败');
+      }
+    }else{
+        $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+    }
+    die(json_encode($return));
+  }
+/* 更新座椅状态 自助取票机打印门票
+    *  $plan 计划id
+    *  $seat 座位ID
+    *  $priceid 价格id 
+    *  $sn 订单号码
+    *  $type 1 更新单张状态  2 整单打印完成
+    */
+  public function post_up_print()
+  {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS'); //允许的请求类型
+    header("Access-Control-Allow-Headers: Origin, X-Requested-With, Content-Type, Accept, Authorization, sign, timestamp");
+    if(IS_POST){
+      $pinfo = json_decode(file_get_contents('php://input'), true);
+      $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+      if($appInfo != false){
+        $plan = F('Plan_'.$pinfo['plan']);
+        if(empty($plan)){
+          $return = array('code' => 413,'info' => '','msg' => '场次已过期');
+          return false;
+        }
+        //更新门票打印状态
+        $model = new Model();
+        $model->startTrans();
+        $sn =  $pinfo['sn'];
+
+        //判断订单类型
+        $order_type = order_type($sn);
+        $map = array('order_sn'=>$sn,'print'=>array('eq',0));
+        $up_print = $model->table(C('DB_PREFIX'). $plan['seat_table'])->where($map)->setInc('print',1); 
+        $up_order = $model->table(C('DB_PREFIX'). order)->where(array('order_sn'=>$sn))->setField('status',9);
+
+        load_redis('delete','lock_'.$sn);
+        
+        if($up_print && $up_order){
+          //记录打印日志
+          print_log($sn,$appInfo['id'],3,$order_type['channel_id'],'订单出票成功',1,6);
+          $model->commit();//提交事务
+          $return = array('code' => 200,'info' => ['sn'=>$sn],'msg' => '状态更新成功');
+        }else{
+          $model->rollback();//事务回滚
+          $return = array('code' => 412,'info' => '','msg' => '状态更新失败');
+        }
+      }else{
+        $return = array('code' => 401,'info' => '','msg' => '认证失败');
+      }
+    }else{
+      $return = array('code' => 404,'info' => '','msg' => '服务起拒绝连接');
+    }
+    die(json_encode($return));
+  }
+
 }
