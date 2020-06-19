@@ -56,11 +56,9 @@
     <volist name="data" id="vo">
       <tr data-id="{$vo.order_sn}" data-num="{$vo.number}" data-money="{$vo.money}">
         <td align="center"><a data-toggle="dialog" href="{:U('Item/Work/orderinfo',array('sn'=>$vo['order_sn']))}"  data-id="orderinfo" data-width="900" data-height="600" data-title="订单详情">{$vo.order_sn}</a></td>
-        <if condition="$vo.type eq '2'">
-        <td align="center">{$vo.plan_id|date="Y-m-d",###}</td>
-        <else />
-        <td align="center">{$vo.plan_id|planShow}</td>
-        </if>
+        
+        <td align="center">{$vo.plan_id|getPrePlanShow=$vo['type'],$vo['status']}</td>
+        
         <td align="center">{$vo.channel_id|hierarchy}</td>
         <td align="center">{$vo.number}</td>
         <td align="right">{$vo.money|format_money}</td>

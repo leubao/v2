@@ -365,17 +365,17 @@ $(function(){
 			dataType:'json',
 			success:function(data){
 			  if(data.statusCode == "200"){
-				//$("#myModal").modal('show');
+				$("#myModal").modal('show');
 				//获取当前商户的可用余额
 				money();
 				var total = $("#subtoal",window.parent.document).html();
 				$("#totalcash").text(total);
 				$("#tomoney").attr('value',total);
 				$("#sn").attr('value',data.sn);
-				layer.open({
-				  type: 2, 
-				  content: $('#payment')
-				});
+				// layer.open({
+				//   type: 2, 
+				//   content: $('#payment')
+				// });
 			  }else{
 				$("#error").text("订单创建失败!");
 				$("#myModal2").modal('show');  //出票失败的提示

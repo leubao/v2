@@ -895,7 +895,7 @@ function crmName($param,$type=NULL){
     */
     function sn_length($sn = ''){
         if(empty($sn)){return false;}
-        if(strlen($sn) > '10'){
+        if(strlen($sn) > '6'){
             return true;
         }else{
             return false;
@@ -2443,4 +2443,14 @@ function verifyIdCard($info, $type = 1){
         $return = true;
     }
     return $return;
+}
+function getPrePlanShow($plan, $type, $status)
+{
+    if((int)$type === 2 && (int)$status <> 1){
+        echo date('Y-m-d', $plan);
+    }elseif((int)$type === 2 && (int)$status === 1){
+        echo planShow($plan, 1, 1);
+    }elseif((int)$type === 1) {
+        echo planShow($plan, 1, 1);
+    }
 }

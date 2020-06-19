@@ -4,7 +4,7 @@
  * @Author: IT Work
  * @Date:   2019-03-10 02:10:28
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-03-27 02:51:56
+ * @Last Modified time: 2020-06-17 18:19:17
  */
 namespace Item\Model;
 
@@ -163,6 +163,7 @@ class BookingModel extends Model {
 			$upData = [
 				'id'			=> $data['id'],
 				'plan_id'		=> $pta[0],
+				'pay'			=> $pinfo['pay'],
 				'number'		=> $areaSeat['num'],
 				'money' 		=> $areaSeat['money'],
 				'info'			=> json_encode($data['info']),
@@ -173,7 +174,6 @@ class BookingModel extends Model {
 			if($model->table(C('DB_PREFIX').'booking')->save($upData)){
         		//创建订单，并排座
 				$status = $order->channel(json_encode($newInfo),27,$info['uinfo'],8,$pinfo['pay']);
-				    	
 		    	if($status){
 		    		$model->commit();
 		    		return true;

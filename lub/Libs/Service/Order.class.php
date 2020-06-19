@@ -453,7 +453,7 @@ class Order extends \Libs\System\Service {
 		 		break;
 		 	case 8:
 		 		//前台预约推送,直接排座
-		 		return Order::quick_order($info, $scena, $uinfo, 2, 1, $act); 
+		 		return Order::quick_order($info, $scena, $uinfo, 1, 1, $act); 
 		 		break;
 		 	default:
 		 		return Order::quick_order($info,$scena,$uinfo,2,2,$act); 
