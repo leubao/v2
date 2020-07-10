@@ -197,7 +197,7 @@ function auto_fenix(price_group,status,vmodel,type,scene = '4'){
           dataType: 'JSON',
           timeout: 1500,
           error: function(){
-              layer.msg('服务器请求超时，请检查网络...');
+            layer.msg('服务器请求超时，请检查网络...');
           },
           success: function(rdata){
             if(rdata.statusCode == '200'){

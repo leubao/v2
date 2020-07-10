@@ -345,6 +345,7 @@ class SetController extends ManageBase{
 			$this->assign('area',$area)
 				->assign('fid',$id)
 				->assign('type',$type)
+				->assign('action', 'group')
 				->display();
 		}
 	}
@@ -358,6 +359,7 @@ class SetController extends ManageBase{
 		$aid = I('get.aid',0,intval);
 		$fid = I('get.fid',0,intval);
 		$type = I('get.type',0,intval);
+		$action = I('get.action');
 		if(empty($aid) || empty($fid)){
 			$this->erun('参数错误!');
 		}
@@ -368,6 +370,7 @@ class SetController extends ManageBase{
 		$this->assign('data',$info)
 			->assign('fid',$fid)
 			->assign('type',$type)
+			->assign('action', $action)
 			->display();
 	}
 	/**
@@ -378,16 +381,26 @@ class SetController extends ManageBase{
 		$aid = I('get.aid',0,intval);
 		$fid = I('get.fid',0,intval);
 		$type = I('get.type',0,intval);
-		if(empty($aid) || empty($fid) || empty($type)){
+		$action = I('get.action');
+		if(empty($aid) || empty($fid) || empty($type) || empty($action)){
 			$this->erun('参数错误!');
 		}
-		if($type == '1'){
-			//座椅分组的状态
-			$info = Operate::do_read('AutoSeat',1,array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),'status'=>1));	
-		}else{
-			//基础控座
-			$info = Operate::do_read('ControlSeat',1,array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),'status'=>1));	
+		if($action === 'group'){
+			//座椅分组座椅分组的状态
+			$info = Operate::do_read('AutoSeat',1,array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),'status'=>1));
 		}
+		if($action === 'control'){
+			//演出控座
+			if($type == 1){
+				//常规控座
+				$map = array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),'status'=>1, 'type'=>1);
+			}else{
+				//特殊控座
+				$map = array('product_id'=>\Libs\Util\Encrypt::authcode($_SESSION['lub_proId'], 'DECODE'),'status'=>1);
+			}
+			$info = Operate::do_read('ControlSeat',1,$map);
+		}
+		
 		
 		foreach ($info as $k=>$v){
 			$infos[$k] = unserialize($v['seat']);
@@ -417,8 +430,9 @@ class SetController extends ManageBase{
 			'group_seat_str' => $group_seat,//当前分组的座位
 			'group_seat' => explode(',',$group_seat),//当前分组的座位
 			'ngroup_seat' => explode(',', $ngroup_seat),//不是当前分组的座位
+			'type'	=> $type,
 			'num'	=> $num,
-		);//dump($return);
+		);
 		echo json_encode($return);
 		return true;	
 	}
@@ -703,6 +717,7 @@ class SetController extends ManageBase{
 			$this->assign('area',$area)
 				->assign('fid',$id)
 				->assign('type',$type)
+				->assign('action', 'control')
 				->display('set_seat');
 		}
 	}

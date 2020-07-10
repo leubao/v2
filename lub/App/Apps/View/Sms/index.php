@@ -17,8 +17,9 @@
     <label>&nbsp;状态:</label>
     <select name="status" data-toggle="selectpicker">
         <option value="">全部</option>
-        <option value="0" <if condition="$where['status'] eq '0'">selected</if>>失败</option>
-        <option value="1" <if condition="$where['status'] eq '1'">selected</if>>成功</option>
+        <option value="0" <if condition="$where['status'] eq '0'">selected</if>>发送中</option>
+        <option value="DELIVRD" <if condition="$where['status'] eq 'DELIVRD'">selected</if>>成功</option>
+        <option value="1" <if condition="$where['status'] eq '1'">selected</if>>发送失败</option>
     </select>
     
     <input type="text" value="{$where['order_sn']}" name="order_sn" class="form-control" size="10" placeholder="订单号">&nbsp;
@@ -33,14 +34,15 @@
 
 </div>
 <div class="bjui-pageContent tableContent">
-  <table data-toggle="tablefixed" data-width="100%" data-nowrap="true">
+  <table data-toggle="tablefixed" data-width="100%">
     <thead>
       <tr>
-        <th align="center">目的号码</th>
+        <th align="center" width="100">目的号码</th>
         <th align="center">发送内容</th>
-        <th align="center">数量</th>
+        <th align="center" width="70">数量</th>
         <th align="center">状态</th>
-        <th align="center">创建时间</th>
+        <th align="center" width="100">创建时间</th>
+        <th align="center" width="100">更新时间</th>
       </tr>
     </thead>
     <tbody>
@@ -49,8 +51,9 @@
         <td align="center">{$vo.phone}</td>
         <td>{$vo.content|urldecode}</td>
         <td align="center">{$vo.num}</td>
-        <th align="center">{$vo.status|status}</th>
+        <th align="center"><strong data-toggle="tooltip" data-placement="bottom" title="{$vo.remark}">{$vo.status}</strong></th>
         <td align="center">{$vo.createtime|datetime}</td>
+        <td align="center">{$vo.updatetime|datetime}</td>
        </tr>
     </volist>
      

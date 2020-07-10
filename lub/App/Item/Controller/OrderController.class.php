@@ -35,19 +35,24 @@ class OrderController extends ManageBase{
 			//判断支付方式，微信支付和支付宝支付中断执行
 			if($run != false){
 				//支付方式影响返回结果
-				if(in_array($run['is_pay'],array('4','5'))){
-					$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>1));
-					$title = "网银支付";
-					$width = '600';
-					$height = '400';
-					$pageId = 'payment';
-				}else{
-					$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'genre'=>1,'plan_id'=>$plan));
+				// if(in_array($run['is_pay'],array('4','5'))){
+				// 	$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>1));
+				// 	$title = "网银支付";
+				// 	$width = '600';
+				// 	$height = '400';
+				// 	$pageId = 'payment';
+				// }else{
+				// 	$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'genre'=>1,'plan_id'=>$plan));
+				// 	$title = "门票打印";
+				// 	$width = '213';
+				// 	$height = '208';
+				// 	$pageId = 'print';
+				// }
+				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'genre'=>1,'plan_id'=>$plan));
 					$title = "门票打印";
 					$width = '213';
 					$height = '208';
 					$pageId = 'print';
-				}
 				$return = array(
 					'statusCode' => '200',
 					'title'		 =>	$title,
@@ -160,17 +165,6 @@ class OrderController extends ManageBase{
 		//更新门票打印状态
 		$model = new Model();
 		$model->startTrans();
-		// switch ($plan['product_type']) {
-		// 	case '1':
-		// 		$table = $plan['seat_table'];
-		// 		break;
-		// 	case '2':
-		// 		$table = 'scenic';
-		// 		break;
-		// 	case '3':
-		// 		$table = 'drifting';
-		// 		break;
-		// }
 		$table = $plan['seat_table'];
 		//判断是否打印已检门票
 		if((int)$this->procof['print_has'] === 1){
@@ -448,20 +442,25 @@ class OrderController extends ManageBase{
 		$order = new Order();
 		$run = $order->quick($pinfo,$type,$uInfo);
 		if($run != false){
-			//支付方式影响返回结果
-			if(in_array($run['is_pay'],array('4','5'))){
-				$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>2,'act'=>$run['act']));
-				$title = "网银支付";
-				$width = '600';
-				$height = '400';
-				$pageId = 'payment';
-			}else{
-				$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan,'act'=>$run['act'],'genre'=>1));
+			//支付方式影响返回结果 TODO 暂停前台微信支付宝收款
+			// if(in_array($run['is_pay'],array('4','5'))){
+			// 	$forwardUrl = U('Item/Order/public_payment',array('sn'=>$run['sn'],'plan'=>$plan,'is_pay'=>$run['is_pay'],'money'=>$run['money'],'order_type'=>2,'act'=>$run['act']));
+			// 	$title = "网银支付";
+			// 	$width = '600';
+			// 	$height = '400';
+			// 	$pageId = 'payment';
+			// }else{
+			// 	$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan,'act'=>$run['act'],'genre'=>1));
+			// 	$title = "门票打印";
+			// 	$width = '213';
+			// 	$height = '208';
+			// 	$pageId = 'print';
+			// }
+			$forwardUrl = U('Item/Order/drawer',array('sn'=>$run['sn'],'plan_id'=>$plan,'act'=>$run['act'],'genre'=>1));
 				$title = "门票打印";
 				$width = '213';
 				$height = '208';
 				$pageId = 'print';
-			}
 			//禁止打印
 			
 			$return = array(
@@ -690,30 +689,50 @@ class OrderController extends ManageBase{
 	}
 /*======================分割线4 @大红袍 =============================================================*/
 	/**
-	 * 预订单处理 type 1    同意排座 2拒绝 退款
+	 * 预订单处理 type 1    同意排座 2审核 4拒绝 退款
 	 */
 	function pay_no_seat(){
-		$ginfo = I('get.');
-		$oinfo = Operate::do_read('Order',0,array('order_sn'=>$ginfo['id']),'','',true);
-		if(empty($ginfo) || empty($oinfo)){$this->erun("参数错误!");}
-		if($oinfo['type'] == '6'){
-			$this->erun("政企订单不支持此项操作!");
-		}else{
-			if($ginfo['type'] == '1'){
-				//同意 排座
-				$order = new Order();
-				$status = $order->add_seat($oinfo);
-			}else{
-				//不同意退款
-				$status = \Libs\Service\Refund::arefund($oinfo);			
+		if(IS_POST){
+			$pinfo = I('post.');
+			$oinfo = Operate::do_read('Order',0,array('order_sn'=>$pinfo['sn']),'','',true);
+			if(empty($pinfo) || empty($oinfo)){$this->erun("参数错误!");}
+			switch ((int)$pinfo['action']) {
+				case 1:
+					$order = new Order();
+					$status = $order->add_seat($oinfo);
+					break;
+				case 2:
+					//使用控座模板设置座位
+					if(!isset($pinfo['control']) || empty($pinfo['control'])){
+						$status = false;
+					}else{
+						$order = new Order();
+						$status = $order->up_control_seat($pinfo, $oinfo);
+					}
+					break;
+				case 4:
+					//不同意退款
+					$status = \Libs\Service\Refund::arefund($oinfo);
+					break;
 			}
-		}
-		//返回结果
-		if($status != false){
-			$this->srun("操作成功",array('tabid'=>$this->menuid.MODULE_NAME));
+			//返回结果
+			if($status != false){
+				$this->srun('操作成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun("操作失败!");
+			}
 		}else{
-			$this->erun("操作失败!");
-		}	
+			$ginfo = I('get.');
+			$oinfo = Operate::do_read('Order',0,array('order_sn'=>$ginfo['id']),'','',true);
+			if(empty($ginfo) || empty($oinfo)){$this->erun("参数错误!");}
+			if($oinfo['type'] == '6'){
+				$this->erun("政企订单不支持此项操作!");
+			}
+			//拉取所有特殊控座模板
+			$control = D('ControlSeat')->where(['status' => 1,'type'=>2,'product_id'=>$oinfo['product_id']])->field('id,name,num')->select();
+			$this->assign('data', $oinfo)->assign('control', $control)->display();
+		}
+			
 	}
 	
 	/**

@@ -358,47 +358,24 @@ class ProductController extends ManageBase{
 	function planadd(){
 		if(IS_POST){
 			$data = I('post.');
-			if(D("Item/Plan")->add_plan($data)){
+			$data['user_id'] = get_user_id();
+			$state = D("Item/Plan")->add_plan($data);
+			if($state){
 				$this->srun("添加成功！", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun('新增失败,在同一时间已存在销售计划!');
 			}
 		}else{
 			//产品信息
-			$pinfo = get_product('info');dump($pinfo);
+			$pinfo = get_product('info');
 			if(empty($pinfo)){$this->erun('未捕获产品信息,请重新登录系统...');}
-			switch ($pinfo['type']) {
-				case '1':
-					//剧场座椅区域信息
-					$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->order('listorder ASC')->select();
-					//判断是否启用场次模板
-					$tplPlan = D('Tplfield')->where(['product_id'=>$pinfo['id'],'status'=>1])->field('id,number,start,end')->order('sorting DESC')->select();
-					//dump($tplPlan);
-					$this->assign('seat',$seat)->assign('tplplan', $tplPlan);
-					break;
-				case '2':
-					//景区
-					break;
-				case '3':
-					//漂流
-					$tooltype = D('ToolType')->where(array('product_id'=>$pinfo['id'],'status'=>1))->field('id,title')->order('id DESC')->select();
-					$this->assign('tooltype',$tooltype);
-					break;
-			}
-			$plantime = D('Item/Plan')->where(['product_id'=>$pinfo['id']])->max('plantime');
-			$today = strtotime(date('Ymd'));
-			if($plantime < $today){
-				$plantime = $today;
-			}else{
-				$plantime = $plantime + 86400;
-			}
-			//票型价格信息
-			$ticket = D('TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
-			//商品s
-			$this->assign('group',$ticket)
-			     ->assign('pinfo',$pinfo)
-			     ->assign('plantime',date('Y-m-d',$plantime))
-				 ->display();
+			$init = D("Item/Plan")->create_plan_init($pinfo);
+			$this->assign('seat',$init['seat'])
+				->assign('tplplan', $init['tplplan'])
+				->assign('group',$init['ticket'])
+			    ->assign('pinfo',$pinfo)
+			    ->assign('plantime',$init['plantime'])
+				->display();
 		}
 	}
 	/**

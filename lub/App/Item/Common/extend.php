@@ -102,7 +102,21 @@ function kpi_fill($param = null){
 
     }
 }
-
+function controlType($value)
+{
+	switch ($value) {
+		case '1':
+			$return = '一般控座';
+			break;
+		case '2':
+			$return = '特殊控座';
+			break;
+		default:
+			$return = '一般控座';
+			break;
+	}
+	echo $return;
+}
 /**
  * 记录窗口售票代收款
  * @param  订单内容 $info

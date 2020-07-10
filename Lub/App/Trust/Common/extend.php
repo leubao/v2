@@ -7,7 +7,7 @@ use Libs\Service\ReturnCode;
  * @param string $msg
  * @return array
  */
-function showReturnCode($status = false, $code = '1002', $data = [], $count = '', $msg = '')
+function showReturnCode($status = false, $code = '1002', $data = [], $msg = '')
 {
     $return_data = [
         'status' => $status,
@@ -23,7 +23,7 @@ function showReturnCode($status = false, $code = '1002', $data = [], $count = ''
         $return_data['msg'] = ReturnCode::$return_code[$code];
     }
     //当错误时记录日志 TODO
-    return json_encode($return_data);
+    die(json_encode($return_data));
     //return json($return_data);
 }
 

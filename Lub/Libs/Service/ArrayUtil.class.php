@@ -11,15 +11,14 @@ class ArrayUtil extends \Libs\System\Service {
      * 设置签名
      * @author helei
      */
-    public function setSign($data)
+    static public function setSign($data)
     {
         $values = ArrayUtil::removeKeys($data, ['sign']);
 
         $values = ArrayUtil::arraySort($values);
 
         $signStr = ArrayUtil::createLinkstring($values);
-
-        $this->retData['sign'] = $this->makeSign($signStr);
+        return self::makeSign($signStr);
     }
     
     

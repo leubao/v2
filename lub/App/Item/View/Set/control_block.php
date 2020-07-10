@@ -15,6 +15,7 @@
         <th width="50">序号</th>
         <th align="center">所属模板</th>
         <th align="center">名称</th>
+        <th align="center">类型</th>
         <th align="center">数量</th>
         <th align="center">状态码</th>
         <th align="center">备注</th>
@@ -29,13 +30,14 @@
         <td>{$vo.sort}</td>
         <td align="center">{$vo.template_id|templateName}</td>
         <td align="center">{$vo.name}</td>
+        <td align="center">{$vo.type|controlType}</td>
         <td align="center">{$vo.num}</td>
         <td align="center">{$vo.state}</td>
         <td align="center">{$vo.remark}</td>
         <td align="center">{$vo.createtime|datetime}</td>
         <td align="center">{$vo.status|status}</td>
         <td align="center">
-          <a type="button" class="btn btn-default" data-toggle="dialog" data-max="true" href="{:U('Item/Set/set_block',array("id"=>$vo[id],'type'=>2,'menuid'=>$menuid))}"><i class="fa fa-th"></i> 设置座位</a>
+          <a type="button" class="btn btn-default" data-toggle="dialog" data-max="true" href="{:U('Item/Set/set_block',array("id"=>$vo[id],'type'=>$vo['type'],'menuid'=>$menuid))}"><i class="fa fa-th"></i> 设置座位</a>
         </td>
        </tr>
     </volist>

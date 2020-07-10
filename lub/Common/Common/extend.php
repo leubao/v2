@@ -364,7 +364,7 @@ function planShow($param,$stype = 1,$type=NULL){
                 break;
             case '3': 
                 $types = '3'.$stype;
-                break;
+                break;    
         }
         switch ($types) {
             case '11':
@@ -386,7 +386,14 @@ function planShow($param,$stype = 1,$type=NULL){
             case '15':
                 //简单短信
                 $name = date('m月d日',$info['plantime']).date('H:i',$info['starttime']);
-                break;    
+                break; 
+            case '17':
+                //智旅同业换行展示
+                $name = [
+                    date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")",
+                    date('H:i',$info['starttime'])."-".date('H:i',$info['endtime'])
+                ];
+                break;   
             case '21':
                 //不显示场次 和结束时间
                 $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
@@ -401,8 +408,15 @@ function planShow($param,$stype = 1,$type=NULL){
                 break;
             case '26':
                 //只显示日期
-                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);;
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
                 break;
+            case '27':
+                //智旅同业换行展示
+                $name = [
+                    date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")",
+                    date('H:i',$info['starttime'])."-".date('H:i',$info['endtime'])
+                ];
+                break;  
             case '31':
                 //不显示场次 和结束时间
                 //$name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
@@ -420,6 +434,13 @@ function planShow($param,$stype = 1,$type=NULL){
                 //不显示场次 和结束时间
                 $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
                 break;
+            case '37':
+                //智旅同业换行展示
+                $name = [
+                    date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")",
+                    date('H:i',$info['starttime'])."-".date('H:i',$info['endtime'])
+                ];
+                break;  
         }
     }else{
         $name = "场次未知";

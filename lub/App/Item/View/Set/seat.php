@@ -163,7 +163,7 @@ $(document).ready(function() {
   //异步加载座椅状态 
   $.ajax({ 
       type     : 'get', 
-      url      : '{:U('Item/Set/seats');}&aid='+areaId+'&fid='+groupId+'&type='+{$type}, 
+      url      : '{:U('Item/Set/seats');}&aid='+areaId+'&fid='+groupId+'&type={$type}&action={$action}', 
       dataType : 'json', 
       success  : function(rdata) { 
           if(rdata.statusCode == '200'){
@@ -178,7 +178,7 @@ $(document).ready(function() {
                 sc.status(currentGroup, 'selected'); 
               });
             }
-            if(rdata.ngroup_seat != ''){
+            if(rdata.ngroup_seat != '' && rdata.type == 1){
               $.each(rdata.ngroup_seat, function(index, otherGroup) {
                 sc.status(otherGroup, 'unavailable'); 
               });

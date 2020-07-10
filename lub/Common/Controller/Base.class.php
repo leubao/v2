@@ -43,45 +43,7 @@ class Base extends LubTMP {
         $this->assign('title', $itemName);
         $this->assign('proconf',$this->pro_conf($product));
     }
-    /**
-     * 返回产品配置信息
-     * 去除敏感信息
-     */
-    public function pro_conf($product){
-        $unset = array(
-            'alipay_email'=>'',
-            'alipay_partner'=>'',
-            'alipay_key'=>'',
-            'aliwappay_email'=>'',
-            'aliwappay_partner'=>'',
-            'aliwappay_key'=>'',
-            'plan_start_time'=>'', 
-            'plan_end_time'=>'',
-            'ticket_sms'=>'',
-            'win_subtract'=>'',
-            'channel_quota'=>'',
-            'channel_time'=>'',
-            'print_seat_custom'=>'',
-            'print_seat'=>'',
-            'webpay'=>'',
-            'area_sms'=>'',
-            'crm_sms'=>'',
-            'print_remrak'=>'',
-            'print_field'=>'',
-            'appsecret'=>'',
-            'token'=>'',
-            'encoding'=>'',
-            'mchkey'=>'',
-            'mchid'=>'',
-            'wxurl'=>'',
-            'tplmsg_order_id'=>'',
-            'tplmsg_order_remark'=>'',
-            'page_title'=>'',
-        );
-        $proconf = cache('ProConfig');
-        $return = array_diff_key($proconf[$product]['1'],$unset);
-        return $return;
-    }
+    
     /*返回去除敏感信息的客户信息
     *@param $uinfo 包含敏感信息的
     */

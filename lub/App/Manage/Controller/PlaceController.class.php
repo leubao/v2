@@ -170,7 +170,35 @@ class PlaceController extends ManageBase{
 			 ->assign('placeid',$placeid)
 			 ->display();
 	}
-	
+	/**
+	 * 更新区域背景色
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2020-06-27T18:21:38+0800
+	 * @return   [type]                   [description]
+	 */
+	public function up_area_color()
+	{
+		if(IS_POST){
+			$pinfo = I('post.');
+			if(!isset($pinfo['id']) || empty($pinfo['id'])){
+				$this->erun("参数错误！");
+			}
+			$upData = [
+				'name'		=>	$pinfo['name'],
+				'bgcolor'	=>	$pinfo['bgcolor'],
+			];
+			$state = D('Area')->where(['id'=>$pinfo['id']])->save($upData);
+			if($state){
+				$this->srun("更新成功！", array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
+			}else{
+				$this->erun("更新失败！");
+			}
+		}else{
+			$ginfo = I('get.');
+			$info = D('Area')->where(['id'=>$ginfo['areaid']])->field('id,name,bgcolor')->find();
+			$this->assign('data', $info)->display();
+		}
+	}
 	/*添加区域
 	 * <！-n 座位ID r 行		l 列 -》  s v显示h隐藏 		a 行列集
 	 * */  
@@ -307,7 +335,7 @@ class PlaceController extends ManageBase{
 			$this->areanav($tempid,$placeid);
 			$this->assign('template_id',$tempid)
 				 ->assign('placeid',$placeid)
-			     ->display();
+			     ->display('areaadd');
 		}
 	}
 	

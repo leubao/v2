@@ -710,24 +710,14 @@ class OrderController extends Base{
 		//更新门票打印状态
 		$model = new Model();
 		$model->startTrans();
-		switch ($plan['product_type']) {
-			case '1':
-				$table = $plan['seat_table'];
-				break;
-			case '2':
-				$table = 'scenic';
-				break;
-			case '3':
-				$table = 'drifting';
-				break;
-		}
+		$table = $plan['seat_table'];
 		//读取门票列表
 		$list = M(ucwords($table))->where(array('order_sn'=>$ginfo['sn']))->select();
 		if($ginfo['type'] == '1'){
-			//一人一票
-			//读取门票列表
+			$orderId = D('Order')->where(['order_sn'=>$ginfo['sn']])->getField('id');
+			//一人一票 读取门票列表
 			foreach ($list as $k=>$v){
-				$info[] = re_print($plan['id'],$plan['encry'],$v,$plan['product_id']);
+				$info[] = re_print($plan['id'],$plan['encry'],$v,$plan['product_id'],$orderId, $ginfo['type']);
 			}
 		}else{
 			//一单一票
@@ -751,7 +741,8 @@ class OrderController extends Base{
 			foreach ($list as $k=>$v){
 				$num[$v['price_id']]['number'] += 1;
 				$sale = unserialize($v['sale']);//dump($sale);
-				$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."^2017^#";
+				//$sn = \Libs\Service\Encry::encryption($plan['id'],$ginfo['sn'],$plan['encry'],$v['area'],$v['seat'],'1',$v['id'])."^2017^#";
+				$sn = \Libs\Service\Encry::toQrData($v['id'],$oinfo['id'],$plan['id'],$print,$ginfo['type']);
 				$info[$v['price_id']] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,

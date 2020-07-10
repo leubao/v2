@@ -123,7 +123,7 @@ class Exports{
             'borders' => array(  
                 'allborders' => array(   
                     'style' => \PHPExcel_Style_Border::BORDER_THIN,//细边框  
-                    'color' => array('argb' => '657180'),  
+                    'color' => array('argb' => '000000'),  
                 ),  
             ),  
         );
@@ -251,33 +251,40 @@ class Exports{
                 $objActSheet->setCellValue ('B2',$header['datetime']);
                 $objActSheet->setCellValue ('I2',date('Y-m-d H:i:s'));
                 /* excel文件内容 */
-                $zz = 5;
+                $zz = 5;//起始行
                 //循环数据
                 foreach ($data as $ks=>$vs){
-                    $ii = '0';//设置渠道商
+                    $ii = '0';
+                    $number = 0;
+                    $money = 0;
+                    $moneys = 0;
+                    $rebate = 0;
+                    //设置渠道商
                     foreach ($vs['plan'] as $ke => $va) {
                         if($ii == '0'){
-                            $objActSheet->setCellValue($a.$zz, "渠道商:".$ii);
-                            $objActSheet->setCellValue($b.$zz, crmName($va['channel_id'],1));
-                            $objActSheet->mergeCells($b.$zz.':'.$m.$zz); 
+                            $objActSheet->setCellValue($a.$zz, "渠道商:".crmName($va['channel_id'],1));
+                            $objActSheet->mergeCells($a.$zz.':'.$m.$zz); 
                         }
                         $zz += 1;
-                        $iii = '0';
+                        $iii = 0;
+                        $ticNum = $va['tic_num'];
                         foreach ($va['price'] as $key => $da) {
                             //设置合并的行数
-                            $ss = $va['tic_num'] == '1' ? $zz : $zz+$va['tic_num']-1;
-                            if($iii == '0'){
+                            $ss = (int)$va['tic_num'] === 1 ? $zz : ($zz + $va['tic_num'] - 1);
+                            if($iii == 0){
                                 $objActSheet->setCellValue($a.$zz, planShows($va['plan'],1));
-                                if($va['tic_num'] > '1'){
-                                //合并单元格
-                                $objActSheet->mergeCells($a.$zz.':'.$a.$ss);
+                                if((int)$va['tic_num'] > 1){
+                                    //合并单元格
+                                    $objActSheet->mergeCells($a.$zz.':'.$a.$ss);
                                 }
                             }
+                            //
                             $objActSheet->setCellValue ($i.$zz, $va['number']);
                             $objActSheet->setCellValue ($j.$zz, $va['money']);
                             $objActSheet->setCellValue ($k.$zz, $va['moneys']);
                             $objActSheet->setCellValue ($l.$zz, $va['rebate'] );
-                            if($va['tic_num'] > '1'){
+                            if($iii == 0 && (int)$va['tic_num'] > 1){
+                               // var_dump($zz,$ss);
                                 //合并单元格
                                 $objActSheet->mergeCells($i.$zz.':'.$i.$ss);
                                 $objActSheet->mergeCells($j.$zz.':'.$j.$ss);
@@ -296,25 +303,44 @@ class Exports{
                             $objActSheet->setCellValue ($h.$zz, $da['rebate'] );
                             /*详细 e*/
 
-                            //计算合计
-                            $number += $va['number'];
-                            $money += $va['money'];
-                            $moneys += $va['moneys'];
-                            $rebate += $va['rebate'];
-
                             $objActSheet->getStyle($a.$zz.':'.$m.$zz)->applyFromArray($styleArray);
-                            $zz+=1;
+                            if((int)$va['tic_num'] > 1 && ($ticNum - 1) > 0){
+                                $zz += 1;
+                            }
+                            //var_dump($zz);
                             $ii++;
                             $iii++;
+                            $ticNum--;
                         }
+                        //计算合计
+                        $number += $va['number'];
+                        $money += $va['money'];
+                        $moneys += $va['moneys'];
+                        $rebate += $va['rebate'];
+                        //计算总计
+                        $Tnumber += $va['number'];
+                        $Tmoney += $va['money'];
+                        $Tmoneys += $va['moneys'];
+                        $Trebate += $va['rebate'];
+                        $objActSheet->getStyle($a.$zz.':'.$m.$zz)->applyFromArray($styleArray);
                         $ii++;
                     }
+                    $zz+=1;
+                    //单渠道商合计
+                    $objActSheet->setCellValue ($h.$zz, '合计:' );
+                    $objActSheet->setCellValue ($i.$zz, $number);
+                    $objActSheet->setCellValue ($j.$zz, $money);
+                    $objActSheet->setCellValue ($k.$zz, $moneys);
+                    $objActSheet->setCellValue ($l.$zz, $rebate );
+                    $objActSheet->getStyle($a.$zz.':'.$m.$zz)->applyFromArray($styleArray);
+                    $zz++;
                 }
-                $objActSheet->setCellValue ($h.$zz, '合计:' );
-                $objActSheet->setCellValue ($i.$zz, $number);
-                $objActSheet->setCellValue ($j.$zz, $money);
-                $objActSheet->setCellValue ($k.$zz, $moneys);
-                $objActSheet->setCellValue ($l.$zz, $rebate );
+                $objActSheet->setCellValue ($h.$zz, '总计:' );
+                $objActSheet->setCellValue ($i.$zz, $Tnumber);
+                $objActSheet->setCellValue ($j.$zz, $Tmoney);
+                $objActSheet->setCellValue ($k.$zz, $Tmoneys);
+                $objActSheet->setCellValue ($l.$zz, $Trebate );
+                $objActSheet->getStyle($a.$zz.':'.$m.$zz)->applyFromArray($styleArray);
                 $filename = "Lub_channl_detail_".time();
                 break;
             case '4':

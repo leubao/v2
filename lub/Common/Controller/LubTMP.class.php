@@ -136,6 +136,45 @@ class LubTMP extends \Think\Controller {
         check_plan();
     }
     /**
+     * 返回产品配置信息
+     * 去除敏感信息
+     */
+    public function pro_conf($product){
+        $unset = array(
+            'alipay_email'=>'',
+            'alipay_partner'=>'',
+            'alipay_key'=>'',
+            'aliwappay_email'=>'',
+            'aliwappay_partner'=>'',
+            'aliwappay_key'=>'',
+            'plan_start_time'=>'', 
+            'plan_end_time'=>'',
+            'ticket_sms'=>'',
+            'win_subtract'=>'',
+            'channel_quota'=>'',
+            'channel_time'=>'',
+            'print_seat_custom'=>'',
+            'print_seat'=>'',
+            'webpay'=>'',
+            'area_sms'=>'',
+            'crm_sms'=>'',
+            'print_remrak'=>'',
+            'print_field'=>'',
+            'appsecret'=>'',
+            'token'=>'',
+            'encoding'=>'',
+            'mchkey'=>'',
+            'mchid'=>'',
+            'wxurl'=>'',
+            'tplmsg_order_id'=>'',
+            'tplmsg_order_remark'=>'',
+            'page_title'=>'',
+        );
+        $proconf = cache('ProConfig');
+        $return = array_diff_key($proconf[$product]['1'],$unset);
+        return $return;
+    }
+    /**
      * Ajax方式返回数据到客户端
      * @access protected
      * @param mixed $data 要返回的数据

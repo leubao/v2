@@ -67,6 +67,11 @@ class PlanModel extends Model{
 		
 		if(count($info) == 1){
 			$planid = $this->add($info['0']);
+			if($planid){
+				if((int)$data['product_type'] === 1){
+					return $this->auth($planid);
+				}
+			}
 		}else{
 			$planid = $this->addAll($info);
 		}
@@ -78,7 +83,7 @@ class PlanModel extends Model{
 		if($data['product_type'] == '1'){
 			//引入销控默认数据
 			//读取配置
-			$proconf = $this->procof;
+			$proconf = cache('ProConfig');
 			if($proconf['quota']){
 				$quotaBase = [
 					'channel_often_quota'		=>	$proconf['channel_often_quota'],
@@ -107,7 +112,7 @@ class PlanModel extends Model{
 				'product_type' => $data['product_type'],
 				'status'=>'1',
 				'is_sales' => 1,
-				'user_id' => get_user_id(),
+				'user_id' => $data['user_id'],
 				'createtime' => time(),
 				'param'	=> serialize($param),
 				'encry'	=> genRandomString(6,1),
@@ -149,7 +154,7 @@ class PlanModel extends Model{
 					'product_type' => $data['product_type'],
 					'status' => $status,
 					'is_sales' => 1,
-					'user_id' => get_user_id(),
+					'user_id' => $data['user_id'],
 					'createtime' => time(),
 					'param'	=> serialize($param),
 					'encry'	=> genRandomString(6,1),
@@ -251,6 +256,43 @@ class PlanModel extends Model{
 			}
 			return false;
 		}
+	}
+	//创建销售计划初始化
+	public function create_plan_init($pinfo)
+	{
+		switch ($pinfo['type']) {
+			case '1':
+				//剧场座椅区域信息
+				$seat = D('Area')->where(array('template_id'=>$pinfo['template_id'],'status'=>1))->field('id,name,template_id,num')->order('listorder ASC')->select();
+				//判断是否启用场次模板
+				$tplPlan = D('Tplfield')->where(['product_id'=>$pinfo['id'],'status'=>1])->field('id,number,start,end')->order('sorting DESC')->select();
+				//
+				break;
+			case '2':
+				//景区
+				break;
+			case '3':
+				//漂流
+				$tooltype = D('ToolType')->where(array('product_id'=>$pinfo['id'],'status'=>1))->field('id,title')->order('id DESC')->select();
+				$this->assign('tooltype',$tooltype);
+				break;
+		}
+		$plantime = D('Item/Plan')->where(['product_id'=>$pinfo['id']])->max('plantime');
+		$today = strtotime(date('Ymd'));
+		if($plantime < $today){
+			$plantime = $today;
+		}else{
+			$plantime = $plantime + 86400;
+		}
+		//票型价格信息
+		$ticket = D('Item/TicketGroup')->relation(true)->where(array('product_id'=>$pinfo['id'],'status'=>'1'))->select();
+		return [
+			'plantime'	=>	date('Y-m-d',$plantime),
+			'seat'		=>	$seat ?? [],
+			'tplplan'	=>  $tplPlan ?? [],
+			'tooltype'	=>	$tooltype ?? [],
+			'ticket'	=>	$ticket
+		];
 	}
 	/**
 	 * 编辑计划

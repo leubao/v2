@@ -62,7 +62,7 @@
       <input type="tel" name="phone" placeholder="请输入手机号" autocomplete="off" class="layui-input">
     </div>
     <div class="layui-form-item">
-        <input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard">
+        <input type="text" name="identity[]" placeholder="身份证" autocomplete="off" class="layui-input idcard">
     </div> 
     <div id="idcardBox"></div>
     <div class="layui-form-item layui-form-text">
@@ -183,8 +183,7 @@ layui.use(['form','layer','laytpl','carousel'], function(){
         if(t.val()==""||undefined||null){
           t.val(0);
         }
-        t.val(parseInt(t.val()) + 1)
-        $("#idcardBox").append('<li class="layui-form-item"><input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard"></div></li>');
+        t.val(parseInt(t.val()) + 1);
       }else{
         layer.msg("亲，您一次只能买这么多了!");
       }
@@ -230,7 +229,6 @@ layui.use(['form','layer','laytpl','carousel'], function(){
     num = parseInt($("#num").val());
     return num;
   }
-
   form.on('submit(pay-submit)', function(data){
     if(plan == 0 || price == 0){
       layer.msg("请选择可用日期~");
@@ -245,40 +243,36 @@ layui.use(['form','layer','laytpl','carousel'], function(){
       return false;
     }
     pay = '{"cash":0,"card":0,"alipay":0}';
-    param = '{"remark":"'+data.field.remark+'","activity":"","settlement":"2"}';
+    param = '{"remark":"'+data.field.remark+'","activity":"","settlement":"'+global['user']['epay']+'"}';
     crm = '{"guide":"'+global['user']['guide']+'","qditem":"'+global['user']['qditem']+'","phone":"'+data.field.phone+'","contact":"'+data.field.username+'","memmber":"'+global['user']['memmber']+'"}';
     var toJSONString = '';
     var field = data.field;
-    var idcardList = [];
-    var length = $(".idcard").length;
-    $(".idcard").each(function(i, el) {
-      var fg  = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-      var idcard = $(this).val();
-      toJSONString = toJSONString + '{"areaId":'+area+',"priceid":'+ticket+',"idcard":"'+idcard+'","price":'+price+',"num":"1"}'+fg;
-    });
-    if(is_array_unique(idcardList)){
-      layer.msg('身份证号码重复!');
-      return false;
+
+    //计算金额
+    if(global['user']['epay'] == '1'){
+      subtotal = parseFloat(price * parseInt(num));
+    }else{
+      subtotal = parseFloat(discount * parseInt(num));
     }
 
+    toJSONString = '{"areaId":'+area+',"priceid":'+ticket+',"price":'+price+',"num":'+num+'}';
     postData = 'info={"subtotal":"'+subtotal+'","plan_id":'+plan+',"checkin":1,"sub_type":0,"type":1,"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+
     $.ajax({
-        type:'POST',
-        url:'<?php echo U('Wechat/Index/order');?>',
-        data:postData,
-        dataType:'json',
-        success:function(data){
-            if(data.statusCode == "200"){
-                location.href = data.url;
-            }else{
-                layer.msg("下单失败:"+data.msg);
-            }
+      type:'POST',
+      url:'<?php echo U('Wechat/Index/order');?>',
+      data:postData,
+      timeout: 1500,
+      dataType:'json',
+      success:function(data){
+        if(data.statusCode == "200"){
+            location.href = data.url;
+        }else{
+            layer.msg("下单失败:"+data.msg);
         }
+      }
     });
   });
-  function is_array_unique(arr){
-    return /(\x0f[^\x0f]+)\x0f[\s\S]*\1/.test("\x0f"+arr.join("\x0f\x0f") +"\x0f");
-  }
 });
 </script>
 <script id="plantpl" type="text/html">

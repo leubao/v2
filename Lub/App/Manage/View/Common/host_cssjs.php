@@ -6,7 +6,7 @@
 <!-- plug - css -->
 <link href="{$config_siteurl}static/bjui/plugins/bootstrapSelect/bootstrap-select.css" rel="stylesheet">
 <link href="{$config_siteurl}static/bjui/themes/css/FA/css/font-awesome.min.css" rel="stylesheet">
-
+<link href="{$config_siteurl}static/bjui/plugins/colorpicker/css/bootstrap-colorpicker.min.css" rel="stylesheet">
 <!--lub css -->
 <link href="{$config_siteurl}static/css/common.css?v=1.2" rel="stylesheet">
 <!--[if lte IE 7]>
@@ -24,6 +24,7 @@
 <script src="{$config_siteurl}static/bjui/js/bjui-all.js"></script>
 <script src="{$config_siteurl}static/js/common.js?v={$Config.js_version}"></script>
 <!-- plugins -->
+<script src="{$config_siteurl}static/bjui/plugins/colorpicker/js/bootstrap-colorpicker.min.js"></script>
 <!-- swfupload for uploadify && kindeditor -->
 <script src="{$config_siteurl}static/bjui/plugins/swfupload/swfupload.min.js"></script>
 <!-- ztree -->

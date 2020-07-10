@@ -317,7 +317,7 @@ class WorkController extends ManageBase{
 				//'createtime'=>array('GT', strtotime(date("Ymd",time()))),//过滤已过期的订单
 			);
 		}
-		$map['plan_id']	=	['in',normal_plan()];
+		//$map['plan_id']	=	['in',normal_plan()];
 		$this->basePage('Order',$map, 'createtime DESC');
 		$this->assign('map',$map)->assign('planname',$planname)->assign('channel',$channel)->assign('channelname',$channelname)->display();
 	}

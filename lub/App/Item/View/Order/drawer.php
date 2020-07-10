@@ -68,7 +68,7 @@ function printTicket(){
 /*打印页面控制*/
 function CreateFullBill(data,type) {
 	LODOP = getLodop();
-	LODOP.SET_SHOW_MODE("LANGUAGE",0);
+	//LODOP.SET_SHOW_MODE("LANGUAGE",0);
 	{$printTpl.info}
 }
 </script>

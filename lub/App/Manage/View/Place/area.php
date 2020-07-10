@@ -15,6 +15,7 @@
     <thead>
       <tr>
         <th align="center">区域名称</th>
+        <th align="center">背景色</th>
         <th align="center">座椅数</th>
         <th align="center">单双号</th>
         <th align="center">朝向</th>
@@ -27,12 +28,14 @@
     <volist name="data" id="vo">
       <tr data-id="{$vo.id}">
         <td>{$vo.name}</td>
+        <td align="center"><div style="width:25px;height: 25px;background-color: {$vo.bgcolor}" class="{$vo.bgcolor}"></div></td>
         <td align="center">{$vo.num}</td>
         <td align="center"><if condition=" $vo['is_mono'] eq '1' ">单号<elseif  condition=" $vo['is_mono'] eq '2' "/>双号<else />单双号</if></td>
         <td align="center"><if condition=" $vo['face'] eq '1' ">朝上<else />朝下</if></td>
         <td align="center">{$vo.start_row}/{$vo.start_list}</td>
         <td align="center">{$vo.status|status}</td>
         <td align="center">
+         <a type="button" class="btn btn-default" data-toggle="dialog" href="{:U('Manage/Place/up_area_color',array("areaid"=>$vo[id],"tempid"=>$tempid,"placeid"=>$placeid,'menuid'=>$menuid))}"><i class="fa fa-th"></i> 编辑</a> 
         <a type="button" class="btn btn-default" data-toggle="dialog" data-max="true" href="{:U('Manage/Place/seat',array("areaid"=>$vo[id],"tempid"=>$tempid,"placeid"=>$placeid,'menuid'=>$menuid))}"><i class="fa fa-th"></i> 座位管理</a>
         <a type="button" class="btn btn-danger" data-toggle="doajax" href="{:U('Manage/Place/del_area',array("id"=>$vo[id],"tempid"=>$tempid,"placeid"=>$placeid,'menuid'=>$menuid))}" data-confirm-msg="确定要执行此操作吗？"><i class="fa fa-trash"></i>删除</a>
         </td>

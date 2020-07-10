@@ -112,7 +112,7 @@ class Report{
 	        	//按照日期
 				$map = array(
 					'product_id' => $value['id'],
-	    			'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
+	    			'status' => array('in','1,5,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 	    			'createtime' => array(array('EGT', $start_time), array('ELT', $end_time), 'AND'),
 	    		);
 	    		$where = array('datetime'=>$datetime,'product_id'=>$value['id'],'status'=>'1');
@@ -141,7 +141,7 @@ class Report{
 						//当前日期是否已生成
 						foreach ($plan as $k => $v) {
 				    		$map = array(
-								'status' 	 => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
+								'status' 	 => array('in','1,5,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
 								'product_id' => $value['id'],
 								'plan_id'    => $v['id'],
 							);
