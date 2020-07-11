@@ -52,6 +52,9 @@ function scene($param){
         case 7 :
             echo "自助机";
             break;
+        case 8 :
+            echo "智旅同业";
+            break;
     }
 }
 /**
@@ -898,6 +901,9 @@ function crmName($param,$type=NULL){
                 break;
             case 7:
                 $return = "自助设备";
+                break;
+            case 8:
+                $return = "智旅同业";
                 break;
             default:
                 $return = "未知场景";

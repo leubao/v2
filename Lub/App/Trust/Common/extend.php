@@ -36,3 +36,25 @@ function ticketStatus($value='')
     ];
     return $arr[$value];
 }
+//获取订单门票
+function getOrderTicket($plan_id, $sn)
+{
+    $plan = F('Plan_'.$plan_id);
+    if(empty($plan)){
+        $plan = D('Plan')->where(['id'=>$plan_id])->field('seat_table')->find();
+    }
+    $field = [
+        'id',
+        'idcard',
+        'checktime',
+        'sale',
+        'status'
+    ];
+    $ticket = D($plan['seat_table'])->where(['order_sn'=>$sn])->field($field)->select();
+    foreach ($ticket as $k => $v) {
+        $sale = array_merge($v, unserialize($v['sale']));
+        unset($sale['sale']);
+        $return[] = $sale;
+    }
+    return $return;
+}

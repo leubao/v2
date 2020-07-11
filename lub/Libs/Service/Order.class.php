@@ -974,7 +974,7 @@ class Order extends \Libs\System\Service {
 		$printtype = $info['checkin'] ? $info['checkin'] : 1;
 		$sn = $info['order_sn'] ? $info['order_sn'] : get_order_sn($plan['id'],$printtype);
 
-		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);//dump($seat);
+		$seat = $this->area_group($info['data'],$plan['product_id'],$info['param'][0]['settlement'],$plan['product_type'],$info['child_ticket'],$channel);
 		if((int)$seat['num'] > 200){$this->error = "400005 : 单笔订单门票数不能超过200...";return false;}
 		/*景区*/
 		if($plan['product_type'] <> '1'){
@@ -1055,7 +1055,6 @@ class Order extends \Libs\System\Service {
 		$orderData = array_merge($orderData,$scena);
 		$state = $model->table(C('DB_PREFIX').'order')->add($orderData);
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add(array('oid' => $state,'order_sn' => $sn,'info' => serialize($newData),'remark' => $info['param'][0]['remark']));
-		
 		if($state && $oinfo){
 			$model->commit();//提交事务
 			//设置订单完结有效期
@@ -1201,9 +1200,10 @@ class Order extends \Libs\System\Service {
 			//读取信息
 			$crm = F('Crm');
 			$crm = $crm[$info['info']['crm'][0]['qditem']];
+
 			if(!in_array('2',explode(',',$crm['param']['ispay']))){
 				$model->rollback();//事务回滚
-				$this->error = '400008 : 未被支持的支付方式';
+				$this->error = '400008 : 未被支持的支付方式-1';
 				return false;
 			}
 		}
@@ -2417,7 +2417,7 @@ class Order extends \Libs\System\Service {
 			}	
 		}
 		/*重新组合区域*/
-		foreach($area as $k=>$v){
+		foreach($area as $k => $v){
 			if($product_type == '1'){
 				//排座
 				$seat['area'][] = [
@@ -2564,6 +2564,7 @@ class Order extends \Libs\System\Service {
 		return $data;
 	}
 	/**
+	 * TODO API 金额
 	 * 获取多级扣款的  渠道版专用 
 	 * @Company  承德乐游宝软件开发有限公司
 	 * @Author   zhoujing      <zhoujing@leubao.com>
@@ -2670,6 +2671,10 @@ class Order extends \Libs\System\Service {
 			case '52':
 				//API团队
 				$return = array('type'=>2,'addsid'=>5,'pay'=>2,'status'=>2,'createtime'=>time());
+				break;
+			case '82':
+				//智旅同业
+				$return = array('type'=>2,'addsid'=>8,'pay'=>2,'status'=>2,'createtime'=>time());
 				break;
 		}
 		return $return;
