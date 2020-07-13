@@ -4,7 +4,7 @@
  * @Author: IT Work
  * @Date:   2020-06-24 09:53:31
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-06-24 10:28:45
+ * @Last Modified time: 2020-07-13 15:10:43
  */
 namespace Trust\Model;
 
@@ -28,7 +28,7 @@ class UserModel extends RelationModel {
             $map['username'] = $identifier;
         }
         //强制场景为客户端
-        $map['is_scene'] = 3;
+        //$map['is_scene'] = 3;
         $map['status'] = '1';
         $uInfo = $this->where($map)->field('email,create_time,update_time,remark,last_login_time,last_login_ip', true)->find();
         if (empty($uInfo)) {

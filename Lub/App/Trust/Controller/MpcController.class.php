@@ -342,7 +342,15 @@ class MpcController extends TrustBase{
      */
     public function get_refund_order()
     {
-        # code...
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        $product = $this->getProduct($pinfo['incode']);
+        $model = D('Item/TicketRefund');
+        $field = 'param,against_reason,reason';
+        $list = $model->where(['product_id'=>$product['id'],'status'=>1,'launch'=>2])->field($field,true)->select();
+        return showReturnCode(true,0, $list, 'ok');
     }
     /**
      * 退单审核

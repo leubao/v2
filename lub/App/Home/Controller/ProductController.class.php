@@ -107,6 +107,7 @@ class ProductController extends Base{
 			
 		}
 		$plan = M('Plan')->where(array('plantime'=>$plantime,'status'=>2,'product_id'=>$pinfo['product']))->field('id,starttime,endtime,games,param,product_type')->select();
+		
 		foreach ($plan as $k => $v) {
 			$param = unserialize($v['param']);
 			if($v['product_type'] == '1'){
@@ -359,7 +360,7 @@ class ProductController extends Base{
 		$uinfo = Partner::getInstance()->getInfo();
 		//获得常用联系人
 		$map = array(
-			"cid" => $uinfo['cid'],
+			'cid' => $uinfo['cid'],
 			'status' => '1',
 		);
 		//检测是否开启配额个人不检测配额 TODO  现在判断不好

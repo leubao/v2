@@ -24,10 +24,10 @@ class Refund extends \Libs\System\Service {
 	function refund($ginfo, $type = 1, $area_id = null, $seat_id = null, $poundage = null, $scena = '1'){
 		$sn = $ginfo['sn'];
 		$info = D('Item/Order')->where(['order_sn'=>$sn])->relation(true)->find();
-		$plan_id = (int)$ginfo['plan'];
-		if(empty($plan_id)){
-			$plan_id = $info['plan_id'];
-		}
+		// $plan_id = (int)$ginfo['plan'];
+		// if(empty($plan_id)){
+		// 	$plan_id = $info['plan_id'];
+		// }
 		
 		if(!empty($info['activity']) && (int)$type === 1){
 			$atype = D('Activity')->where(['id'=>$info['activity']])->getField('type');
@@ -35,13 +35,13 @@ class Refund extends \Libs\System\Service {
 				$type = 7;
 			}
 		}
-		if(empty($sn) || empty($info) || empty($plan_id)){
+		if(empty($sn) || empty($info)){
 			error_insert('4004101');return false;
 		}
 		//获取所属计划
-		$plan = F('Plan_'.$plan_id);
+		$plan = F('Plan_'.$info['plan_id']);
 		if(empty($plan)){
-			$plan = M('Plan')->where(array('id'=>$plan_id))->find();
+			$plan = M('Plan')->where(array('id'=>$info['plan_id']))->find();
 		}
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']][1];

@@ -87,7 +87,7 @@
                   <h3>产品名称：{$vo.name}</h3>
                   <p>{$vo.content}</p>
                   <div class="btn-group btn-group-justified">
-                      <a href="{:U('Home/promotions/index',array('type'=>$vo['type'],'pid'=>$vo['id'],'itemid'=>$vo['item_id']))}" class="btn btn-primary" role="button" >立即购票</a>
+                      <a href="{:U('Home/product/scenic',array('type'=>$vo['type'],'pid'=>$vo['id'],'itemid'=>$vo['item_id']))}" class="btn btn-primary" role="button" >立即购票</a>
                   </div>
               </div>
           </div>

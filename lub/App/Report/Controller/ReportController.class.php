@@ -541,4 +541,33 @@ class ReportController extends ManageBase{
 	function channel_kpi(){
 		$this->display();
 	}
+	//售票与入园统计
+	public function sales_and_entry()
+	{
+		$where = array();
+		$today = date('Y-m-d');
+        $start_time = I('starttime') ? I('starttime') : date('Y-m-d',strtotime('-1 day'));
+        $end_time = I('endtime') ? I('endtime') : $today;
+		$this->assign('starttime',$start_time)->assign('endtime',$end_time);
+		//判断开始时间与今天的时间差小于60天
+		$day = timediff($start_time, $today, 'day');
+		if($day['day'] > 60){
+			$this->erun('时间跨度不能超过60天~');
+		}
+		$where = [
+			'plantime'	=> array(array('EGT', strtotime($start_time)), array('ELT', strtotime($end_time)), 'AND'),	
+        	'product_id'=> get_product('id')
+        ];
+		$plan = D('Plan')->where($where)->field('id,plantime,seat_table')->order('plantime ASC,games ASC')->select();
+		
+		foreach ($plan as $k => $v) {
+			$list[] = [
+				'title' =>	planShow($v['id'], 1, 4),
+				'count'	=>	D($v['seat_table'])->count(),
+				'sold'	=>	D($v['seat_table'])->where(['status'=>['in',['2','99']]])->count(),//售出
+				'into' 	=>	D($v['seat_table'])->where(['status'=>['in','99']])->count(),//入园
+			];
+		}
+		$this->assign('data',$list)->assign('plan_count', count($list))->display();
+	}
 }
