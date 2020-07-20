@@ -198,7 +198,7 @@ function post_server(areaId,templateId,groupId){
   select_seat = '"'+select_seat+'"'
   postData = 'info={"data":'+ select_seat + ',"aid":'+areaId+',"template":'+templateId+',"group":'+groupId+'}';
   $.ajax({
-    <if condition="$type eq '1'">
+    <if condition="$action eq 'group'">
     url: '{:U('Item/Set/set_seat');}',
     <else />
     url: '{:U('Item/Set/set_block');}',

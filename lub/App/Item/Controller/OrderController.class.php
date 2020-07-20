@@ -700,6 +700,7 @@ class OrderController extends ManageBase{
 				case 1:
 					$order = new Order();
 					$status = $order->add_seat($oinfo);
+					$msg = '订单已通过审核';
 					break;
 				case 2:
 					//使用控座模板设置座位
@@ -709,14 +710,20 @@ class OrderController extends ManageBase{
 						$order = new Order();
 						$status = $order->up_control_seat($pinfo, $oinfo);
 					}
+					$msg = '订单已通过审核';
 					break;
 				case 4:
 					//不同意退款
 					$status = \Libs\Service\Refund::arefund($oinfo);
+					$msg = '订单未通过审核';
 					break;
 			}
 			//返回结果
 			if($status != false){
+				//判断是否需要推送通知
+				if($oinfo['addsid'] === 8){
+					\Trust\Service\Wisdom::confirm_order($pinfo['sn'], 1,$msg);
+				}
 				$this->srun('操作成功',array('tabid'=>$this->menuid.MODULE_NAME,'closeCurrent'=>true));
 			}else{
 				$this->erun("操作失败!");
@@ -793,6 +800,9 @@ class OrderController extends ManageBase{
 					'refresh'	=> '348Item'		
 				);
 				$message = "排座成功!单号";
+				if($oinfo['addsid'] === 8){
+					\Trust\Service\Wisdom::confirm_order($pinfo['sn'], 1,'订单已通过审核');
+				}
 				D('Item/Operationlog')->record($message, 200);//记录售票员日报表
 			}else{
 				$return = array(

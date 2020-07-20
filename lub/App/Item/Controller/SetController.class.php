@@ -298,7 +298,7 @@ class SetController extends ManageBase{
 	 */
 	function set_seat(){
 		if(IS_POST){
-			$pinfo = json_decode($_POST['info'],true);//dump($pinfo);
+			$pinfo = json_decode($_POST['info'],true);
 			$info = M('AutoSeat')->where(array('id'=>$pinfo['group']))->getField('seat');
 			$seat = unserialize($info);
 			$num = count(explode(',',$pinfo['data']));
@@ -586,7 +586,7 @@ class SetController extends ManageBase{
 	 * @return [type] [description]
 	 */
 	function control_block(){
-		$this->basePage('ControlSeat','','sort DESC');
+		$this->basePage('ControlSeat','','id DESC, sort DESC');
 		$this->display();
 	}
 	/**

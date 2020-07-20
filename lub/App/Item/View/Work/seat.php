@@ -100,9 +100,10 @@
         <tr>
             <td align='right'>支付方式:</td>
             <td><select class="required" name="pay" id="selectPay" data-toggle="selectpicker">
-                    <option value="1" selected>现金</option>
-                    <option value="6">POS机划卡</option>
+                    
+                    <option value="6" selected>POS机划卡</option>
                     <option value="3">签单</option>
+                    <option value="1">现金</option>
                     <option value="4">支付宝支付</option>
                     <option value="5">微信支付</option>
                 </select>
