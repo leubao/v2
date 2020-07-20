@@ -4,7 +4,7 @@
  * @Author: IT Work
  * @Date:   2020-06-24 09:53:31
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-07-13 15:10:43
+ * @Last Modified time: 2020-07-14 10:07:39
  */
 namespace Trust\Model;
 
@@ -51,6 +51,8 @@ class UserModel extends RelationModel {
         if($uInfo['group']['type'] <> '4'){
             //查询所属商户相关信息
             $crm = M('Crm')->where(array('id'=>$uInfo['cid']))->field('id,name,groupid,cash,level,agent,itemid,f_agents,param')->find();
+            //构建从属关系链
+            $crm['link'] = agent_channel($uInfo['cid'], 2);
             $param = json_decode($crm['param'],true);
             unset($crm['param']);
             $uInfo['crm'] = $crm;

@@ -19,13 +19,14 @@ class LubTMPRemind {
         if(empty($planIdx)){
             return true;
         }
-    	$list = D('Order')->where(['plan_id'=>['in', $planIdx],'status'=>['in','1','9','6']])->field('order_sn,phone')->select();
-    	$list = array_unique($list);
+    	$list = D('Order')->where(['plan_id'=>['in', $planIdx],'status'=>['in',['1','9','6']]])->field('order_sn,phone')->select();
+       
+    	$list = unique_multidim_array($list, 'phone');
+       
     	if(!empty($list)){
     		foreach ($list as $k => $v) {
     			\Libs\Service\Sms::remind($v['order_sn'],$v['phone']);
     		}
     	}
     }
-
 }

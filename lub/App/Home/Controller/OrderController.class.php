@@ -461,6 +461,7 @@ class OrderController extends Base{
 						"createtime" => time(),
 						"order_sn"   => $ginfo["sn"],
 						"applicant"  => \Home\Service\Partner::getInstance()->id,
+						"product_id" => $info['product_id'],
 						"crm_id"     => $info["channel_id"],
 						"plan_id"    => $info["plan_id"],
 						"reason"     => $ginfo["reason"],

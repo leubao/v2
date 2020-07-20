@@ -35,26 +35,31 @@ function crmgroupName($param){
 /**
  * 获取场景类型
  */
-function scene($param){
+function scene($param, $type = 0){
     switch ($param){
         case 1 :
-            echo "窗口";
+            $return = "窗口";
             break;
         case 3 :
-            echo "渠道版";
+            $return = "渠道版";
             break;
         case 4 :
-            echo "运营平台";
+            $return = "运营平台";
             break;
         case 5 :
-            echo "API";
+            $return = "API";
             break;
         case 7 :
-            echo "自助机";
+            $return = "自助机";
             break;
         case 8 :
-            echo "智旅同业";
+            $return = "智旅同业";
             break;
+    }
+    if($type){
+        return $return;
+    }else{
+        echo $return;
     }
 }
 /**
@@ -431,7 +436,7 @@ function planShow($param,$stype = 1,$type=NULL){
                 break;
             case '22':
                 //短信发送
-                $name = date('m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")";
+                $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")".date('H:i',$info['starttime']);
                 break;
             case '32':
                 //不显示场次 和结束时间
@@ -1880,8 +1885,9 @@ function crmName($param,$type=NULL){
      * @param $group string 票型分组 支持多个分组
      * @param $seale string 1根据区域获取可售票型,2获取当前计划所有可售票型 注意 只在剧场模式下有效
      * @param $sealeTicket array 特殊方式限定销售票型 比如活动
+     * @param $uinfo array 当前用户
     */
-    function pullprice($planid, $type, $areaId, $scene, $group = null, $seale = '1', $sealeTicket = []){
+    function pullprice($planid, $type, $areaId, $scene, $group = null, $seale = '1', $sealeTicket = [], $uinfo = []){
         switch ($type) {
             case '1':
                 $types = array('in','1,3,4,5,6,7,8');
@@ -1948,7 +1954,7 @@ function crmName($param,$type=NULL){
             'product_id'=>  $plan['product_id']
         ];
         //计划可销售票型
-        $planTicket = implode(',',$param['ticket']);//dump($param['ticket']);
+        $planTicket = implode(',',$param['ticket']);
         //是否限制票型
         if(empty($sealeTicket)){
             $map['activity'] = '0';
@@ -1970,7 +1976,10 @@ function crmName($param,$type=NULL){
         }
         //获取价格信息
         $tickets = M('TicketType')->where($map)->field('id,name,area,price,discount')->select();
-        if($plan['product_type'] == '1' && $seale == '2'){
+        if(empty($uinfo)){
+            $uinfo = Home\Service\Partner::getInstance()->getInfo();
+        }
+        if((int)$plan['product_type'] === 1 && (int)$seale === 2){
             foreach ($tickets as $va){
                 if(in_array($va['id'],$param['ticket'])){
                     $va['area_num'] = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);
@@ -1980,7 +1989,6 @@ function crmName($param,$type=NULL){
                     //判断是否开启多级扣款 TODO  后期优化
                     if((int)$scene === (int)2){
                         //获取当前用户
-                        $uinfo = Home\Service\Partner::getInstance()->getInfo();
                         $ticketLevel = F('TicketLevel');
                         if(!$ticketLevel){
                             D('Home/TicketLevel')->ticke_level_cache();
@@ -1999,7 +2007,7 @@ function crmName($param,$type=NULL){
                 }
             }
         }else{
-
+            
             foreach ($tickets as $va){
                 if(in_array($va['id'],$param['ticket'])){
                     $va['area_num'] = $area_num;
@@ -2008,7 +2016,7 @@ function crmName($param,$type=NULL){
                     //判断是否开启多级扣款 TODO  后期优化 指定票型ID时，使用景区指定价格
                     if((int)$scene === (int)2){
                         //获取当前用户
-                        $uinfo = Home\Service\Partner::getInstance()->getInfo();
+                        //$uinfo = Home\Service\Partner::getInstance()->getInfo();
                         $ticketLevel = F('TicketLevel');
                         if(!$ticketLevel){
                             D('Home/TicketLevel')->ticke_level_cache();
@@ -2017,7 +2025,7 @@ function crmName($param,$type=NULL){
                         $itemConf = cache('ItemConfig');
                         //一级代理商直接显示景区结算价格
                         if($itemConf[$uinfo['crm']['itemid']]['1']['level_pay'] && $uinfo['crm']['level'] > 16 && empty($sealeTicket)){
-                            $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];//d//ump($ticket_level);
+                            $ticket_level = $ticketLevel[$uinfo['crm']['f_agents']];
                             $va['discount'] = empty($ticket_level[$va['id']]['discount']) ? $va['discount'] : $ticket_level[$va['id']]['discount'];/*结算价格*/
                         }
                     }
@@ -2026,6 +2034,7 @@ function crmName($param,$type=NULL){
                     }
                 }
             }
+
         }
         return $price;
     }
@@ -2380,7 +2389,7 @@ function getHttpContent($url, $method = 'GET', $postData = array()){
                 curl_setopt($ch, CURLOPT_POST, 1);
                 curl_setopt($ch, CURLOPT_POSTFIELDS, $curlPost);
             }
-            $data = curl_exec($ch);
+            $data = curl_exec($ch);dump($url);
             curl_close($ch);
         } catch (Exception $e) {
             $data = null;

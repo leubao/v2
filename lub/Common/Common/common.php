@@ -59,7 +59,28 @@ function array2file($array, $filename) {
     }
     return false;
 }
-
+/**
+ * 多维数指定字段去重
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2020-07-17T15:16:58+0800
+ * @param    [type]                   $array                [description]
+ * @param    [type]                   $key                  [description]
+ * @return   [type]                                         [description]
+ */
+function unique_multidim_array($array, $key) {
+    $temp_array = array();
+    $i = 0;
+    $key_array = array();
+   
+    foreach($array as $val) {
+        if (!in_array($val[$key], $key_array)) {
+            $key_array[$i] = $val[$key];
+            $temp_array[$i] = $val;
+        }
+        $i++;
+    }
+    return $temp_array;
+}
 /**
  * 返回LubTMP对象
  * @return Object

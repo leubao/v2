@@ -49,6 +49,11 @@ class TrustBase extends LubTMP{
 	public function getProduct($incode)
 	{
 		$product = D('Product')->where(['idCode' => $incode])->field('id,name,template_id,type,param')->find();
+		$product['isArea'] = false;
+		if((int)$product['type'] === 1){
+			$product['isArea'] = true;
+		}
+
 		return $product;
 	}
 	//验证签名

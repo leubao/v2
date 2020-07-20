@@ -1947,6 +1947,10 @@ class Order extends \Libs\System\Service {
 		$seat = $param['data'];
 		//读取订单对应计划
 		$plan = F('Plan_'.$oinfo['plan_id']);
+		if(empty($plan)){
+			$this->error = '销售计划已暂停销售~';
+			return false;
+		}
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']]['1'];
 		$plan_param = unserialize($plan['param']);

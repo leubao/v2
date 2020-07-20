@@ -17,7 +17,57 @@ class MpcController extends TrustBase{
 	protected function _initialize() {
         parent::_initialize();
     }
+    /**
+     * 获取权限
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-07-18T21:36:18+0800
+     * @return   [type]                   [description]
+     */
+    public function get_auth()
+    {
+        $pinfo = I('post.');
+        if(!isset($pinfo['user_id']) || empty($pinfo['user_id'])){
+            return showReturnCode(false,1003);
+        }
+        //获取权限
+        $map = [
+            'id' => $pinfo['user_id'],
+            'is_scene'  =>  1
+        ];
+        $user = D('User')->where($map)->field('id,nickname,role_id')->find();
+        $auth = [
+            //订单管理
+            '1' =>  ['app'=>'Order', 'controller'=> 'index', 'action' => 'index'],
+            //销售简报
+            '2' =>  ['app'=>'Report', 'controller'=> 'Financial', 'action' => 'index'],
+            //销售计划
+            '3' =>  ['app'=>'Item', 'controller'=> 'Product', 'action' => 'plan'],
+            //待处理订单
+            '4' =>  ['app'=>'Item', 'controller'=> 'Work', 'action' => 'bookticket'],
+            //退单管理
+            '5' =>  ['app'=>'Item', 'controller'=> 'Work', 'action' => 'channel_refund'],
+        ];
 
+        if((int)$user['role_id'] === 1){
+            $authList = [1,2,3,4,5,6,7];
+        }else{
+            $authList = [6,7];
+            foreach ($auth as $k => $v) {
+                $map = [
+                    'role_id'   =>  $user['role_id'],
+                    'app'       =>  $v['app'],
+                    'controller'=>  $v['controller'],
+                    'action'    =>  $v['action'],
+                    'status'    =>  1
+                ];
+                $role = D('Access')->where($map)->find();
+                if($role){
+                    array_push($authList, $k);
+                }
+            } 
+        } 
+        return showReturnCode(true,0, $authList, 'ok');
+    }
     /**
      * 获取销售计划
      * @Author   zhoujing                 <zhoujing@leubao.com>
@@ -92,6 +142,7 @@ class MpcController extends TrustBase{
     	$model = D('Item/Plan');
     	$init = $model->create_plan_init($product);
     	$init['product'] = $product;
+
     	return showReturnCode(true,0, $init, 'ok');
     }
     /**
@@ -243,6 +294,50 @@ class MpcController extends TrustBase{
     }
 
     /***********************************订单处理**********************************************/
+    public function get_order_list()
+    {
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        $starttime = strtotime(date("Ymd"));
+        $endtime = $starttime + 86399;
+        $product = $this->getProduct($pinfo['incode']);
+        $model = D('Item/Order');
+        $map = [
+            'product_id' => $product['id'],
+            //'createtime' => array(array('EGT', $starttime), array('ELT', $endtime), 'AND')
+        ];
+        if(!isset($pinfo['page']) || empty($pinfo['page'])){
+            $page = 1;
+        }else{
+            $page = $pinfo['page'];
+        }
+        $firstRow = ($page - 1) * 20;
+        $count = $model->where($map)->count();
+        $toal_page = ceil($count, 20);
+        $list = $model->where($map)->field('id,order_sn,plan_id,number,guide_id,channel_id,money,addsid,type,status,createtime')->order('id DESC')->limit($firstRow, 20)->select();
+        if(!empty($list)){
+            $idx = array_unique(array_column($list, 'channel_id'));
+            $crmList = D('Crm')->where(['id' => ['in', $idx]])->field('id,name')->select();
+            $crmList = array_column($crmList, 'name', 'id');
+
+            $uidx = array_unique(array_column($list, 'guide_id'));
+            $userList = D('User')->where(['id' => ['in', $uidx]])->field('id,nickname')->select();
+            $userList = array_column($userList, 'nickname', 'id');
+            foreach ($list as $k => $v) {
+                $v['plan']  = planShow($v['plan_id'],2,1);
+                $v['guide'] = $userList[$v['guide_id']];
+                $v['name']  = $crmList[$v['channel_id']];
+                $v['type']  = channel_type($v['type'],1);
+                $v['addsid']= scene($v['addsid'],1);
+                $channel[] = $v;
+            }
+            $list = $channel;
+        }
+        
+        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page], 'ok');
+    }
     /**
      * 待审核订单
      * @Author   zhoujing                 <zhoujing@leubao.com>
@@ -260,8 +355,35 @@ class MpcController extends TrustBase{
             'product_id' => $product['id'],
             'status'     => array('in',['5','6'])
         ];
-        $list = $model->where($map)->field('id,order_sn,plan_id,number,channel_id')->select();
-        return showReturnCode(true,0, $list, 'ok');
+
+        if(!isset($pinfo['page']) || empty($pinfo['page'])){
+            $page = 1;
+        }else{
+            $page = $pinfo['page'];
+        }
+        $firstRow = ($page - 1) * 20;
+
+        $count = $model->where($map)->count();
+        $toal_page = ceil($count, 20);
+        $list = $model->where($map)->field('id,order_sn,plan_id,number,guide_id,channel_id')->order('id DESC')->limit($firstRow, 20)->select();
+        if(!empty($list)){
+            $idx = array_unique(array_column($list, 'channel_id'));
+            $crmList = D('Crm')->where(['id' => ['in', $idx]])->field('id,name')->select();
+            $crmList = array_column($crmList, 'name', 'id');
+
+            $uidx = array_unique(array_column($list, 'guide_id'));
+            $userList = D('User')->where(['id' => ['in', $uidx]])->field('id,nickname')->select();
+            $userList = array_column($userList, 'nickname', 'id');
+            foreach ($list as $k => $v) {
+                $v['plan']  = planShow($v['plan_id'],2,1);
+                $v['guide'] = $userList[$v['guide_id']];
+                $v['name']  = $crmList[$v['channel_id']];
+                $channel[] = $v;
+            }
+            $list = $channel;
+        }
+        
+        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page], 'ok');
     }
     public function get_audit_oinfo()
     {
@@ -275,14 +397,16 @@ class MpcController extends TrustBase{
         $product = $this->getProduct($pinfo['incode']);
         $model = D('Item/Order');
         $info = $model->where(['order_sn'=>$pinfo['sn']])->relation(true)->find();
-        if(empty($oinfo)){
+        if(empty($info)){
             return showReturnCode(false,1010, '', '未找到有效订单~');
         }
         //拉取所有特殊控座模板
         $control = D('ControlSeat')->where(['status' => 1,'type'=>2,'product_id'=>$info['product_id']])->field('id,name,num')->select();
+        $ifPlan = F('Plan_'.$info['plan_id']) ? true : false;
         $return = [
-            'order'  => $info,
-            'control'=> $control
+            'order'   => $info,
+            'is_audit'=> $ifPlan,
+            'control' => $control
         ];
         return showReturnCode(true,0, $return, 'ok');
     }
@@ -304,15 +428,18 @@ class MpcController extends TrustBase{
         if(!isset($pinfo['sn']) || empty($pinfo['sn'])){
             return showReturnCode(false,1003);
         }
+        if(!isset($pinfo['user_id']) || empty($pinfo['user_id'])){
+            return showReturnCode(false,1003);
+        }
         $model = D('Item/Order');
         $info = $model->where(['order_sn'=>$pinfo['sn']])->relation(true)->find();
-        if(empty($oinfo)){
+        if(empty($info)){
             return showReturnCode(false,1010, '', '未找到有效订单~');
         }
         switch ((int)$pinfo['action']) {
             case 1:
                 $order = new \Libs\Service\Order();
-                $status = $order->add_seat($oinfo);
+                $status = $order->add_seat($info);
                 break;
             case 2:
                 //使用控座模板设置座位
@@ -320,12 +447,12 @@ class MpcController extends TrustBase{
                     $status = false;
                 }else{
                     $order = new \Libs\Service\Order();
-                    $status = $order->up_control_seat($pinfo, $oinfo);
+                    $status = $order->up_control_seat($pinfo, $info);
                 }
                 break;
             case 4:
                 //不同意退款
-                $status = \Libs\Service\Refund::arefund($oinfo);
+                $status = \Libs\Service\Refund::arefund($info);
                 break;
         }
         if($status){
@@ -348,9 +475,50 @@ class MpcController extends TrustBase{
         }
         $product = $this->getProduct($pinfo['incode']);
         $model = D('Item/TicketRefund');
-        $field = 'param,against_reason,reason';
-        $list = $model->where(['product_id'=>$product['id'],'status'=>1,'launch'=>2])->field($field,true)->select();
-        return showReturnCode(true,0, $list, 'ok');
+
+        if(!isset($pinfo['page']) || empty($pinfo['page'])){
+            $page = 1;
+        }else{
+            $page = $pinfo['page'];
+        }
+        $firstRow = ($page - 1) * 20;
+
+        $field = 'param,against_reason';
+        $list = $model->where(['product_id'=>$product['id'],'status'=>1,'launch'=>2])->field($field, true)->limit($firstRow, 20)->select();
+        
+        $count = $model->where($map)->count();
+        $toal_page = ceil($count, 20);
+        foreach ($list as $k => $v) {
+            $v['crm_id'] = crmName($v['crm_id'], 1);
+            $v['plan'] = planShow($v['plan_id'], 2, 4);
+            $v['applicant'] = userName($v['applicant'], 1, 1);
+            $v['createtime'] = date('Y-m-d H:i:s', $v['createtime']);
+            $lists[] = $v;
+        }
+        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page], 'ok');
+    }
+    /**
+     * 退单详情
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-07-15T14:09:29+0800
+     * @return   [type]                   [description]
+     */
+    public function get_refund_info()
+    {
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        if(!isset($pinfo['sn']) || empty($pinfo['sn'])){
+            return showReturnCode(false,1003);
+        }
+        $product = $this->getProduct($pinfo['incode']);
+        $model = D('Item/TicketRefund');
+        $info = $model->where(['product_id'=>$product['id'],'order_sn'=>$pinfo['sn'],'status'=>1])->find();
+        $info['applicant'] = userName($info['applicant'],1,1);
+        $info['crm_id'] = crmName($info['crm_id'],1);
+        $info['plan_id'] = planShow($info['plan_id'], 2, 1);
+        return showReturnCode(true,0, $info, 'ok');
     }
     /**
      * 退单审核
@@ -360,18 +528,194 @@ class MpcController extends TrustBase{
      */
     public function post_refund_order()
     {
-        # code...
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        if(!in_array($pinfo['action'], ['1','2'])){
+            return showReturnCode(false,1003);
+        }
+        if(!in_array($pinfo['poundage'], ['1','2','3'])){
+            return showReturnCode(false,1003);
+        }
+        if(!isset($pinfo['user_id']) || empty($pinfo['user_id'])){
+            return showReturnCode(false,1003);
+        }
+        if(!isset($pinfo['id']) || empty($pinfo['id'])){
+            return showReturnCode(false,1003);
+        }
+        if(!isset($pinfo['sn']) || empty($pinfo['sn'])){
+            return showReturnCode(false,1003);
+        }
+        $checkOrder = new \Libs\Service\CheckStatus();
+        if(!$checkOrder->OrderCheckStatus($pinfo['sn'], 2103)){
+            return showReturnCode(false,1000,'','订单已锁定'.$checkOrder->error);
+        }
+        if((int)$pinfo['action'] === 1){
+            //同意
+            $refund = new \Libs\Service\Refund;
+            $status = $refund->refund($pinfo,1,'','',$pinfo['poundage'],1);
+            $checkOrder->delMarking($pinfo['sn']);
+            if($status){
+                return showReturnCode(true,0, ['sn'=>$pinfo['sn']], '退款成功');
+            }else{
+                return showReturnCode(false,1000, ['sn'=>$pinfo['sn']], '退票失败');
+            }
+        }
+        if((int)$pinfo['action'] === 2){
+            //驳回申请
+            $data = array(
+                "id" => $pinfo["id"],
+                "against_reason" => $pinfo["remark"],
+                "status"  => 2,
+                "user_id" => $pinfo['user_id'],
+            );
+            //改变订单状态 事务处理
+            $model = new \Common\Model\Model();
+            $model->startTrans();
+            $order_up = $model->table(C('DB_PREFIX').'order')->where(array('order_sn'=>$pinfo['sn'],'status'=>7))->setField('status',1);
+            $up = $model->table(C('DB_PREFIX').'ticket_refund')->save($data);
+            if($up && $order_up){
+                $model->commit();
+                $checkOrder->delMarking($pinfo['sn']);
+                return showReturnCode(true,0, ['sn'=>$pinfo['sn']], '退款申请驳回成功');
+            }else{
+                $model->rollback();
+                $checkOrder->delMarking($pinfo['sn']);
+                return showReturnCode(false,1000, ['sn'=>$pinfo['sn']], '退款申请驳回失败!');
+            }
+        }
     }
     /*******************************销售简报****************************************/
+    /**
+     * 获取当日销售计划
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-07-17T10:22:44+0800
+     * @return   [type]                   [description]
+     */
+    public function get_today_plan()
+    {
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        $product = $this->getProduct($pinfo['incode']);
+
+        $day = strtotime(date('Y-m-d'));
+        $plan = D('Plan')->where(['plantime'=>$day,'product_id'=>$product['id']])->field('id,plantime,starttime,endtime,games')->select();
+
+        foreach ($plan as $k => $v) {
+            $v['title'] = planShow($v['id'], 2,4);
+            $return[] = $v;
+        }
+
+        return showReturnCode(true,0, $return, 'ok');
+    }
     /**
      * 销售简报 日报
      * @Author   zhoujing                 <zhoujing@leubao.com>
      * @DateTime 2020-07-09T11:43:08+0800
      * @return   [type]                   [description]
      */
-    public function today()
+    public function briefing(){
+        //统计报表
+        //1、读取当天的场次
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        $product = $this->getProduct($pinfo['incode']);
+
+        $day = strtotime(date('Y-m-d'));
+        $plan = D('Plan')->where(['plantime'=>$day,'product_id'=>$product['id']])->field('id,seat_table,param')->select();
+        foreach ($plan as $k => $v) {
+            $param = unserialize($v['param']);
+            $title = planShow($v['id'], 2,4);
+            $v['plan']  = $v['id'];
+            $v['title'] = $title;
+            foreach ($param['seat'] as $k => $ve) {
+                $area[] = array(
+                    'id'    =>  $ve,
+                    'name'  =>  areaName($ve,1),
+                    'number'=>  areaSeatCount($ve,1),
+                    'num'   =>  area_count_seat($v['seat_table'],array('status'=>'0','area'=>$ve),1),
+                    'nums'  =>  area_count_seat($v['seat_table'],array('status'=>array('in','2,99'),'area'=>$ve),1),//已售出
+                    'cnum'  =>  area_count_seat($v['seat_table'],array('status'=>array('in','99'),'area'=>$ve),1),//已检票
+                ); 
+            }
+            $v['area'] = $area;
+            unset($v['param']);
+            $today[] = $v;
+            $plans[] = [
+                'id'   =>  $v['id'],
+                'title'=>  $title
+            ];
+        }
+        //2、旅行社排行
+        $map = [
+            'product_id' => $product['id'],
+            'plan_id'    => ['in', array_column($plan, 'id')],
+            'status'     => ['in', ['1','9']],
+            'type'       => ['in', ['2','4','6']]
+        ];
+        //dump($map);
+        $list = M('Order')->where($map)->field(['id','channel_id','sum(number)' => 'total', 'sum(money)' => 'moneys'])->group('channel_id')->order('total DESC')->select();
+        //dump($list);
+        $idx = array_column($list, 'channel_id');
+        $crmList = D('Crm')->where(['id' => ['in', $idx]])->field('id,name')->select();
+
+        $crmList = array_column($crmList, 'name', 'id');
+        foreach ($list as $k => $v) {
+            $v['name']  =   $crmList[$v['channel_id']];
+            $channel[] = $v;
+        }
+        //3、票型汇总
+        $endtime = $day  + 86399;
+        $map = array(
+            'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
+            'createtime' => array(array('EGT', $day), array('ELT', $endtime), 'AND'),
+            'product_id' => $product['id']
+        );
+        $list = \Libs\Service\Report::strip_order($map, date('Ymd',$day),2);
+        //构造报表生成数据
+        $list = \Libs\Service\Report::operator($list);
+        $ticket = \Libs\Service\Report::day_fold($list,1);
+
+        $return = [
+            'plan'      =>  $plans,//销售计划
+            'today'     =>  $today,//场次详情
+            'channel'   =>  $channel,
+            'ticket'    =>  $ticket
+        ];
+
+        return showReturnCode(true,0, $return, 'ok');
+    }
+    /**
+     * 核验数据
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-07-16T20:57:28+0800
+     * @return   [type]                   [description]
+     */
+    public function nuclear()
     {
-        
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        if(!isset($pinfo['plan_id']) || empty($pinfo['plan_id'])){
+            return showReturnCode(false,1003);
+        }
+        $plan = F('Plan_'.$pinfo['plan_id']);
+        if(empty($plan)){
+            $plan = D('Plan')->where(['id' => $pinfo['plan_id']])->field('id,seat_table')->find();
+        }
+        $return = [
+            'sold'      =>  D($plan['seat_table'])->where(['status' => ['in','2,99']])->count(),//已售出
+            'nuclear'   =>  D($plan['seat_table'])->where(['status' => '99'])->count(),//已核销
+            'notinto'   =>  D($plan['seat_table'])->where(['status' => '2'])->count(),//未入园
+            'drawer'    =>  D('Order')->where(['plan_id' => $pinfo['plan_id'],'status'=>1])->count()
+        ];
+        return showReturnCode(true,0, $return, 'ok');
     }
     /**
      * 场次简报
@@ -382,5 +726,25 @@ class MpcController extends TrustBase{
     public function plan_report()
     {
         # code...
+    }
+
+    /**
+     * 余票查询
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-07-17T00:44:33+0800
+     * @return   [type]                   [description]
+     */
+    public function more_ticket()
+    {
+        $pinfo = I('post.');
+        if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+            return showReturnCode(false,1003);
+        }
+        if(!isset($pinfo['plan']) || empty($pinfo['plan'])){
+            return showReturnCode(false,1003);
+        }
+        $product = $this->getProduct($pinfo['incode']);
+        $return = \Libs\Service\Api::get_plan($product['id'],$pinfo,$product['type']);
+        return showReturnCode(true,0, $return, 'ok');
     }
 }
