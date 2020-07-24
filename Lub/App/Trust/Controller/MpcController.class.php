@@ -160,7 +160,6 @@ class MpcController extends TrustBase{
     	$field = ['plantime','games','starttime','endtime'];
     	
     	$product = $this->getProduct($pinfo['incode']);
-    	$model = D('Item/Plan');
         //校验票型编码是否都存在
         $ifTicket = false;
         $ticket = D('TicketType')->where(['product_id'=>$product['id'],'status'=>1])->field('id')->select();
@@ -204,13 +203,30 @@ class MpcController extends TrustBase{
             'template_id'   =>  $product['template_id'],
     		'ticket'		=>	$pinfo['ticket'],
     		'seat'			=>	$pinfo['seat'],
+            'quota'         =>  $pinfo['quota'],
+            'quotas'        =>  $pinfo['quotas'],
+            'start'         =>  $pinfo['start'],
     		'goods'			=>	[]
     	];
+        if(in_array($product['type'], ['2','3','4'])){
+            $data['plan'] = [[
+                
+                'plantime'      =>  $pinfo['plantime'],
+                'games'         =>  $pinfo['games'],
+                'starttime'     =>  $pinfo['starttime'],
+                'endtime'       =>  $pinfo['endtime'],
+                'quota'         =>  $pinfo['quota'],
+                'quotas'        =>  $pinfo['quotas']
+
+
+            ]];
+        }
+        $model = D('Item/Plan');
     	$state = $model->add_plan($data);
     	if($state){
-    		return showReturnCode(true,0, [], 'ok');
+    		return showReturnCode(true,0, $state, 'ok');
     	}else{
-    		return showReturnCode(false,1007, [], '新增失败~');
+    		return showReturnCode(false,1007, $state, '新增失败~');
     	}
     }
     /**
@@ -255,7 +271,7 @@ class MpcController extends TrustBase{
         }
         if($model->where(array('id'=>$info['id']))->setField('status',$status)){
             $model->toAlizhiyouPlan($info['id'], $info['product_id']);
-            $model->plan_cache();
+            $model->plan_cache($info['product_id']);
             return showReturnCode(true,0, [], 'ok');
         }else{
             return showReturnCode(false,1001, [], '更新失败~');
@@ -285,8 +301,9 @@ class MpcController extends TrustBase{
     	$info = $model->where($map)->find();
         $param = unserialize($info['param']);
         $param['ticket'] = $pinfo['ticket'];
-        $state = D('Plan')->where(['id'=>$pinfo['id']])->setField('param',serialize($param));
+        $state = $model->where(['id'=>$pinfo['id']])->setField('param',serialize($param));
         if($state){
+            $model->plan_cache($info['product_id']);
             return showReturnCode(true,0, [], 'ok');
         }else{
             return showReturnCode(false,1001, [], '更新失败~');
@@ -315,7 +332,7 @@ class MpcController extends TrustBase{
         }
         $firstRow = ($page - 1) * 20;
         $count = $model->where($map)->count();
-        $toal_page = ceil($count, 20);
+        $toal_page = ceil($count/20);
         $list = $model->where($map)->field('id,order_sn,plan_id,number,guide_id,channel_id,money,addsid,type,status,createtime')->order('id DESC')->limit($firstRow, 20)->select();
         if(!empty($list)){
             $idx = array_unique(array_column($list, 'channel_id'));
@@ -336,7 +353,7 @@ class MpcController extends TrustBase{
             $list = $channel;
         }
         
-        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page], 'ok');
+        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page ? $toal_page : $count], 'ok');
     }
     /**
      * 待审核订单
@@ -383,7 +400,7 @@ class MpcController extends TrustBase{
             $list = $channel;
         }
         
-        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page], 'ok');
+        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page ? $toal_page : 1], 'ok');
     }
     public function get_audit_oinfo()
     {
@@ -452,6 +469,7 @@ class MpcController extends TrustBase{
                 break;
             case 4:
                 //不同意退款
+               // $info['channel_id']
                 $status = \Libs\Service\Refund::arefund($info);
                 break;
         }
@@ -484,7 +502,8 @@ class MpcController extends TrustBase{
         $firstRow = ($page - 1) * 20;
 
         $field = 'param,against_reason';
-        $list = $model->where(['product_id'=>$product['id'],'status'=>1,'launch'=>2])->field($field, true)->limit($firstRow, 20)->select();
+        $map = ['product_id'=>$product['id'],'status'=>1,'launch'=>2];
+        $list = $model->where($map)->field($field, true)->limit($firstRow, 20)->select();
         
         $count = $model->where($map)->count();
         $toal_page = ceil($count, 20);
@@ -495,7 +514,7 @@ class MpcController extends TrustBase{
             $v['createtime'] = date('Y-m-d H:i:s', $v['createtime']);
             $lists[] = $v;
         }
-        return showReturnCode(true,0, ['list'=>$list,'total_page'=>$toal_page], 'ok');
+        return showReturnCode(true,0, ['list'=>$lists,'total_page'=>$toal_page ? $toal_page : 1], 'ok');
     }
     /**
      * 退单详情
@@ -535,7 +554,7 @@ class MpcController extends TrustBase{
         if(!in_array($pinfo['action'], ['1','2'])){
             return showReturnCode(false,1003);
         }
-        if(!in_array($pinfo['poundage'], ['1','2','3'])){
+        if((int)$pinfo['action'] === 1 && !in_array($pinfo['poundage'], ['1','2','3'])){
             return showReturnCode(false,1003);
         }
         if(!isset($pinfo['user_id']) || empty($pinfo['user_id'])){
@@ -569,6 +588,7 @@ class MpcController extends TrustBase{
                 "against_reason" => $pinfo["remark"],
                 "status"  => 2,
                 "user_id" => $pinfo['user_id'],
+                "updatetime" => date('Y-m-d H:i:s')
             );
             //改变订单状态 事务处理
             $model = new \Common\Model\Model();
@@ -582,7 +602,7 @@ class MpcController extends TrustBase{
             }else{
                 $model->rollback();
                 $checkOrder->delMarking($pinfo['sn']);
-                return showReturnCode(false,1000, ['sn'=>$pinfo['sn']], '退款申请驳回失败!');
+                return showReturnCode(false,1000, ['sn'=>$pinfo['sn'],$order_up,$up], '退款申请驳回失败!');
             }
         }
     }
@@ -602,7 +622,7 @@ class MpcController extends TrustBase{
         $product = $this->getProduct($pinfo['incode']);
 
         $day = strtotime(date('Y-m-d'));
-        $plan = D('Plan')->where(['plantime'=>$day,'product_id'=>$product['id']])->field('id,plantime,starttime,endtime,games')->select();
+        $plan = D('Plan')->where(['plantime'=>$day,'product_id'=>$product['id']])->field('id,plantime,starttime,endtime,games,product_type')->select();
 
         foreach ($plan as $k => $v) {
             $v['title'] = planShow($v['id'], 2,4);
@@ -624,66 +644,56 @@ class MpcController extends TrustBase{
         if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
             return showReturnCode(false,1003);
         }
+
         $product = $this->getProduct($pinfo['incode']);
 
         $day = strtotime(date('Y-m-d'));
-        $plan = D('Plan')->where(['plantime'=>$day,'product_id'=>$product['id']])->field('id,seat_table,param')->select();
+        $plan = D('Plan')->where(['plantime'=>$day,'product_id'=>$product['id']])->field('id')->select();
         foreach ($plan as $k => $v) {
-            $param = unserialize($v['param']);
-            $title = planShow($v['id'], 2,4);
-            $v['plan']  = $v['id'];
-            $v['title'] = $title;
-            foreach ($param['seat'] as $k => $ve) {
-                $area[] = array(
-                    'id'    =>  $ve,
-                    'name'  =>  areaName($ve,1),
-                    'number'=>  areaSeatCount($ve,1),
-                    'num'   =>  area_count_seat($v['seat_table'],array('status'=>'0','area'=>$ve),1),
-                    'nums'  =>  area_count_seat($v['seat_table'],array('status'=>array('in','2,99'),'area'=>$ve),1),//已售出
-                    'cnum'  =>  area_count_seat($v['seat_table'],array('status'=>array('in','99'),'area'=>$ve),1),//已检票
-                ); 
-            }
-            $v['area'] = $area;
-            unset($v['param']);
-            $today[] = $v;
             $plans[] = [
-                'id'   =>  $v['id'],
-                'title'=>  $title
+                'value'=>  $v['id'],
+                'label'=>  planShow($v['id'], 2,4)
             ];
         }
+
+        if(!isset($pinfo['plan']) || empty($pinfo['plan'])){
+            $planIdx = ['in', array_column($plan, 'id')];
+        }else{
+            $planIdx = $pinfo['plan'];
+        }
+
         //2、旅行社排行
         $map = [
             'product_id' => $product['id'],
-            'plan_id'    => ['in', array_column($plan, 'id')],
+            'plan_id'    => $planIdx,
             'status'     => ['in', ['1','9']],
             'type'       => ['in', ['2','4','6']]
         ];
         //dump($map);
         $list = M('Order')->where($map)->field(['id','channel_id','sum(number)' => 'total', 'sum(money)' => 'moneys'])->group('channel_id')->order('total DESC')->select();
-        //dump($list);
-        $idx = array_column($list, 'channel_id');
-        $crmList = D('Crm')->where(['id' => ['in', $idx]])->field('id,name')->select();
+        if(!empty($list)){
+            $idx = array_column($list, 'channel_id');
+            $crmList = D('Crm')->where(['id' => ['in', $idx]])->field('id,name')->select();
 
-        $crmList = array_column($crmList, 'name', 'id');
-        foreach ($list as $k => $v) {
-            $v['name']  =   $crmList[$v['channel_id']];
-            $channel[] = $v;
+            $crmList = array_column($crmList, 'name', 'id');
+            foreach ($list as $k => $v) {
+                $v['name']  =   $crmList[$v['channel_id']];
+                $channel[] = $v;
+            }
         }
+        
         //3、票型汇总
-        $endtime = $day  + 86399;
         $map = array(
+            'plan_id'    => $planIdx,
             'status' => array('in','1,7,9'),//订单状态为支付完成和已出票和申请退票中的报表
-            'createtime' => array(array('EGT', $day), array('ELT', $endtime), 'AND'),
             'product_id' => $product['id']
         );
         $list = \Libs\Service\Report::strip_order($map, date('Ymd',$day),2);
         //构造报表生成数据
         $list = \Libs\Service\Report::operator($list);
         $ticket = \Libs\Service\Report::day_fold($list,1);
-
         $return = [
             'plan'      =>  $plans,//销售计划
-            'today'     =>  $today,//场次详情
             'channel'   =>  $channel,
             'ticket'    =>  $ticket
         ];
@@ -707,14 +717,24 @@ class MpcController extends TrustBase{
         }
         $plan = F('Plan_'.$pinfo['plan_id']);
         if(empty($plan)){
-            $plan = D('Plan')->where(['id' => $pinfo['plan_id']])->field('id,seat_table')->find();
+            $plan = D('Plan')->where(['id' => $pinfo['plan_id']])->field('id,seat_table,product_type')->find();
         }
-        $return = [
-            'sold'      =>  D($plan['seat_table'])->where(['status' => ['in','2,99']])->count(),//已售出
-            'nuclear'   =>  D($plan['seat_table'])->where(['status' => '99'])->count(),//已核销
-            'notinto'   =>  D($plan['seat_table'])->where(['status' => '2'])->count(),//未入园
-            'drawer'    =>  D('Order')->where(['plan_id' => $pinfo['plan_id'],'status'=>1])->count()
-        ];
+        if((int)$plan['product_type'] === 1){
+            $return = [
+                'sold'      =>  D($plan['seat_table'])->where(['status' => ['in','2,99']])->count(),//已售出
+                'nuclear'   =>  D($plan['seat_table'])->where(['status' => '99'])->count(),//已核销
+                'notinto'   =>  D($plan['seat_table'])->where(['status' => '2'])->count(),//未入园
+                'drawer'    =>  D('Order')->where(['plan_id' => $pinfo['plan_id'],'status'=>1])->count()
+            ];
+        }else{
+            $return = [
+                'sold'      =>  D($plan['seat_table'])->where(['status' => ['in','2,99'],'plan_id' => $plan['id']])->count(),//已售出
+                'nuclear'   =>  D($plan['seat_table'])->where(['status' => '99','plan_id' => $plan['id']])->count(),//已核销
+                'notinto'   =>  D($plan['seat_table'])->where(['status' => '2','plan_id' => $plan['id']])->count(),//未入园
+                'drawer'    =>  D('Order')->where(['plan_id' => $pinfo['plan_id'],'status'=>1])->count()
+            ];
+        }
+        
         return showReturnCode(true,0, $return, 'ok');
     }
     /**
@@ -744,7 +764,12 @@ class MpcController extends TrustBase{
             return showReturnCode(false,1003);
         }
         $product = $this->getProduct($pinfo['incode']);
-        $return = \Libs\Service\Api::get_plan($product['id'],$pinfo,$product['type']);
+        if(in_array($product['type'], ['2','3'])){
+            $type = 4;
+        }else{
+            $type = 1;
+        }
+        $return = \Libs\Service\Api::get_plan($product['id'],$pinfo,$type);
         return showReturnCode(true,0, $return, 'ok');
     }
 }

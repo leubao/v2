@@ -14,7 +14,7 @@ function showReturnCode($status = false, $code = '1002', $data = [], $msg = '')
         'code' => '0',
         'msg' => '未定义消息',
         'count'=> $code == 0 ? $count : 0,
-        'data' => $code == 0 ? $data : []
+        'data' => $data
     ];
     $return_data['code'] = $code;
     if(!empty($msg)){

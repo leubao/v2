@@ -5,7 +5,7 @@
 <title>出票方式</title>
 </head>
 <body>
- <script src="{$config_siteurl}static/js/LodopFuncs.js?=6.2" type="text/javascript"></script>
+ <script src="{$config_siteurl}static/js/LodopFuncs.js?=6.226" type="text/javascript"></script>
 <!-- <object id="LODOP_OB" classid="clsid:2105C259-1E0C-4534-8141-A753534CB4CA" width=0 height=0> </object>
 <embed id="LODOP_EM" type="application/x-print-lodop" width=0 height=0></embed>
 </objec>  -->

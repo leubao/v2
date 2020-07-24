@@ -39,9 +39,9 @@ class TrustBase extends LubTMP{
 		// // }
 		
 		// //验证签名
-		// if(!$this->checkSign()){
-		// 	return showReturnCode(false,1009);
-		// }
+		if(!$this->checkSign()){
+			return showReturnCode(false,1009);
+		}
 		
 		
 	}

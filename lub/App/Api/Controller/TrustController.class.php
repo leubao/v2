@@ -464,7 +464,7 @@ class TrustController extends LubTMP {
       $return = [
         'status'=> false,
         'code'  => 401,
-        'data'  => [],
+        'data'  => $qr,
         'msg'   => '该场次已停用~'
       ];
       die(json_encode($return));

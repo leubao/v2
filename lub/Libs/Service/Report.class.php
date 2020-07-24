@@ -366,7 +366,7 @@ class Report{
 		foreach ($data as $ke => $value) {
 			$datas[$value['price_id']]['plan_id'] = $key;
 			$datas[$value['price_id']]['price_id'] = $value['price_id'];
-			$datas[$value['price_id']]["price"] 	 = $value["price"];
+			$datas[$value['price_id']]["price"]  = $value["price"];
         	$datas[$value['price_id']]["discount"] = $value["discount"];
 			$datas[$value['price_id']]['number'] += $value['number'];
 		}
@@ -385,11 +385,12 @@ class Report{
 	function day_fold($data,$work = '1'){
 		//根据合并计划
 		foreach ($data as $key => $value) {
+
 			$plan['plan'][$value['plan_id']][]= $value;
 		}
-		//dump($plan);
 		//计划内合并票型
 		foreach ($plan['plan'] as $key => $value) {
+
 			$ticket[$key] = Report::plan_ticket_folds($value,$work);
 		}
 		return $ticket;
@@ -616,7 +617,7 @@ class Report{
 	        	$discount = Report::channel_level_price($priceid,$ticket);
 	        }else{
 				$discount = $valu['discount'];/*结算价格*/
-	        }//$discount = $valu['discount'];
+	        }
 			if($work == '1'){
 				//含工作票统计
 				$num[$valu['price_id']]['num'] += $valu['number'];
@@ -626,6 +627,7 @@ class Report{
 				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 						'product_id'=> $product_id,
+						'name'		=> ticketName($valu['price_id'],1),
 						'plan_id' 	=> $valu['plan_id'], 
 					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $valu['price'],
@@ -644,6 +646,7 @@ class Report{
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $product_id,
+							'name'		=> ticketName($valu['price_id'],1),
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
@@ -663,6 +666,7 @@ class Report{
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $product_id,
+							'name'		=> ticketName($valu['price_id'],1),
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $valu['price'],
@@ -679,6 +683,7 @@ class Report{
 		foreach ($datas['price'] as $k => $v) {
 			$datas['channel_id'] = $v['channel_id'];
 			$datas['plan'] = $v['plan_id'];
+			$datas['plan_str'] = planShow($v['plan_id'], 2, 1);
 			$datas['number'] += $v['number'];
 			$datas['money']  += $v['money'];
 			$datas['moneys'] += $v['moneys'];

@@ -5,7 +5,7 @@ namespace Trust\Service;
  * @Author: IT Work
  * @Date:   2020-07-13 10:26:44
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-07-15 15:16:16
+ * @Last Modified time: 2020-07-22 13:12:47
  */
 class Wisdom
 {
@@ -18,7 +18,7 @@ class Wisdom
 		//获取订单
 		$postData = [
 			"order_sn"	=>	$sn,
- 			"type"		=>	'order_confirm',//1新订单提醒//2订单审核提醒3//预约审核提醒//4待处理订单
+ 			"type"		=>	'order_confirm',
  			"status"	=>	$status,
   			"remark"	=>	$remark
 		];

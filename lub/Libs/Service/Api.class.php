@@ -106,7 +106,7 @@ class Api extends \Libs\System\Service {
             $param = unserialize($plan['param']);
         }else{
             $plantime = strtotime($pinfo['plan']);
-            $map['plantime'] = $plantime;
+            $map['plantime'] = $pinfo['plan'];//$plantime;
             $plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,quotas,plantime,starttime,endtime,games')->select();
         }
         
@@ -180,13 +180,13 @@ class Api extends \Libs\System\Service {
                     'tooltype' => $tooltype,
                     'name'  => $name,
                     'number'=>  $v['quotas'],
-                    'num'   =>  $number,
-                    'nums'  =>  $nums
+                    'num'   =>  $nums,
+                    'nums'  =>  $number
                 );
             }
             $return = array(
                 'statusCode' => '200',
-                'plan'  => date($v['plantime'],'Y年M月D日'),
+                'plan'  => $plan,
                 'area'  => $area
             );
         }

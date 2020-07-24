@@ -1,7 +1,8 @@
-﻿var CreatedOKLodop7766 = null, CLodopIsLocal;
+﻿//==本JS是加载Lodop插件及CLodop服务的综合示例，可直接使用，建议看懂后融进自己页面程序==
 
-//====判断是否需要 Web打印服务CLodop:===
-//===(不支持插件的浏览器版本需要用它)===
+var CreatedOKLodopObject, CLodopIsLocal, CLodopJsState;
+
+//==判断是否需要CLodop(那些不支持插件的浏览器):==
 function needCLodop() {
     try {
         var ua = navigator.userAgent;
@@ -43,22 +44,25 @@ function needCLodop() {
     }
 }
 
-//====页面引用CLodop云打印必须的JS文件,用双端口(8000和18000）避免其中某个被占用：====
-if (needCLodop()) {
-    var src1 = "http://localhost:8000/CLodopfuncs.js?priority=1";
-    var src2 = "http://localhost:18000/CLodopfuncs.js?priority=0";
-
+//==加载引用CLodop的主JS,用双端口8000和18000(以防其中一个被占):==
+function loadCLodop() {
+    if (CLodopJsState == "loading" || CLodopJsState == "complete") return;
+    CLodopJsState = "loading";
     var head = document.head || document.getElementsByTagName("head")[0] || document.documentElement;
-    var oscript = document.createElement("script");
-    oscript.src = src1;
-    head.insertBefore(oscript, head.firstChild);
-    oscript = document.createElement("script");
-    oscript.src = src2;
-    head.insertBefore(oscript, head.firstChild);
-    CLodopIsLocal = !!((src1 + src2).match(/\/\/localho|\/\/127.0.0./i));
+    var JS1 = document.createElement("script");
+    var JS2 = document.createElement("script");
+    JS1.src = "http://localhost:8000/CLodopfuncs.js?priority=1";
+    JS2.src = "http://localhost:18000/CLodopfuncs.js";
+    JS1.onload  = JS2.onload  = function()    {CLodopJsState = "complete";}
+    JS1.onerror = JS2.onerror = function(evt) {CLodopJsState = "complete";}
+    head.insertBefore(JS1, head.firstChild);
+    head.insertBefore(JS2, head.firstChild);
+    CLodopIsLocal = !!((JS1.src + JS2.src).match(/\/\/localho|\/\/127.0.0./i));
 }
 
-//====获取LODOP对象的主过程：====
+if (needCLodop()){loadCLodop();}//加载
+
+//==获取LODOP对象主过程,判断是否安装、需否升级:==
 function getLodop(oOBJECT, oEMBED) {
     var strHtmInstall = "<br><font color='#FF00FF'>打印控件未安装!点击这里<a href='install_lodop32.exe' target='_self'>执行安装</a>,安装后请刷新页面或重新进入。</font>";
     var strHtmUpdate = "<br><font color='#FF00FF'>打印控件需要升级!点击这里<a href='install_lodop32.exe' target='_self'>执行升级</a>,升级后请重新进入。</font>";
@@ -78,31 +82,31 @@ function getLodop(oOBJECT, oEMBED) {
             try {
                 LODOP = getCLodop();
             } catch (err) {}
-            if (!LODOP && document.readyState !== "complete") {
-                alert("网页还没下载完毕，请稍等一下再操作.");
+            if (!LODOP && CLodopJsState !== "complete") {
+                if (CLodopJsState == "loading") alert("网页还没下载完毕，请稍等一下再操作."); else alert("没有加载CLodop的主js，请先调用loadCLodop过程.");
                 return;
             }
             if (!LODOP) {
-                //document.body.innerHTML = strCLodopInstall_1 + (CLodopIsLocal ? strCLodopInstall_2 : "") + strCLodopInstall_3 + document.body.innerHTML;                
+                document.body.innerHTML = strCLodopInstall_1 + (CLodopIsLocal ? strCLodopInstall_2 : "") + strCLodopInstall_3 + document.body.innerHTML;
                 return;
             } else {
-                if (CLODOP.CVERSION < "3.0.9.2") {
+                if (CLODOP.CVERSION < "4.1.0.1") {
                     document.body.innerHTML = strCLodopUpdate + document.body.innerHTML;
                 }
                 if (oEMBED && oEMBED.parentNode)
-                    oEMBED.parentNode.removeChild(oEMBED);
+                    oEMBED.parentNode.removeChild(oEMBED); //清理旧版无效元素
                 if (oOBJECT && oOBJECT.parentNode)
                     oOBJECT.parentNode.removeChild(oOBJECT);
             }
         } else {
             var is64IE = isIE && !!(ua.match(/x64/i));
-            //=====如果页面有Lodop就直接使用，没有则新建:==========
+            //==如果页面有Lodop就直接使用,否则新建:==
             if (oOBJECT || oEMBED) {
                 if (isIE)
                     LODOP = oOBJECT;
                 else
                     LODOP = oEMBED;
-            } else if (!CreatedOKLodop7766) {
+            } else if (!CreatedOKLodopObject) {
                 LODOP = document.createElement("object");
                 LODOP.setAttribute("width", 0);
                 LODOP.setAttribute("height", 0);
@@ -112,10 +116,10 @@ function getLodop(oOBJECT, oEMBED) {
                 else
                     LODOP.setAttribute("type", "application/x-print-lodop");
                 document.documentElement.appendChild(LODOP);
-                CreatedOKLodop7766 = LODOP;
+                CreatedOKLodopObject = LODOP;
             } else
-                LODOP = CreatedOKLodop7766;
-            //=====Lodop插件未安装时提示下载地址:==========
+                LODOP = CreatedOKLodopObject;
+            //==Lodop插件未安装时提示下载地址:==
             if ((!LODOP) || (!LODOP.VERSION)) {
                 if (ua.indexOf('Chrome') >= 0)
                     document.body.innerHTML = strHtmChrome + document.body.innerHTML;
@@ -131,8 +135,7 @@ function getLodop(oOBJECT, oEMBED) {
         }
         //===如下空白位置适合调用统一功能(如注册语句、语言选择等):==
         LODOP.SET_LICENSES("承德乐游宝软件开发有限公司","B55671E7C5D18B1DB54055BE2B7B04F2","","");
-
-
+    
         //=======================================================
         return LODOP;
     } catch (err) {

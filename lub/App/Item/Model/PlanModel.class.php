@@ -39,7 +39,6 @@ class PlanModel extends Model{
 				$endtime = strtotime($endtime);
 				$games = $data['games'];
 			}
-			
 			if($this->is_plan($data['product_id'],$plantime,$starttime,$endtime,$games)){
 				return false;
 			}
@@ -62,9 +61,7 @@ class PlanModel extends Model{
 				$data['plan'] = $plan;
 			}
 		}
-
 		$info = $this->structure_data($data,$plantime,$starttime,$endtime);
-		
 		if(count($info) == 1){
 			$planid = $this->add($info['0']);
 			if($planid){
@@ -274,7 +271,6 @@ class PlanModel extends Model{
 			case '3':
 				//漂流
 				$tooltype = D('ToolType')->where(array('product_id'=>$pinfo['id'],'status'=>1))->field('id,title')->order('id DESC')->select();
-				$this->assign('tooltype',$tooltype);
 				break;
 		}
 		$plantime = D('Item/Plan')->where(['product_id'=>$pinfo['id']])->max('plantime');
