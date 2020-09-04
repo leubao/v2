@@ -390,6 +390,31 @@ function check_idcard_area(code,area,actid,number,plan) {
 function is_array_unique(arr){
   return /(\x0f[^\x0f]+)\x0f[\s\S]*\1/.test("\x0f"+arr.join("\x0f\x0f") +"\x0f");
 }
+/**
+ * 身份证设备校验
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2020-08-20T11:05:35+0800
+ */
+function checkEqui(cardMi){
+  $.ajax({
+    url: 'https://api.pro.alizhiyou.com/eauth/idcard',
+    type: 'POST',
+    dataType: 'JSON',
+    data: {'type':2,'mi':cardMi},
+    success: function (res) {
+      if(res.status){
+        sessionStorage.setItem('sadmin', cardMi);
+      } else {
+        $(this).dialog('close','collect_idcard');
+        $(this).alertmsg('error',"error:未检测到有效设备,请检查硬件设备~");
+      }
+    },
+    error: function (e) {
+      $(this).dialog('close','collect_idcard');
+      $(this).alertmsg('error','错误');
+    }
+  })
+}
 /*窗口打印*/
 (function($){
     $.printBox = function(rel){

@@ -32,7 +32,11 @@
       <a href="{:U('Manage/Index/index_info');}" data-toggle="dialog" data-options="id:area_info" data-mask=true; class="btn btn-default btn-xs seat_work-cart"><i class="fa fa-info-circle"></i></a> <a href="" class="btn btn-default btn-xs seat_work-cart"><i class="fa fa-question-circle"></i></a> 
       <a type="button" class="btn tn-default btn-xs" onclick="$(this).dialog('refresh');" data-placement="top" data-toggle="tooltip" rel="reload" title="刷新当前页"><i class="fa fa-refresh"></i></a>
       <!--<button type="button" class="btn btn-success"><input type="checkbox"> 拖动排位</button>-->
-      <button type="button" class="btn btn-success" onclick="autoSeat();"><i class="fa fa-cogs"></i> 自动排位</button>
+      <input id="cradarr" type="hidden" name="card.name" value="">
+      <a type="button" class="btn btn-info" data-toggle="lookupbtn" data-url="{:U('Manage/Index/public_collect_idcard');}" data-group="card" data-width="800" data-height="400" data-id="collect_idcard" data-mask="true" id="realToTicket" data-icon="credit-card"> 实名制购票</a>
+  
+
+      <!-- <button type="button" class="btn btn-success" onclick="autoSeat();">自动排位</button> -->
       <a type="button" class="btn btn-danger" onclick="$(this).dialog('refresh');"><i class="fa fa-circle-o-notch"></i> 重置排位</a>
       
     </div>
@@ -111,7 +115,7 @@
         </tr>
     </table>
     <!--提交-->
-    <div class="submit_seat"><a href="#" class="btn btn-success" onclick="seat_server();">立即出票</a></div>
+    <div class="submit_seat"><a href="#" class="btn btn-success" id="seatServer{$area}">立即出票</a></div>
     <!--图列 s-->
     <div id="legend"></div>
     <!--left info e--> 
@@ -148,9 +152,12 @@ $(document).ready(function() {
   $("#work-price-{$area} tr").each(function(){
       //绑定onclick事件
       $(this).click(function(){
-          /*查询是否存在已选择*/
-          $("#work-price-{$area} tr").filter(".selected").removeClass("selected");
-          $(this).addClass('selected');
+        /*查询是否存在已选择*/
+        $("#work-price-{$area} tr").filter(".selected").removeClass("selected");
+        $(this).addClass('selected');
+        if(cardArr.length > 0){
+          $("#work-num-"+areaId+"-"+$(this).data().pid).val(cardArr.length);
+        }
       });
   });
   /*设置座位区域的宽高*/
@@ -166,6 +173,7 @@ $(document).ready(function() {
       counts = '',
       work_num = '',
       work_nums = '',
+      cardArr = [],
       seatLength = {$data.num},/*当前区域座椅个数*/
       Position = 0;
   $('#work-seat-map-w-h-{$area}').width(seatMapW);
@@ -210,7 +218,12 @@ $(document).ready(function() {
           return this.style();
           return false;
         }
-        
+        if(cardArr.length > 0){
+          if(is_array_unique(cardArr)){
+            $(this).alertmsg('error','身份证号码重复!');
+            return false;
+          }
+        }
         if (this.status() == 'available' || this.status() == 'unpre') {
             // 获取待排数 work_num 待排数 work_nums 已排数
             if(work_num <= '0' || isNaN(work_num)){
@@ -324,7 +337,92 @@ $(document).ready(function() {
           }); */ 
       } 
   });
+  //身份证采集结果
+  $('#cradarr').on('afterchange.bjui.lookup', function(e, data) {
+    var cardStr = data.value;
+    if(!cardStr){
+      $(this).alertmsg('error','未找到有效的身份证号码!');
+    }
+    cardArr = cardStr.split('|');
+  });
   //autoSeat();
+  $("#realToTicket").on('click',function(){
+    //判断当前设备是否授权
+    var sadmin = '';//sessionStorage.getItem('sadmin');
+    var samidJsonUrl = 'http://127.0.0.1:8080/api/GetSAMID';
+    if(!sadmin){
+      $.ajax({
+        url: samidJsonUrl,
+        type: 'GET',
+        dataType: 'JSON',
+        success: function (res) {
+          if(res.retcode = '0x90'){
+            checkEqui(res.retmsg)
+          } else {
+            $(this).alertmsg('error',"error:未检测到有效设备,请检查硬件设备~");
+          }
+        },
+        error: function (e) {
+          $(this).dialog('close','collect_idcard');
+          $(this).alertmsg('error', 'error:未检测到有效设备,请检查硬件设备~');
+        }
+      })
+    }
+  });
+  //提交表单
+  $("#seatServer{$area}").on('click',function(){
+    var postData = '',pay = '',crm = '',
+      contact = $("#work-crm input[name='content']").val() ? $("#work-crm input[name='content']").val() : '0',
+      phone = $("#work-crm input[name='phone']").val() ? $("#work-crm input[name='phone']").val() : '0',
+      remark = $("#work-crm textarea[name='remark']").val() ? $("#work-crm textarea[name='remark']").val() : "空...",
+      sub_type = $("#work-crm input[type='radio']:checked").val() ? $("#work-crm input[type='radio']:checked").val() : '1',
+      toJSONString = '',
+      checkinT = '1',/*一人一票*/
+      //plan = {$plan['id']},
+      //areaId  = '{$area}',
+      guide = '0',
+      qditem = '0',
+      isReal = false,
+      type = {$type},
+      settlement = PRODUCT_CONF.settlement,
+      is_pay = $('#selectPay option:selected').val(),
+      length =  $("#selected-seats-{$area} li").length,
+      cash = parseFloat($('#work-seat-total-{$area}').html()),
+      url = '<?php echo U('Item/Order/seatPost',array('plan'=>$plan['id'],'type'=>$type));?>';
+    if(length <= 0){
+        $(this).alertmsg('error','未找到要售出的座位!');
+        return false;
+    }
+    <?php if($type == '2'){?>
+        guide = $("#work-crm input[name='user.id']").val(),
+        qditem = $("#work-crm input[name='channel.id']").val();
+        if(phone == '' || contact == '' || guide == '' || qditem == ''){
+          $(this).alertmsg('error','请完善团队信息!');
+          return false;
+        }
+    <?php } ?>
+    if(cardArr.length > 0){
+      isReal = true;
+      if($("#selected-seats-{$area} li").length != cardArr.length){
+        $(this).alertmsg('error','实名制购票已开启,存在未绑定实名的座位,请补充证件信息!');
+        return false;
+      }
+    }
+    $("#selected-seats-{$area} li").each(function(i){
+      var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
+      if(isReal){
+        toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","idcard":'+cardArr[i]+',"price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
+      }else{
+        toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","idcard":"","price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
+      }
+    });
+    /*获取支付相关数据*/
+    pay = '{"cash":'+cash+',"card":0,"alipay":0}';
+    param = '{"remark":"'+remark+'","settlement":"'+settlement+'","activity":"0","is_pay":"'+is_pay+'"}';
+    crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":"'+phone+'","contact":"'+contact+'"}';
+    postData = 'info={"subtotal":'+cash+',"plan_id":'+planId+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"type":'+type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
+    post_server(postData,url);
+  });
 });
 //计算总金额 
 function work_total(){
@@ -407,45 +505,5 @@ function autoSeat(){
   });
   return true;  
 }
-function seat_server() {
-  var postData = '',pay = '',crm = '',
-    contact = $("#work-crm input[name='content']").val() ? $("#work-crm input[name='content']").val() : '0',
-    phone = $("#work-crm input[name='phone']").val() ? $("#work-crm input[name='phone']").val() : '0',
-    remark = $("#work-crm textarea[name='remark']").val() ? $("#work-crm textarea[name='remark']").val() : "空...",
-    sub_type = $("#work-crm input[type='radio']:checked").val() ? $("#work-crm input[type='radio']:checked").val() : '1',
-    toJSONString = '',
-    checkinT = '1',/*一人一票*/
-    plan = {$plan['id']},
-    areaId  = '{$area}',
-    guide = '0',
-    qditem = '0',
-    type = {$type},
-    settlement = PRODUCT_CONF.settlement,
-    is_pay = $('#selectPay option:selected').val(),
-    length =  $("#selected-seats-{$area} li").length,
-    cash = parseFloat($('#work-seat-total-{$area}').html()),
-    url = '<?php echo U('Item/Order/seatPost',array('plan'=>$plan['id'],'type'=>$type));?>';
-  if(length <= 0){
-      $(this).alertmsg('error','未找到要售出的座位!');
-      return false;
-  }
-  <?php if($type == '2'){?>
-      guide = $("#work-crm input[name='user.id']").val(),
-      qditem = $("#work-crm input[name='channel.id']").val();
-      if(phone == '' || contact == '' || guide == '' || qditem == ''){
-        $(this).alertmsg('error','请完善团队信息!');
-        return false;
-      }
-  <?php } ?>
-  $("#selected-seats-{$area} li").each(function(i){
-      var fg = i+1 < length ? ',':' ';/*判断是否增加分割符*/
-      toJSONString = toJSONString + '{"areaId":'+areaId+',"priceid":' +$(this).data().priceid+',"seatid":"'+$(this).data().seat+'","price":"'+parseFloat($(this).data('price')).toFixed(2)+'"}'+fg;
-  });
-  /*获取支付相关数据*/
-  pay = '{"cash":'+cash+',"card":0,"alipay":0}';
-  param = '{"remark":"'+remark+'","settlement":"'+settlement+'","is_pay":"'+is_pay+'"}';
-  crm = '{"guide":'+guide+',"qditem":'+qditem+',"phone":"'+phone+'","contact":"'+contact+'"}';
-  postData = 'info={"subtotal":'+cash+',"plan_id":'+plan+',"checkin":'+checkinT+',"sub_type":'+sub_type+',"type":'+type+',"data":['+ toJSONString + '],"crm":['+crm+'],"pay":['+pay+'],"param":['+param+']}';
-  post_server(postData,url);
-}
+
 </script>

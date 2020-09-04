@@ -65,6 +65,7 @@ class Order extends \Libs\System\Service {
 					'soldtime' => $createtime,
 					'status'   => '2',
 					'price_id' => $v['priceid'],
+					'idcard'   => empty($v['idcard']) ? '0' : $v['idcard'],
 					'sale'	   => serialize(array('plantime'=>date('Y-m-d ',$plan['plantime']).date(' H:i',$plan['starttime']),
 												'area'=>areaName($v['areaId'],1),
 												'seat'=>Order::print_seat($v['seatid'],$plan['product_id'],$ticketType[$v['priceid']]['param']['ticket_print'],$ticketType[$v['priceid']]['param']['ticket_print_custom']),
@@ -78,6 +79,26 @@ class Order extends \Libs\System\Service {
 												'remark'=>$remark['remark'],
 										)),//售出信息 票型  单价
 				);
+				/*校验身份证号码是否正确*/
+				$id_card = $v['idcard'] ? strtoupper($v['idcard']) : 0;
+				if(!empty($id_card)){
+					//默认使用场次限制
+					$verifyIdCard = verifyIdCard(['actid'=>$info['param'][0]['activity'],'plan'=>$plan['id'],'idcard'=>$id_card],2);
+					if(!checkIdCard($id_card) || !$verifyIdCard){
+						$this->error = '400030 : 身份证号码有误...';
+						$model->rollback();
+						return false;
+						break;
+					}
+					$idcard[] = [
+						'plan_id'		=>	$plan['id'],
+						'order_sn'		=>	$sn,
+						'idcard'		=>	$v['idcard'],
+						'ticket'		=>	$v['seatid'],
+						'number'		=>	1,
+						'activity_id'	=>	$info['param'][0]['activity']
+					];
+				}
 				$status[$k]=$model->table(C('DB_PREFIX').$plan['seat_table'])->where($map)->save($data);
 				//计算订单返佣金额
 				$rebate += $ticketType[$v['priceid']]['rebate'];
@@ -194,6 +215,9 @@ class Order extends \Libs\System\Service {
 			])
 		];
 		$oinfo = $model->table(C('DB_PREFIX').'order_data')->add($newInfo);
+		if(!empty($idcard)){
+			D('IdcardLog')->addAll($idcard);
+		}
 		/*记录售票员操作日志*/
 		if($flag && $state && $oinfo){
 			$model->commit();//提交事务
@@ -2833,7 +2857,7 @@ class Order extends \Libs\System\Service {
 					}
 					return '北一口' .$area;
 				}else{
-					if((int)$seats[1] > 35 || in_array($seat, $c1Arr)){
+					if((int)$seats[1] > 37 || in_array($seat, $c1Arr)){
 						$area = 'C1区';
 					}else{
 						$area = 'C区';

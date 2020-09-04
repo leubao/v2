@@ -138,7 +138,7 @@ layui.use(['form','layer','laytpl'], function(){
           t.val(0);
         }
         t.val(parseInt(t.val()) + 1)
-        $("#idcardBox").append('<li class="layui-form-item"><input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard"></div></li>');
+        // $("#idcardBox").append('<li class="layui-form-item"><input type="text" name="identity[]" lay-verify="identity" placeholder="身份证" autocomplete="off" class="layui-input idcard"></div></li>');
       }else{
         layer.msg("亲，您一次只能买这么多了!");
       }

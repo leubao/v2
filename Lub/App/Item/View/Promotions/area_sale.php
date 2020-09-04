@@ -289,24 +289,4 @@ $("#realToTicket").on('click',function(){
     })
   }
 });
-function checkEqui(cardMi){
-  $.ajax({
-    url: 'https://api.pro.alizhiyou.com/eauth/idcard',
-    type: 'POST',
-    dataType: 'JSON',
-    data: {'type':2,'mi':cardMi},
-    success: function (res) {
-      if(res.status){
-        sessionStorage.setItem('sadmin', cardMi);
-      } else {
-        $(this).dialog('close','collect_idcard');
-        $(this).alertmsg('error',"error:未检测到有效设备,请检查硬件设备~");
-      }
-    },
-    error: function (e) {
-      $(this).dialog('close','collect_idcard');
-      $(this).alertmsg('error','错误');
-    }
-  })
-}
 </script> 

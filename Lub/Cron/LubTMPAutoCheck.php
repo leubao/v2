@@ -17,6 +17,7 @@ class LubTMPAutoCheck {
     	//检测过期场次是否有效
     	Check::check_plan();
     	//全面检测扣款、返利、退单是否成功
+        
     	//检测各终端自助设备是否正常
     }
 }
