@@ -530,7 +530,11 @@ class FinancialController extends ManageBase{
 		$db = D('ReportData');
 		$list = $db->where($map)->field('id,plan_id,pay,moneys')->select();
 		$data = Report::source_cash($list, (int)$type);//dump($data);
-		$this->assign('data',$data)->assign('map',$map)->assign('product_id',$map['product_id'])->display();
+		S('Source'.get_user_id(),$data);
+		$export_map['type'] = $type;
+		$export_map['datetime'] = $starttime.'至'.$endtime;
+		$export_map['report'] = 'source_cash';
+		$this->assign('data',$data)->assign('map',$map)->assign('export_map', $export_map)->assign('product_id',$map['product_id'])->display();
 	}
 	/**
 	 * 渠道商月度销售汇总

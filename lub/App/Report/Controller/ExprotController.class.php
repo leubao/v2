@@ -8,8 +8,9 @@
 // +----------------------------------------------------------------------
 namespace Report\Controller;
 use Common\Controller\ManageBase;
-use \Libs\Service\Exports; 
+use \Libs\Service\Exports;
 class ExprotController extends ManageBase{
+
 	protected function _initialize() {
 		parent::_initialize();
 	}
@@ -39,6 +40,12 @@ class ExprotController extends ManageBase{
 				break;
 			case 'channel_months':
 				return $this->months_report($info);
+				break;
+			case 'team_order':
+				return $this->team_order($info);
+				break;
+			case 'source_cash':
+				return $this->source_cash($info);
 				break;
 			default:
 				# code...
@@ -157,13 +164,15 @@ class ExprotController extends ManageBase{
 	        if(!empty($info['crm_id'])){
 	        	$map['crm_id'] = array('in',$info['crm_id']['1']);
 	        }
-			
+			if(!empty($info['types'])){
+				$map['type'] = $info['types'];
+			}
 			//查询数据
 			$list = $db->where($map)->select();
 			//构造导出数据集
 			foreach ($list as $k => $v) {
 	   			$data[] = array(
-	   				'datetime'	=>	date('Y-m-d H:i:s',$v['createtime']),
+	   				'datetime'	=>	date('Y-m-d H:i:s', $v['createtime']),
 	   				'type'		=>	operation($v['type'],1),
 	   				'sn'		=>	$v['order_sn'],
 		   			'money'		=>	$v['cash'],
@@ -171,7 +180,7 @@ class ExprotController extends ManageBase{
 		   			'user'		=>	userName($v['user_id'],1,1),
 		   			'channel'	=>	crmName($v['crm_id'],1),
 		   			'remark'	=>	$v['remark'],
-		   			);
+		   		);
 	   		}
 	   		//景区日报表明细 表头
 			$headArr = array(
@@ -199,6 +208,26 @@ class ExprotController extends ManageBase{
 		}
 		//汇总
 		return Exports::templateExecl($data,'channel_sum',$info,8);
+	}
+	function team_order($info)
+	{
+		
+	}
+	/**
+	 * 资金来源导出
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2020-09-03T16:15:18+0800
+	 * @param    [type]                   $info                 [description]
+	 * @return   [type]                                         [description]
+	 */
+	public function source_cash($info)
+	{
+		$data = S('Source'.get_user_id());
+		if(empty($data)){
+			$this->erun("缓存已过期，请重新查询!");
+		}
+		//汇总
+		return Exports::templateExecl($data,'source_cash',$info,10);
 	}
 	//构造表头
 	function headArr(){
@@ -243,4 +272,3 @@ class ExprotController extends ManageBase{
 		return $headArr;
 	}
 }
-?>
