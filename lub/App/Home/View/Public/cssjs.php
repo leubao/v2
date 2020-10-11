@@ -12,7 +12,7 @@
 <!--左侧折叠菜单-->
 <script src="{$config_siteurl}static/home/js/tendina.min.js"></script>
 <!-- 引入自定义样式文件-->
-<link rel="stylesheet" href="{$config_siteurl}static/home/css/core.css">
+<link rel="stylesheet" href="{$config_siteurl}static/home/css/core.css?v=1.0.1">
 <link rel="stylesheet" href="../static/layui/css/layui.css">
 <title>{$title} 渠道版  - by LubTMP v2.0</title>
 <style type="text/css" media="screen">

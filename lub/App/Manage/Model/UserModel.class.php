@@ -159,10 +159,10 @@ class UserModel extends Model {
             unset($data['password']);
         }
         if ($this->create($data)) {
-            if ($this->data['password']) {
+            if ($data['password']) {
                 $verify = genRandomString(6);
                 $this->verify = $verify;
-                $this->password = $this->hashPassword($this->password, $verify);
+                $this->password = $this->hashPassword($data['password'], $verify);
             }
             $status = $this->save();
             return $status !== false ? true : false;

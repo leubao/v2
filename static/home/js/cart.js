@@ -995,7 +995,7 @@ function newPage(){
 }
 /*手机号正确校验*/
 function checkPhone(mobile) {
-	if (mobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,3,5,6,7,8]))\d{8}$/)) {
+	if (mobile.match(/^((1[3,5,6,8,9][0-9])|(14[5,7])|(17[0,1,3,5,6,7,8]))\d{8}$/)) {
 		return true;
 	} else {
 		return false;

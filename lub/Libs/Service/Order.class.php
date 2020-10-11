@@ -1096,7 +1096,7 @@ class Order extends \Libs\System\Service {
 				return $sn;
 			}
 		}else{
-			$this->error = '400006 : 订单创建失败';
+			$this->error = '400006 : 订单创建失败-3';
 			$model->rollback();//事务回滚
 			return false;
 		}
@@ -1399,7 +1399,7 @@ class Order extends \Libs\System\Service {
 			return ['order_sn' => $info['order_sn'],'act'=> $oInfo['param'][0]['activity']];
 		}else{
 			error_insert('400006');
-			$this->error = '400006 : 订单创建失败';
+			$this->error = '400006 : 订单创建失败~';
 			$model->rollback();//事务回滚
 			return false;
 		}	
@@ -1549,6 +1549,7 @@ class Order extends \Libs\System\Service {
 		}
 		/*==============================渠道版扣费 end=================================================*/
 		/*==============================自动排座开始 start =============================================*/
+
 		if($is_seat == '1'){
 			//辅助排座
 			foreach ($seat['aux_seat'] as $s => $a) {
@@ -2487,7 +2488,7 @@ class Order extends \Libs\System\Service {
 			
 			}
 			//计算订单金额
-			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement,$channel);
+			$money = Order::amount($v['priceid'],$v['num'],$v['areaId'],$product_id,$settlement,$channel);//var_dump($money);
 			if($price != '0'){
 				$child_moeny = $price*$v['num'];
 			}else{

@@ -11,7 +11,7 @@ use Common\Model\Model;
 use Payment\Common\PayException;
 use Payment\Client\Refund as wxRefund;
 class Refund extends \Libs\System\Service {
-	
+	public $error = '';
 	/*退票处理
 	 * 
 	 * @param $ginfo array 参数包
@@ -46,14 +46,19 @@ class Refund extends \Libs\System\Service {
 		$proconf = cache('ProConfig');
 		$proconf = $proconf[$plan['product_id']][1];
 		//判断演出是否已过期 TODO 场次结束时间不允许退票  动态配置
-		if($proconf['plan_refund'] == '1'){
-			$datetime = date('Ymd',time());
+		if((int)$proconf['plan_refund'] === 1){
+			$time = time();
+			$datetime = date('Ymd',$time);
 			$plantime = date('Ymd',$plan['plantime']);
-			$starttime = date('H:i',$plan['starttime']);
-			$endtime = strtotime("$starttime +40 minute");
-			if($datetime > $plantime || empty($plan)){error_insert('400411');return false;}
-			if($plantime == $datetime){
-				if($createtime >= $endtime){error_insert('400411');return false;}
+
+			$starttime = date('Y-m-d H:i:s', $plan['starttime']);
+			$timer = $proconf['plan_refund_time'] ?? 0;
+			$endtime = strtotime("$starttime +$timer minute");
+			if($datetime > $plantime){
+				return false;
+			}
+			if($plantime == $datetime && $endtime >= $time){
+				return false;
 			}
 		}
 		//判断订单所属渠道商是个人还是商户 三级分销
@@ -594,7 +599,7 @@ class Refund extends \Libs\System\Service {
 				if($income == false){echo "15";
 					$model->rollback();return false;
 				}
-			}else{echo "16";
+			}else{
 				$model->rollback();return false;
 			}
 		}
@@ -778,16 +783,16 @@ class Refund extends \Libs\System\Service {
 			}
 		}
 		/*微信支付4支付宝5微信支付*/
-		if($info['pay'] == '5'){
-			$refundPay = Refund::weixin_refund($sn,$info['product_id'],$money_back);
-			if(!$refundPay){
-				$model->rollback();//事务回滚
-				return false;
-			}
-		}
-		if($info['pay'] == '4'){
-			$refundPay = Refund::alipay_refund($sn,$info['product_id'],$money_back);
-		}
+		// if($info['pay'] == '5'){
+		// 	$refundPay = Refund::weixin_refund($sn,$info['product_id'],$money_back);
+		// 	if(!$refundPay){
+		// 		$model->rollback();//事务回滚
+		// 		return false;
+		// 	}
+		// }
+		// if($info['pay'] == '4'){
+		// 	$refundPay = Refund::alipay_refund($sn,$info['product_id'],$money_back);
+		// }
 		/*=============处理日志===============*/
 		if($info['status'] <> '7'){
 			$refund_data = array(
@@ -899,7 +904,6 @@ class Refund extends \Libs\System\Service {
 		if(in_array($type,array('2','4','6','7','8'))){
 			//团队
 			$pay_type = Refund::pay_type($product_id,$channel_id,$sub_type);
-			//dump($pay_type);
 			if(in_array($pay_type,array('1','3'))){
 				//存在返利
 				switch ($status) {
@@ -1149,7 +1153,7 @@ class Refund extends \Libs\System\Service {
 	/**
 	 * 不同意退款
 	 */
-	function arefund($oinfo){
+	function arefund($oinfo, $user_id = ''){
 		$model = new \Think\Model();
 		$model->startTrans();
 		$createtime = time();
@@ -1159,9 +1163,12 @@ class Refund extends \Libs\System\Service {
 			//先消费后记录
 			$crmData = array('cash' => array('exp','cash+'.$oinfo['money']),'uptime' => $createtime);
 			$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$cid))->setField($crmData);
+			if(empty($user_id)){
+				$user_id = get_user_id();
+			}
 			$data = array(
 				'cash'		=>	$oinfo['money'],
-				'user_id'	=>	get_user_id(),
+				'user_id'	=>	$user_id,
 				'crm_id'	=>	$cid,
 				'createtime'=>	$createtime,
 				'type'		=>	'5',

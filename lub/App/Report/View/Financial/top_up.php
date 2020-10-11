@@ -29,7 +29,8 @@
          <option value="2"  <if condition="$map['type'] eq '2'">selected</if>>花费</option>
          <option value="3"  <if condition="$map['type'] eq '3'">selected</if>>补贴</option>
          <option value="4"  <if condition="$map['type'] eq '4'">selected</if>>退票</option>
-         <option value="5"  <if condition="$map['type'] eq '5'">selected</if>>提现</option>
+         <option value="5"  <if condition="$map['type'] eq '5'">selected</if>>退款</option>
+         <option value="6"  <if condition="$map['type'] eq '6'">selected</if>>提现</option>
       </select>
   	&nbsp;
     

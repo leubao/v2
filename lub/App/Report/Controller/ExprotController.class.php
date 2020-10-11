@@ -45,8 +45,13 @@ class ExprotController extends ManageBase{
 				return $this->team_order($info);
 				break;
 			case 'source_cash':
+				//资金来源
 				return $this->source_cash($info);
 				break;
+			case 'print_log':
+				//打印日志导出
+				return $this->print_log($info);
+				break;	
 			default:
 				# code...
 				break;
@@ -228,6 +233,74 @@ class ExprotController extends ManageBase{
 		}
 		//汇总
 		return Exports::templateExecl($data,'source_cash',$info,10);
+	}
+	public function print_log($info)
+	{
+		if(!isset($info['starttime']) || empty($info['starttime']) || !isset($info['endtime']) || empty($info['endtime'])){
+			$this->erun("亲，请选择导出日期范围....");
+        	return false;
+		}
+		$map = [];
+		$endtime = strtotime($info['endtime']) + 86399;
+        $map['createtime'] = array(array('EGT', strtotime($info['starttime'])), array('ELT', $endtime), 'AND');
+		if (!empty($info['type'])) {
+            $map['type'] = array('eq', $info['type']);
+        }
+        if(!empty($info['user_id'])){
+            $map['uid'] = array('in',$info['user_id']);
+        }
+        if(!empty($info['scene'])){
+            $map['scene'] = $info['scene'];
+        }
+        if(!empty($info['sn'])){
+            $map['order_sn'] = $info['sn'];
+        }
+
+		$db = D('PrintLog');
+		//查询数据
+		$list = $db->where($map)->select();
+		
+		if(count($list) > 10000){
+			$this->erun("亲，单次导出不超过1万条数据,请修改日期范围....");
+        	return false;
+		}
+		//构造导出数据集
+		foreach ($list as $k => $v) {
+			switch ($v['type']) {
+				case '1':
+					$type ='首次打印';
+					break;
+				case '2':
+					$type ='二次打印';
+					break;
+				default:
+					$type ='同步通信';
+					break;
+			}
+   			$data[] = array(
+   				'sn'		=>	$v['order_sn'],
+   				'type'		=>	$type,
+	   			'name'		=>	$v['scene'] == '7' ? crmName($v['uid'],1) : userName($v['uid'],1,1),
+	   			'user'		=>	$v['type'] == '2' ? pwd_name($v['user_id'],1) : '首次打印',
+	   			'number'	=>	$v['number'],
+	   			'scene'		=>	scene($v['scene'],1),
+	   			'datetime'	=>	date('Y-m-d H:i:s', $v['createtime']),
+	   			'remark'	=>	$v['remark'],
+	   		);
+   		}
+   		//景区日报表明细 表头
+		$headArr = array(
+   			'sn'		=>	'订单号',
+   			'type'		=>	'打印次数',
+   			'name'		=>	'操作员',
+   			'user'		=>	'授权员',
+   			'number'	=>	'数量',
+   			'scene'		=>	'打印场景',
+   			'datetime'	=>	'操作时间',
+   			'remark'	=>	'备注',
+   		);
+   		$filename = "打印日志";
+   		return Exports::getExcel($filename,$headArr,$data);
 	}
 	//构造表头
 	function headArr(){

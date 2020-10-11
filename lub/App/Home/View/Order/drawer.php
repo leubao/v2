@@ -33,7 +33,6 @@ function printTicket(){
       parent.location.reload();
     },
     success:function(data){
-      
       if(data.status == '1'){
         var selSeat = eval(data.info);/*返回的座位信息*/
         $.each(selSeat,function(){
@@ -43,10 +42,13 @@ function printTicket(){
           LODOP.SET_PRINT_PAGESIZE(2,{$printTpl.width},{$printTpl.height},"USER");
           LODOP.SET_PRINT_MODE("POS_BASEON_PAPER",true);
           LODOP.PRINT();  
-          /*关闭当前弹窗*/
-          layer.closeAll();
-          parent.location.reload();
+          
+
         });
+        /*关闭当前弹窗*/
+        layer.closeAll();
+          //TODO刷新页面会导致数据丢失
+        //parent.location.reload();
       }else{
         layer.msg(data.message);
         layer.closeAll();

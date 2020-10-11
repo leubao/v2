@@ -96,7 +96,7 @@ class Api extends \Libs\System\Service {
     function get_plan($product_id,$pinfo,$ginfo)
     {   
         $map['product_id'] = $product_id;
-        $map['status'] = 2;//状态必为售票中
+        $map['status'] = 2;//状态必为售票中 
     
         if(in_array($ginfo,['1','2','3'])){
             $info = explode('-', $pinfo['plan']);
@@ -106,7 +106,7 @@ class Api extends \Libs\System\Service {
             $param = unserialize($plan['param']);
         }else{
             $plantime = strtotime($pinfo['plan']);
-            $map['plantime'] = $pinfo['plan'];//$plantime;
+            $map['plantime'] = $plantime;
             $plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,quotas,plantime,starttime,endtime,games')->select();
         }
         
@@ -144,6 +144,125 @@ class Api extends \Libs\System\Service {
                     'number'=>  areaSeatCount($v,1),
                     'num'   =>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
                     'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,66,99'),'area'=>$v),1),//已售出
+                ); 
+            }
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => planShow($plan['id'],1,1),
+                'area'  => $area
+            );
+        }
+        //拉取漂流的销售情况
+        if($ginfo == '4'){
+            foreach ($plan as $k => $v) {
+                $param = unserialize($v['param']);
+                $where = [
+                    'plan_id'=>$v['id'],
+                    //'product_id'=>$product_id,
+                    'status'=>['in','2,99,66']
+                ];
+                switch ($v['product_type']) {
+                    case '2':
+                        $tooltype = '00';
+                        $name = date('H:i',$v['starttime']).'-'.date("H:i",$v['endtime']);
+
+                        break;
+                    case '3':
+                        $tooltype = tooltype($param['tooltype'],1);
+                        $name = '[第'.$v['games'].'趟-'.$tooltype.'] '. date('H:i',$v['starttime']).'-'.date("H:i",$v['endtime']);
+                        
+                        break;
+                }
+                $number = D($v['seat_table'])->where($where)->count();
+                //获取当前可售数量
+                $nums = $v['quotas'] - $number;
+                $area[] = array(
+                    'tooltype' => $tooltype,
+                    'name'  => $name,
+                    'number'=>  $v['quotas'],
+                    'num'   =>  $number,
+                    'nums'  =>  $nums,
+                );
+            }
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => $plan,
+                'area'  => $area
+            );
+        }
+        //拉取小商品
+        if($ginfo == '2'){
+            foreach ($param['goods'] as $k => $v) {
+                $info = goodsInfo($product_id,'',$v,1);
+                $number = array(
+                    'number'=>  '1',//已售出
+                ); 
+                $goods[] = array_merge($info,$number);
+            }
+            if(empty($goods)){
+                $goods = 'null';
+            }
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => $plan['id'],
+                'goods' => $goods           
+            );
+        }
+        //设置session
+        session('plan',$plan);
+        return $return;
+    }
+    function get_trust_plan($product_id,$pinfo,$ginfo)
+    {   
+        $map['product_id'] = $product_id;
+        $map['status'] = 2;//状态必为售票中
+    
+        if(in_array($ginfo,['1','2','3'])){
+            $info = explode('-', $pinfo['plan']);
+            $map['plantime'] = (int)$info[0] ? (int)$info[0] : $today;
+            $map['games'] = (int)$info[1] ? (int)$info[1] : 1 ;
+            $plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,plantime,starttime,endtime,games')->find();
+            $param = unserialize($plan['param']);
+        }else{
+            $plantime = strtotime($pinfo['plan']);
+            $map['plantime'] = $pinfo['plan'];//$plantime;
+            $plan = M('Plan')->where($map)->field('id,param,seat_table,product_type,quotas,plantime,starttime,endtime,games')->select();
+        }
+        
+        //拉取坐席
+        if($ginfo == '1'){
+            foreach ($param['seat'] as $k => $v) {
+                $area[] = array(
+                    'id'    =>  $v,
+                    'name'  =>  areaName($v,1),
+                    'number'=>  areaSeatCount($v,1),
+                    'num'   =>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
+                    'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,99'),'area'=>$v),1),//已售出
+                    'numb'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','66'),'area'=>$v),1),//预定数
+                    'cnum'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','99'),'area'=>$v),1),//已检票
+                ); 
+            }
+            $sale = array(
+                'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,99')),1),
+                'numb'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','66')),1),
+                'money' =>  format_money(M('Order')->where(array('status'=>array('in','1,7,9'),'plan_id'=>$plan['id']))->sum('money')),
+            );
+            $return = array(
+                'statusCode' => '200',
+                'plan'  => $plan['id'],
+                'area'  => $area,
+                'sale'  => $sale,
+            );
+        }
+        //剧院返回区域和已售数量
+        if($ginfo == '3'){
+            foreach ($param['seat'] as $k => $v) {
+                $area[] = array(
+                    'id'    =>  $v,
+                    'name'  =>  areaName($v,1),
+                    'number'=>  areaSeatCount($v,1),
+                    'num'   =>  area_count_seat($plan['seat_table'],array('status'=>'0','area'=>$v),1),
+                    'nums'  =>  area_count_seat($plan['seat_table'],array('status'=>array('in','2,99'),'area'=>$v),1),//已售出
                 ); 
             }
             $return = array(
@@ -209,7 +328,6 @@ class Api extends \Libs\System\Service {
             );
         }
         //设置session
-        session('plan',$plan);
         return $return;
     }
     /**

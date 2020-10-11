@@ -142,4 +142,22 @@ function collection_log($info,$pay)
 	}
 	return true;
 }
+/**
+ * @Author   zhoujing                 <zhoujing@leubao.com>
+ * @DateTime 2020-08-21T00:01:01+0800
+ * @param    string                   $value                类型1金额分账2比例分账
+ * @return   [type]                                         [description]
+ */
+function billType($value)
+{
+	switch ($value) {
+		case 1:
+			$return = '金额分账';
+			break;
+		case 2:
+			$return = '比例分账';
+			break;
+	}
+	echo $return;
+}
 ?>

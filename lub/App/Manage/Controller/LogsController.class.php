@@ -105,6 +105,7 @@ class LogsController extends ManageBase {
         $sn = I('sn');
         $scene = I('scene');
         $this->assign('starttime',$start_time)->assign('endtime',$end_time);
+        $export_map = array();
         if (!empty($start_time) && !empty($end_time)) {
             $start_time = strtotime($start_time);
             $end_time = strtotime($end_time) + 86399;
@@ -121,13 +122,18 @@ class LogsController extends ManageBase {
         }
         if($sn != ''){
             $where['order_sn'] = $sn;
-        }       
+        }
+        $export_map = $where;
+        $export_map['starttime'] = $start_time;
+        $export_map['endtime'] = $end_time;
+        $export_map['report']   = 'print_log';
         $user = M('User')->where(array('status'=>1,'is_scene'=>2))->field('id,nickname')->select();
         $this->basePage('PrintLog',$where,array("id" => "desc"));
         $this->assign('user',$user_id)
             ->assign('username',$username)
             ->assign('type',$type)
             ->assign('scene',$scene)
+            ->assign('export_map',$export_map)
             ->display();
     }
     /**

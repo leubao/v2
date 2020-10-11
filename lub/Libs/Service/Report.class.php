@@ -381,8 +381,9 @@ class Report{
 	*  日报表
 	*  @param $data 待处理数据
 	*  @param $work 是否含工作票 1包含工作票2 不含工作票 3仅含工作票
+	*  @param $product_id 产品id
 	*/
-	function day_fold($data,$work = '1'){
+	function day_fold($data,$work = '1', $product_id = ''){
 		//根据合并计划
 		foreach ($data as $key => $value) {
 
@@ -391,7 +392,7 @@ class Report{
 		//计划内合并票型
 		foreach ($plan['plan'] as $key => $value) {
 
-			$ticket[$key] = Report::plan_ticket_folds($value,$work);
+			$ticket[$key] = Report::plan_ticket_folds($value,$work, $product_id);
 		}
 		return $ticket;
 	}
@@ -601,9 +602,11 @@ class Report{
 	* 分场次按票型归类  用于景区按场次汇总  单计划内合并票型   票型合并
 	* @param $work int 是否包含工作票 1 含工作票 2不含工作票
 	*/
-	function plan_ticket_folds($data,$work = '1'){
+	function plan_ticket_folds($data,$work = '1', $product_id = ''){
 		//只能显示当前产品的报表
-		$product_id = get_product('id');
+		if(empty($product_id)){
+			$product_id = get_product('id');
+		}
 		foreach ($data as $k => $valu) {
 			//根据是否开启多级扣款，开启多级扣款时按照级别显示结算价
 			//判断级别，查询价格
@@ -622,7 +625,7 @@ class Report{
 				//含工作票统计
 				$num[$valu['price_id']]['num'] += $valu['number'];
 				$num[$valu['price_id']]['rebate'] += $valu['subsidy'];//dump($num[$valu['price_id']]['rebate']);
-				if(empty($product_id)){$product_id = $valu['product_id'];}
+				// if(empty($product_id)){$product_id = $valu['product_id'];}
 				$money = Report::settlement($num[$valu['price_id']]['num'],$valu['price_id'],$product_id,$discount);
 				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
@@ -701,7 +704,9 @@ class Report{
 	 * @return   [type]        [description]
 	 */
 	private function channel_level_price($priceid,$ticketList = null){
-		$uinfo = \Home\Service\Partner::getInstance()->getInfo();
+		if(empty($uinfo)){
+			$uinfo = \Home\Service\Partner::getInstance()->getInfo();
+		}
 		//读取当前用户的价格政策
 		$ticketLevel = F('TicketLevel');
 		if(!$ticketLevel){

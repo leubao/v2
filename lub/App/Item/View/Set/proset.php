@@ -64,6 +64,7 @@
                                 <td>
                                 <input type="radio" name="plan_refund" data-toggle="icheck" value="0" <eq name="vo['plan_refund']" value="0"> checked</eq> data-label="开启&nbsp;">
                                 <input type="radio" name="plan_refund" data-toggle="icheck" value="1" <eq name="vo['plan_refund']" value="1"> checked</eq> data-label="关闭">
+                                <input type="text" name="plan_refund_time" value="{$vo.plan_refund_time}" size="10"><span class="remark">开演后几分钟后可退,退过期票关闭后有效</span>
                                 </td>
                               </tr>
                               <tr>

@@ -180,21 +180,29 @@ class ItemReport{
 	* return true|false
 	*/
 	function strip_order($map, $datetime, $type = '1'){//dump($map);
-		$list = D('Item/Order')->where($map)->relation(true)->select();
+		//G('begin');
+		$list = D('Item/Order')->where($map)->relation(true)->field('money,id_card,phone,take,sub_type,createtime,uptime,is_print,activity,openid,subtract_num', true)->select();
+		// G('end');
+		// echo D('Item/Order')->_sql();
+		// echo G('begin','end').'s';
 		if(!empty($list)){
+			$planIdx = ['in', array_column($list, 'plan_id')];
+			$planList = M('Plan')->where(array('id'=>$planIdx))->field('id,plantime,games')->select();
+			$plantime = array_column($planList, 'plantime', 'id');
+			$games = array_column($planList, 'games', 'id');
+			$time = time();
 			foreach ($list as $key => $value) {
 				// TODO 缺少写入成功性验证
-				$plan = M('Plan')->where(array('id'=>$value['plan_id']))->field('plantime,games')->find();
 				$general = array(
 					'datetime'	=>	$datetime,	//报表日期时间
 					'product_id'=>	$value['product_id'],
-					'plantime'	=>	date('Ymd',$plan['plantime']),
-					'games'		=>	$value['product_type'] == '1' ? $plan['games'] : 0,	//场次
+					'plantime'	=>	date('Ymd',$plantime[$value['plan_id']]),
+					'games'		=>	$value['product_type'] == '1' ? $games[$value['plan_id']] : 0,	//场次
 					'order_sn'	=>	$value['order_sn'],	//订单号
 					'plan_id'	=>	$value['plan_id'],	//计划ID
 					'channel_id'=>	$value['channel_id'] ? $value['channel_id'] : '0',//渠道ID
 					'user_id'	=>	$value['user_id'],	//操作员
-					'createtime'=>	time(),	//创建时间
+					'createtime'=>	$time,	//创建时间
 					'type'		=>	$value['type'],//订单类型1散客订单2团队订单4渠道版定单
 					'pay'		=>	$value['pay'],//支付方式1现金2余额
 					'addsid' 	=>	$value['addsid'],
@@ -376,14 +384,14 @@ class ItemReport{
 	*  @param $work 是否含工作票 1包含工作票2 不含工作票 3仅含工作票
 	*  @param $is_check 核算方式
 	*/
-	function day_fold($data,$work = '1',$is_check = 1){
+	function day_fold($data,$work = '1',$is_check = 1, $product_id = ''){
 		//根据合并计划
 		foreach ($data as $key => $value) {
 			$plan['plan'][$value['plan_id']][]= $value;
 		}
 		//计划内合并票型
 		foreach ($plan['plan'] as $key => $value) {
-			$ticket[$key] = ItemReport::plan_ticket_folds($value,$work,$is_check);
+			$ticket[$key] = ItemReport::plan_ticket_folds($value,$work,$is_check, $product_id);
 		}
 		return $ticket;
 	}
@@ -593,9 +601,11 @@ class ItemReport{
 	* 分场次按票型归类  用于景区按场次汇总  单计划内合并票型   票型合并
 	* @param $work int 是否包含工作票 1 含工作票 2不含工作票 3 仅含工作票
 	*/
-	function plan_ticket_folds($data,$work = '1',$is_check = 1){
+	function plan_ticket_folds($data,$work = '1',$is_check = 1, $product_id = ''){
 		//只能显示当前产品的报表
-		$product_id = get_product('id');
+		if(empty($product_id)){
+			$product_id = get_product('id');
+		}
 		foreach ($data as $k => $valu) {
 			//根据是否开启多级扣款，开启多级扣款时按照级别显示结算价
 			//判断级别，查询价格
@@ -609,7 +619,8 @@ class ItemReport{
 				$datas['price'][$valu['price_id']] = array( 
 						'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 						'product_id'=> $product_id,
-						'plan_id' 	=> $valu['plan_id'], 
+						'name'		=> ticketName($valu['price_id'],1),
+						'plan_id' 	=> $valu['plan_id'],
 					 	'price_id'	=> $valu['price_id'],
 					    'price'  	=> $money['price'],
 	  					'discount' 	=> $money['discount'],
@@ -627,6 +638,7 @@ class ItemReport{
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $product_id,
+							'name'		=> ticketName($valu['price_id'],1),
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $money['price'],
@@ -646,6 +658,7 @@ class ItemReport{
 					$datas['price'][$valu['price_id']] = array( 
 							'channel_id'=> $valu['channel_id'] ? $valu['channel_id'] : $valu['user_id'],
 							'product_id'=> $product_id,
+							'name'		=> ticketName($valu['price_id'],1),
 							'plan_id' 	=> $valu['plan_id'], 
 						 	'price_id'	=> $valu['price_id'],
 						    'price'  	=> $money['price'],
@@ -662,6 +675,7 @@ class ItemReport{
 		foreach ($datas['price'] as $k => $v) {
 			$datas['channel_id'] = $v['channel_id'];
 			$datas['plan'] = $v['plan_id'];
+			$datas['plan_str'] = planShow($v['plan_id'], 2, 1);
 			$datas['number'] += $v['number'];
 			$datas['money']  += $v['money'];
 			$datas['moneys'] += $v['moneys'];
@@ -1038,7 +1052,7 @@ class ItemReport{
 	 					break;
 	 				default:
 	 					//未知
-	 					$return[$v['plan_id']]['unknown'] +=  $v['moneys'];
+	 					$return[$v['plan_id']][] +=  $v['moneys'];
 	 					break;
 	 			}
 	 		}
@@ -1082,7 +1096,7 @@ class ItemReport{
  		return $return;
  	}
  	//售票员资金一览表
- 	function conductor($datatime = '',$plan_id = '',$user_id = '')
+ 	function conductor($datatime = '',$plan_id = '', $user_id = '')
  	{	
  		if(empty($plan_id)){
  			$map = [
@@ -1245,7 +1259,7 @@ class ItemReport{
 	        	}    
 	        }    
 	    }
-	    echo '合并后'.count($arr2);
+	    //echo '合并后'.count($arr2);
  		return $model->addAll($arr2);
  	}
  	//分按月 分渠道商 分票型汇总

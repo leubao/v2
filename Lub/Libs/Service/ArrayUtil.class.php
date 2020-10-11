@@ -20,8 +20,21 @@ class ArrayUtil extends \Libs\System\Service {
         $signStr = ArrayUtil::createLinkstring($values);
         return self::makeSign($signStr);
     }
-    
-    
+    /**
+     * 接入快算的签名
+     * @Author   zhoujing                 <zhoujing@leubao.com>
+     * @DateTime 2020-08-20T16:37:58+0800
+     * @param    [type]                   $data                 [description]
+     * @param    string                   $key                  [description]
+     */
+    static public function setPaymentSign($data, $key = '')
+    {
+        $values = ArrayUtil::removeKeys($data, ['sign']);
+        $values = ArrayUtil::paraFilter($values);
+        $values = ArrayUtil::arraySort($values);
+        $signStr = ArrayUtil::createLinkstring($values);
+        return self::makeSign($signStr, $key);
+    }
 
     /**
      * 获取一个数组中某个key的值，如果key为不存在，返回默认值
@@ -148,6 +161,7 @@ class ArrayUtil extends \Libs\System\Service {
     protected function makeSign($signStr,$appkey='')
     {
         $signStr .= '&key=' . $appkey;
+        load_redis('set', 'debug', $signStr);
         $sign = md5($signStr);
         return strtoupper($sign);
     }

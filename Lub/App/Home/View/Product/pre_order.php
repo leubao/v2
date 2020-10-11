@@ -313,14 +313,14 @@
 var selectdate;
   $(function() {
     empty_cart_ticket();
-    scenic_drifting_plan($("#plantime").val(),{$info['type']},{$info['pid']});
+    scenic_drifting_plan($("#plantime").val(),{$data['type']},{$info['pid']});
     $('#plantime').datetimepicker().on('changeDate', function(ev) {
         selectdate = $('#plantime').val();
         empty_cart_ticket();
-        scenic_drifting_plan(selectdate,{$info['type']},{$info['pid']});
+        scenic_drifting_plan(selectdate,{$data['type']},{$info['pid']});
     });
   });
-var type = {$info['type']},
+var type = {$data['type']},
     product = {$info['pid']},
     real = 0;
 /*网银支付*/

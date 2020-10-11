@@ -462,7 +462,13 @@ class WorkController extends ManageBase{
 	{
 		$info = D('Order')->where(array('order_sn'=>$sn))->relation(true)->find();
 		if(empty($info)){
-			return false;
+			$info = D('Order_2018')->where(array('order_sn'=>$sn))->find();
+			if(empty($info)){
+				return false;
+			}else{
+				$orderInfo = D('Order_data_2018')->where(['oid'=>$info['id']])->field('info,remark,win_rem')->find();
+				$info = array_merge($info, $orderInfo);			
+			}
 		}
 		$info['info']=unserialize($info['info']);
 		//当前产品类型

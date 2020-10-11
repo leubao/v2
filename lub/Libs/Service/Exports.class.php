@@ -87,6 +87,7 @@ class Exports{
             $objSheet ->setCellValue($colum.'1', $v);
             $key += 1;
         }
+        $data = self::yieldData($data);
 
         $column = 2;
         foreach($data as $key => $rows){ //行写入
@@ -98,8 +99,11 @@ class Exports{
             }
             $column++;
         }
+        array_unshift($data);
+        
         //设置活动单指数到第一个表,所以Excel打开这是第一个表
         $objPHPExcel->setActiveSheetIndex(0);
+
         header('Content-Type: application/vnd.ms-excel');
         header("Content-Disposition: attachment;filename=\"$fileName\"");
         header('Cache-Control: max-age=0');
@@ -107,6 +111,12 @@ class Exports{
         $objWriter->save('php://output'); //文件通过浏览器下载
         exit;
     }
+    public static function yieldData($data)
+   {
+       foreach ($data as $datum){
+           yield $datum;
+       }
+   }
     /*
     *按模板导出
     *@param $type int 报表类型
@@ -496,6 +506,81 @@ class Exports{
                 $objActSheet->setCellValue ($k.$zz, $moneys);
                 $objActSheet->setCellValue ($l.$zz, $rebate );
                 $filename = "Lub_channel_sum_".time();
+                break;
+            case '9':
+                // 渠道补贴报表
+                
+                break;
+            case '10':
+                // 资金来源
+                $objActSheet->setTitle ("资金来源报表");
+                $objActSheet->setCellValue ('B2',$header['datetime']);
+                $objActSheet->setCellValue ('E2',date('Y-m-d H:i:s'));
+                /* excel文件内容 */
+                $zz = 4;//起始行
+                if((int)$header['type'] === 1){
+                    foreach ($data as $ks=>$vs){
+                        $objActSheet->setCellValue($a.$zz, planShow($ks, 2, 1));
+                        $am = $zz+6;
+                        $objActSheet->mergeCells($a.$zz.':'.$a.$am);
+
+                        $objActSheet->setCellValue($d.$zz, format_money($vs['money']));
+                        $objActSheet->mergeCells($d.$zz.':'.$d.$am);
+                        //类型
+                        $objActSheet->setCellValue($b.$zz, '现金');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['cash']));
+                        $zz++;
+                        $objActSheet->setCellValue($b.$zz, '授信额');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['difference']));
+                        $zz++;
+                        $objActSheet->setCellValue($b.$zz, '签单');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['sign']));
+                        $zz++;
+                        $objActSheet->setCellValue($b.$zz, '划卡');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['stamp']));
+                        $zz++;
+                        $objActSheet->setCellValue($b.$zz, '支付宝');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['alipay']));
+                        $zz++;
+                        $objActSheet->setCellValue($b.$zz, '微信支付');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['wxpay']));
+                        $zz++;
+                        $objActSheet->setCellValue($b.$zz, '其它');
+                        $objActSheet->setCellValue($c.$zz, format_money($vs['unknown']));
+                        $zz++;
+                    }
+                }else{
+                    $objActSheet->setCellValue($a.$zz, $header['datetime']);
+                    $am = $zz+6;
+                    $objActSheet->mergeCells($a.$zz.':'.$a.$am);
+
+                    $objActSheet->setCellValue($d.$zz, format_money($data['money']));
+                    $objActSheet->mergeCells($d.$zz.':'.$d.$am);
+                    
+                    //类型
+                    $objActSheet->setCellValue($b.$zz, '现金');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['cash']));
+                    $zz++;
+                    $objActSheet->setCellValue($b.$zz, '授信额');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['difference']));
+                    $zz++;
+                    $objActSheet->setCellValue($b.$zz, '签单');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['sign']));
+                    $zz++;
+                    $objActSheet->setCellValue($b.$zz, '划卡');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['stamp']));
+                    $zz++;
+                    $objActSheet->setCellValue($b.$zz, '支付宝');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['alipay']));
+                    $zz++;
+                    $objActSheet->setCellValue($b.$zz, '微信支付');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['wxpay']));
+                    $zz++;
+                    $objActSheet->setCellValue($b.$zz, '其它');
+                    $objActSheet->setCellValue($c.$zz, format_money($data['unknown']));
+                    $zz++;   
+                }
+                $filename = "Lubsource_cash_".time();
                 break;
             default:
                 # code...

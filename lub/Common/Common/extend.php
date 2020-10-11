@@ -376,7 +376,7 @@ function planShow($param,$stype = 1,$type=NULL){
         }
         switch ($types) {
             case '11':
-            //完全展示 剧场
+                //完全展示 剧场
                 $name = date('Y-m-d',$info['plantime'])."(".get_chinese_weekday($info['plantime']).")". "&nbsp;&nbsp;第".$info['games']."场&nbsp;&nbsp;".date('H:i',$info['starttime'])."-".date('H:i',$info['endtime']);
                 break;
             case '12':
@@ -505,7 +505,7 @@ function get_chinese_weekday($datetime){
  */
 function crmName($param,$type=NULL){
     if(!empty($param)){
-        $name = M('Crm')->where(array('id'=>$param))->getField('name');
+        $name = M('Crm')->where(array('id'=>$param))->cache('crm_name_'.$param, 3600)->getField('name');
     }else{
         $name = "渠道商";
     }
@@ -716,7 +716,10 @@ function crmName($param,$type=NULL){
                 $msg = "退款";
                 $status = "primary";
                 break;
-            
+            case 6:
+                $msg = "提现";
+                $status = "danger";
+                break;
         }
         if($type){
             return $msg;
@@ -831,7 +834,7 @@ function crmName($param,$type=NULL){
         $sn = load_redis('rPop','sn_library');
         if(!$sn){
             $date = substr(date('Ymd'),3);
-            if((int)substr($date, 1, 1) === 0){
+            if((int)substr($date, 0, 1) === 0){
                 $date = '8'.substr(date('Ymd'),4);
             }
             $sn = $date.$checkType. $planid. str_pad(mt_rand(1, 99999), 5, '0', STR_PAD_LEFT);
@@ -1044,7 +1047,7 @@ function crmName($param,$type=NULL){
     function money_map($param,$type = '1'){
         if(!empty($param)){
             if($type == '1'){
-                $param = D('Crm')->where(array('id'=>$param))->field('id,level,f_agents')->find();
+                $param = D('Crm')->where(array('id'=>$param))->field('id,level,f_agents')->cache('crm_money_map_'.$param, 3600)->find();
                 /*
                  * 读取上级渠道商的ID
                  */
@@ -1059,8 +1062,8 @@ function crmName($param,$type=NULL){
                         return $param['f_agents'];
                         break;
                     case $Config['level_3'] :
-                        //三级渠道商  获取二级的上一级ID  
-                        $cid = Libs\Service\Operate::do_read('Crm',0,array('id'=>$param['f_agents']),'',array('f_agents'));
+                        //三级渠道商  获取二级的上一级ID
+                        $cid = D('Crm')->where(array('id'=>$param['f_agents']))->field('id,level,f_agents')->cache('crm_money_map_'.$param['f_agents'], 3600)->find();
                         return $cid['f_agents'];
                         break;
                 }
@@ -1685,7 +1688,6 @@ function crmName($param,$type=NULL){
         $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;
         $sn = \Libs\Service\Encry::toQrData($data['id'],$orderId,$plan_id,$print,$team);
-        
         //是否启用qr_url
         if(!empty($proconf['qr_url'])){
             $sn = $proconf['ticket_url'].$sn;
@@ -1925,9 +1927,9 @@ function crmName($param,$type=NULL){
             case '1':
                 //获取当前可售数量
                 $table = ucwords($plan['seat_table']);
-                if($seale == '1'){
-                    $area_num = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);;
-                    $area_nums = area_count_seat($table,['area'=>$va['area'],'status'=>'2'],1);;
+                if((int)$seale === 1){
+                    $area_num = area_count_seat($table,['area'=>$areaId,'status'=>'0'],1);
+                    $area_nums = area_count_seat($table,['area'=>$areaId,'status'=>'2'],1);
                     $area = array('area' => $areaId);
                 }
                 break;
@@ -2010,9 +2012,12 @@ function crmName($param,$type=NULL){
             
             foreach ($tickets as $va){
                 if(in_array($va['id'],$param['ticket'])){
+                    if((int)$plan['product_type'] === 1){
+                        $area_num = area_count_seat($table,['area'=>$va['area'],'status'=>'0'],1);
+                    }
                     $va['area_num'] = $area_num;
                     $va['area_nums']= $area_nums;
-                    $va['area_id'] = 0;
+                    $va['area_id'] = $va['area'];
                     //判断是否开启多级扣款 TODO  后期优化 指定票型ID时，使用景区指定价格
                     if((int)$scene === (int)2){
                         //获取当前用户
@@ -2489,4 +2494,17 @@ function getPrePlanShow($plan, $type, $status)
     }elseif((int)$type === 1) {
         echo planShow($plan, 1, 1);
     }
+}
+//校验活动是否正在进行时
+function check_active($info)
+{
+    if($info['status'] == 0){
+        return false;
+    }
+    $today = strtotime(date('Ymd'));
+    if($info['endtime'] < $today){
+        D('Activity')->where(['id'=>$info['id']])->setField('status',0);
+        return false;
+    }
+    return true;
 }

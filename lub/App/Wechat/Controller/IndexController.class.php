@@ -222,14 +222,14 @@ class IndexController extends LubTMP {
         $this->wx_init($this->pid);
         session('pid',$this->pid);
         $urls = Wticket::reg_link($user['user']['id'],$this->pid);
-        $product = D('Product')->where(['id'=>$this->pid])->cache(true)->field('name,type')->find();
-        if($product['type'] == 1){
+        $produt = D('Product')->where(['id'=>$this->pid])->cache(true)->field('type')->find();
+        if($produt['type'] == 1){
             $template = 'show';
         }else{
             $template = 'scenic';
         }
         //限制单笔订单最大数
-        $this->assign('product', $product)->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
+        $this->assign('goods_info',json_encode($goods_info))->assign('ginfo',$this->ginfo)->assign('uinfo',$user)
             ->assign('urls',$urls)->assign('param',$param)->display($template);
     }
     function check_login($url){
@@ -286,7 +286,7 @@ class IndexController extends LubTMP {
     function orderlist(){
         //加密参数
         $ginfo = I('get.');
-        $url = U('Wechat/Index/orderlist',['pid'=>$ginfo['pid']]);
+        $url = U('Wechat/index/orderlist',['pid'=>$ginfo['pid']]);
         session('user',null);//TODO  生产环境删除
         
         //判断用户是否登录   检查session 是否为空
@@ -800,10 +800,9 @@ class IndexController extends LubTMP {
                        $money = $info['money']*100; 
                     }
                     //$money = 1;
-                    // $proconf = cache('ProConfig');dump(cache('Config'));
-                    // $proconf = $proconf[$this->pid][2];
-                    $config = cache('Config');
-                    $notify_url = $config['siteurl'].'index.php/Wechat/Notify/notify.html';
+                    $proconf = cache('ProConfig');
+                    $proconf = $proconf[$this->pid][2];
+                    $notify_url = $proconf['wx_url'].'index.php/Wechat/Notify/notify.html';
                     //产品名称
                     $product_name = product_name($this->pid,1);
                     $pay = & load_wechat('Pay',$this->pid);
@@ -816,7 +815,7 @@ class IndexController extends LubTMP {
                     }
                     $this->assign('jsapi',$prepayid)->assign('wxpay',$options);
                 }
-            }dump($info);
+            }
             $this->assign('data',$info)->display();
         }
     }
@@ -1293,5 +1292,65 @@ class IndexController extends LubTMP {
         }
         
         $this->assign('data',$list)->display();
+    }
+    public function test_pay()
+    {
+        $user = session('user');
+        if(empty($user['user']['openid']) || !empty($this->user)){
+            Wticket::tologin($zinfo);
+            $user = session('user');
+        }
+        //var_dump(U('Wechat/Index/test_pay',array('pid'=>I('get.pid'),'u'=>'')));
+        //$this->check_login(U('Wechat/Index/test_pay',array('pid'=>I('get.pid'),'u'=>'')));
+        //同步分账信息
+        $settleInfo = [[
+            'ledgerNo'  =>  '10033855673',//分账方编号
+            'ledgerName'=>  '武夷山市天空之镜旅游管理有限公司',//分账方名称
+            'amount'    =>  '0.01',//分账金额
+            //'proportion'=>  ,//比例分账的比例，所有分账比例累加不能超过 1（100%） 0.23(含义：23%)
+        ],
+        ['ledgerNo'  =>  '10033677648',//分账方编号
+        'ledgerName'=>  '武夷山市安畅旅游开发有限公司',//分账方名称
+        'amount'    =>  '0.01',//分账金额
+        ]];
+        //异步分账
+        // $a = [
+        //     'sn'            =>  session_create_id(),//商户订单号
+        //     'mch_id'        =>  '10033843358',//商户编号
+        //     'uniqueOrderNo' =>  '',//要分账订单的易宝流水号
+        //     'request_no'    =>  $serial_no,//本次流水号
+        //     'settle_info'   =>  [],//要分账的信息，只支持按金额分账
+        //     'is_thaw_amount'=>  TRUE,//是否解冻收单商户剩余可用金额 可选TRUE、FALSE 默认TRUE
+        //     'notify_url'    =>  'http://cby.leubao.com/api.php/test/notify',//分账回调地址
+        // ];
+        $data = [
+            'out_trade_no'  =>  session_create_id(),//商户订单号
+            'mch_id'        =>  '10033843358',//商户编号
+            'appid'         =>  'wxde733cb2b0c68a36',//公众号appid
+            'total'         =>  '0.04',//金额
+            'openid'        =>  $user['user']['openid'],//opneid
+            'profit_sharing'=>  'REAL_TIME',//'REAL_TIME_DIVIDE',//资金处理类型DELAY_SETTLE("延迟结算"),REAL_TIME("实时订单");REAL_TIME_DIVIDE（” 实时 分账” ）SPLIT_ACCOUNT_IN("实时拆分入账");
+            'settle_info'   =>  [
+                'divideDetail'      =>  [],//$settleInfo,//'',//json_encode($settleInfo),
+                'divideNotifyUrl'   =>  'http://cby.leubao.com/api.php/test/notify',
+            ],//结算信息
+            'title'         =>  '测试支付',//商品标题
+            'description'   =>  '测试支付',//商品描述
+            'client_ip'     =>  get_client_ip(),//客户端IP
+            'notify_url'    =>  'http://cby.leubao.com/api.php/test/notify',
+            'time_stamp'     =>  time(),
+            'nonce_str'     =>  genRandomString(8,1),//随机字符串
+            'sign'          =>  ''
+        ];
+        $key = 'WhvUMxDgYjufJcdez6oGw1RXT9i8tQrs';
+        $data['sign'] = \Libs\Service\ArrayUtil::setPaymentSign($data, $key);
+        $url = 'https://api.msg.alizhiyou.cn/pay/gopay';
+        if(!empty($user)){
+            $res = json_decode(getHttpContent($url, 'POST', $data), true);
+            var_dump($data,$res);
+            $this->assign('data', $res['data']);
+        }
+        
+        $this->display();
     }
 }

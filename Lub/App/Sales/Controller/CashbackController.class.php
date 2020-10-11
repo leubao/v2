@@ -87,19 +87,19 @@ class CashbackController extends ManageBase{
                 if($itemCof['rebate_pay'] == '2'){
                     /*注意200的限额,根据模板设置金额*/
                     $state = true;
-                    if($info['money'] > 1000){
+                    if($info['money'] > 400){
                         //大于200拆分多个红包
                         $redNum = 1;
                         $redInfo = [];
                         $redInfo[] = [
-                            'money' => $info['money']%1000,
+                            'money' => $info['money']%400,
                             'sn'    => $info['sn'],
                             'openid'=> $info['openid'],
                         ];
-                        $num = (int)floor($info['money']/1000);//dump($num);
+                        $num = (int)floor($info['money']/400);//dump($num);
                         for ($i = $num; $i <> 0; $i--) {
                             $redInfo[] = [
-                                'money' => '1000',
+                                'money' => '400',
                                 'sn'    => $info['sn'].'I'.$redNum,
                                 'openid'=> $info['openid'],
                             ];
@@ -178,7 +178,8 @@ class CashbackController extends ManageBase{
     public function public_check_backe()
     {
         $sn = I('sn');
-        $config = load_payment('wx_red');
+        $item_id =  get_item('id');
+        $config = load_payment('wx_red', $item_id);
         $data = [
             'mch_billno' => $sn,
             'bill_type'  => 'MCHT',
@@ -303,9 +304,8 @@ class CashbackController extends ManageBase{
         if(empty($redTpl)){
             $this->erun('未找到红包模板,请设置');
         }
-        $config = load_payment('wx_red');
+        $config = load_payment('wx_red', $redTpl['item_id']);
         //先查询是否已经返利
-        
         $postData = [
             'mch_billno'        =>  $info['sn'],//商户订单号
             'send_name'         =>  $redTpl['send_name'],//商户名称

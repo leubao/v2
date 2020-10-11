@@ -69,25 +69,57 @@ class Ticket extends \Libs\System\Service {
 		//更新门票打印状态
 		$model = new Model();
 		$model->startTrans();
-		switch ($plan['product_type']) {
-			case '1':
-				$table = $plan['seat_table'];
-				break;
-			case '2':
-				$table = 'scenic';
-				break;
-			case '3':
-				$table = 'drifting';
-				break;
-			case '4':
-				$table = 'scenic';
-				break;
-		}
+		// switch ($plan['product_type']) {
+		// 	case '1':
+		// 		$table = $plan['seat_table'];
+		// 		break;
+		// 	case '2':
+		// 		$table = 'scenic';
+		// 		break;
+		// 	case '3':
+		// 		$table = 'drifting';
+		// 		break;
+		// 	case '4':
+		// 		$table = 'scenic';
+		// 		break;
+		// }
+		$table = $plan['seat_table'];
 		$list = M(ucwords($table))->where(array('order_sn'=>$sn,'status'=>2))->select();
 		$count = count($list);//dump($list);
 		//一单一票
-		//读取订单信息  日期时间  人数  单价 10元/人   
-		if($count > 0){
+		if((int)$team === 2){
+			if($count > 0){
+				foreach ($list as $k=>$v){
+					$sale = unserialize($v['sale']);
+					
+					if($v['print'] == 0){
+						$print = 1;
+					}else{
+						$print = $print + 1;
+					}
+					//TODO  电子门票默认一团一票
+					$sns = \Libs\Service\Encry::toQrData($v['id'],$order['id'],$plan['id'],$print, $team);
+					$info[$v['price_id']] = array(
+						'discount'		=>	$sale['discount'],
+						'field'			=>	$info_field,
+						'price'			=>	$sale['price'],
+						'priceName'		=>	$sale['priceName'],
+						'remark'		=>	$sale['remark'],
+						'remark_type'	=>	$sale['remark_type'],
+						'sn'			=>	$sn,
+						'sns'			=>	$sns,
+						'user'			=>	$info_user,
+						'number'		=>	$count
+					);
+					$price_id = $v['price_id'];
+				}
+				$sns = $info[$price_id]['sns'];
+
+				//更新门票打印状态
+				$up_print = $model->table(C('DB_PREFIX'). $table)->where($map)->setInc('print',1);
+			}
+		}else{
+			//一人一票
 			foreach ($list as $k=>$v){
 				$sale = unserialize($v['sale']);
 				
@@ -98,7 +130,7 @@ class Ticket extends \Libs\System\Service {
 				}
 				//TODO  电子门票默认一团一票
 				$sns = \Libs\Service\Encry::toQrData($v['id'],$order['id'],$plan['id'],$print, $team);
-				$info[$v['price_id']] = array(
+				$info[] = array(
 					'discount'		=>	$sale['discount'],
 					'field'			=>	$info_field,
 					'price'			=>	$sale['price'],
@@ -111,8 +143,36 @@ class Ticket extends \Libs\System\Service {
 					'number'		=>	$count
 				);
 				$price_id = $v['price_id'];
-			}	
-			$sns = $info[$price_id]['sns'];
+			}
+		}
+		
+		//读取订单信息  日期时间  人数  单价 10元/人   
+		if($count > 0){
+			// foreach ($list as $k=>$v){
+			// 	$sale = unserialize($v['sale']);
+				
+			// 	if($v['print'] == 0){
+			// 		$print = 1;
+			// 	}else{
+			// 		$print = $print + 1;
+			// 	}
+			// 	//TODO  电子门票默认一团一票
+			// 	$sns = \Libs\Service\Encry::toQrData($v['id'],$order['id'],$plan['id'],$print, $team);
+			// 	$info[$v['price_id']] = array(
+			// 		'discount'		=>	$sale['discount'],
+			// 		'field'			=>	$info_field,
+			// 		'price'			=>	$sale['price'],
+			// 		'priceName'		=>	$sale['priceName'],
+			// 		'remark'		=>	$sale['remark'],
+			// 		'remark_type'	=>	$sale['remark_type'],
+			// 		'sn'			=>	$sn,
+			// 		'sns'			=>	$sns,
+			// 		'user'			=>	$info_user,
+			// 		'number'		=>	$count
+			// 	);
+			// 	$price_id = $v['price_id'];
+			// }	
+			// $sns = $info[$price_id]['sns'];
 
 			//更新门票打印状态
 			$up_print = $model->table(C('DB_PREFIX'). $table)->where($map)->setInc('print',1);
@@ -131,7 +191,7 @@ class Ticket extends \Libs\System\Service {
 				'base'	 => $base,
 				'seatList'=> implode(', ', $seatList),
 				'sns'	=> $sns,//TODO 暂时直接使用定单号
-				'info'	=> $info ? $info : 0,
+				'info'	=> $info ? array_values($info) : 0,
 			);
 		}else{
 			$model->rollback();//事务回滚

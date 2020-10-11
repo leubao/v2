@@ -4,12 +4,52 @@
   <div class="tabs-container" style="padding: 15px">
       <div class="tabs-left">
           <ul class="nav nav-tabs nav-stacked">
-              <li  class="active"><a data-toggle="tab" href="#paytab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  微信支付</a></li>
+              <li  class="active"><a data-toggle="tab" href="#paytab-1" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  快算聚合</a></li>
+              <li><a data-toggle="tab" href="#paytab-4" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  微信支付</a></li>
               <li class=""><a data-toggle="tab" href="#paytab-5" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  支付宝支付</a></li>
               <li class=""><a data-toggle="tab" href="#paytab-6" aria-expanded="false"><i class="fa fa-lastfm-square"></i>  建设银行</a></li>
           </ul>
           <div class="tabs-content">
-              <div id="paytab-4" class="tab-pane active">
+            <div id="paytab-1" class="tab-pane active">
+                <div class="panel-body">
+                    <fieldset style="height:100%;">
+                      <legend>快算聚合</legend>
+                      <div style="height:94%; overflow:hidden;">
+                      <table class="table  table-bordered">
+                      <tbody>
+                        <tr>
+                          <td width="120px">APPID:</td>
+                          <td><input type="text" name="app_id" class="form-control" size="30" value="{$vo.app_id}" placeholder="appID">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">商户id:</td>
+                          <td><input type="text" name="mch_id" class="form-control" value="{$vo.mch_id}" size="20" placeholder="商户id">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">商户支付密钥Key:</td>
+                          <td><input type="text" name="mch_key" class="form-control" value="{$vo.mch_key}" size="40" placeholder="商户支付密钥Key">
+                          </td>
+                        </tr>
+                        <tr>
+                          <td width="120px">资金处理类型:</td>
+                          <td>
+                            <select name="profit_type" data-toggle="selectpicker" data-rule="required">
+                                <option value="REAL_TIME" <eq name="vo.profit_type" value='REAL_TIME'>selected</eq>>实时订单</option>
+                                <option value="DELAY_SETTLE" <eq name="vo.profit_type" value='DELAY_SETTLE'>selected</eq>>延迟结算</option>
+                                <option value="REAL_TIME_DIVIDE" <eq name="vo.profit_type" value='REAL_TIME_DIVIDE'>selected</eq>>实时分账</option>
+                                <option value="SPLIT_ACCOUNT_IN" <eq name="vo.profit_type" value='SPLIT_ACCOUNT_IN'>selected</eq>>实时拆分入账</option>
+                            </select>
+                          </td>
+                        </tr>
+                      </tbody>
+                      </table>
+                    </div>
+                    </fieldset>
+                </div>
+              </div>
+              <div id="paytab-4" class="tab-pane">
                 <div class="panel-body">
                     <fieldset style="height:100%;">
                       <legend>微信支付</legend>

@@ -32,9 +32,12 @@ class IndexController extends ManageBase {
 			'type',
 			'activity'
 		];
-		$this->basePage('Order', $map, array('createtime'=>'DESC'), 25, $field);
+		//判断是否存在分表
+		$table = $this->getTableName();
+		$this->basePage($table, $map, array('createtime'=>'DESC'), 25, $field);
 		$this->assign('map',$map)->assign('export_map',$export_map)->display();
 	}
+	
 	/*订单导出*/
 	function public_export_order(){
 		$starttime = I('starttime');
@@ -48,17 +51,32 @@ class IndexController extends ManageBase {
         $map = [];
         $rest = $this->get_order_map();
 		$map = array_merge($rest['map'],$map);
+        $table = $this->getTableName();
         
-		$list = M('Order')->where($map)->select();
+		$list = M($table)->where($map)->field(['order_sn','addsid','type','number','money','plan_id','channel_id','user_id','take','phone','status','createtime'])->select();
+		if(count($list) > 10000){
+			$this->erun("亲，一次最多只能导出10000条数据,请缩短日期范围后重试....");
+        	return false;
+		}
+		$uIdx = array_column($list, 'user_id');
+		$cIdx = array_column($list, 'channel_id');
+		//->where(['id'=>['in', $cIdx]])
+		$crm = D('Crm')->field('id,name')->select();
+		$crm = array_column($crm, 'name', 'id');
+		$user = D('User')->where(['id'=>['in', $uIdx]])->field('id,nickname')->select();
+		$user = array_column($user, 'nickname', 'id');
+
 		foreach ($list as $k => $v) {
+			$cid = money_map($v['channel_id'],1);
    			$data[] = array(
    				'sn'		=>	$v['order_sn'],
    				'scena'		=>	addsid($v['addsid'],1).'('.channel_type($v['type'],1).')',
 	   			'number'	=>	$v['number'],
 	   			'money'		=>	$v['money'],
 	   			'plan'		=>	planShow($v['plan_id'],2,1),
-	   			'channel'	=>	crmName($v['channel_id'],1),
-	   			'user'		=>	userName($v['user_id'],1,1),
+	   			'mpc'		=>	$crm[$cid],
+	   			'channel'	=>	$crm[$v['channel_id']],//crmName($v['channel_id'],1),
+	   			'user'		=>	$user[$v['user_id']],//userName($v['user_id'],1,1),
 	   			'take'		=>	$v['take'],
 	   			'phone'		=>	$v['phone'],
 	   			'status'	=>	order_status($v['status'],1),
@@ -71,6 +89,7 @@ class IndexController extends ManageBase {
    			'number'	=>	'数量',
    			'money'		=>	'金额',
    			'plan'		=>	'所属计划',
+   			'mpc'		=>	'结算渠道商',
    			'channel'	=>	'渠道商',
    			'user'		=>	'下单人',
    			'take'		=>	'联系人',
@@ -343,5 +362,27 @@ class IndexController extends ManageBase {
 	    $this->basePage('MemberLog', $map, 'id DESC', 25, 'id,sn,thetype,password,member_id,status,datetime,update_time');
 	    $this->assign('pinfo',$pinfo)
 			->display();
+	}
+
+	/**
+	 * 动态获取表名称
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2020-07-27T00:38:45+0800
+	 * @return   [type]                   [description]
+	 */
+	public function getTableName()
+	{
+		$time = strtotime('2018-12-31');
+		$endtime = I('endtime');
+		if(empty($endtime)){
+			$table = 'Order';
+		}else{
+			if(strtotime($endtime) > $time){
+				$table = 'Order';
+			}else{
+				$table = 'Order_2018';
+			}
+		}
+		return $table;
 	}
 }
