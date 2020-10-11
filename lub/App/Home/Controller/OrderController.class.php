@@ -83,7 +83,8 @@ class OrderController extends Base{
 	        $plantime = array(array('EGT', $start_time), array('ELT', $end_time), 'AND');
         	$planlist = M('Plan')->where(['plantime'=>$plantime,'status'=>['in','2,3,4']])->field('id')->select();
         	$where['plan_id'] = array('in',implode(',', array_column($planlist,'id')));
-        	$order = 'plan_id DESC';
+        	$order = 'plan_id DESC,createtime DESC';
+        	//$order = 'createtime DESC';
         }
         if (!empty($status)) {
             $where['status'] = $status;
@@ -146,6 +147,7 @@ class OrderController extends Base{
         //传递查询时间
         $this->assign('start_time',$start_time)
         	->assign('end_time',$end_time);
+        $where = [];
         if(!empty($user_id)){
         	$where['user_id'] = $user_id;
         }
@@ -168,11 +170,9 @@ class OrderController extends Base{
         }
         $uinfo = Partner::getInstance()->getInfo();
         if($uinfo['groupid'] == '3'){
-        	$where =  ['channel_id' =>	$uinfo['cid']];
+        	$where['channel_id'] =	$uinfo['cid'];
         }else{
-        	$where = array(
-				'channel_id' =>	array(in,$this->get_channel()),
-			);
+        	$where['channel_id'] =	array(in,$this->get_channel());
         }
 		$user = M('User')->where(array('status'=>'1','cid'=>$uinfo['cid']))->field('id,nickname')->select();
 		$count = $db->where($where)->count();
@@ -445,6 +445,9 @@ class OrderController extends Base{
 			if(empty($ginfo)){
 				$this->error("参数错误!");
 			}
+			if(empty($ginfo["reason"])){
+				$this->error("请输入取消理由~");
+			}
 			if(load_redis('get','lock_'.$ginfo['sn'])){
 				$this->error('订单锁定中~');
 			}
@@ -468,6 +471,7 @@ class OrderController extends Base{
 						"re_type"    => $ginfo["re_type"],
 						"status"     => 1,
 						"money"      => $ginfo["money"],
+						"number"	 => $info['number'],
 						"launch"     => 2,
 						"order_status" => $ginfo["order_status"]
 					);

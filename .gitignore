@@ -16,3 +16,6 @@ iview
 testSer
 layui
 IndexController.class.php
+#runtime
+Lub/App/Nhome
+.idea

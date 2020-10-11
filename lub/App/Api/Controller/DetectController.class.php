@@ -415,41 +415,20 @@ class DetectController extends Controller{
 	 */
     function ticket(){
     	$sn = I('get.sn');
-    	$info = D('Item/Order')->where(array('order_sn'=>$sn))->find();
-    	if(!empty($info)){
-    		//读取计划
-    		$plan = M('Plan')->where(array('id'=>$info['plan_id']))->find();
-    		//查询座位表
-    		$list = M(ucwords($plan['seat_table']))->where(array('order_sn'=>$sn))->select();
-    		//返回信息
-    		
-    	}
-    	$config = cache("Config");
-    	foreach ($list as $ke=>$va){
-    		$print = $va['print']+1;
-    		/*$ec = $va['order_sn'].','.$va['area'].','.$va['seat'].','.$print.','.$va['id'];
-    		
-    		$data[$ke]['data'] = $plan['id']."^".\Libs\Util\Encrypt::authcode($ec,ENCODE,$plan['encry'])."^#";*/
-    		$data[$ke]['data'] = $this->re_print($plan['id'],$plan['encry'],$va);
-	    	$b= Codeapi::code_create($data[$ke]['data'],$config['code_size'],$config['level'],1,$config['q_color'],$config['b_color'],$config['w_color'],$config['n_color'],'','');
-	    	/*图片转base64*/
-	    	$type=getimagesize($b);//取得图片的大小，类型等 
-	    	$fp=fopen($b,"r")or die("Can't open file"); 
-	    	$data[$ke]['img'] = chunk_split(base64_encode(fread($fp,filesize($b))));//base64编码
-	    	//更新打印次数
-	    	M(ucwords($plan['seat_table']))->where(array('id'=>$va['id']))->setInc('print',1);
-    	}
-    	$a= "2A5500FC56123400000001"."155^e735yIt40TW/t6ff8FFUBd9corYssxj18g1z8gPJnU+aj7VAQ4wQRGjsqvm9n+j4ni8r4nVQEHlMPw#";
-    	$t= "2A5500FC561234000000013135355E3664336233326F356561396A755336494377773071646F5753452B4E6253524D366E655541666C39437A543532736974576757456E5130736A7737586B37446744595250434F526B72464D4C6E775E2300140E0BFD";
-    	//$cc = "2A5500FC561234000000013135355E3664336233326F356561396A755336494377773071646F5753452B4E6253524D366E655541666C39437A543532736974576757456E5130736A7737586B37446744595250434F526B72464D4C6E775E2300";
-    	$bb = "*03000000013135355E3664336233326F356561396A755336494377773071646F5753452B4E6253524D366E655541666C39437A543532736974576757456E5130736A7737586B37446744595250434F526B72464D4C6E775E2300";
-    	$io = "*5400000001208^f821bOOeM4fdsOxdLcdOkFvpZWllgdji9h+qQhe/qjVMC+zOcZBhH8TmVxABnjiY7+F4c2gIh0Vmlg^#";
-    	$rr = $this->reader($io);
- 
-    	echo "16进制".$rr."<br />";
-    	//echo "16进制".dechex($rr);
-    	$this->assign('data',$data);
-    	$this->display();
+    	$type = I('get.type') ? I('get.type') : 1;
+	    if(empty($sn)){
+	      $class = 'error';
+	    }else{
+	      $ticket = \Libs\Service\Ticket::createTicket($sn, $type);
+	      if($ticket['status']){
+	        $class = 'success';
+	      }else{
+	        $class = 'error';
+	      }
+	    }
+	    $this->assign('class',$class);
+	    $this->assign('ticket',$ticket);
+	    $this->display();
     }
     /*
 	返回打印数据

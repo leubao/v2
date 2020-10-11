@@ -88,14 +88,14 @@ class PaymentController extends Base{
 				    }else{
 				    	$return = [
 					    	'status'	=>	300,
-					    	'msg'		=>	$ret['return_msg']
+					    	'msg'		=>	$ret['return_msg'].'22'
 					    ];
 					    echo json_encode($return);
 				    }
 				} catch (PayException $e) {
 					$return = [
 				    	'status'	=>	300,
-				    	'msg'		=>	$e->errorMessage()
+				    	'msg'		=>	$e->errorMessage().'221'
 				    ];
 				    echo json_encode($return);
 				    exit;
@@ -146,17 +146,21 @@ class PaymentController extends Base{
 
             	}
                 $log = json_decode(load_redis('get','pay_'.$sn), true);
-                $payLog = [
-                	'out_trade_no'	=>	$ret['transaction_id'],
-                	'money'			=>  $log['cash'],
-                	'order_sn'		=>	$sn,
-                	'type'			=>	2,
-                	'pattern'		=>  1,
-                	'scene'			=>	2,
-                	'user_id'		=>  get_user_id(),
-                ];
-                M('Pay')->add($payLog);
-                $this->topUp($log);
+                $count = D('Pay')->where(['order_sn' => $sn])->count();
+                if((int)$count === 0){
+					$payLog = [
+	                	'out_trade_no'	=>	$ret['transaction_id'],
+	                	'money'			=>  $log['cash'],
+	                	'order_sn'		=>	$sn,
+	                	'type'			=>	2,
+	                	'pattern'		=>  1,
+	                	'scene'			=>	2,
+	                	'user_id'		=>  get_user_id(),
+	                ];
+	                M('Pay')->add($payLog);
+	                $this->topUp($log);
+                }
+                
                 $return = ['status'=>'200','msg'=>'支付成功'];
             }
         }
@@ -173,26 +177,31 @@ class PaymentController extends Base{
 		$crmData = array('cash' => array('exp','cash+'.$log['cash']),'uptime' => time());
 
 		$c_pay = $model->table(C('DB_PREFIX')."crm")->where(array('id'=>$log['crm_id']))->setField($crmData);
-
-		//充值成功后，添加一条充值记录
-		$data = array(
-			'order_sn'  =>  $log['order_sn'],
-			'cash'		=>	$log['cash'],
-			'user_id'	=>	get_user_id(),
-			'crm_id'	=>	$log['crm_id'],
-			'createtime'=>	time(),
-			'type'		=>	'1',
-			'balance'	=>  balance($log['crm_id'],1),
-			'tyint'		=>	1,//客户类型1企业4个人
-			'remark'	=>	'自助充值'.$log['remark'],
-		);		
-		$recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
-		if($c_pay && $recharge){
-			$model->commit();//成功则提交
-			load_redis('delete', 'pay_'.$sn);
+		$count = D('crm_recharge')->where(['order_sn' => $sn])->count();
+		if((int)$count === 0){
+			//充值成功后，添加一条充值记录
+			$data = array(
+				'order_sn'  =>  $log['order_sn'],
+				'cash'		=>	$log['cash'],
+				'user_id'	=>	get_user_id(),
+				'crm_id'	=>	$log['crm_id'],
+				'createtime'=>	time(),
+				'type'		=>	'1',
+				'balance'	=>  balance($log['crm_id'],1),
+				'tyint'		=>	1,//客户类型1企业4个人
+				'remark'	=>	'自助充值'.$log['remark'],
+			);		
+			$recharge = $model->table(C('DB_PREFIX')."crm_recharge")->add($data);
+			if($c_pay && $recharge){
+				$model->commit();//成功则提交
+				load_redis('delete', 'pay_'.$sn);
+			}else{
+				$model->rollback();//不成功，则回滚
+				load_redis('lpush','pay_err',json_encode($log));
+			}
 		}else{
 			$model->rollback();//不成功，则回滚
-			load_redis('lpush','pay_err',json_encode($log));
 		}
+		
 	}
 }

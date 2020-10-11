@@ -33,6 +33,7 @@
         <option value="3" <eq name="type" value="3"> selected</eq>>补贴</option>
         <option value="4" <eq name="type" value="4"> selected</eq>>退票</option>
         <option value="5" <eq name="type" value="5"> selected</eq>>退款</option>
+        <option value="6" <eq name="type" value="6"> selected</eq>>提现</option>
       </select>
       &nbsp;
       <label>范围:</label>

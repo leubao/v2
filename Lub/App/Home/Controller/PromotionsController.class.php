@@ -55,7 +55,7 @@ class PromotionsController extends Base{
 		$info = D('Activity')->where(['id'=>$id])->find();
 		$info['param'] = json_decode($info['param'],true);
 		//判断活动是否正在进行
-		if(!$this->check_active($info)){
+		if(!check_active($info)){
 			$this->error("活动已结束,或已经停用",array('tabid'=>$this->menuid.MODULE_NAME));
 		}
 		//根据活动类型加载
@@ -150,19 +150,7 @@ class PromotionsController extends Base{
 		//重新组合数据
 		
 	}
-	//校验活动是否正在进行时
-	public function check_active($info)
-	{
-		if($info['status'] == 0){
-			return false;
-		}
-		$today = strtotime(date('Ymd'));
-		if($info['endtime'] < $today){
-			D('Activity')->where(['id'=>$info['id']])->setField('status',0);
-			return false;
-		}
-		return true;
-	}
+	
 	/**
 	 * 渠道售票公共信息
 	 * @param  int $plan_id   计划id

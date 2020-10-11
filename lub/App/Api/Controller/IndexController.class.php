@@ -1653,4 +1653,20 @@ class IndexController extends ApiBase {
     die(json_encode($return));
   }
 
+
+  public function intoTheGarden()
+  {
+    if(IS_POST){
+      $pinfo = I('post.'); 
+      $appInfo = Api::check_app($pinfo['appid'],$pinfo['appkey']);
+
+      if(!$appInfo){
+        $return = array('code' => 401,'info' => '','msg' => '认证失败');
+        die(json_encode($return));
+      }
+      $order = new Order();
+      $run = $order->quick(json_encode($pinfo),51,$appInfo);
+      die(json_encode([$run,$order->error]));
+    }
+  }
 }

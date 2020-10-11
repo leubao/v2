@@ -17,6 +17,31 @@ use Libs\Service\ArrayUtil;
 class TempController extends ApiBase {
 
   function tongpiao(){
+    // $starttime = date('Y-m-d H:i:s');
+    // $timer = -10;
+    // $endtime = strtotime("$starttime +$timer minute");
+    // echo date('Y-m-d H:i:s', $endtime);
+$day = date('Ymd',strtotime("-1 day"));var_dump($day);
+       // $day = date('Ymd', strtotime($day));
+        $plan = M('Plan')->where(array('plantime'=>strtotime($day),'product_id'=>44))->field('id')->select();
+      
+        $total = D('Order')->where(['plan_id'=>['in', array_column($plan, 'id')]])->sum('number');
+var_dump($plan,$total);
+    //\Trust\Service\Wisdom::confirm_order('200707472650', 1, '订单已通过审核');
+    //测试加密效果
+    // $list = D('seat_207_200620_1')->where(['status'=>['in','2,99']])->select();
+   
+    // foreach ($list as $key => $value) {
+    //   $orderId = D('Order')->where(['order_sn'=>$value['order_sn']])->getField('id');
+    //   $pwd = re_print('3','444842',$value,207,$orderId, 1);
+    //   $state = \Libs\Service\Encry::getQrData($pwd['sn']);
+    //   //dump($state);
+    //   if(!$state){
+    //     $err[] = ['pwd'=> $pwd, 'seat' => $value['seat'],'sn'=>$value['order_sn']];
+    //   }
+    // }
+
+    // dump($err);
     //1、基于主体读取统票订单
    //  $list = D('Order')->where(['activity'=>58,'createtime'=>['gt',strtotime('20200501')],'status'=>['in', ['1','9']]])->field('id,order_sn,number,money')->select();
    //  $olist = D('OrderData')->where(['oid'=>['in', array_column($list, 'id')]])->select();
@@ -50,82 +75,233 @@ class TempController extends ApiBase {
     // }
     //3、更新总数
   }
+  function splitup($info){
 
-  function get_temp_seat(){
-    //读取模板
-    $area = D('Area')->where(['status'=>1,'template_id'=>32])->field('id,name,seat,seats,seatid')->select();
-    $row = [];
-    $col = [];
-    $seatid = [];
-    foreach ($area as $k => $v) {
-      $seat = unserialize($v['seats']);
-      $rows = str_replace("','", ",", $seat['rows']);
-      $cols = str_replace("','", ",", $seat['columns']);
-      if(!empty($row)){
-        $row = array_merge($row, explode(',', $rows));
-      }else{
-        $row = explode(',', $rows);
-      }
-
-      if(!empty($col)){
-        $col = array_merge($col, explode(',', $cols));
-      }else{
-        $col = explode(',', $cols);
-      }
-
-      //合并已存在的座位
-      if(empty($seatid)){
-        $seatid = unserialize($v['seatid']);
-      }else{
-        $seatid = array_merge($seatid, unserialize($v['seatid']));
-      }
-      
-    }dump($seatid);
-    //去重
-    $row = array_unique($row);
-    $col = array_unique($col);
-    //dump($row);dump($col);
-    //排序
-    sort($row);
-    sort($col);  
-    //获取首尾
-    //判断是否区分单双号 TODO
-    $odd = [];
-    $even = [];
-    $rowList = [];
-    $colList = [];
-    foreach ($col as $k => $v) {
-      if($v%2 !== 0){
-        $odd[] = $v;
-      }else{
-        $even[] = $v;
-      }
-    }
-    //奇数降序，
-    asort($odd);
-    //偶数升序
-    arsort($even);
-    //集合
-    $colList = array_merge($even,$odd);
-    //判断朝向 TODO
-    $rowList = rsort($rowList);
-    //生成座位
-    foreach ($rowList as $key => $value) {
-      foreach ($colList as $k => $v) {
-        //判断是否存在座位
+        $info = preg_replace('/($s*$)|(^s*^)/m', '',$info);
+        //开始标记
+        $bj = substr($info,0,1);
+        $charArr = explode('@',$info);
+        $header = explode('^',$charArr[0]);
+        $validity = explode('#',$charArr[1]);
+        //会话ID 当会话id不存在时会报错 TODO
         
-        $seatList[$value][] = [
-          'row'     => $value,  
-          'col'     => $v,
-          'is_seat' => $is_seat,
-          'bgColor' => $bgColor,
-          'seat'    => $value.'-'.$v,
+        $sid = $validity[1];
+        //产品ID
+        // $pid = self::get_product_id($header[0], true);
+        // if(empty($bj) || $bj <> '*' || empty($pid)){
+        //     return ['status' => 400, 'info'=>'','msg' => '数据不完整' ];
+        // }
+        //实名
+        $real = '';
+        //通道ID
+        $no = substr($header[1],0,2);
+        //请求类型
+        $request = substr($header[1],2,1);
+        //凭证类型
+        $voucher = substr($header[1],3,1);
+        //返回类型
+        $return = substr($header[1],4,1);
+        //判断是否开启URLQR
+        if($request === 'R'){
+            $idTq = explode('^',$validity[0]);
+            if(empty($idTq)){
+                return ['status' => 400, 'info'=>'','msg' => '数据不完整' ];
+            }
+            $content = $idTq[0];
+            $real = $idTq[1];
+        }else{
+            //检票数据 处理一单一票的问题
+            $check_team = explode('&',$validity[0]);
+            if(!empty($check_team[1])){
+                $team = explode('^', $check_team[1]);
+                $content = rtrim($check_team[0], '^');
+            }else{
+                $team[0] = 0;
+                $content = rtrim($validity[0], '^');
+            }
+        }
+        //年卡数据
+        if($request == 'Y'){
+            $year = 'yes';
+        }else{
+            $year = 'no';
+        }
+        //判断是否存在请求类型和凭证类型
+        if(!in_array($request,['H','K','V','I','Y','R'])){
+            //返回错误 请求类型或凭证类型不被支持
+            return [ 'status' => 400,'info'=>'', 'msg' => '不被支持的请求类型'];
+        }
+        if(!in_array($voucher,['Q','C','F','H','M','N'])){
+            return [ 'status' => 400, 'info'=>'', 'msg' => '不被支持的凭证类型'];
+        }
+        if(empty($validity[0])){
+            return ['status' => 400, 'info'=>'', 'msg' => '数据不完整' ];
+        }else{
+            //若是强制实名认证
+            $data = array(
+                'sessionid' => (String)$no,
+                //'product_id'=> $pid,
+                'request'   => $request,
+                'voucher'   => $voucher,
+                'return'    => $return,
+                'content'   => $content,
+                'real'      => $real, 
+                'team'      => $team[0],
+                'year'      => $year,//年卡标记
+                'sid'       => trim($sid),
+                'status'    => 200,
+                'original'  => $info,
+                'msg'       => ''
+            );
+            return $data;
+        }
+    }
+  function get_seat_list(){
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type, sign, timestamp, Authorization, X-Requested-With, token');
+    if(IS_POST){
+      $pinfo = json_decode(file_get_contents('php://input'), true);
+      $product = D('Product')->where(['idCode'=>$pinfo['product_no']])->field('id,template_id')->find();
+      //读取模板
+      $area = D('Area')->where(['status'=>1,'template_id'=>$product['template_id']])->field('id,name,seat,seats,seatid,bgcolor,num')->select();
+      $row = [];
+      $col = [];
+      $seatid = [];
+      $areaSeat = [];
+      $area_legend = [];
+      foreach ($area as $k => $v) {
+        $seat = unserialize($v['seats']);
+        $rows = str_replace("','", ",", $seat['rows']);
+        $cols = str_replace("','", ",", $seat['columns']);
+        if(!empty($row)){
+          $row = array_merge($row, explode(',', $rows));
+        }else{
+          $row = explode(',', $rows);
+        }
+
+        if(!empty($col)){
+          $col = array_merge($col, explode(',', $cols));
+        }else{
+          $col = explode(',', $cols);
+        }
+        //区域背景颜色
+        $areaBgColor[$v['id']] = $v['bgcolor'];
+        //合并已存在的座位
+        $seatArr = $this->getSeatArray(unserialize($v['seatid']));
+        if(empty($seatid)){
+          $seatid = $seatArr;
+        }else{
+          $seatid = array_merge($seatid, $seatArr);
+        }
+        $areaSeat[$v['id']] = $seatArr;
+        //区域图例
+        $area_legend[$v['id']] = [
+          'name'    =>  $v['name'],
+          'num'     =>  $v['num'],
+          'bgcolor' =>  $v['bgcolor']
         ];
       }
-    }
+      F('area_seat', $areaSeat);
+      F('area_bgcolor', $areaBgColor);
+      //去重
+      $row = array_unique($row);
+      $col = array_unique($col);
+      //排序
+      sort($row);
+      sort($col);  
+      //获取首尾
+      //判断是否区分单双号 TODO
+      $odd = [];
+      $even = [];
+      $rowList = [];
+      $colList = [];
+      foreach ($col as $k => $v) {
+        if($v%2 !== 0){
+          $odd[] = $v;
+        }else{
+          $even[] = $v;
+        }
+      }
+      //奇数降序，
+      asort($odd);
+      //偶数升序
+      arsort($even);
+      //集合
+      $colList = array_merge($even,$odd);
+      //判断朝向 TODO
+      //格式化行
+      for ($i=1; $i < count($row)+1; $i++) { 
+        $rowList[] = $i;
+      }
+      rsort($rowList);
 
+      //生成座位
+      foreach ($rowList as $key => $value) {
+        foreach ($colList as $k => $v) {
+          //判断是否存在座位
+          $seats = $value.'-'.$v;
+          if(in_array($seats,$seatid)){
+            $is_seat = true;
+          }else{
+            $is_seat = false;
+          }
+          $seatList[$value][] = [
+            'row'     => $value,  
+            'col'     => $v,
+            'is_seat' => $is_seat,
+            'bgColor' => $this->getSeatArea($seats),
+            'seat'    => $seats,
+          ];
+        }
+      }
+      
+      //TODO  朝向
+      rsort($seatList);
+      //区域图例
+
+
+      $return = [
+        "code" => 200,
+        "data" => [
+          'row' =>  $rowList,
+          'col' =>  $colList,
+          'area_legend' => $area_legend,
+          'seat_list' => $seatList
+        ],
+        "msg" => 'ok'
+      ];
+      die(json_encode($return));
+    }
+    
   }
-  function get_seat_list(){
+  public function getSeatArray($seatArr)
+  {
+    $seat = [];
+    foreach ($seatArr as $k => $v) {
+      if(empty($seat)){
+        $seat = $v;
+      }else{
+        $seat = array_merge($seat,$v);
+      }
+      
+    }
+    return $seat;
+  }
+  public function getSeatArea($seat)
+  {
+    $areaSeat = F('area_seat');
+    $areaBgColor = F('area_bgcolor');
+    foreach ($areaSeat as $key => $value) {
+      if(in_array($seat, $value)){
+        return $areaBgColor[$key];
+        break;
+      }
+    }
+  }
+
+  function get_temp_seat(){
     header('Access-Control-Allow-Origin: *');
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Credentials: true');
@@ -197,16 +373,57 @@ class TempController extends ApiBase {
     header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
     header('Access-Control-Allow-Credentials: true');
     header('Access-Control-Allow-Headers: Content-Type, sign, timestamp, Authorization, X-Requested-With, token');
-    $plan = D('Plan')->where(['status'=>2])->field('id,plantime,starttime,endtime,games')->select();
+    $plan = D('Plan')->where(['status'=>2])->field('id,plantime,starttime,endtime,games')->order('plantime ASC,games ASC')->select();
+    $list = [];
     foreach ($plan as $k => $v) {
-      $v['title'] = planShow($v['id'], 1, 1);
+      $v['title'] = planShow($v['id'], 2, 1);
+      $list[] = $v;
     }
     $return = [
       "code" => 200,
-      "data" => $plan,
+      "data" => $list,
       "msg" => 'ok'
     ];
     die(json_encode($return));
+  }
+  //读取指定场次已售出
+  function get_plan_seat()
+  {
+    header('Access-Control-Allow-Origin: *');
+    header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
+    header('Access-Control-Allow-Credentials: true');
+    header('Access-Control-Allow-Headers: Content-Type, sign, timestamp, Authorization, X-Requested-With, token');
+    if(IS_POST){
+      $pinfo = json_decode(file_get_contents('php://input'), true);
+      $plan = F('Plan_'.$pinfo['planSelected']);
+      if(empty($plan)){
+        $plan = D('Plan')->where(['id'=>$pinfo['planSelected']])->field('id,seat_table')->find();
+      }
+      $checked = 0;
+      $seat = D($plan['seat_table'])->where(['status'=>['in','2,99']])->field('id,seat,status')->select();
+      foreach ($seat as $k => $v) {
+        $cr = explode('-',$v['seat']);
+        $v['row'] =  $cr[0];
+        $v['col'] =  $cr[1];
+        $seats[$v['seat']] = $v;
+        if((int)$v['status'] === 99){
+          $checked += 1;
+        }
+      }
+      //TODO  朝向
+      //rsort($seats);
+      $return = [
+        "code" => 200,
+        "data" => [
+          'sold' => count($seat),
+          'checked' => $checked,
+          'seat' => $seats ?? [],
+        ],
+        "msg" => 'ok'
+      ];
+      die(json_encode($return));
+    }
+    
   }
   public function cs_link()
   {
@@ -538,19 +755,18 @@ class TempController extends ApiBase {
     }
     //自助机dayin
     function c_print(){
-      $url = "http://new.leubao.com/api.php?a=api_plan";
+      $url = "http://www.yx513.net/api.php?a=api_print";
       $post = array(
         'appid' => '65535',
-        'appkey'=> 'a646ce13e4c01f42b8ac2a0ca879069',
-        'sn' =>  '51111143165',
-        'phone'=>'18631451216',
+        'appkey'=> '7c31eb7543a788d3c9b8d4018b80878c',
+        'sn' =>  '806141243789872',
+        'phone'=>'18960696692',
        // 'card'  => '4',
         'type' => '1',
         );
       $post['data'] = json_encode($post);
       $aa = $this->curl_server($url,$post);
       dump($aa);
-      dump(json_decode($aa));
     }
     //测试api 退票
     function c_refund(){
@@ -868,6 +1084,51 @@ class TempController extends ApiBase {
     function sy(){
       \Libs\Service\Check::check_ticket_order_tag();
     }
+    // function cby(){
+    //   $crm = D('Crm')->where(['level' => ['in', '17','18']])->field('id')->select();
+    //   foreach ($crm as $key => $v) {
+    //     //查询是否存在订单
+    //     $orderL = D('Order')->where(['channel_id'=>$v['id'],'status'=>['in',['1','9']],'plan_id'=>['gt',122]])->field('order_sn,money,channel_id,user_id,addsid')->select();
+    //     $payLink = crm_level_link($v['id']);
+    //     $payCrm = count($payLink);//dump($payCrm);
+    //     $payLink = array_diff($payLink, [$v['id']]);
+        
+    //     if(!empty($orderL)){
+    //       foreach ($orderL as $k => $va) {
+    //         //判断是否正常扣款
+    //         $payL = D('CrmRecharge')->where(['order_sn'=>$va['order_sn']])->count();
+    //         dump($payL < $payCrm);
+    //         if($payL != $payCrm){
+    //           echo $va['order_sn'];
+    //           // $crmData = array('cash' => array('exp','cash-'.$va['money']),'uptime' => time());
+    //           // $c_pay = D("crm")->where(['id'=>['in',implode(',',$payLink)]])->setField($crmData);
+    //           // //TODO 不同级别扣款金额不同
+    //           // foreach ($payLink as $p => $l) {
+    //           //   $data[] = array(
+    //           //     'cash'    =>  $va['money'],
+    //           //     'user_id' =>  $va['user_id'],
+    //           //     'guide_id'=>  $l,
+    //           //     'addsid'  =>  $va['addsid'],
+    //           //     'crm_id'  =>  $l,
+    //           //     'createtime'=>  time(),
+    //           //     'type'    =>  '2',
+    //           //     'order_sn'=>  $va['order_sn'],
+    //           //     'balance' =>  balance($l,1),
+    //           //     'tyint'   => 1,//客户类型1企业4个人
+    //           //   );
+    //           // }
+    //           // $c_pay2 = D('crm_recharge')->addAll($data);
+    //           // if($c_pay == false || $c_pay2 == false){
+    //           //   echo $va['order_sn'];
+    //           // }
+    //         }
+            
+    //       }
+          
+    //     }
+    //   }
+      
+    // }
     //生成结算数据
     public function js($starttime = '', $endtime = '')
     {

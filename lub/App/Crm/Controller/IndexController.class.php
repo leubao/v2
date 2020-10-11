@@ -600,7 +600,7 @@ class IndexController extends ManageBase{
 				'user_id'	=>	get_user_id(),
 				'crm_id'	=>	$id,
 				'createtime'=>	time(),
-				'type'		=>	'5',
+				'type'		=>	'6',
 				'balance'	=>  balance($id,$channel),
 				'tyint'		=>	$channel,//客户类型1企业4个人
 				'remark'	=>	$remark,

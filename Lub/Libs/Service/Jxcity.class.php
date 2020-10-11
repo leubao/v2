@@ -4,7 +4,7 @@ namespace Libs\Service;
  * @Author: IT Work
  * @Date:   2019-12-18 23:35:56
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-04-24 23:58:38
+ * @Last Modified time: 2020-10-02 15:36:36
  */
 class Jxcity extends \Libs\System\Service {
 	
@@ -13,8 +13,8 @@ class Jxcity extends \Libs\System\Service {
     {
     	//查询前一天数据
     	if($total === 0){
-    		$day = date('Ymd', strtotime($day));
-    		$plan = M('Plan')->where(array('plantime'=>$day,'product_id'=>43))->field('id')->select();
+    		//$day = date('Ymd', strtotime($day));
+    		$plan = M('Plan')->where(array('plantime'=>strtotime($day),'product_id'=>44))->field('id')->select();
     		$total = D('Order')->where(['plan_id'=>['in', array_column($plan, 'id')]])->sum('number');
     	}
     	$body = [[
@@ -40,11 +40,11 @@ class Jxcity extends \Libs\System\Service {
     	//查询15分钟内新增订单数据
     	$map = array(
     		'createtime' => array(
-    			array('EGT', strtotime(date('Y-m-d', $date))), 
+    			array('EGT', strtotime(date('Y-m-d'))), 
     			array('ELT', $date), 
     			'AND' 
     		),
-            'product_id' => 43,
+            'product_id' => 44,
     		'status' => ['in', ['1','9']]
     	);
     	$total = D('Order')->where($map)->sum('number');
@@ -78,11 +78,11 @@ class Jxcity extends \Libs\System\Service {
     	//查询15分钟内新增订单数据
     	$map = array(
     		'createtime' => array(
-    			array('EGT', strtotime(date('Y-m-d', $date))), 
+    		    array('EGT', strtotime(date('Y-m-d'))), 
     			array('ELT', $date),
     			'AND' 
     		),
-            'product_id' => 43,
+            'product_id' => 44,
     		'status' => ['in', ['9']]
     	);
     	$total = D('Order')->where($map)->sum('number');
@@ -130,10 +130,11 @@ class Jxcity extends \Libs\System\Service {
 
     public function addLog($request, $response)
     {
+        $request =  json_decode($request, true);
     	$data = [
     		'push_id'   	=>  1003,
     		'name'	    	=>	"上饶旅游监管平台",
-    		'request'		=>	json_encode($request),
+    		'request'		=>	json_encode($request['body']),
     		'response'		=> 	$response,
     		'create_time'	=>	date('Y-m-d H:i:s')
     	];
