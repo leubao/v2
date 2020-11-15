@@ -86,6 +86,20 @@ sql;
 		D('SweeperLog')->add($log);
 		return true;
 	}
+	//清理过期的代订定单
+	public function pre_order_invalid()
+	{
+		//自动作废待审核的订单
+        $model = D('Item/Order');
+        $map = [
+        	'createtime' => ['ELT', strtotime('-2 day')],
+            'status' => array('in',['5','6']),
+            'pay'    => array('in', ['0','1','3']) 
+        ];
+        $status = $model->where($map)->setField(['status'=>0,'uptime'=>time(),'user_id'=>1]);
+        var_dump($status);
+        //TODO 记录日志
+	}
 	//删除一年前的打印日志
 	public function print_log_del()
 	{

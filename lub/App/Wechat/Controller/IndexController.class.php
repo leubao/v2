@@ -1344,7 +1344,7 @@ class IndexController extends LubTMP {
         ];
         $key = 'WhvUMxDgYjufJcdez6oGw1RXT9i8tQrs';
         $data['sign'] = \Libs\Service\ArrayUtil::setPaymentSign($data, $key);
-        $url = 'https://api.msg.alizhiyou.cn/pay/gopay';
+        $url = 'https://api.pay.xzusoft.cn/pay/gopay';
         if(!empty($user)){
             $res = json_decode(getHttpContent($url, 'POST', $data), true);
             var_dump($data,$res);

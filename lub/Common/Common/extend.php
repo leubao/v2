@@ -2191,7 +2191,7 @@ function get_up_fxqr($openid, $pid){
  * 记录网银支付日志
  * @param  string $money 金额
  * @param  string $sn    系统单号
- * @param  int    $scene 创建场景 1、窗口当面付2在线支付
+ * @param  int    $scene 创建场景 1、窗口当面付2在线支付3快算
  * @param  int    $type  1支付宝2微信
  * @param  int    $pattern 支付类型1收款2付款3退款
  * @param  array  $data  提交数据包

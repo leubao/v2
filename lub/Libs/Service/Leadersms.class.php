@@ -34,12 +34,13 @@ class Leadersms extends \Libs\System\Service {
           $where = array('status'=>array('in','2,99'));
           $type = '7';
           $start = '1';
+          $ids = $plan['id'];
           break;
         case '2':
           //景区 T+1发送
           if($type == 2){
             $channel = Leadersms::channel($plan['id']);
-            $where = array('status'=>array('in','2,99'),'plan_id'=>array('in',$plan['plan_id']));
+            $where = array('status'=>array('in','2,99'),'plan_id'=>array('in',$plan['id']));
             $start = '2';
           }else{
             $channel = Leadersms::channel($plan['id']);

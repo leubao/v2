@@ -6,7 +6,9 @@
   <div class="modal-body">
   <div class="panel panel-default cler_mag_20"> 
     <!-- Default panel contents -->
-    
+    <div class="alert alert-warning" role="alert">
+      当前充值仅对一级商户有效
+    </div>
     <div class="panel-body form-horizontal">
       <div class="form-group">
           <label class="col-sm-2 control-label">当前商户:</label>
