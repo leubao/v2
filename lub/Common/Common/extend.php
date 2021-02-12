@@ -1684,6 +1684,9 @@ function crmName($param,$type=NULL){
     */
     function re_print($plan_id, $encry, $data, $product_id = '', $orderId = '', $team = 1){
         $plan = F('Plan_'.$plan_id);
+        if(empty($plan)){
+            $plan = D('Plan')->where(['id' => $plan_id])->find();
+        }
         $proconf = cache('ProConfig');
         $proconf = $proconf[$plan['product_id']][1];
         $print = $data['print']+1;

@@ -4,7 +4,7 @@
  * @Author: IT Work
  * @Date:   2020-05-05 12:12:38
  * @Last Modified by:   IT Work
- * @Last Modified time: 2020-07-14 18:17:29
+ * @Last Modified time: 2021-02-12 13:07:32
  */
 namespace Libs\Service; 
 use Org\Util\Date;
@@ -21,6 +21,11 @@ class EditOrder extends \Libs\System\Service {
     public function upIdcardOrder($sn, $data)
     {
     	try{
+    		//判断同笔订单是否存在相同的身份证号
+			if(count($data['idcard']) != count(array_unique($data['idcard']))){
+				$this->error = '身份证号码存在重复~';
+    			return false;
+			}
     		//读取订单
     		$order = D('Item/Order')->where(array('order_sn'=>$sn,'status'=>1))->relation(true)->field('uptime,createtime', true)->find();
     		if(empty($order)){
@@ -41,6 +46,7 @@ class EditOrder extends \Libs\System\Service {
     		//更新座位
     		$model = new Model();
 			$model->startTrans();
+
 			foreach ($data['idcard'] as $k => $v) {
 				/*校验身份证号码是否正确*/
 				$id_card = strtoupper($v);
@@ -53,7 +59,7 @@ class EditOrder extends \Libs\System\Service {
 				}
 				if(isset($ticket[$k])){
 					//校验是否可用
-					if($this->checkIdCard($v, $order['activity'], $sn)){
+					if($this->checkIdCard(trim($v), $order['activity'], $sn, $order['plan_id'])){
 						$upState = $model->table(C('DB_PREFIX'). $plan['seat_table'])->where(array('id'=>$k,'status' => 2))->setField('idcard', $v);
 						if(!$upState){
 							//记录错误
@@ -91,12 +97,38 @@ class EditOrder extends \Libs\System\Service {
     /**
      * 校验身份证号
     */
-    public function checkIdCard($idcard, $activity, $sn){
-    	$map = ['idcard' => $idcard, 'activity_id' => $activity, 'order_sn'=>[NEQ,$sn]];
+    public function checkIdCard($idcard, $activity, $sn, $plan_id = 0){
+    	
+    	//限制区域销售时判断地域
+    	$actInfo = D('Item/Activity')->getActInfo($activity);
+    	//同场次互斥或活动内互斥
+    	if((int)$actInfo['param']['info']['limit'] === 1){
+            $map = ['idcard' => $idcard, 'activity_id' => $activity, 'order_sn'=>[NEQ,$sn]];
+        }else{
+        	$map = ['idcard' => $idcard, 'activity_id' => $activity, 'order_sn'=>[NEQ,$sn], 'plan_id'=>$plan_id];
+        }
+
+    	if(in_array($actInfo['type'],['3','9'])){
+    		$idcards = $actInfo['param']['info']['card'];
+    		if(!empty($idcards)){
+    			$next = false;
+				foreach ($idcards as $k => $v) {
+					$site = substr($idcard, 0, (int)strlen($v));
+					if($site === $v){
+						$next = true;
+						break;
+					}
+				}
+				if(!$next){
+					return false;
+				}
+    		}
+			
+    	}
+
 		$count = (int)D('IdcardLog')->where($map)->count();
 		if($count > 0){
 			//读取活动
-			$actInfo = D('Item/Activity')->getActInfo($activity);
 			$number = (int)$actInfo['param']['info']['number'];
 			if($number > 0){
 				if($count >= $number){
@@ -111,4 +143,5 @@ class EditOrder extends \Libs\System\Service {
 			return true;
 		}
     }
+
 }
