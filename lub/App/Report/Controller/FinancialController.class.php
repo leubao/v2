@@ -701,4 +701,36 @@ class FinancialController extends ManageBase{
 		$this->assign('member_sum',$memSum);
 		$this->display();
 	}
+	/**
+	 * 按区域统计人数
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2021-01-01T20:10:25+0800
+	 * @return   [type]                   [description]
+	 */
+	public function range_count()
+	{
+		$starttime = I('starttime');
+	    $endtime = I('endtime') ? I('endtime') : date('Y-m-d',time());
+	    
+	    //传递条件
+	    $this->assign('starttime',$starttime);
+        $this->assign('endtime',$endtime);
+        if (!empty($starttime) && !empty($endtime)) {
+            $starttime = date('Ymd', strtotime($starttime));
+            $endtime = date('Ymd', (strtotime($endtime) + 86399));
+            $map['plantime'] = array(array('GT', $starttime), array('LT', $endtime), 'AND');
+        }else{
+        	//默认显示当天的订单
+        	$starttime = date("Ymd");
+            $endtime = date('Ymd', (strtotime($starttime) + 86399));
+        	$map['plantime'] = array(array('EGT', $starttime), array('ELT', $endtime), 'AND');
+        }
+        $map['status'] = 1;
+
+        $list = M('ReportData')->where($map)->group('area')->field(['area','sum(number) as number','sum(moneys) as moneys','sum(money) as money'])->select();
+
+//var_dump($map, $list);
+
+        $this->assign('data', $list)->display();
+	}
 }
