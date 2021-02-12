@@ -793,7 +793,22 @@ class MpcController extends TrustBase{
 	{
 		# code...
 	}
-
+	/**
+	 * 返回全部可用价格分组
+	 * @Author   zhoujing                 <zhoujing@leubao.com>
+	 * @DateTime 2021-02-05T00:01:10+0800
+	 * @return   [type]                   [description]
+	 */
+	public function get_ticket_group()
+	{
+		$pinfo = I('post.');
+		if(!isset($pinfo['incode']) || empty($pinfo['incode'])){
+			return showReturnCode(false,1003);
+		}
+		$product = $this->getProduct($pinfo['incode']);
+		$group = D('TicketGroup')->where(['status'=>1,'product_id'=>$product['id']])->field('id,name')->select();
+		return showReturnCode(true,0, $group, 'ok');
+	}
 	/**
 	 * 余票查询
 	 * @Author   zhoujing                 <zhoujing@leubao.com>
